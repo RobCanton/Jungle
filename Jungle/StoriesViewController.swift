@@ -69,6 +69,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
+    func scrollHandler(_ active:Bool) {
+        collectionView.isScrollEnabled = !active
+    }
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -127,11 +131,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         longPressGR.minimumPressDuration = 0.33
         
         longPressGR.delegate = self
-        //self.view.addGestureRecognizer(longPressGR)
+        self.view.addGestureRecognizer(longPressGR)
         
         tapGR = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGR.delegate = self
-        //self.view.addGestureRecognizer(tapGR)
+        self.view.addGestureRecognizer(tapGR)
         
     }
     
@@ -155,6 +159,12 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let cell = getCurrentCell() else { return false }
         
+        if cell.scrollActive { return false }
+        
+        if let _ = gestureRecognizer as? UITapGestureRecognizer  {
+            return true
+        }
+        
 
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
@@ -163,7 +173,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
 
             let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-            
+            if translate.y <= 0 { return false }
 
             return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
         }
@@ -197,12 +207,20 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         if firstCell {
             firstCell = false
         }
+        cell.scrollHandler = scrollHandler
         
         return cell
     }
     
     func dismissPopup(_ animated:Bool) {
-
+        getCurrentCell()?.pauseVideo()
+        getCurrentCell()?.destroyVideoPlayer()
+        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
+            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
+            self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
+            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+            navigationController?.popViewController(animated: animated)
+        }
     }
     
     func showUser(_ uid:String) {
@@ -236,18 +254,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
-    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-        
-        let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
-        let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
-        self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-        self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
-        
-        let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
-        let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-        
-        return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
-    }
+
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let xOffset = scrollView.contentOffset.x

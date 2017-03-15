@@ -12,12 +12,16 @@ import AVFoundation
 import Firebase
 
 
-public class StoryViewController: UICollectionViewCell, StoryProtocol {
+public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollViewDelegate {
 
     var viewIndex = 0
     var returnIndex:Int?
     var item:StoryItem?
     var delegate:PopupProtocol?
+    
+    var scrollView:TouchScrollView!
+    
+    var scrollHandler:((_ active:Bool)->())?
 
     func showUser(_ uid: String) {
         returnIndex = viewIndex
@@ -411,12 +415,57 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        let scrollFrame = CGRect(x:0,y:0,width:width,height: height)
+        scrollView = TouchScrollView(frame: scrollFrame)
+        
         contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
         contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
+        contentView.addSubview(scrollView)
+        
+        let v1 = UIView(frame: scrollFrame)
+        v1.backgroundColor = UIColor.clear
+        
+        let v2 = UIView(frame: scrollFrame)
+        v2.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
+        
+        var v2Frame = v2.frame
+        v2Frame.origin.y = v1.frame.height
+        v2.frame = v2Frame
+        
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.isPagingEnabled = true
+        scrollView.bounces = false
+        scrollView.backgroundColor = UIColor.clear
+        scrollView.addSubview(v1)
+        scrollView.addSubview(v2)
+        scrollView.canCancelContentTouches = false
+        scrollView.contentSize = CGSize(width: frame.width, height: frame.height * 2.0)
+        scrollView.delegate = self
 
+    }
+    
+    var scrollActive = true
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollActive = true
+        scrollHandler?(scrollActive)
+        pauseStory()
+        let alpha = scrollView.contentOffset.y / (UIScreen.main.bounds.size.height)
+        print("ALPHA: \(alpha)")
+        
+        progressBar?.alpha =  1 - alpha
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y == 0 {
+            scrollActive = false
+            scrollHandler?(scrollActive)
+            resumeStory()
+        }
     }
     
 
@@ -470,5 +519,13 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol {
     }()
     
     
+}
+
+class TouchScrollView: UIScrollView, UIGestureRecognizerDelegate {
+    
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
 }
 

@@ -25,7 +25,7 @@ protocol CameraDelegate {
     func takingVideo()
 }
 
-class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GPSServiceDelegate {
+class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate {
     
     var screenMode:ScreenMode = .Camera
 
@@ -86,17 +86,21 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
     }
     
     var v1: PlacesViewController!
+    var v2: UIViewController!
+    var v3: UIViewController!
     var cameraView:CameraViewController!
     
+    var cameraBtnFrame:CGRect!
     @IBOutlet weak var scrollView: UIScrollView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let definiteBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
+        scrollView.delegate = self
         
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
-        var cameraBtnFrame = recordBtn.frame
+        cameraBtnFrame = recordBtn.frame
         cameraBtnFrame.origin.y = definiteBounds.height - 140
         cameraBtnFrame.origin.x = self.view.bounds.width/2 - cameraBtnFrame.size.width/2
         recordBtn.frame = cameraBtnFrame
@@ -109,7 +113,8 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
         self.view.insertSubview(cameraView.view, belowSubview: scrollView)
         cameraView.didMove(toParentViewController: self)
         
-        recordBtn.tappedHandler = cameraView.didPressTakePhoto
+        
+        recordBtn.tappedHandler = recordButtonTapped
         recordBtn.pressedHandler = cameraView.pressed
         recordBtn.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
         
@@ -145,11 +150,11 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
         v1.masterNav = self.navigationController
         v1.container = self
         
-        let v2: UIViewController = UIViewController()
+        v2 = UIViewController()
         v2.view.backgroundColor = UIColor.clear
         v2.view.frame = v1.view.bounds
         
-        let v3: UIViewController = UIViewController()
+        v3 = UIViewController()
         v3.view.backgroundColor = UIColor.white
         v3.view.frame = v1.view.bounds
         
@@ -190,6 +195,22 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
+    func recordButtonTapped() {
+        print("RECORD TAPPED")
+        switch screenMode {
+        case .Transitioning:
+            break
+        case .Activity:
+            scrollView.setContentOffset(CGPoint(x:v2.view.frame.origin.x, y: 0), animated: true)
+            break
+        case .Camera:
+            
+            print("CAMERA")
+            cameraView.didPressTakePhoto()
+            break
+        }
+    }
+    
     
     func sendButtonTapped(sender: UIButton) {
         
@@ -222,50 +243,6 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
             cameraView.cameraState = .Initiating
         }
     }
-    
-
-    
-    func tracingLocation(_ currentLocation: CLLocation) {
-        print("New location")
-        LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
-        // singleton for get last location
-        if mapView == nil {
-            
-            let camera = GMSCameraPosition.camera(withTarget: currentLocation.coordinate, zoom: 16.5)
-            
-            mapView = GMSMapView.map(withFrame: mapContainer.bounds, camera: camera)
-            mapContainer.addSubview(mapView!)
-            mapView!.backgroundColor = UIColor.black
-            mapView!.isMyLocationEnabled = false
-            mapView!.settings.scrollGestures = false
-            mapView!.settings.rotateGestures = false
-            mapView!.settings.tiltGestures = false
-            mapView!.isUserInteractionEnabled = false
-            mapView!.isBuildingsEnabled = true
-            mapView!.isIndoorEnabled = true
-            mapContainer.alpha = 0.6
-            
-            do {
-                // Set the map style by passing the URL of the local file.
-                if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
-                    mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-                } else {
-                    NSLog("Unable to find style.json")
-                }
-            } catch {
-                NSLog("One or more of the map styles failed to load. \(error)")
-            }
-            
-        } else{
-            mapView!.animate(toLocation: currentLocation.coordinate)
-        }
-    }
-    
-    func tracingLocationDidFailWithError(_ error: NSError) {
-        print(error.code)
-        
-        
-    }
 
     
     override var prefersStatusBarHidden: Bool
@@ -282,6 +259,55 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
     }
     
     let transitionController: TransitionController = TransitionController()
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        returningCell?.fadeInInfo()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        returningCell?.colorView.alpha = 0.0
+        returningCell?.nameLabel.alpha = 0.0
+        returningCell?.timeLabel.alpha = 0.0
+    }
+    
+    var returningCell:PhotoCell?
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        screenMode = .Transitioning
+        recordBtn.removeGestures()
+        let v2Start = v2.view.frame.origin.x
+        let x = scrollView.contentOffset.x
+        if x < v2.view.frame.origin.x {
+            let alpha = 1 - x / v2Start
+            print("OFFSET: \(scrollView.contentOffset.x)")
+            let col = UIColor(red: 0/255, green: 237/255, blue: 154/255, alpha: alpha)
+            v1.view.backgroundColor = col
+            
+            var recordBtnFrame = cameraBtnFrame
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+            recordBtn.frame = recordBtnFrame!
+            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.dot.alpha = 1 - alpha
+            
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        print("STOPPED: \(scrollView.contentOffset.x)")
+        let x = scrollView.contentOffset.x
+        if x == 0 {
+            print("ACTIVITY ACTIVE")
+            screenMode = .Activity
+        } else if x == v2.view.frame.origin.x {
+            screenMode = .Camera
+            recordBtn.addGestures()
+        } else if x == v3.view.frame.origin.x {
+            print("FOLLOWING ACTIVE")
+            
+        }
+    }
+    
     
 }
 
@@ -301,7 +327,7 @@ extension ContainerViewController: CameraDelegate {
     func showCameraOptions() {
         scrollView.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.15, animations: {
-            self.mapContainer?.alpha = 0.6
+            self.mapContainer?.alpha = 0.75
         })
     }
     
@@ -333,6 +359,8 @@ extension ContainerViewController: CameraDelegate {
         sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         uploadCoordinate = nil
     }
+    
+
 }
 
 extension ContainerViewController: View2ViewTransitionPresenting {
@@ -355,7 +383,6 @@ extension ContainerViewController: View2ViewTransitionPresenting {
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
         
-        
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
         let cell: PhotoCell = v1.collectionView!.cellForItem(at: i) as! PhotoCell
@@ -376,6 +403,50 @@ extension ContainerViewController: View2ViewTransitionPresenting {
         }
     }
     
+}
+
+extension ContainerViewController: GPSServiceDelegate {
+    func tracingLocation(_ currentLocation: CLLocation) {
+        print("New location")
+        LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
+        // singleton for get last location
+        if mapView == nil {
+            
+            let camera = GMSCameraPosition.camera(withTarget: currentLocation.coordinate, zoom: 16.5)
+            
+            mapView = GMSMapView.map(withFrame: mapContainer.bounds, camera: camera)
+            mapContainer.addSubview(mapView!)
+            mapView!.backgroundColor = UIColor.black
+            mapView!.isMyLocationEnabled = false
+            mapView!.settings.scrollGestures = false
+            mapView!.settings.rotateGestures = false
+            mapView!.settings.tiltGestures = false
+            mapView!.isUserInteractionEnabled = false
+            mapView!.isBuildingsEnabled = true
+            mapView!.isIndoorEnabled = true
+            mapContainer.alpha = 0.75
+            
+            do {
+                // Set the map style by passing the URL of the local file.
+                if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
+                    mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+                } else {
+                    NSLog("Unable to find style.json")
+                }
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+            
+        } else{
+            mapView!.animate(toLocation: currentLocation.coordinate)
+        }
+    }
+    
+    func tracingLocationDidFailWithError(_ error: NSError) {
+        print(error.code)
+        
+        
+    }
 }
 
 enum CameraState {

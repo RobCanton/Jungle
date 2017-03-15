@@ -27,8 +27,8 @@ class CameraButton: UIView {
     override init(frame:CGRect) {
         super.init(frame:frame)
     
-        dot = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 8))
-        dot.layer.cornerRadius = 4
+        dot = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 6))
+        dot.layer.cornerRadius = 3
         dot.clipsToBounds = true
         dot.backgroundColor = UIColor.white
         
@@ -126,6 +126,14 @@ class CameraButton: UIView {
         }
         
         // animate
+    }
+    
+    func addGestures() {
+        interactionView.addGestureRecognizer(press)
+    }
+    
+    func removeGestures() {
+        interactionView.removeGestureRecognizer(press)
     }
     
     func updateProgress(progress:CGFloat) {

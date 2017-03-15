@@ -132,6 +132,7 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
             
             if masterNav != nil {
                 print("PUSH IT!")
+                container!.returningCell = collectionView.cellForItem(at: indexPath) as! PhotoCell
                 masterNav!.delegate = container!.transitionController
                 container!.transitionController.push(viewController: storiesViewController, on: container!, attached: storiesViewController)
                 print("PUSHED")
