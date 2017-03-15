@@ -120,7 +120,6 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, GP
         flashView.alpha = 0.0
         self.view.insertSubview(flashView, belowSubview: recordBtn)
         
-
         placesClient = GMSPlacesClient.shared()
         
         let height = view.frame.height - cameraBtnFrame.origin.y  + 60

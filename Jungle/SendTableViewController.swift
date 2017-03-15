@@ -82,7 +82,6 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
 
-    
     func sent() {
         containerRef.cameraView.cameraState = .Initiating
         containerRef.recordBtn.isHidden = false

@@ -57,7 +57,6 @@ class PhotoCell: UICollectionViewCell {
         
         self.colorView.backgroundColor = UIColor.lightGray
         
-        
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
                 

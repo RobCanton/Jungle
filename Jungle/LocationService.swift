@@ -66,13 +66,7 @@ class LocationService: NSObject {
                     self.delegate?.locationsUpdated(locations: self.nearbyLocations)
                 })
             }
-           
-            
-            
         })
-        
-        
-        
     }
     
     

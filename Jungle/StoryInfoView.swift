@@ -17,7 +17,6 @@ class StoryInfoView: UIView {
     @IBOutlet weak var backgroundBlur: UIVisualEffectView!
     @IBOutlet weak var usernameTopConstraint: NSLayoutConstraint!
     
-    
     @IBOutlet weak var pinImage: UIImageView!
     
     var uid:String?

@@ -16,8 +16,6 @@ class Comment: NSObject {
     fileprivate var text:String
     fileprivate var date:Date
     
-    
-    
     init(key:String, author:String, text:String, timestamp:Double)
     {
         self.key          = key

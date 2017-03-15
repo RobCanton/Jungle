@@ -19,7 +19,6 @@ class ProgressIndicator: UIView {
         self.layer.cornerRadius = frame.height / 2
         self.clipsToBounds = true
         
-        
         backgroundColor = UIColor(white: 1.0, alpha: 0.10)
         
         progress = UIView()

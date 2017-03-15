@@ -178,7 +178,6 @@ class UploadService {
             }
             completion()
         }
-        
     }
     
     static func downloadStory(postKeys:[String], completion: @escaping (_ story:[StoryItem])->()) {

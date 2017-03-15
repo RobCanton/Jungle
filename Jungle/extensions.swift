@@ -73,7 +73,6 @@ extension UIView {
 
 extension Date
 {
-    
     func timeStringSinceNow() -> String
     {
         let calendar = Calendar.current

@@ -26,12 +26,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol {
     
     func showViewers() {
         guard let item = self.item else { return }
-
     }
     
     func showLikes() {
         guard let item = self.item else { return }
-
     }
     
     func more() {

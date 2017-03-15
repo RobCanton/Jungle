@@ -18,7 +18,6 @@ class CameraButton: UIView {
     
     var redCircle:UIView!
     var interactionView:UIView!
-    
     var dot:UIView!
     
     var tappedHandler:(()->())?
@@ -32,8 +31,6 @@ class CameraButton: UIView {
         dot.layer.cornerRadius = 4
         dot.clipsToBounds = true
         dot.backgroundColor = UIColor.white
-        
-        
         
         dot.center = CGPoint(x: self.frame.width / 2,y: self.frame.height/2)
         

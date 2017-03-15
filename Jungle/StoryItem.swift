@@ -196,7 +196,6 @@ class StoryItem: NSObject, NSCoding {
             }
         })
     }
-    
 }
 
 func < (lhs: StoryItem, rhs: StoryItem) -> Bool {

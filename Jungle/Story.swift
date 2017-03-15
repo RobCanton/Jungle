@@ -103,7 +103,6 @@ class Story: ItemDelegate {
         return true
     }
     
-    
     func itemDownloaded() {
         if !needsDownload() {
             self.state = .contentLoaded

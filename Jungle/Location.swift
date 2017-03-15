@@ -17,7 +17,6 @@ class Location: NSObject {
     fileprivate var coordinates:CLLocation
     fileprivate var story:Story
     
-    
     init(key:String, name:String, address:String, coordinates:CLLocation, postKeys: [(String,Double)])
     {
         self.id          = key

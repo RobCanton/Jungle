@@ -19,7 +19,7 @@ class GPSService: NSObject, CLLocationManagerDelegate {
     
     override init() {
         super.init()
-        
+    
         self.locationManager = CLLocationManager()
         guard let locationManager = self.locationManager else {
             return
@@ -98,6 +98,7 @@ class GPSService: NSObject, CLLocationManagerDelegate {
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         //delegate?.authorizationChange()
     }
+    
     
     // Private function
     fileprivate func updateLocation(_ currentLocation: CLLocation){

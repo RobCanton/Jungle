@@ -30,7 +30,6 @@ class StoryProgressIndicator: UIView {
         storyItems = _story.items!
         if storyItems.count > 0 {
             
-
             let totalWidth = self.frame.width
             let gapWidth = CGFloat(storyItems.count - 1) * gap
             

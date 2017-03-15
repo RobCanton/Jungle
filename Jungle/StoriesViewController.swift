@@ -205,8 +205,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
     }
     
-    
-    
     func showUser(_ uid:String) {
 
     }

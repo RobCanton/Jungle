@@ -61,7 +61,6 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = UIColor(white: 0.90, alpha: 1.0)
         
-        
         refresher = UIRefreshControl()
         collectionView.alwaysBounceVertical = true
         refresher.tintColor = UIColor.lightGray
