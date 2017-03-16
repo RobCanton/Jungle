@@ -47,6 +47,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        clearTmpDirectory()
+    }
+    
+    func clearTmpDirectory() {
+        print("Clear temp directory")
+        do {
+            let tmpDirectory = try FileManager.default.contentsOfDirectory(atPath: NSTemporaryDirectory())
+            try tmpDirectory.forEach { file in
+                let path = String.init(format: "%@%@", NSTemporaryDirectory(), file)
+                try FileManager.default.removeItem(atPath: path)
+            }
+        } catch {
+            print(error)
+        }
     }
 
 

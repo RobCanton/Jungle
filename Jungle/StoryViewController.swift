@@ -19,9 +19,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var item:StoryItem?
     var delegate:PopupProtocol?
     
-    var scrollView:TouchScrollView!
-    
-    var scrollHandler:((_ active:Bool)->())?
 
     func showUser(_ uid: String) {
         returnIndex = viewIndex
@@ -61,6 +58,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var shouldPlay = false
     
     var story:Story!
+    var location:Location?
     
     var flagLabel:UILabel?
     
@@ -76,6 +74,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
 
         story.determineState()
 
+    }
+    
+    func prepareStory(withLocation location:Location) {
+        self.location = location
+        self.story = location.getStory()
+        self.story.delegate = self
+        shouldPlay = false
+        
+        headerView.setupLocation(self.location!)
+        
+        story.determineState()
     }
     
     func observeKeyboard() {
@@ -123,7 +132,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
 
         let screenWidth: CGFloat = (UIScreen.main.bounds.size.width)
         let screenHeight: CGFloat = (UIScreen.main.bounds.size.height)
-        let margin:CGFloat = 8.0
+        let margin:CGFloat = 12.0
         progressBar?.removeFromSuperview()
         progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
         progressBar!.createProgressIndicator(_story: story)
@@ -415,60 +424,15 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        let width: CGFloat = (UIScreen.main.bounds.size.width)
-        let height: CGFloat = (UIScreen.main.bounds.size.height)
-        let scrollFrame = CGRect(x:0,y:0,width:width,height: height)
-        scrollView = TouchScrollView(frame: scrollFrame)
-        
+
         contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
+        contentView.addSubview(headerView)
         contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
-        contentView.addSubview(scrollView)
         
-        let v1 = UIView(frame: scrollFrame)
-        v1.backgroundColor = UIColor.clear
-        
-        let v2 = UIView(frame: scrollFrame)
-        v2.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
-        
-        var v2Frame = v2.frame
-        v2Frame.origin.y = v1.frame.height
-        v2.frame = v2Frame
-        
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.isPagingEnabled = true
-        scrollView.bounces = false
-        scrollView.backgroundColor = UIColor.clear
-        scrollView.addSubview(v1)
-        scrollView.addSubview(v2)
-        scrollView.canCancelContentTouches = false
-        scrollView.contentSize = CGSize(width: frame.width, height: frame.height * 2.0)
-        scrollView.delegate = self
-
     }
-    
-    var scrollActive = true
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        scrollActive = true
-        scrollHandler?(scrollActive)
-        pauseStory()
-        let alpha = scrollView.contentOffset.y / (UIScreen.main.bounds.size.height)
-        print("ALPHA: \(alpha)")
-        
-        progressBar?.alpha =  1 - alpha
-    }
-    
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y == 0 {
-            scrollActive = false
-            scrollHandler?(scrollActive)
-            resumeStory()
-        }
-    }
-    
-
     
     public lazy var content: UIImageView = {
         let view: UIImageView = UIImageView(frame: self.contentView.bounds)
@@ -515,6 +479,15 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
         view.alpha = 0.0
+        return view
+    }()
+    
+    lazy var headerView: PostHeaderView = {
+        let margin:CGFloat = 2.0
+        var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        view.frame = CGRect(x: margin, y: margin + 12.0, width: width, height: view.frame.height)
         return view
     }()
     

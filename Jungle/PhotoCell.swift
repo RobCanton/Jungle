@@ -72,12 +72,12 @@ class PhotoCell: UICollectionViewCell {
                     }
                     
                     let avgColor = image!.areaAverage()
-                    let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.25, additionalBrightness: 0.15)
+                    let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
                     self.colorView.backgroundColor = saturatedColor
                     
-                    self.colorView.alpha = 0.5
-                    //self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
-                    //self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
+                    self.colorView.alpha = 0.6
+                    self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
+                    self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
 
                 })
             }
@@ -85,15 +85,28 @@ class PhotoCell: UICollectionViewCell {
     }
     
     
-    func fadeInInfo() {
+    func fadeInInfo(animated:Bool) {
+        if animated {
+            self.colorView.alpha = 0.0
+            self.nameLabel.alpha = 0.0
+            self.timeLabel.alpha = 0.0
+            UIView.animate(withDuration: 0.3, animations: {
+                self.colorView.alpha = 0.6
+                self.nameLabel.alpha = 1.0
+                self.timeLabel.alpha = 1.0
+            })
+        } else{
+            self.colorView.alpha = 0.6
+            self.nameLabel.alpha = 1.0
+            self.timeLabel.alpha = 1.0
+        }
+        
+    }
+    
+    func fadeOutInfo() {
         self.colorView.alpha = 0.0
         self.nameLabel.alpha = 0.0
         self.timeLabel.alpha = 0.0
-        UIView.animate(withDuration: 0.3, animations: {
-            self.colorView.alpha = 0.5
-            self.nameLabel.alpha = 1.0
-            self.timeLabel.alpha = 1.0
-        })
     }
 
 }

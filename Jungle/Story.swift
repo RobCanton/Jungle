@@ -21,6 +21,7 @@ class Story: ItemDelegate {
     fileprivate var postKeys:[(String,Double)]
     fileprivate var posts:[String]
     var delegate:StoryProtocol?
+    
 
     var items:[StoryItem]?
     var state:UserStoryState = .notLoaded
@@ -118,6 +119,24 @@ class Story: ItemDelegate {
             }
         }
     }
+}
+
+func < (lhs: Story, rhs: Story) -> Bool {
+    let t1 = lhs.getPostKeys().first!.1
+    let t2 = rhs.getPostKeys().first!.1
+    return t1 < t2
+}
+
+func > (lhs: Story, rhs: Story) -> Bool {
+    let t1 = lhs.getPostKeys().first!.1
+    let t2 = rhs.getPostKeys().first!.1
+    return t1 > t2
+}
+
+func == (lhs: Story, rhs: Story) -> Bool {
+    let t1 = lhs.getPostKeys().first!.1
+    let t2 = rhs.getPostKeys().first!.1
+    return t1 == t2
 }
 
 //func findStoryByUserID(uid:String, stories:[Story]) -> Int? {

@@ -9,6 +9,10 @@
 import UIKit
 import View2ViewTransition
 
+enum SortedBy {
+    case Recent,Popular,Nearest
+}
+
 class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, LocationDelegate {
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
@@ -21,6 +25,10 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
     var refresher:UIRefreshControl!
     
     var locations = [Location]()
+    
+    var sortMode:SortedBy = .Recent
+    
+    var backdrop:UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,7 +52,7 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         layout.minimumInteritemSpacing = 1.0
         layout.minimumLineSpacing = 1.0
         
-        collectionView = UICollectionView(frame: CGRect(x: 1,y: 54,width: view.frame.width - 2,height: view.frame.height - 2 - 54), collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: CGRect(x: 1,y: 70,width: view.frame.width - 2,height: view.frame.height - 2 - 70), collectionViewLayout: layout)
         
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
@@ -59,7 +67,13 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         collectionView.bounces = true
         collectionView.isPagingEnabled = false
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.backgroundColor = UIColor(white: 0.90, alpha: 1.0)
+        collectionView.backgroundColor = UIColor.clear
+        
+        backdrop = UIView(frame: CGRect(x: 0, y: collectionView.frame.origin.y, width: view.frame.width, height: view.frame.height - 66))
+        backdrop.backgroundColor = UIColor.white
+        view.insertSubview(backdrop, belowSubview: collectionView)
+        
+        
         
         refresher = UIRefreshControl()
         collectionView.alwaysBounceVertical = true
@@ -69,10 +83,50 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         
         self.view.addSubview(collectionView)
         
+        
+        let segmentedControl = UISegmentedControl(items: ["Recent", "Popular", "Nearest"])
+        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.center = CGPoint(x: view.frame.width/2, y: 27 + 12)
+        segmentedControl.tintColor = UIColor.white
+        segmentedControl.addTarget(self, action: #selector(changeSort), for: .valueChanged)
+        self.view.addSubview(segmentedControl)
+        
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
 
     }
+    
+    func changeSort(control: UISegmentedControl) {
+        switch control.selectedSegmentIndex {
+        case 0:
+            sortMode = .Recent
+            break
+        case 1:
+            sortMode = .Popular
+            break
+        case 2:
+            sortMode = .Nearest
+            break
+        default:
+            break
+        }
+        
+        DispatchQueue.global(qos: .background).async {
+            
+            
+            self.locations = self.getSortedLocations(self.locations)
+            
+            // Go back to the main thread to update the UI
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+                
+            }
+        }
+
+        
+    }
+    
+    
     
     func loadData()
     {
@@ -91,9 +145,23 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
     func locationsUpdated(locations: [Location]) {
         print("NEW LOCATIONS")
         print(locations)
-        self.locations = locations
+        
+        self.locations = getSortedLocations(locations)
+
         collectionView.reloadData()
         stopRefresher()
+    }
+    
+    func getSortedLocations(_ locations:[Location]) -> [Location] {
+        
+        switch sortMode {
+        case .Recent:
+            return locations.sorted(by: { $0.getStory() > $1.getStory()})
+        case .Popular:
+            return locations.sorted(by: { $0.getContributers().count > $1.getContributers().count})
+        case .Nearest:
+            return locations.sorted(by: { $0.getDistance() < $1.getDistance()})
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -117,29 +185,21 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
-        print("TAPPED")
         let story = locations[indexPath.item].getStory()
         if story.state == .contentLoaded {
-            print("CONTENT LOADED")
             self.selectedIndexPath = indexPath
             
             let storiesViewController: StoriesViewController = StoriesViewController()
-            
             
             storiesViewController.locations = self.locations
             storiesViewController.transitionController = container!.transitionController
             container!.transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]
             
             if masterNav != nil {
-                print("PUSH IT!")
-                container!.returningCell = collectionView.cellForItem(at: indexPath) as! PhotoCell
                 masterNav!.delegate = container!.transitionController
                 container!.transitionController.push(viewController: storiesViewController, on: container!, attached: storiesViewController)
-                print("PUSHED")
-               // masterNav!.pushViewController(storiesViewController, animated: true)
             }
         } else {
-            print("DOWNLOAD STORY")
             story.downloadStory()
             
         }

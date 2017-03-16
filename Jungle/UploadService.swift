@@ -21,6 +21,8 @@ class Upload {
     var videoURL:URL?
 }
 
+let dataCache = NSCache<NSString, AnyObject>()
+
 class UploadService {
     
     static func writeImageToFile(withKey key:String, image:UIImage) {
@@ -130,6 +132,9 @@ class UploadService {
         let uid = user.uid
         
         if let data = UIImageJPEGRepresentation(upload.image!, 0.5) {
+            for component in place.addressComponents! {
+                print("TYPE: \(component.type) : \(component.name)")
+            }
             // Create a reference to the file you want to upload
             // Create the file metadata
             let contentTypeStr = "image"
@@ -154,17 +159,22 @@ class UploadService {
                         "dateCreated": [".sv": "timestamp"],
                         "length": 5.0
                     ] as [String : Any]
+                    
+                    
+                    
+                    
                     dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
-                                "name": place.name,
-                                "latitude": place.coordinate.latitude,
-                                "longitude": place.coordinate.longitude,
-                                "address": place.formattedAddress,
-                                "posts/\(postKey)": [".sv": "timestamp"]
+                                "info/name": place.name,
+                                "info/lat": place.coordinate.latitude,
+                                "info/lon": place.coordinate.longitude,
+                                "info/address": place.formattedAddress,
+                                "posts/\(postKey)": [".sv": "timestamp"],
+                                "contributers/\(uid)": true
                             ]
-                            
+
                             let placeRef = ref.child("places/\(place.placeID)")
                             placeRef.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
@@ -202,6 +212,10 @@ class UploadService {
     }
     
     static func getUpload(key:String, completion: @escaping (_ item:StoryItem?)->()) {
+        
+        if let cachedUpload = dataCache.object(forKey: "upload-\(key)" as NSString) as? StoryItem {
+            return completion(cachedUpload)
+        }
         
         let ref = FIRDatabase.database().reference()
         let postRef = ref.child("uploads/\(key)")
@@ -247,6 +261,7 @@ class UploadService {
                     var flagged = false
 
                     item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, flagged: flagged)
+                    dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
             return completion(item)

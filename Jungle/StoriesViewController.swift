@@ -46,7 +46,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             self.collectionView.reloadData()
         }
     }
-
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -68,11 +67,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             }
         }
     }
-    
-    func scrollHandler(_ active:Bool) {
-        collectionView.isScrollEnabled = !active
-    }
-    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -159,7 +153,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let cell = getCurrentCell() else { return false }
         
-        if cell.scrollActive { return false }
         
         if let _ = gestureRecognizer as? UITapGestureRecognizer  {
             return true
@@ -203,11 +196,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         let cell: StoryViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! StoryViewController
         cell.contentView.backgroundColor = UIColor.black
         cell.delegate = self
-        cell.prepareStory(withStory: locations[indexPath.item].getStory(), atIndex: nil)
+        cell.prepareStory(withLocation: locations[indexPath.item])
         if firstCell {
             firstCell = false
         }
-        cell.scrollHandler = scrollHandler
         
         return cell
     }

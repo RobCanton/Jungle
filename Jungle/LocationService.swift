@@ -101,10 +101,11 @@ class LocationService: NSObject {
             
             if snapshot.exists() {
                 let dict         = snapshot.value as! [String:AnyObject]
-                let name         = dict["name"] as! String
-                let lat          = dict["latitude"] as! Double
-                let lon          = dict["longitude"] as! Double
-                let address      = dict["address"] as! String
+                let info         = dict["info"] as! [String:AnyObject]
+                let name         = info["name"] as! String
+                let lat          = info["lat"] as! Double
+                let lon          = info["lon"] as! Double
+                let address      = info["address"] as! String
                 let coord = CLLocation(latitude: lat, longitude: lon)
                 
                 var postKeys = [(String,Double)]()
@@ -115,8 +116,12 @@ class LocationService: NSObject {
                     }
                 }
                 
+                var contributers = [String:Any]()
+                if snapshot.hasChild("contributers") {
+                    contributers = dict["contributers"] as! [String:Any]
+                }
                 
-                location = Location(key: snapshot.key, name: name, address: address, coordinates: coord, postKeys: postKeys)
+                location = Location(key: snapshot.key, name: name, address: address, coordinates: coord, postKeys: postKeys, contributers: contributers)
             }
             
             completion(location)

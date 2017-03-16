@@ -248,7 +248,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     override var prefersStatusBarHidden: Bool
     {
         get{
-            return true
+            return false
         }
     }
     
@@ -261,14 +261,12 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     let transitionController: TransitionController = TransitionController()
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        returningCell?.fadeInInfo()
+        returningCell?.fadeInInfo(animated: true)
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        returningCell?.colorView.alpha = 0.0
-        returningCell?.nameLabel.alpha = 0.0
-        returningCell?.timeLabel.alpha = 0.0
+
     }
     
     var returningCell:PhotoCell?
@@ -281,7 +279,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         if x < v2.view.frame.origin.x {
             let alpha = 1 - x / v2Start
             print("OFFSET: \(scrollView.contentOffset.x)")
-            let col = UIColor(red: 0/255, green: 237/255, blue: 154/255, alpha: alpha)
+            let col = UIColor(red: 0/255, green: 128/255, blue: 255/255, alpha: alpha)
             v1.view.backgroundColor = col
             
             var recordBtnFrame = cameraBtnFrame
@@ -345,7 +343,6 @@ extension ContainerViewController: CameraDelegate {
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         
-        
         uploadCoordinate = GPSService.sharedInstance.lastLocation!
         
     }
@@ -376,7 +373,7 @@ extension ContainerViewController: View2ViewTransitionPresenting {
         let image_frame = cell.imageView.frame
         let x = cell.frame.origin.x + 2
         
-        let y = cell.frame.origin.y + 54 + 0 - v1.collectionView!.contentOffset.y//+ navHeight
+        let y = cell.frame.origin.y + 70 + 0 - v1.collectionView!.contentOffset.y//+ navHeight
         let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
         return view.convert(rect, to: view)
     }
@@ -395,6 +392,14 @@ extension ContainerViewController: View2ViewTransitionPresenting {
         print("PREP")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
+        
+        if !isPresenting {
+            if let cell = v1.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
+                returningCell?.fadeInInfo(animated: false)
+                returningCell = cell
+                returningCell!.fadeOutInfo()
+            }
+        }
         
         if !isPresenting && !v1.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
             v1.collectionView!.reloadData()
