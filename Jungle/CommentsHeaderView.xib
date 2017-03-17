@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -16,7 +17,10 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DVW-eO-p6v">
-                    <rect key="frame" x="12" y="11" width="25" height="25"/>
+                    <rect key="frame" x="0.0" y="0.0" width="47" height="47"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="DVW-eO-p6v" secondAttribute="height" multiplier="1:1" id="a0a-MJ-q9C"/>
+                    </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <state key="normal" image="delete">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -39,7 +43,10 @@
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P53-W6-4P1">
-                    <rect key="frame" x="431" y="11" width="25" height="25"/>
+                    <rect key="frame" x="427" y="0.0" width="49" height="47"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="P53-W6-4P1" secondAttribute="height" multiplier="1:1" id="Bx8-yp-Ka4"/>
+                    </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <state key="normal" image="more">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -51,15 +58,17 @@
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstItem="P53-W6-4P1" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="0aY-3G-NUP"/>
                 <constraint firstAttribute="trailing" secondItem="Wc6-eQ-kGb" secondAttribute="trailing" id="4c9-Zz-4xZ"/>
                 <constraint firstItem="bPk-VY-KnH" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="62v-cQ-qbf"/>
+                <constraint firstItem="DVW-eO-p6v" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="ICL-Xt-A0p"/>
+                <constraint firstAttribute="bottom" secondItem="P53-W6-4P1" secondAttribute="bottom" id="LYX-08-ntE"/>
                 <constraint firstItem="Wc6-eQ-kGb" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="M1s-4G-rZn"/>
                 <constraint firstAttribute="bottom" secondItem="Wc6-eQ-kGb" secondAttribute="bottom" id="Q5C-PH-tZt"/>
-                <constraint firstItem="DVW-eO-p6v" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="12" id="Qn1-uT-tNA"/>
                 <constraint firstItem="bPk-VY-KnH" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="Rum-Bs-zGm"/>
-                <constraint firstItem="DVW-eO-p6v" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="ZAs-F2-VFu"/>
-                <constraint firstAttribute="trailing" secondItem="P53-W6-4P1" secondAttribute="trailing" constant="12" id="eE3-Pd-Ajb"/>
+                <constraint firstAttribute="trailing" secondItem="P53-W6-4P1" secondAttribute="trailing" id="ebs-43-L5T"/>
+                <constraint firstItem="P53-W6-4P1" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="efa-M7-8tA"/>
+                <constraint firstAttribute="bottom" secondItem="DVW-eO-p6v" secondAttribute="bottom" id="rJZ-Ek-3Sk"/>
+                <constraint firstItem="DVW-eO-p6v" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="ypQ-vC-9AR"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <point key="canvasLocation" x="75" y="-258.5"/>

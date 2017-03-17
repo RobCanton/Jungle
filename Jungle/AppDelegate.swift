@@ -10,9 +10,16 @@ import UIKit
 import GoogleMaps
 import GooglePlaces
 import Firebase
+import ReSwift
 
 let accentColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
+
+let mainStore = Store<AppState>(
+    reducer: AppReducer(),
+    state: nil
+)
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

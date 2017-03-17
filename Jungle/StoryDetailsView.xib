@@ -24,7 +24,7 @@
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="3 comments" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="358-qW-sQP">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="358-qW-sQP">
                             <rect key="frame" x="42" y="34" width="233" height="22"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="25" id="Kw1-Sk-UzQ"/>
@@ -60,7 +60,7 @@
                         <constraint firstAttribute="height" constant="50" id="tXE-wE-h8u"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <state key="normal" image="FD0A769A-76AD-4714-9414-EAA972E338BF">
+                    <state key="normal" image="945CFCDE-F7CB-4FDE-8771-E8C329C783B1">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                 </button>
@@ -83,7 +83,7 @@
         </view>
     </objects>
     <resources>
-        <image name="FD0A769A-76AD-4714-9414-EAA972E338BF" width="16" height="16">
+        <image name="945CFCDE-F7CB-4FDE-8771-E8C329C783B1" width="16" height="16">
             <mutableData key="keyedArchiveRepresentation">
 YnBsaXN0MDDUAQIDBAUGPT5YJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoK4HCBMU
 GR4fIyQrLjE3OlUkbnVsbNUJCgsMDQ4PEBESVk5TU2l6ZVYkY2xhc3NcTlNJbWFnZUZsYWdzVk5TUmVw

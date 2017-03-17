@@ -41,8 +41,7 @@ class LocationService: NSObject {
     
     func requestNearbyLocations(_ latitude:Double, longitude:Double) {
         
-        guard let user = FIRAuth.auth()?.currentUser else { return }
-        let uid = user.uid
+        let uid = mainStore.state.userState.uid
         let apiRef = ref.child("api/requests/location/\(uid)")
         apiRef.setValue([
             "lat": latitude,
@@ -53,8 +52,7 @@ class LocationService: NSObject {
     }
     
     func listenToResponses() {
-        guard let user = FIRAuth.auth()?.currentUser else { return }
-        let uid = user.uid
+        let uid = mainStore.state.userState.uid
         let responseRef = ref.child("api/responses/locations/\(uid)")
         responseRef.observe(.value, with: { snapshot in
             responseRef.removeValue()

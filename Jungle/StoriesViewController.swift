@@ -153,7 +153,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func handleTap(gestureRecognizer: UITapGestureRecognizer) {
-        //getCurrentCell()?.tapped(gesture: gestureRecognizer)
+        getCurrentCell()?.tapped(gesture: gestureRecognizer)
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {

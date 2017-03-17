@@ -35,11 +35,10 @@ class StoryDetailsView: UIView {
         let username = user.getUsername()
         let str = "\(username) \(item.caption)"
         
+        imageView.loadImageAsync(user.getImageUrl(), completion: nil)
         
-        /*if item.comments.count > 0 {
-        } else {
-            commentsLabel.text = "Comment"
-        }*/
+        
+        
         let attributes: [String: AnyObject] = [
             NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightLight)
         ]
@@ -56,7 +55,21 @@ class StoryDetailsView: UIView {
         
         
         captionLabel.attributedText = title
+        setCommentsLabel(numComments: item.comments.count)
         
+    }
+    
+    func setCommentsLabel(numComments:Int) {
+        if numComments > 0 {
+            if numComments == 1 {
+                commentsLabel.text = "1 comment"
+            } else {
+                commentsLabel.text = "\(numComments) comments"
+            }
+           
+        } else {
+            commentsLabel.text = "Write a comment"
+        }
     }
 
 }

@@ -28,7 +28,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var commentBar:CommentBar!
     
     var commentsRef:FIRDatabaseReference?
-    
+    var captionComment:Comment?
     override func viewDidLoad() {
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
@@ -52,17 +52,29 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
-        tableView.tableFooterView = UIView()
+        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 300))
+        
         
         self.view.addSubview(tableView)
         
+        if item.caption != "" {
+            captionComment = Comment(key: "\(item.getKey())-caption", author: item.authorId, text: item.caption, timestamp: item.dateCreated.timeIntervalSince1970 * 1000)
+        }
+        
+        
         self.comments = item.comments
+        
+        if captionComment != nil {
+            self.comments.insert(captionComment!, at: 0)
+        }
         self.tableView.reloadData()
         
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
         commentBar.frame = CGRect(x: 0, y: view.frame.height - 50.0, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
         commentBar.sendHandler = sendComment
+        
+    
 
         self.view.addSubview(commentBar)
     
@@ -93,7 +105,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                     self.item.addComment(comment)
                     self.comments = self.item.comments
+                    if self.captionComment != nil {
+                        self.comments.insert(self.captionComment!, at: 0)
+                    }
                     self.tableView.reloadData()
+                    self.scrollBottom(animated: true)
                 }
             })
         } else {
@@ -106,7 +122,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                 self.item.addComment(comment)
                 self.comments = self.item.comments
+                if self.captionComment != nil {
+                    self.comments.insert(self.captionComment!, at: 0)
+                }
                 self.tableView.reloadData()
+                self.scrollBottom(animated: true)
             })
         }
     }
@@ -115,11 +135,14 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewWillDisappear(animated)
         commentsRef?.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
+        storyRef.footerView.setCommentsLabel(numComments: item.comments.count)
+        
     }
     
     func dismissHandle() {
         storyRef.fadeInDetails()
         storyRef.commentsActive = false
+        storyRef.resumeStory()
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -147,7 +170,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         let comment = comments[indexPath.row]
         let text = comment.getText()
         let width = tableView.frame.width - (12 + 10 + 8 + 32)
-        let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular))
+        let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
         let height2 = size.height + 26 + 14  // +8 for some bio padding
         return height2
     }
@@ -182,6 +205,14 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         })
     }
     
+    func scrollBottom(animated:Bool) {
+        if comments.count > 0 {
+            let lastIndex = IndexPath(row: comments.count-1, section: 0)
+            self.tableView.scrollToRow(at: lastIndex, at: UITableViewScrollPosition.bottom, animated: animated)
+        }
+    }
+
+    
     func keyboardWillDisappear(notification: NSNotification){
 
         self.commentBar.sendButton.isEnabled = false
@@ -201,6 +232,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         guard let item = self.item else { return }
         print("SEND COMMENT: \(comment)")
         UploadService.addComment(post: item, comment: comment)
+        commentBar.textField.resignFirstResponder()
     }
 
 }

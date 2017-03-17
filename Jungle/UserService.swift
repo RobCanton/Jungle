@@ -85,6 +85,8 @@ class UserService {
             return
         }
         
+        
+        
         let storageRef = FIRStorage.storage().reference()
         let imageRef = storageRef.child("user_profiles/\(user.uid)")
         if let picData = UIImageJPEGRepresentation(image, 0.9) {

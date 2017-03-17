@@ -127,9 +127,7 @@ class UploadService {
         let dataRef = ref.child("uploads").childByAutoId()
         let postKey = dataRef.key
         
-        guard let user = FIRAuth.auth()?.currentUser else { return }
-        
-        let uid = user.uid
+        let uid = mainStore.state.userState.uid
         
         if let data = UIImageJPEGRepresentation(upload.image!, 0.5) {
             for component in place.addressComponents! {
@@ -167,16 +165,17 @@ class UploadService {
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
-                                "info/name": place.name,
-                                "info/lat": place.coordinate.latitude,
-                                "info/lon": place.coordinate.longitude,
-                                "info/address": place.formattedAddress,
-                                "posts/\(postKey)": [".sv": "timestamp"],
-                                "contributers/\(uid)": true
+                                "places/\(place.placeID)/info/name": place.name,
+                                "places/\(place.placeID)/info/lat": place.coordinate.latitude,
+                                "places/\(place.placeID)/info/lon": place.coordinate.longitude,
+                                "places/\(place.placeID)/info/address": place.formattedAddress,
+                                "places/\(place.placeID)/posts/\(postKey)": [".sv": "timestamp"],
+                                "places/\(place.placeID)/contributers/\(uid)": true,
+                                "users/activity/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
 
-                            let placeRef = ref.child("places/\(place.placeID)")
-                            placeRef.updateChildValues(updateValues, withCompletionBlock: { error, ref in
+
+                            ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
                             })
                         } else {
@@ -284,9 +283,7 @@ class UploadService {
         if comment == "" { return }
         let ref = FIRDatabase.database().reference()
         
-        guard let user = FIRAuth.auth()?.currentUser else { return }
-        
-        let uid = user.uid
+        let uid = mainStore.state.userState.uid
 
         let postRef = ref.child("api/requests/comment").childByAutoId()
         postRef.setValue([
@@ -300,81 +297,5 @@ class UploadService {
     
     
 
-}
-
-
-
-let imageCache = NSCache<NSString, UIImage>()
-
-func loadImageUsingCacheWithURL(_ _url:String, completion: @escaping (_ image:UIImage?, _ fromCache:Bool)->()) {
-    // Check for cached image
-    if let cachedImage = imageCache.object(forKey: _url as NSString) {
-        return completion(cachedImage, true)
-    } else {
-        downloadImageWithURLString(_url, completion: completion)
-    }
-}
-
-func loadImageCheckingCache(withUrl _url:String, check:Int, completion: @escaping (_ image:UIImage?, _ fromCache:Bool, _ check:Int)->()) {
-    // Check for cached image
-    if let cachedImage = imageCache.object(forKey: _url as NSString) {
-        return completion(cachedImage, true, check)
-    } else {
-        downloadImage(withUrl: _url, check: check, completion: completion)
-    }
-}
-
-func downloadImageWithURLString(_ _url:String, completion: @escaping (_ image:UIImage?, _ fromCache:Bool)->()) {
-    
-    let url = URL(string: _url)
-    
-    URLSession.shared.dataTask(with: url!, completionHandler:
-        { (data, response, error) in
-            
-            //error
-            if error != nil {
-                if error?._code == -999 {
-                    return
-                }
-                //print(error?.code)
-                return completion(nil, false)
-            }
-            DispatchQueue.main.async {
-                if let downloadedImage = UIImage(data: data!) {
-                    imageCache.setObject(downloadedImage, forKey: _url as NSString)
-                }
-                
-                let image = UIImage(data: data!)
-                return completion(image!, false)
-            }
-            
-    }).resume()
-}
-
-func downloadImage(withUrl _url:String, check:Int, completion: @escaping (_ image:UIImage?, _ fromCache:Bool, _ check:Int)->()) {
-    
-    let url = URL(string: _url)
-    
-    URLSession.shared.dataTask(with: url!, completionHandler:
-        { (data, response, error) in
-            
-            //error
-            if error != nil {
-                if error?._code == -999 {
-                    return
-                }
-                //print(error?.code)
-                return completion(nil, false, check)
-            }
-            DispatchQueue.main.async {
-                if let downloadedImage = UIImage(data: data!) {
-                    imageCache.setObject(downloadedImage, forKey: _url as NSString)
-                }
-                
-                let image = UIImage(data: data!)
-                return completion(image!, false, check)
-            }
-            
-    }).resume()
 }
 

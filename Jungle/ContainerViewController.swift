@@ -88,7 +88,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     }
     
     var v1: PlacesViewController!
-    var v2: UIViewController!
+    var v2: ActivityViewController!
     var v3: UIViewController!
     var cameraView:CameraViewController!
     
@@ -151,11 +151,13 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         nav.view.frame = self.view.bounds
         v1.masterNav = self.navigationController
         v1.container = self
-        /*
-        v2 = UIViewController()
-        v2.view.backgroundColor = UIColor.clear
+        
+        v2 = ActivityViewController()
+        let nav2 = UINavigationController(rootViewController: v2)
+        v2.view.backgroundColor = UIColor.white
         v2.view.frame = v1.view.bounds
         
+        /*
         v3 = UIViewController()
         v3.view.backgroundColor = UIColor.white
         v3.view.frame = v1.view.bounds
@@ -224,7 +226,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         bottom.view.backgroundColor = UIColor.red
         snapContainer = SnapContainerViewController.containerViewWith(nav,
                                                                           middleVC: middle,
-                                                                          rightVC: right,
+                                                                          rightVC: nav2,
                                                                           topVC: top,
                                                                           bottomVC: bottom)
         self.addChildViewController(snapContainer)
