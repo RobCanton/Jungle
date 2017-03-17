@@ -19,6 +19,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var item:StoryItem?
     var delegate:PopupProtocol?
     
+    var footerTapped:UITapGestureRecognizer!
 
     func showUser(_ uid: String) {
         returnIndex = viewIndex
@@ -170,9 +171,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
         killTimer()
         pauseVideo()
-        
-        
-        
+
         guard let items = story.items else { return }
         if viewIndex >= items.count { return }
         
@@ -180,17 +179,26 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         let item = items[viewIndex]
         self.item = item
 
-        
-        
-
         if item.contentType == .image {
             prepareImageContent(item: item)
         } else if item.contentType == .video {
             prepareVideoContent(item: item)
         }
         
-
-        
+        UserService.getUser(item.authorId, completion: { user in
+            print("USER: \(user)")
+            if user != nil {
+                let caption = "\(user!.getUsername()) \(item.caption)"
+                let width = self.frame.width - (42 + 50)
+                var size:CGFloat = 8.0 + 25 + 2
+                
+                size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
+                
+                self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
+                self.footerView.setInfo( item: item, user: user!)
+            }
+        })
+     
     }
 
 
@@ -422,16 +430,116 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
 
     var keyboardUp = false
     
+    var dragGesture:UIPanGestureRecognizer!
+    
+    
+    var scrollView:UIScrollView!
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
 
         contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
-        contentView.addSubview(headerView)
         contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
+        contentView.addSubview(headerView)
+        contentView.addSubview(footerView)
         
+        dragGesture = UIPanGestureRecognizer(target: self, action: #selector(dragView))
+        //footerView.addGestureRecognizer(dragGesture)
+        
+        footerTapped = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
+        footerView.isUserInteractionEnabled = true
+        footerView.addGestureRecognizer(footerTapped)
+        
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        
+        
+        let v1 = UIView()
+        v1.frame = scrollView.frame
+        v1.backgroundColor = UIColor.clear
+        
+        let v2 = UIView()
+        v2.frame = v1.frame
+        v2.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
+        
+        var v2Frame = v2.frame
+        v2Frame.origin.y = height
+        v2.frame = v2Frame
+        
+        self.scrollView.delegate = self
+        self.scrollView.bounces = false
+        self.scrollView.isPagingEnabled = true
+        self.scrollView.addSubview(v1)
+        self.scrollView.addSubview(v2)
+        self.scrollView.contentSize = CGSize(width: width, height: height * 2)
+        self.scrollView.isUserInteractionEnabled = false
+        contentView.addSubview(scrollView)
+
+        
+        
+    }
+    
+    var commentsActive = false
+    func handleFooterTap(sender: UITapGestureRecognizer) {
+        delegate?.showComments()
+        commentsActive = true
+        pauseStory()
+        UIView.animate(withDuration: 0.15, animations: {
+            self.footerView.alpha = 0
+            self.progressBar?.alpha = 0
+            self.headerView.alpha = 0
+        })
+       // scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+
+    }
+    
+    func fadeInDetails() {
+        UIView.animate(withDuration: 0.15, animations: {
+            self.footerView.alpha = 1
+            self.progressBar?.alpha = 1
+            self.headerView.alpha = 1
+        })
+    }
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let y = scrollView.contentOffset.y
+        let alpha = 1 - (y / scrollView.frame.height)
+        self.footerView.alpha = alpha
+        self.progressBar?.alpha = alpha
+        self.headerView.alpha = alpha
+    }
+    
+    func dragView(sender: UIPanGestureRecognizer) {
+        
+        
+        
+        
+        let state = sender.state
+        if state == .ended {
+            var frame = sender.view!.frame
+            if frame.origin.y < self.frame.height / 2 {
+                frame.origin.y = 0
+            } else {
+                frame.origin.y = self.frame.height - frame.height
+            }
+            frame.origin.y = self.frame.height - frame.height
+            
+            UIView.animate(withDuration: 0.25, animations: {
+                
+                sender.view!.frame = frame
+            })
+        } else {
+            let translation = sender.translation(in: self)
+            var frame = sender.view!.frame
+            frame.origin.y += translation.y
+            sender.view!.frame = frame
+        }
+        
+        sender.setTranslation(CGPoint.zero, in: self)
     }
     
     public lazy var content: UIImageView = {
@@ -456,12 +564,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }()
     
     public lazy var gradientView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.3, width: self.bounds.width, height: self.bounds.height * 0.7))
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.15, width: self.bounds.width, height: self.bounds.height * 0.85))
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 0, y: 1)
-        let dark = UIColor(white: 0.0, alpha: 0.55)
+        let dark = UIColor(white: 0.0, alpha: 0.8)
         gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
@@ -488,6 +596,15 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         view.frame = CGRect(x: margin, y: margin + 12.0, width: width, height: view.frame.height)
+        return view
+    }()
+    
+    lazy var footerView: StoryDetailsView = {
+        let margin:CGFloat = 2.0
+        var view = UINib(nibName: "StoryDetailsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! StoryDetailsView
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        view.frame = CGRect(x: margin, y: height - view.frame.height, width: width, height: view.frame.height)
         return view
     }()
     

@@ -25,7 +25,7 @@ class PhotoCell: UICollectionViewCell {
         
         self.layer.borderColor = UIColor.black.cgColor
         self.layer.borderWidth = 0.0
-        self.layer.cornerRadius = 4.0
+        //self.layer.cornerRadius = 4.0
         self.clipsToBounds = true
         
         

@@ -60,47 +60,31 @@ func == (lhs: Comment, rhs: Comment) -> Bool {
 }
 
 class User:NSObject, NSCoding {
-    var uid: String
-    var displayName: String
-    var name: String?
-    var imageURL: String
-    var largeImageURL: String?
-    var bio: String?
-    fileprivate var verified:Bool
+    fileprivate var uid: String
+    fileprivate var username: String
+    fileprivate var imageURL: String
     
-    init(uid:String, displayName:String, name:String?, imageURL: String, largeImageURL: String?, bio: String?, verified:Bool)
+    init(uid:String, username:String, imageURL:String)
     {
-        self.uid           = uid
-        self.displayName   = displayName
-        self.name          = name
-        self.imageURL      = imageURL
-        self.largeImageURL = largeImageURL
-        self.bio           = bio
-        self.verified      = verified
+        self.uid       = uid
+        self.username  = username
+        self.imageURL  = imageURL
     }
     
     required convenience init(coder decoder: NSCoder) {
         
         let uid = decoder.decodeObject(forKey: "uid") as! String
-        let displayName = decoder.decodeObject(forKey: "displayName") as! String
-        let name = decoder.decodeObject(forKey: "name") as? String
+        let username = decoder.decodeObject(forKey: "username") as! String
         let imageURL = decoder.decodeObject(forKey: "imageURL") as! String
-        let largeImageURL = decoder.decodeObject(forKey: "largeImageURL") as? String
-        let bio = decoder.decodeObject(forKey: "bio") as? String
-        let verified = decoder.decodeObject(forKey: "verified") as! Bool
-        self.init(uid: uid, displayName: displayName, name: name, imageURL: imageURL, largeImageURL: largeImageURL, bio: bio, verified: verified)
+        self.init(uid: uid, username: username, imageURL: imageURL)
 
     }
 
     
     func encode(with coder: NSCoder) {
         coder.encode(uid, forKey: "uid")
-        coder.encode(displayName, forKey: "displayName")
-        coder.encode(name, forKey: "name")
+        coder.encode(username, forKey: "username")
         coder.encode(imageURL, forKey: "imageURL")
-        coder.encode(largeImageURL, forKey: "largeImageURL")
-        coder.encode(bio, forKey: "bio")
-        coder.encode(verified, forKey: "verified")
     }
     
 
@@ -109,25 +93,14 @@ class User:NSObject, NSCoding {
         return uid
     }
     
-    func getDisplayName() -> String {
-        return displayName
+    func getUsername() -> String {
+        return username
     }
     
-    func getName() -> String? {
-        return name
-    }
-    
+
     func getImageUrl() -> String {
         return imageURL
     }
     
-    func setImageURLS(_ largeImageURL:String, smallImageURL:String) {
-        self.largeImageURL = largeImageURL
-        self.imageURL = smallImageURL
-    }
-    
-    func isVerified() -> Bool {
-        return verified
-    }
     
 }

@@ -196,6 +196,21 @@ class StoryItem: NSObject, NSCoding {
             }
         })
     }
+    
+    func addComment(_ comment:Comment) {
+        for _comment in comments {
+            if _comment.getKey() == comment.getKey() { return }
+        }
+        
+        self.comments.append(comment)
+        cache()
+    }
+
+    
+    func cache() {
+        dataCache.removeObject(forKey: "upload-\(key)" as NSString)
+        dataCache.setObject(self, forKey: "upload-\(key)" as NSString)
+    }
 }
 
 func < (lhs: StoryItem, rhs: StoryItem) -> Bool {

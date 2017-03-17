@@ -34,7 +34,7 @@ class StoryInfoView: UIView {
     
     func setInfo(user:User, item:StoryItem) {
         uid = user.getUserId()
-        usernameLabel.text = user.getDisplayName()
+        
         captionLabel.text = item.caption
         if item.caption != "" {
             usernameTopConstraint.constant = 8

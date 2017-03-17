@@ -28,18 +28,18 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
     
     var sortMode:SortedBy = .Recent
     
-    var backdrop:UIView!
+    var returningCell:PhotoCell?
+    
+    let transitionController: TransitionController = TransitionController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = UIColor.clear
+        self.view.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.isTranslucent = false
         
-        self.view.layer.cornerRadius = 6
-        self.view.clipsToBounds = true
-        
-        itemSideLength = (UIScreen.main.bounds.width - 8.0)/3.0
-        self.automaticallyAdjustsScrollViewInsets = false
+        itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
+        self.automaticallyAdjustsScrollViewInsets = true
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
         screenSize = self.view.frame
@@ -52,7 +52,7 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         layout.minimumInteritemSpacing = 1.0
         layout.minimumLineSpacing = 1.0
         
-        collectionView = UICollectionView(frame: CGRect(x: 1,y: 70,width: view.frame.width - 2,height: view.frame.height - 2 - 70), collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: CGRect(x: 0,y: 0,width: view.frame.width ,height: view.frame.height ), collectionViewLayout: layout)
         
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
@@ -67,13 +67,7 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         collectionView.bounces = true
         collectionView.isPagingEnabled = false
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.backgroundColor = UIColor.clear
-        
-        backdrop = UIView(frame: CGRect(x: 0, y: collectionView.frame.origin.y, width: view.frame.width, height: view.frame.height - 66))
-        backdrop.backgroundColor = UIColor.white
-        view.insertSubview(backdrop, belowSubview: collectionView)
-        
-        
+        collectionView.backgroundColor = UIColor.white
         
         refresher = UIRefreshControl()
         collectionView.alwaysBounceVertical = true
@@ -82,18 +76,32 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         collectionView.addSubview(refresher)
         
         self.view.addSubview(collectionView)
-        
+
         
         let segmentedControl = UISegmentedControl(items: ["Recent", "Popular", "Nearest"])
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.center = CGPoint(x: view.frame.width/2, y: 27 + 12)
-        segmentedControl.tintColor = UIColor.white
+        segmentedControl.tintColor = UIColor.darkGray
         segmentedControl.addTarget(self, action: #selector(changeSort), for: .valueChanged)
-        self.view.addSubview(segmentedControl)
+        self.navigationItem.titleView = segmentedControl
         
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
 
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        globalContainerRef?.snapContainer.scrollView.isScrollEnabled = true
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        returningCell?.fadeInInfo(animated: true)
+        returningCell = nil
+        
     }
     
     func changeSort(control: UISegmentedControl) {
@@ -192,12 +200,14 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
             let storiesViewController: StoriesViewController = StoriesViewController()
             
             storiesViewController.locations = self.locations
-            storiesViewController.transitionController = container!.transitionController
-            container!.transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]
+            storiesViewController.transitionController = transitionController
+            transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]
             
-            if masterNav != nil {
-                masterNav!.delegate = container!.transitionController
-                container!.transitionController.push(viewController: storiesViewController, on: container!, attached: storiesViewController)
+            if let nav = self.navigationController {
+                nav.delegate = transitionController
+                storiesViewController.containerRef = container
+                globalContainerRef?.snapContainer.scrollView.isScrollEnabled = false
+                transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
             }
         } else {
             story.downloadStory()
@@ -207,10 +217,76 @@ class PlacesViewController:UIViewController, UICollectionViewDelegate, UICollect
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        print("COLLECTION OFFSET: \(scrollView.contentOffset.y)")
+    }
+    
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
     }
+    
+
+
+}
+
+extension PlacesViewController: View2ViewTransitionPresenting {
+    
+    func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
+        
+        guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
+            return CGRect.zero
+        }
+        
+        let i =  IndexPath(row: indexPath.item, section: 0)
+        let cell: PhotoCell = collectionView!.cellForItem(at: i)! as! PhotoCell
+        let image_frame = cell.imageView.frame
+        let x = cell.frame.origin.x + 1
+        let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+        let y = cell.frame.origin.y + navHeight - collectionView!.contentOffset.y//+ navHeight
+        let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+        return view.convert(rect, to: view)
+    }
+    
+    func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
+        
+        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
+        let i = IndexPath(row: indexPath.item, section: 0)
+        let cell: PhotoCell = collectionView!.cellForItem(at: i) as! PhotoCell
+        print("INITIAL VIEW")
+        return cell.imageView
+    }
+    
+    func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
+        
+        print("PREP")
+        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
+        let i = IndexPath(row: indexPath.item, section: 0)
+        
+        if !isPresenting {
+            if let cell = collectionView!.cellForItem(at: indexPath) as? PhotoCell {
+                returningCell?.fadeInInfo(animated: false)
+                returningCell = cell
+                returningCell!.fadeOutInfo()
+            }
+        }
+        
+        if !isPresenting && !collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+            collectionView!.reloadData()
+            collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+            collectionView!.layoutIfNeeded()
+        }
+    }
+    
+    func dismissInteractionEnded(_ completed: Bool) {
+        
+//        if completed {
+//            statusBarShouldHide = false
+//            self.setNeedsStatusBarAppearanceUpdate()
+//        }
+        
+    }
+    
 }
 
 

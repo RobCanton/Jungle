@@ -157,7 +157,7 @@ class UploadService {
                         "url": downloadURL!.absoluteString,
                         "contentType": contentTypeStr,
                         "dateCreated": [".sv": "timestamp"],
-                        "length": 5.0
+                        "length": 6.0
                     ] as [String : Any]
                     
                     
@@ -255,6 +255,18 @@ class UploadService {
                     var likes = [String:Double]()
                     
                     var comments = [Comment]()
+                    if snapshot.hasChild("comments") {
+                        let commentsDict = dict["comments"] as! [String:AnyObject]
+                        for (key, object) in commentsDict {
+                            let key = key
+                            let author = object["author"] as! String
+                            let text = object["text"] as! String
+                            let timestamp = object["timestamp"] as! Double
+                            
+                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                            comments.append(comment)
+                        }
+                    }
                     
                     comments.sort(by: { return $0 < $1 })
                     
@@ -268,7 +280,101 @@ class UploadService {
         })
     }
     
+    static func addComment(post:StoryItem, comment:String) {
+        if comment == "" { return }
+        let ref = FIRDatabase.database().reference()
+        
+        guard let user = FIRAuth.auth()?.currentUser else { return }
+        
+        let uid = user.uid
+
+        let postRef = ref.child("api/requests/comment").childByAutoId()
+        postRef.setValue([
+            "sender": uid,
+            "recipient": post.getAuthorId(),
+            "postKey": post.getKey(),
+            "text":comment,
+            "timestamp":[".sv":"timestamp"]
+        ])
+    }
+    
     
 
+}
+
+
+
+let imageCache = NSCache<NSString, UIImage>()
+
+func loadImageUsingCacheWithURL(_ _url:String, completion: @escaping (_ image:UIImage?, _ fromCache:Bool)->()) {
+    // Check for cached image
+    if let cachedImage = imageCache.object(forKey: _url as NSString) {
+        return completion(cachedImage, true)
+    } else {
+        downloadImageWithURLString(_url, completion: completion)
+    }
+}
+
+func loadImageCheckingCache(withUrl _url:String, check:Int, completion: @escaping (_ image:UIImage?, _ fromCache:Bool, _ check:Int)->()) {
+    // Check for cached image
+    if let cachedImage = imageCache.object(forKey: _url as NSString) {
+        return completion(cachedImage, true, check)
+    } else {
+        downloadImage(withUrl: _url, check: check, completion: completion)
+    }
+}
+
+func downloadImageWithURLString(_ _url:String, completion: @escaping (_ image:UIImage?, _ fromCache:Bool)->()) {
+    
+    let url = URL(string: _url)
+    
+    URLSession.shared.dataTask(with: url!, completionHandler:
+        { (data, response, error) in
+            
+            //error
+            if error != nil {
+                if error?._code == -999 {
+                    return
+                }
+                //print(error?.code)
+                return completion(nil, false)
+            }
+            DispatchQueue.main.async {
+                if let downloadedImage = UIImage(data: data!) {
+                    imageCache.setObject(downloadedImage, forKey: _url as NSString)
+                }
+                
+                let image = UIImage(data: data!)
+                return completion(image!, false)
+            }
+            
+    }).resume()
+}
+
+func downloadImage(withUrl _url:String, check:Int, completion: @escaping (_ image:UIImage?, _ fromCache:Bool, _ check:Int)->()) {
+    
+    let url = URL(string: _url)
+    
+    URLSession.shared.dataTask(with: url!, completionHandler:
+        { (data, response, error) in
+            
+            //error
+            if error != nil {
+                if error?._code == -999 {
+                    return
+                }
+                //print(error?.code)
+                return completion(nil, false, check)
+            }
+            DispatchQueue.main.async {
+                if let downloadedImage = UIImage(data: data!) {
+                    imageCache.setObject(downloadedImage, forKey: _url as NSString)
+                }
+                
+                let image = UIImage(data: data!)
+                return completion(image!, false, check)
+            }
+            
+    }).resume()
 }
 

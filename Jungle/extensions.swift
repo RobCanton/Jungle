@@ -41,6 +41,16 @@ extension UIImage {
     }
 }
 
+extension UIImageView {
+    
+    func loadImageAsync(_ url:String, completion:((_ fromCache:Bool)->())?) {
+        loadImageUsingCacheWithURL(url, completion: { image, fromCache in
+            self.image = image
+            completion?(fromCache)
+        })
+    }
+}
+
 extension UIColor {
     
     func modified(withAdditionalHue hue: CGFloat, additionalSaturation: CGFloat, additionalBrightness: CGFloat) -> UIColor {
@@ -110,4 +120,47 @@ extension Date
         return "\(timeStr) ago"
     }
     
+}
+
+extension UILabel {
+    
+    public class func size(withText text: String, forWidth width: CGFloat, withFont font: UIFont) -> CGSize {
+        let measurementLabel = UILabel()
+        measurementLabel.font = font
+        measurementLabel.text = text
+        measurementLabel.numberOfLines = 0
+        measurementLabel.lineBreakMode = .byWordWrapping
+        measurementLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        measurementLabel.widthAnchor.constraint(equalToConstant: width).isActive = true
+        return measurementLabel.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+    }
+    
+    public class func size(withUsername username: String, andCaption caption:String, forWidth width: CGFloat) -> CGSize {
+        let measurementLabel = UILabel()
+        let str = "\(username) \(caption)"
+        
+        let attributes: [String: AnyObject] = [
+            NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightRegular)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        
+        if let range = str.range(of: username) {// .rangeOfString(countStr) {
+            let index = str.distance(from: str.startIndex, to: range.lowerBound)//str.startIndex.distance(fromt:range.lowerBound)
+            let a: [String: AnyObject] = [
+                NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightBold),
+                ]
+            title.addAttributes(a, range: NSRange(location: index, length: username.characters.count))
+        }
+        
+        
+        measurementLabel.attributedText = title
+        measurementLabel.numberOfLines = 0
+        measurementLabel.lineBreakMode = .byWordWrapping
+        measurementLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        measurementLabel.widthAnchor.constraint(equalToConstant: width).isActive = true
+        return measurementLabel.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+    }
 }

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="CommentBar" customModule="Jungle" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="392" height="64"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="o7x-9J-Dpe">
+                    <rect key="frame" x="0.0" y="0.0" width="392" height="64"/>
+                    <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="3Ua-d3-gjB">
+                        <rect key="frame" x="0.0" y="0.0" width="392" height="64"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    </view>
+                    <blurEffect style="dark"/>
+                </visualEffectView>
+                <label hidden="YES" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Comment" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zHt-xi-SwK">
+                    <rect key="frame" x="8" y="22" width="71" height="20"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="textColor" white="1" alpha="0.7541849124203821" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Comment" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="MSC-g9-ptN">
+                    <rect key="frame" x="8" y="0.0" width="313" height="64"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <textInputTraits key="textInputTraits" keyboardAppearance="alert" returnKeyType="send"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="color" keyPath="_placeholderLabel.textColor">
+                            <color key="value" white="1" alpha="0.32914510350318471" colorSpace="calibratedWhite"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </textField>
+                <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iy8-lv-81J">
+                    <rect key="frame" x="321" y="0.0" width="63" height="63"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="iy8-lv-81J" secondAttribute="height" multiplier="1:1" id="39m-J6-GGd"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                    <state key="normal" title="Send">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="sendButton:" destination="iN0-l3-epB" eventType="touchUpInside" id="TcN-tW-rmQ"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="iy8-lv-81J" secondAttribute="trailing" constant="8" id="34O-Kl-zbd"/>
+                <constraint firstAttribute="bottom" secondItem="MSC-g9-ptN" secondAttribute="bottom" id="AOW-Zm-cmF"/>
+                <constraint firstItem="zHt-xi-SwK" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="Huu-Yn-1Ra"/>
+                <constraint firstItem="iy8-lv-81J" firstAttribute="leading" secondItem="MSC-g9-ptN" secondAttribute="trailing" id="Oyv-Ia-Fbf"/>
+                <constraint firstItem="zHt-xi-SwK" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="StC-ae-wlt"/>
+                <constraint firstItem="MSC-g9-ptN" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="Utu-2H-plk"/>
+                <constraint firstAttribute="trailing" secondItem="o7x-9J-Dpe" secondAttribute="trailing" id="XXP-kP-wtC"/>
+                <constraint firstItem="o7x-9J-Dpe" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="Z9a-wA-waP"/>
+                <constraint firstAttribute="bottom" secondItem="iy8-lv-81J" secondAttribute="bottom" constant="1" id="bYq-Hq-bpb"/>
+                <constraint firstItem="iy8-lv-81J" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="rE9-cg-gf4"/>
+                <constraint firstAttribute="bottom" secondItem="o7x-9J-Dpe" secondAttribute="bottom" id="vIA-FN-5Oo"/>
+                <constraint firstItem="o7x-9J-Dpe" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="yAM-Sy-bcf"/>
+                <constraint firstItem="MSC-g9-ptN" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="yMo-tC-vse"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="commentPlaceHolder" destination="zHt-xi-SwK" id="d4P-8I-kHA"/>
+                <outlet property="sendButton" destination="iy8-lv-81J" id="6Qi-hO-7Nb"/>
+                <outlet property="textField" destination="MSC-g9-ptN" id="EF0-Ri-o68"/>
+            </connections>
+            <point key="canvasLocation" x="74" y="-213"/>
+        </view>
+    </objects>
+</document>

@@ -14,13 +14,14 @@ protocol PopupProtocol {
     func showUser(_ uid:String)
     func showUsersList(_ uids:[String], _ title:String)
     func showOptions()
+    func showComments()
     func dismissPopup(_ animated:Bool)
 }
 
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate, PopupProtocol {
     
     weak var transitionController: TransitionController!
-    
+    var containerRef:ContainerViewController?
     var label:UILabel!
     var locations = [Location]()
     var stories = [Story]()
@@ -34,9 +35,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
     var firstCell = true
     
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
+        navigationController?.setNavigationBarHidden(true, animated: false)
         
         if self.navigationController!.delegate !== transitionController {
             self.collectionView.reloadData()
@@ -45,6 +47,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         if self.navigationController!.delegate !== transitionController {
             self.collectionView.reloadData()
         }
+        containerRef?.statusBar(hide: true)
+        containerRef?.hideOverlay()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -70,6 +74,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        containerRef?.statusBar(hide: false)
         
         NotificationCenter.default.removeObserver(self)
     }
@@ -80,6 +85,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         for cell in collectionView.visibleCells as! [StoryViewController] {
             cell.cleanUp()
         }
+        containerRef?.showOverlay()
     }
     
     var textField:UITextView!
@@ -147,12 +153,13 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func handleTap(gestureRecognizer: UITapGestureRecognizer) {
-        getCurrentCell()?.tapped(gesture: gestureRecognizer)
+        //getCurrentCell()?.tapped(gesture: gestureRecognizer)
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let cell = getCurrentCell() else { return false }
         
+        if cell.commentsActive { return false }
         
         if let _ = gestureRecognizer as? UITapGestureRecognizer  {
             return true
@@ -166,7 +173,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
 
             let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-            if translate.y <= 0 { return false }
+            if translate.y <= 0 {
+                return false
+            }
+            
+            
 
             return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
         }
@@ -216,15 +227,36 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func showUser(_ uid:String) {
-
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = UIViewController()
+        controller.title = title
+        controller.view.backgroundColor = UIColor.white
+        self.navigationController?.pushViewController(controller, animated: true)
     }
     
     func showUsersList(_ uids:[String], _ title:String) {
-
+        
     }
     
 
     func showOptions() {
+        
+    }
+    
+    func showComments() {
+
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        let controller = CommentsViewController()
+        controller.title = "Comments"
+        controller.storyRef = cell
+        controller.item = item
+        controller.containerRef = containerRef
+        let nav = UINavigationController(rootViewController: controller)
+        nav.modalPresentationStyle = .overCurrentContext
+        self.present(nav, animated: true, completion: nil)
         
     }
     

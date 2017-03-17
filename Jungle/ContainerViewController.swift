@@ -13,7 +13,7 @@ import GooglePlaces
 import CoreLocation
 import AVFoundation
 import Firebase
-import View2ViewTransition
+
 
 
 protocol CameraDelegate {
@@ -24,6 +24,8 @@ protocol CameraDelegate {
     func takingPhoto()
     func takingVideo()
 }
+
+var globalContainerRef:ContainerViewController?
 
 class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate {
     
@@ -91,13 +93,14 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     var cameraView:CameraViewController!
     
     var cameraBtnFrame:CGRect!
-    @IBOutlet weak var scrollView: UIScrollView!
     
+    var snapContainer:SnapContainerViewController!
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         let definiteBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
-        scrollView.delegate = self
+        globalContainerRef = self
         
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
         cameraBtnFrame = recordBtn.frame
@@ -110,15 +113,13 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         cameraView.delegate = self
         cameraView.view.frame = self.view.bounds
         self.addChildViewController(cameraView)
-        self.view.insertSubview(cameraView.view, belowSubview: scrollView)
+        
         cameraView.didMove(toParentViewController: self)
         
         
         recordBtn.tappedHandler = recordButtonTapped
         recordBtn.pressedHandler = cameraView.pressed
         recordBtn.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
-        
-        view.insertSubview(recordBtn, aboveSubview: scrollView)
         
         flashView = UIView(frame: view.bounds)
         flashView.backgroundColor = UIColor.white
@@ -132,7 +133,6 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         mapContainer = UIView(frame: CGRect(x: 0, y: view.frame.height - height, width: view.frame.width, height: height))
         //mapContainer.layer.cornerRadius = 56
         mapContainer.clipsToBounds = true
-        view.insertSubview(mapContainer, belowSubview: scrollView)
         
         let gradient = CAGradientLayer()
         
@@ -144,12 +144,14 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         mapContainer.layer.mask = gradient
     
 
-        
         v1 = PlacesViewController()
-        v1.view.frame = self.view.bounds
+        
+        let nav = UINavigationController(rootViewController: v1)
+
+        nav.view.frame = self.view.bounds
         v1.masterNav = self.navigationController
         v1.container = self
-        
+        /*
         v2 = UIViewController()
         v2.view.backgroundColor = UIColor.clear
         v2.view.frame = v1.view.bounds
@@ -158,9 +160,9 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         v3.view.backgroundColor = UIColor.white
         v3.view.frame = v1.view.bounds
         
-        self.addChildViewController(v1)
-        self.scrollView.addSubview(v1.view)
-        v1.didMove(toParentViewController: self)
+        self.addChildViewController(nav)
+        self.scrollView.addSubview(nav.view)
+        nav.didMove(toParentViewController: self)
         
         self.addChildViewController(v2)
         self.scrollView.addSubview(v2.view)
@@ -184,15 +186,64 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         
         self.scrollView.setContentOffset(CGPoint(x:v2Frame.origin.x,y: 0), animated: false)
         
+        var userVC = UIViewController()
+        userVC.view.frame = v1.view.bounds
+        userVC.view.backgroundColor = UIColor.green
+        
+        var clearVC = UIViewController()
+        clearVC.view.frame = v1.view.bounds
+        clearVC.view.backgroundColor = UIColor.red
+        
+        self.addChildViewController(userVC)
+        self.verticalScrollView.addSubview(userVC.view)
+        userVC.didMove(toParentViewController: self)
+        
+        self.addChildViewController(clearVC)
+        self.verticalScrollView.addSubview(clearVC.view)
+        clearVC.didMove(toParentViewController: self)
+        
+        self.verticalScrollView.contentSize = CGSize(width: self.view.frame.width, height: self.view.frame.size.height * 2)
+        self.verticalScrollView.isPagingEnabled = true
+        self.verticalScrollView.bounces = false
+        
+        self.verticalScrollView.setContentOffset(CGPoint(x:0,y: v1.view.frame.height), animated: false)
+        
+        */
+        
+        let middle = UIViewController()
+        middle.view.frame = self.view.frame
+        middle.view.backgroundColor = UIColor.clear
+        let right = UIViewController()
+        right.view.frame = self.view.frame
+        right.view.backgroundColor = UIColor.yellow
+        let top = UIViewController()
+        top.view.frame = self.view.frame
+        top.view.backgroundColor = UIColor.blue
+        let bottom = UIViewController()
+        bottom.view.frame = self.view.frame
+        bottom.view.backgroundColor = UIColor.red
+        snapContainer = SnapContainerViewController.containerViewWith(nav,
+                                                                          middleVC: middle,
+                                                                          rightVC: right,
+                                                                          topVC: top,
+                                                                          bottomVC: bottom)
+        self.addChildViewController(snapContainer)
+        snapContainer.didMove(toParentViewController: self)
+        
+        self.view.addSubview(cameraView.view)
+        self.view.addSubview(mapContainer)
+        self.view.addSubview(flashView)
+        self.view.addSubview(snapContainer.view)
+        self.view.addSubview(recordBtn)
+        
         GPSService.sharedInstance.delegate = self
         GPSService.sharedInstance.startUpdatingLocation()
         
-        
     }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     func recordButtonTapped() {
@@ -201,7 +252,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         case .Transitioning:
             break
         case .Activity:
-            scrollView.setContentOffset(CGPoint(x:v2.view.frame.origin.x, y: 0), animated: true)
+            //scrollView.setContentOffset(CGPoint(x:v2.view.frame.origin.x, y: 0), animated: true)
             break
         case .Camera:
             
@@ -245,66 +296,78 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     }
 
     
-    override var prefersStatusBarHidden: Bool
-    {
-        get{
-            return false
-        }
-    }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle{
-        get {
-            return .lightContent
-        }
-    }
-    
-    let transitionController: TransitionController = TransitionController()
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        returningCell?.fadeInInfo(animated: true)
+        
+
+    }
+    
+    func hideOverlay() {
+        self.recordBtn.isUserInteractionEnabled = false
+        UIView.animate(withDuration: 0.15, animations: {
+            self.recordBtn.alpha = 0.0
+        })
+    }
+    
+    func showOverlay() {
+        self.recordBtn.isUserInteractionEnabled = true
+        UIView.animate(withDuration: 0.15, animations: {
+            self.recordBtn.alpha = 1.0
+        }, completion: { success in
+            self.recordBtn.isUserInteractionEnabled = true
+        })
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        self.setNeedsStatusBarAppearanceUpdate()
+    }
+    
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        screenMode = .Transitioning
+//        recordBtn.removeGestures()
+//        let v2Start = v2.view.frame.origin.x
+//        let x = scrollView.contentOffset.x
+//        if x < v2.view.frame.origin.x {
+//            let alpha = 1 - x / v2Start
+//            
+//            var recordBtnFrame = cameraBtnFrame
+//            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+//            recordBtn.frame = recordBtnFrame!
+//            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+//            recordBtn.dot.alpha = 1 - alpha
+//            
+//        }
+//    }
+//    
+//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+//        print("STOPPED: \(scrollView.contentOffset.x)")
+//        let x = scrollView.contentOffset.x
+//        if x == 0 {
+//            print("ACTIVITY ACTIVE")
+//            screenMode = .Activity
+//        } else if x == v2.view.frame.origin.x {
+//            screenMode = .Camera
+//            recordBtn.addGestures()
+//        } else if x == v3.view.frame.origin.x {
+//            print("FOLLOWING ACTIVE")
+//            
+//        }
+//    }
+    
+    var statusBarShouldHide = false
+//    
+    override var prefersStatusBarHidden: Bool {
+        get {
+            return statusBarShouldHide
+        }
+    }
+    
+    public func statusBar(hide: Bool) {
+        statusBarShouldHide = hide
+        self.setNeedsStatusBarAppearanceUpdate()
+    }
 
-    }
-    
-    var returningCell:PhotoCell?
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        screenMode = .Transitioning
-        recordBtn.removeGestures()
-        let v2Start = v2.view.frame.origin.x
-        let x = scrollView.contentOffset.x
-        if x < v2.view.frame.origin.x {
-            let alpha = 1 - x / v2Start
-            print("OFFSET: \(scrollView.contentOffset.x)")
-            let col = UIColor(red: 0/255, green: 128/255, blue: 255/255, alpha: alpha)
-            v1.view.backgroundColor = col
-            
-            var recordBtnFrame = cameraBtnFrame
-            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
-            recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
-            recordBtn.dot.alpha = 1 - alpha
-            
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        print("STOPPED: \(scrollView.contentOffset.x)")
-        let x = scrollView.contentOffset.x
-        if x == 0 {
-            print("ACTIVITY ACTIVE")
-            screenMode = .Activity
-        } else if x == v2.view.frame.origin.x {
-            screenMode = .Camera
-            recordBtn.addGestures()
-        } else if x == v3.view.frame.origin.x {
-            print("FOLLOWING ACTIVE")
-            
-        }
-    }
     
     
 }
@@ -323,14 +386,14 @@ extension ContainerViewController: CameraDelegate {
     }
     
     func showCameraOptions() {
-        scrollView.isUserInteractionEnabled = true
+        //scrollView.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.15, animations: {
             self.mapContainer?.alpha = 0.75
         })
     }
     
     func hideCameraOptions() {
-        scrollView.isUserInteractionEnabled = false
+        //scrollView.isUserInteractionEnabled = false
         self.mapContainer?.isUserInteractionEnabled = false
         
     }
@@ -360,55 +423,7 @@ extension ContainerViewController: CameraDelegate {
 
 }
 
-extension ContainerViewController: View2ViewTransitionPresenting {
-    
-    func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
-        
-        guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
-            return CGRect.zero
-        }
-        
-        let i =  IndexPath(row: indexPath.item, section: 0)
-        let cell: PhotoCell = v1.collectionView!.cellForItem(at: i)! as! PhotoCell
-        let image_frame = cell.imageView.frame
-        let x = cell.frame.origin.x + 2
-        
-        let y = cell.frame.origin.y + 70 + 0 - v1.collectionView!.contentOffset.y//+ navHeight
-        let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-        return view.convert(rect, to: view)
-    }
-    
-    func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
-        
-        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
-        let cell: PhotoCell = v1.collectionView!.cellForItem(at: i) as! PhotoCell
-        print("INITIAL VIEW")
-        return cell.imageView
-    }
-    
-    func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
-        
-        print("PREP")
-        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
-        
-        if !isPresenting {
-            if let cell = v1.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
-                returningCell?.fadeInInfo(animated: false)
-                returningCell = cell
-                returningCell!.fadeOutInfo()
-            }
-        }
-        
-        if !isPresenting && !v1.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-            v1.collectionView!.reloadData()
-            v1.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
-            v1.collectionView!.layoutIfNeeded()
-        }
-    }
-    
-}
+
 
 extension ContainerViewController: GPSServiceDelegate {
     func tracingLocation(_ currentLocation: CLLocation) {
