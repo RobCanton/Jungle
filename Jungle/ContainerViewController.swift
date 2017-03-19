@@ -205,8 +205,8 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         
         
         self.view.addSubview(cameraView.view)
-        self.view.addSubview(mapContainer)
         self.view.addSubview(blurView)
+        self.view.addSubview(mapContainer)
         self.view.addSubview(flashView)
         self.view.addSubview(snapContainer.view)
         self.view.addSubview(recordBtn)
@@ -239,6 +239,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             snapContainer.middleVertScrollVc.scrollView.setContentOffset(CGPoint(x:0, y: UIScreen.main.bounds.height), animated: true)
             break
         case .Saved:
+            snapContainer.middleVertScrollVc.scrollView.setContentOffset(CGPoint(x:0, y: UIScreen.main.bounds.height), animated: true)
             break
         case .Activity:
             snapContainer.scrollView.setContentOffset(CGPoint(x:v1.view.frame.width, y: 0), animated: true)
@@ -311,19 +312,25 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         
         screenMode = .Transitioning
         recordBtn.removeGestures()
-        let v2Start = v1.view.frame.width
+        let width = UIScreen.main.bounds.width
         let x = offset.x
-        if x < v2Start {
-            let alpha = 1 - x / v2Start
+        if x < width {
+            let alpha = 1 - x / width
             
             var recordBtnFrame = cameraBtnFrame
-            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
             recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
             
-        } else if x > v2Start * 2 {
-            print("GREATER")
+        } else if x > width  {
+            let alpha = (x - width) / width
+            
+            var recordBtnFrame = cameraBtnFrame
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
+            recordBtn.frame = recordBtnFrame!
+            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.dot.alpha = 1 - alpha
         }
     }
     
@@ -362,19 +369,31 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         print("VERTICAL SCROLL: \(offset)")
         screenMode = .Transitioning
         recordBtn.removeGestures()
-        let v2Start = v1.view.frame.height
+        let height = UIScreen.main.bounds.height
         let y = offset.y
-        if y < v2Start {
-            let alpha = 1 - y / v2Start
+        if y < height {
+            let alpha = 1 - y / height
             
             var recordBtnFrame = cameraBtnFrame
-            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
             recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
+            mapContainer.alpha = 1 - alpha
             animator?.fractionComplete = 1 - alpha
             blurView.isHidden = false
             
+        } else if y > height {
+            let alpha = (y - height) / height
+            
+            var recordBtnFrame = cameraBtnFrame
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
+            recordBtn.frame = recordBtnFrame!
+            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.dot.alpha = 1 - alpha
+            mapContainer.alpha = 1 - alpha
+            animator?.fractionComplete = 1 - alpha
+            blurView.isHidden = false
         }
     }
     
