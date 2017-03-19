@@ -11,6 +11,7 @@ import GoogleMaps
 import GooglePlaces
 import Firebase
 import ReSwift
+import AVFoundation
 
 let accentColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
@@ -31,6 +32,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GMSPlacesClient.provideAPIKey(GMSAPIKEY)
         GMSServices.provideAPIKey(GMSAPIKEY)
         FIRApp.configure()
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: .mixWithOthers)
+            //print("AVAudioSession Category Playback OK")
+            do {
+                try AVAudioSession.sharedInstance().setActive(true)
+                //print("AVAudioSession is Active")
+            } catch _ as NSError {
+                //print(error.localizedDescription)
+            }
+        } catch _ as NSError {
+            //print(error.localizedDescription)
+        }
+        
+        
         return true
     }
 

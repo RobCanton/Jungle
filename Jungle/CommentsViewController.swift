@@ -33,11 +33,14 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
 
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        
         header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
         header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: navHeight)
         view.addSubview(header)
         
         header.closeHandler = dismissHandle
+        
         
         view.backgroundColor = UIColor(white: 0.0, alpha: 0.7)
         
@@ -80,10 +83,15 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        header.setUserInfo(uid: item.getAuthorId())
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
-        
+        globalContainerRef?.statusBar(hide: true)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -140,19 +148,19 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func dismissHandle() {
+
         storyRef.fadeInDetails()
         storyRef.commentsActive = false
         storyRef.resumeStory()
         self.dismiss(animated: true, completion: nil)
     }
     
-    func showUser() {
+    func showUser(uid:String) {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
-        let controller = tempViewController()
-        controller.title = title
-        controller.view.backgroundColor = UIColor.white
+        let controller = UserProfileViewController()
+        controller.uid = uid
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -179,7 +187,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
         cell.setContent(comment: comments[indexPath.row])
-        
+        cell.authorTapped = showUser
         return cell
     }
     

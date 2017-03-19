@@ -14,14 +14,17 @@ class VerticalScrollViewController: UIViewController, SnapContainerViewControlle
     var bottomVc: UIViewController!
     var scrollView: UIScrollView!
     
+    var scrollDelegate: UIScrollViewDelegate?
+    
     class func verticalScrollVcWith(middleVc: UIViewController,
                                     topVc: UIViewController?=nil,
-                                    bottomVc: UIViewController?=nil) -> VerticalScrollViewController {
+                                    bottomVc: UIViewController?=nil, delegate:UIScrollViewDelegate) -> VerticalScrollViewController {
         let middleScrollVc = VerticalScrollViewController()
         
         middleScrollVc.topVc = topVc
         middleScrollVc.middleVc = middleVc
         middleScrollVc.bottomVc = bottomVc
+        middleScrollVc.scrollDelegate = delegate
         
         return middleScrollVc
     }
@@ -37,6 +40,7 @@ class VerticalScrollViewController: UIViewController, SnapContainerViewControlle
         scrollView.isPagingEnabled = true
         scrollView.showsVerticalScrollIndicator = false
         scrollView.bounces = false
+        scrollView.delegate = scrollDelegate
         
         let view = (
             x: self.view.bounds.origin.x,
@@ -118,11 +122,12 @@ class VerticalScrollViewController: UIViewController, SnapContainerViewControlle
     // MARK: - SnapContainerViewControllerDelegate Methods
     
     func outerScrollViewShouldScroll() -> Bool {
-        if scrollView.contentOffset.y < middleVc.view.frame.origin.y || scrollView.contentOffset.y > 2*middleVc.view.frame.origin.y {
+        if scrollView.contentOffset.y < middleVc.view.frame.origin.y || scrollView.contentOffset.y >= 2*middleVc.view.frame.origin.y {
             return false
         } else {
             return true
         }
     }
+
     
 }

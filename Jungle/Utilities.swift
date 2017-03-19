@@ -127,3 +127,27 @@ func cropImageToSquare(image: UIImage) -> UIImage? {
     
     return nil
 }
+
+func getNumericShorthandString(_ number:Int) -> String {
+    var str = "\(number)"
+    
+    if number >= 1000000 {
+        let decimal = Double(number) / 1000000
+        str = "\(roundToOneDecimal(decimal))M"
+    } else if number >= 100000 {
+        let decimal = Int(Double(number) / 1000)
+        str = "\(decimal)K"
+    } else if number >= 10000 {
+        let decimal = Double(number) / 1000
+        str = "\(roundToOneDecimal(decimal))K"
+    } else if number >= 1000 {
+        str.insert(",", at: str.index(str.startIndex, offsetBy: 1))
+    }
+    return str
+}
+
+func roundToOneDecimal(_ value:Double) -> Double {
+    return Double(floor(value*10)/10)
+}
+
+

@@ -255,6 +255,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         controller.item = item
         controller.containerRef = containerRef
         let nav = UINavigationController(rootViewController: controller)
+        nav.navigationBar.isTranslucent = false
+        nav.navigationBar.tintColor = UIColor.black
+        
         nav.modalPresentationStyle = .overCurrentContext
         self.present(nav, animated: true, completion: nil)
         

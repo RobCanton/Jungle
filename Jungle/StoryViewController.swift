@@ -564,12 +564,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }()
     
     public lazy var gradientView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.15, width: self.bounds.width, height: self.bounds.height * 0.85))
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.75, width: self.bounds.width, height: self.bounds.height * 0.25))
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 0, y: 1)
-        let dark = UIColor(white: 0.0, alpha: 0.8)
+        let dark = UIColor(white: 0.0, alpha: 0.7)
         gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false

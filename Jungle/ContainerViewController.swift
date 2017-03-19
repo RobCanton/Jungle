@@ -27,7 +27,7 @@ protocol CameraDelegate {
 
 var globalContainerRef:ContainerViewController?
 
-class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate {
+class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate, ScrollDelegate {
     
     var screenMode:ScreenMode = .Camera
 
@@ -41,6 +41,10 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     
     var progressTimer : Timer!
     var progress : CGFloat! = 0
+    
+    var blurView:UIVisualEffectView!
+    
+    var animator: UIViewPropertyAnimator?
     
     
     var uploadCoordinate:CLLocation?
@@ -89,7 +93,8 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     
     var v1: PlacesViewController!
     var v2: ActivityViewController!
-    var v3: UIViewController!
+    var v3: SavedCollectionView!
+    var myProfileViewController:MyProfileViewController!
     var cameraView:CameraViewController!
     
     var cameraBtnFrame:CGRect!
@@ -157,61 +162,15 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         v2.view.backgroundColor = UIColor.white
         v2.view.frame = v1.view.bounds
         
-        /*
-        v3 = UIViewController()
-        v3.view.backgroundColor = UIColor.white
+        v3 = SavedCollectionView()
+        v3.uid = mainStore.state.userState.uid
+        let nav3 = UINavigationController(rootViewController: v3)
+        
         v3.view.frame = v1.view.bounds
         
-        self.addChildViewController(nav)
-        self.scrollView.addSubview(nav.view)
-        nav.didMove(toParentViewController: self)
-        
-        self.addChildViewController(v2)
-        self.scrollView.addSubview(v2.view)
-        v2.didMove(toParentViewController: self)
-        
-        self.addChildViewController(v3)
-        self.scrollView.addSubview(v3.view)
-        v3.didMove(toParentViewController: self)
-        
-        var v2Frame: CGRect = v2.view.frame
-        v2Frame.origin.x = self.view.frame.width
-        v2.view.frame = v2Frame
-        
-        var v3Frame: CGRect = v3.view.frame
-        v3Frame.origin.x = self.view.frame.width * 2
-        v3.view.frame = v3Frame
-        
-        self.scrollView.contentSize = CGSize(width: self.view.frame.width * 3, height: self.view.frame.size.height)
-        self.scrollView.isPagingEnabled = true
-        self.scrollView.bounces = false
-        
-        self.scrollView.setContentOffset(CGPoint(x:v2Frame.origin.x,y: 0), animated: false)
-        
-        var userVC = UIViewController()
-        userVC.view.frame = v1.view.bounds
-        userVC.view.backgroundColor = UIColor.green
-        
-        var clearVC = UIViewController()
-        clearVC.view.frame = v1.view.bounds
-        clearVC.view.backgroundColor = UIColor.red
-        
-        self.addChildViewController(userVC)
-        self.verticalScrollView.addSubview(userVC.view)
-        userVC.didMove(toParentViewController: self)
-        
-        self.addChildViewController(clearVC)
-        self.verticalScrollView.addSubview(clearVC.view)
-        clearVC.didMove(toParentViewController: self)
-        
-        self.verticalScrollView.contentSize = CGSize(width: self.view.frame.width, height: self.view.frame.size.height * 2)
-        self.verticalScrollView.isPagingEnabled = true
-        self.verticalScrollView.bounces = false
-        
-        self.verticalScrollView.setContentOffset(CGPoint(x:0,y: v1.view.frame.height), animated: false)
-        
-        */
-        
+        myProfileViewController = UIStoryboard(name: "MyProfileViewController", bundle: nil).instantiateViewController(withIdentifier: "MyProfileViewController") as! MyProfileViewController
+        let nav4 = UINavigationController(rootViewController: myProfileViewController)
+
         let middle = UIViewController()
         middle.view.frame = self.view.frame
         middle.view.backgroundColor = UIColor.clear
@@ -227,13 +186,27 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         snapContainer = SnapContainerViewController.containerViewWith(nav,
                                                                           middleVC: middle,
                                                                           rightVC: nav2,
-                                                                          topVC: top,
-                                                                          bottomVC: bottom)
+                                                                          topVC: nav4,
+                                                                          bottomVC: nav3)
+        
         self.addChildViewController(snapContainer)
         snapContainer.didMove(toParentViewController: self)
         
+        blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+        blurView.frame = view.bounds
+        blurView.isHidden = true
+        
+        
+        animator = UIViewPropertyAnimator(duration: 1, curve: .linear) {
+            self.blurView.effect = nil
+        }
+        
+        snapContainer.scrollDelegate = self
+        
+        
         self.view.addSubview(cameraView.view)
         self.view.addSubview(mapContainer)
+        self.view.addSubview(blurView)
         self.view.addSubview(flashView)
         self.view.addSubview(snapContainer.view)
         self.view.addSubview(recordBtn)
@@ -253,13 +226,22 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         switch screenMode {
         case .Transitioning:
             break
-        case .Activity:
-            //scrollView.setContentOffset(CGPoint(x:v2.view.frame.origin.x, y: 0), animated: true)
+        case .Places:
+            print("SHOW CAMERA")
+            snapContainer.scrollView.setContentOffset(CGPoint(x:v1.view.frame.width, y: 0), animated: true)
             break
         case .Camera:
             
             print("CAMERA")
             cameraView.didPressTakePhoto()
+            break
+        case .Profile:
+            snapContainer.middleVertScrollVc.scrollView.setContentOffset(CGPoint(x:0, y: UIScreen.main.bounds.height), animated: true)
+            break
+        case .Saved:
+            break
+        case .Activity:
+            snapContainer.scrollView.setContentOffset(CGPoint(x:v1.view.frame.width, y: 0), animated: true)
             break
         }
     }
@@ -325,21 +307,108 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         self.setNeedsStatusBarAppearanceUpdate()
     }
     
+    func didScrollHorizontally(_ offset: CGPoint) {
+        
+        screenMode = .Transitioning
+        recordBtn.removeGestures()
+        let v2Start = v1.view.frame.width
+        let x = offset.x
+        if x < v2Start {
+            let alpha = 1 - x / v2Start
+            
+            var recordBtnFrame = cameraBtnFrame
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+            recordBtn.frame = recordBtnFrame!
+            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.dot.alpha = 1 - alpha
+            
+        } else if x > v2Start * 2 {
+            print("GREATER")
+        }
+    }
+    
+    func didEndHorizontalScroll(_ offset: CGPoint) {
+        print("END HORIZONTAL SCROLL")
+        let x = offset.x
+        let width = UIScreen.main.bounds.width
+        if x == 0 {
+            print("PLACES ACTIVE")
+            screenMode = .Places
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = false
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+            
+        } else if x >= width && x < width * 2.0 {
+            print("CAMERA ACTIVE")
+            screenMode = .Camera
+            recordBtn.addGestures()
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = true
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+        } else if x >= width * 2.0 {
+            print("FOLLOWING ACTIVE")
+            screenMode = .Activity
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = false
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+            
+        }
+    }
+    
+    func didScrollVertically(_ offset: CGPoint) {
+        print("VERTICAL SCROLL: \(offset)")
+        screenMode = .Transitioning
+        recordBtn.removeGestures()
+        let v2Start = v1.view.frame.height
+        let y = offset.y
+        if y < v2Start {
+            let alpha = 1 - y / v2Start
+            
+            var recordBtnFrame = cameraBtnFrame
+            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
+            recordBtn.frame = recordBtnFrame!
+            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.dot.alpha = 1 - alpha
+            animator?.fractionComplete = 1 - alpha
+            blurView.isHidden = false
+            
+        }
+    }
+    
+    func didEndVerticalScroll(_ offset: CGPoint) {
+        print("END VERTICAL SCROLL")
+        let y = offset.y
+        let height = UIScreen.main.bounds.height
+        if y == 0 {
+            print("PROFILE ACTIVE")
+            screenMode = .Profile
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = true
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+        } else if y >= height && y < height * 2.0 {
+            screenMode = .Camera
+            recordBtn.addGestures()
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = true
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+        } else if y >= height * 2 {
+            print("Saved ACTIVE")
+            screenMode = .Saved
+            UIView.animate(withDuration: 0.25, animations: {
+                self.statusBarIsLight = false
+                self.setNeedsStatusBarAppearanceUpdate()
+            })
+            
+        }
+    }
+    
 //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        screenMode = .Transitioning
-//        recordBtn.removeGestures()
-//        let v2Start = v2.view.frame.origin.x
-//        let x = scrollView.contentOffset.x
-//        if x < v2.view.frame.origin.x {
-//            let alpha = 1 - x / v2Start
-//            
-//            var recordBtnFrame = cameraBtnFrame
-//            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height / 2 * alpha
-//            recordBtn.frame = recordBtnFrame!
-//            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
-//            recordBtn.dot.alpha = 1 - alpha
-//            
-//        }
+    
 //    }
 //    
 //    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -357,11 +426,23 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
 //        }
 //    }
     
+    
+    
     var statusBarShouldHide = false
-//    
+    var statusBarIsLight = true
     override var prefersStatusBarHidden: Bool {
         get {
             return statusBarShouldHide
+        }
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        get {
+            if statusBarIsLight {
+                return .lightContent
+            } else {
+                return .default
+            }
         }
     }
     
@@ -484,5 +565,5 @@ enum FlashMode {
 }
 
 enum ScreenMode {
-    case Transitioning, Camera, Activity
+    case Transitioning, Camera, Places, Activity, Profile, Saved
 }

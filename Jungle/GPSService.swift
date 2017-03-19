@@ -84,6 +84,7 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         
         // singleton for get last location
         self.lastLocation = location
+        print("ALT: \(location.altitude)")
         
         // use for real time update location
         updateLocation(location)
