@@ -23,7 +23,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var upload:Upload!
     
     var sendTap:UITapGestureRecognizer!
-    var containerRef:ContainerViewController!
+    var containerRef:MainViewController!
     
 
     override func viewDidLoad() {

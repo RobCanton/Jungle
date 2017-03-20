@@ -23,9 +23,12 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
         state.isAuth = true
         state.uid = a.user.getUserId()
         state.user = a.user
+        Listeners.startListeningToFollowers()
+        Listeners.startListeningToFollowing()
         break
         
     case _ as UserIsUnauthenticated:
+        Listeners.stopListeningToAll()
         state = UserState()
         break
         

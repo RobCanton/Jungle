@@ -14,6 +14,7 @@ class StoryDetailsView: UIView {
     @IBOutlet weak var captionLabel: UILabel!
 
     @IBOutlet weak var commentsLabel: UILabel!
+    
     /*
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
@@ -36,7 +37,6 @@ class StoryDetailsView: UIView {
         let str = "\(username) \(item.caption)"
         
         imageView.loadImageAsync(user.getImageUrl(), completion: nil)
-        
         
         
         let attributes: [String: AnyObject] = [

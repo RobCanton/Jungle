@@ -8,6 +8,7 @@
 
 import UIKit
 import View2ViewTransition
+import Firebase
 
 enum SortedBy {
     case Recent,Popular,Nearest
@@ -70,7 +71,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         refresher = UIRefreshControl()
         collectionView.alwaysBounceVertical = true
         refresher.tintColor = UIColor.lightGray
-        refresher.addTarget(self, action: #selector(loadData), for: .valueChanged)
+        refresher.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         collectionView.addSubview(refresher)
         
         view.addSubview(collectionView)
@@ -85,13 +86,35 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         //self.navigationItem.titleView = segmentedControl
         
         inboxButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-        inboxButton.setImage(UIImage(named:"inbox"), for: .normal)
+        inboxButton.setImage(UIImage(named:"restart"), for: .normal)
         inboxButton.center = CGPoint(x: view.frame.width - 20 - 8, y: 22)
+        inboxButton.addTarget(self, action: #selector(refreshData), for: .touchUpInside)
         view.addSubview(inboxButton)
         
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
 
+    }
+    
+    var activityIndicator:UIActivityIndicatorView?
+    
+    func refreshData() {
+        
+        activityIndicator?.stopAnimating()
+        activityIndicator?.removeFromSuperview()
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        activityIndicator?.startAnimating()
+        activityIndicator?.center = inboxButton.center
+        self.view.addSubview(activityIndicator!)
+        inboxButton.isHidden = true
+        
+        if let lastLocation = GPSService.sharedInstance.lastLocation {
+            LocationService.sharedInstance.requestNearbyLocations(lastLocation.coordinate.latitude, longitude: lastLocation.coordinate.longitude)
+        } else {
+            stopRefresher()
+        }
+        
+        //try! FIRAuth.auth()?.signOut()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -137,20 +160,11 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         
     }
     
-    
-    
-    func loadData()
-    {
-        if let lastLocation = GPSService.sharedInstance.lastLocation {
-            LocationService.sharedInstance.requestNearbyLocations(lastLocation.coordinate.latitude, longitude: lastLocation.coordinate.longitude)
-        } else {
-            stopRefresher()
-        }
-    }
-    
     func stopRefresher()
     {
-        refresher.endRefreshing()
+        activityIndicator?.stopAnimating()
+        activityIndicator?.removeFromSuperview()
+        inboxButton.isHidden = false
     }
     
     func locationsUpdated(locations: [Location]) {

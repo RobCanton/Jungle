@@ -82,6 +82,12 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             }
         })
 
+        
+        if uid != mainStore.state.userState.uid {
+            let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: nil)
+            moreButton.tintColor = UIColor.black
+            self.navigationItem.rightBarButtonItem = moreButton
+        }
     
     }
 
@@ -91,7 +97,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         mainStore.subscribe(self)
         globalMainRef?.statusBar(hide: false, animated: true)
         navigationController?.setNavigationBarHidden(false, animated: true)
-        
+        listenToPosts()
         
     }
     
@@ -113,7 +119,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     
     func newState(state: AppState) {
-
+        let status = checkFollowingStatus(uid: uid)
+        getHeaderView()?.setUserStatus(status: status)
     }
 
     
@@ -121,20 +128,21 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     func listenToPosts() {
         
-//        guard let userId = uid else { return }
-//        if mainStore.state.socialState.blockedBy.contains(userId) { return }
-//        postsRef = UserService.ref.child("users/activity/\(userId)")
-//        postsRef?.observeSingleEvent(of: .value, with: { snapshot in
-//            var postKeys = [String]()
-//            if snapshot.exists() {
-//                let keys = snapshot.value as! [String:AnyObject]
-//                for (key, _) in keys {
-//                    postKeys.append(key)
-//                }
-//            }
-//            self.postKeys = postKeys
-//            self.downloadStory(postKeys: postKeys)
-//        })
+        guard let userId = uid else { return }
+       // if mainStore.state.socialState.blockedBy.contains(userId) { return }
+        postsRef = UserService.ref.child("users/uploads/\(userId)")
+        postsRef?.observeSingleEvent(of: .value, with: { snapshot in
+            var postKeys = [String]()
+            if snapshot.exists() {
+                let keys = snapshot.value as! [String:AnyObject]
+                for (key, _) in keys {
+                    postKeys.append(key)
+                }
+            }
+            print("KEYS: \(postKeys)")
+            self.postKeys = postKeys
+            self.downloadStory(postKeys: postKeys)
+        })
     }
     
     func stopListeningToPosts() {
@@ -167,13 +175,13 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     var text:String?
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let staticHeight:CGFloat = 8 + 70 + 8 + 40 + 8 + 8 + 50
+        let staticHeight:CGFloat = 8 + 140
         if user != nil {
             text = "Here is my bio about absolutely nothing important. but u can catch me out side mannn dem."
             if let text = text {
                 if text != "" {
-                    var size =  UILabel.size(withText: text, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightRegular))
-                    let height2 = size.height + staticHeight + 10  // +8 for some bio padding
+                    var size =  UILabel.size(withText: text, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightMedium))
+                    let height2 = size.height + staticHeight + 12  // +8 for some bio padding
                     size.height = height2
                     return size
                 }
@@ -186,13 +194,16 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 40
+        return posts.count
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        cell.imageView.image = UIImage(named: "pineapple")
+        let post = posts[indexPath.item]
+        cell.nameLabel.isHidden = true
+        cell.timeLabel.isHidden = true
+        cell.imageView.loadImageAsync(post.getDownloadUrl().absoluteString, completion: nil)
         return cell
     }
     
@@ -203,7 +214,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
-        return CGSize(width: itemSideLength, height: itemSideLength)
+        return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
     }
     
     let transitionController: TransitionController = TransitionController()

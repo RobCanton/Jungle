@@ -107,6 +107,49 @@ class UserService {
         }
         
     }
+    
+    static func followUser(uid:String) {
+        let current_uid = mainStore.state.userState.uid
+        
+        let socialRef = ref.child("users/social")
+        let userRef = socialRef.child("followers/\(uid)/\(current_uid)")
+        userRef.setValue(false)
+        
+        
+        let currentUserRef = socialRef.child("following/\(current_uid)/\(uid)")
+        currentUserRef.setValue(false, withCompletionBlock: {
+            error, ref in
+        })
+        
+        let followRequestRef = ref.child("api/requests/social").childByAutoId()
+        followRequestRef.setValue([
+            "type": "FOLLOW",
+            "sender": current_uid,
+            "recipient": uid
+            ])
+        
+        
+        //unblockUser(uid: uid, completionHandler: { success in })
+        
+        
+    }
+    
+    static func unfollowUser(uid:String) {
+        let current_uid = mainStore.state.userState.uid
+        
+        let userRef = ref.child("users/social/followers/\(uid)/\(current_uid)")
+        userRef.removeValue()
+        
+        let currentUserRef = ref.child("users/social/following/\(current_uid)/\(uid)")
+        currentUserRef.removeValue()
+        
+        let followRequestRef = ref.child("api/requests/social").childByAutoId()
+        followRequestRef.setValue([
+            "type": "UNFOLLOW",
+            "sender": current_uid,
+            "recipient": uid
+            ])
+    }
 
 
     

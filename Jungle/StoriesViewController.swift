@@ -253,12 +253,17 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         controller.title = "Comments"
         controller.storyRef = cell
         controller.item = item
+        if item.comments.count == 0 {
+            controller.shouldShowKeyboard = true
+        }
+        
         //controller.containerRef = containerRef
         let nav = UINavigationController(rootViewController: controller)
         nav.navigationBar.isTranslucent = false
         nav.navigationBar.tintColor = UIColor.black
         
         nav.modalPresentationStyle = .overCurrentContext
+        
         self.present(nav, animated: true, completion: nil)
         
     }

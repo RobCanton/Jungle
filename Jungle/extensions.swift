@@ -193,12 +193,12 @@ extension UILabel {
     }
     
     func styleFollowerText(count:Int, text:String, color:UIColor, color2:UIColor) {
-        self.numberOfLines = 2
+        self.numberOfLines = 1
         self.textAlignment = .center
         var shortHand = getNumericShorthandString(count)
         
         let str = "\(shortHand) \(text)"
-        let font = UIFont.systemFont(ofSize: 16, weight: UIFontWeightSemibold)//(name: "AvenirNext-Regular", size: 12)
+        let font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightRegular)//(name: "AvenirNext-Regular", size: 12)
         
         let attributes: [String: AnyObject] = [
             NSFontAttributeName : font,
@@ -210,7 +210,7 @@ extension UILabel {
         if let range = str.range(of: shortHand) {// .rangeOfString(countStr) {
             let index = str.distance(from: str.startIndex, to: range.lowerBound)//str.startIndex.distance(fromt:range.lowerBound)
             let a: [String: AnyObject] = [
-                NSFontAttributeName : UIFont.systemFont(ofSize: 20, weight: UIFontWeightBold),//UIFont(name: "AvenirNext-Medium", size: 16)!,
+                NSFontAttributeName : UIFont.systemFont(ofSize: 18, weight: UIFontWeightBold),//UIFont(name: "AvenirNext-Medium", size: 16)!,
                 NSForegroundColorAttributeName : color2
             ]
             title.addAttributes(a, range: NSRange(location: index, length: shortHand.characters.count))

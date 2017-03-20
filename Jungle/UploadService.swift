@@ -171,7 +171,8 @@ class UploadService {
                                 "places/\(place.placeID)/info/address": place.formattedAddress,
                                 "places/\(place.placeID)/posts/\(postKey)": [".sv": "timestamp"],
                                 "places/\(place.placeID)/contributers/\(uid)": true,
-                                "users/activity/\(uid)/\(postKey)": [".sv": "timestamp"]
+                                "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
+                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
 
 

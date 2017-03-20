@@ -190,7 +190,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pineapple" translatesAutoresizingMaskIntoConstraints="NO" id="hfb-u0-ehE">
-                                <rect key="frame" x="152" y="246" width="70" height="70"/>
+                                <rect key="frame" x="152" y="245.5" width="70" height="70"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="If3-dK-Tz2"/>
                                     <constraint firstAttribute="width" secondItem="hfb-u0-ehE" secondAttribute="height" multiplier="1:1" id="sVj-m3-Cex"/>
@@ -429,12 +429,12 @@
             </objects>
             <point key="canvasLocation" x="4652" y="2567"/>
         </scene>
-        <!--Activity-->
+        <!--Messages-->
         <scene sceneID="Acb-X4-bOZ">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="WlY-pn-aYk" customClass="MainNavigationController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
-                    <tabBarItem key="tabBarItem" title="Activity" image="activity" id="bOv-k9-l7j"/>
+                    <tabBarItem key="tabBarItem" title="Messages" image="message" id="bOv-k9-l7j"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="aFY-7g-KAH">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -553,10 +553,10 @@
             </objects>
             <point key="canvasLocation" x="3713" y="4715"/>
         </scene>
-        <!--Temp-->
+        <!--View Controller-->
         <scene sceneID="egl-pN-k9o">
             <objects>
-                <viewController id="JQp-xp-Ss1" customClass="temp" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="JQp-xp-Ss1" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="COx-1l-1hJ"/>
                         <viewControllerLayoutGuide type="bottom" id="EVT-Cb-91B"/>
@@ -594,9 +594,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="activity" width="25" height="25"/>
         <image name="home" width="25" height="25"/>
         <image name="left_arrow" width="25" height="25"/>
+        <image name="message" width="25" height="25"/>
         <image name="notifications" width="25" height="25"/>
         <image name="pineapple" width="1422" height="1422"/>
         <image name="user" width="25" height="25"/>

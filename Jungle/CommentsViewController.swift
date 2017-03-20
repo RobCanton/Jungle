@@ -29,6 +29,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var commentsRef:FIRDatabaseReference?
     var captionComment:Comment?
+    
+    var tapGesture:UITapGestureRecognizer!
+    
+    var shouldShowKeyboard:Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
@@ -77,6 +82,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         commentBar.textField.delegate = self
         commentBar.sendHandler = sendComment
         self.view.addSubview(commentBar)
+        
+        tapGesture = UITapGestureRecognizer(target: self, action: #selector(authorTitleTapped))
+        header.imageView.superview!.addGestureRecognizer(tapGesture)
+        header.imageView.superview!.isUserInteractionEnabled = true
     
     }
     
@@ -87,10 +96,18 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        
         navigationController?.setNavigationBarHidden(true, animated: true)
         globalMainRef?.statusBar(hide: true, animated: true)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        if shouldShowKeyboard {
+            commentBar.textField.becomeFirstResponder()
+            shouldShowKeyboard = false
+        }
+        
         
         commentsRef?.removeAllObservers()
         commentsRef = UserService.ref.child("uploads/\(item.getKey())/comments")
@@ -152,6 +169,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         self.dismiss(animated: true, completion: nil)
     }
     
+    func authorTitleTapped(sender:UITapGestureRecognizer) {
+        showUser(uid: item.getAuthorId())
+    }
+    
     func showUser(uid:String) {
         if let nav = self.navigationController {
             nav.delegate = nil
@@ -174,7 +195,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         let comment = comments[indexPath.row]
         let text = comment.getText()
-        let width = tableView.frame.width - (12 + 10 + 8 + 32)
+        let width = tableView.frame.width - (12 + 10 + 10 + 32)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
         let height2 = size.height + 26 + 14  // +8 for some bio padding
         return height2

@@ -53,7 +53,7 @@
                     <rect key="frame" x="103" y="0.0" width="271" height="47"/>
                     <subviews>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KTU-3D-Wq8">
-                            <rect key="frame" x="8" y="14" width="19" height="19"/>
+                            <rect key="frame" x="8" y="16" width="15" height="15"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="KTU-3D-Wq8" secondAttribute="height" multiplier="1:1" id="oQs-oQ-oxI"/>
                             </constraints>
@@ -67,11 +67,11 @@
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
-                        <constraint firstItem="chm-ro-IUs" firstAttribute="leading" secondItem="KTU-3D-Wq8" secondAttribute="trailing" constant="8" id="EFd-YW-D8x"/>
+                        <constraint firstItem="chm-ro-IUs" firstAttribute="leading" secondItem="KTU-3D-Wq8" secondAttribute="trailing" constant="10" id="EFd-YW-D8x"/>
                         <constraint firstAttribute="trailing" secondItem="chm-ro-IUs" secondAttribute="trailing" constant="8" id="Erj-WQ-Btb"/>
-                        <constraint firstAttribute="bottom" secondItem="KTU-3D-Wq8" secondAttribute="bottom" constant="14" id="PXr-Tq-Lc1"/>
+                        <constraint firstAttribute="bottom" secondItem="KTU-3D-Wq8" secondAttribute="bottom" constant="16" id="PXr-Tq-Lc1"/>
                         <constraint firstItem="chm-ro-IUs" firstAttribute="centerY" secondItem="hte-tC-jEp" secondAttribute="centerY" id="ZCE-Uz-fsp"/>
-                        <constraint firstItem="KTU-3D-Wq8" firstAttribute="top" secondItem="hte-tC-jEp" secondAttribute="top" constant="14" id="fyx-YT-ETA"/>
+                        <constraint firstItem="KTU-3D-Wq8" firstAttribute="top" secondItem="hte-tC-jEp" secondAttribute="top" constant="16" id="fyx-YT-ETA"/>
                         <constraint firstItem="KTU-3D-Wq8" firstAttribute="centerY" secondItem="hte-tC-jEp" secondAttribute="centerY" id="htf-VF-SCA"/>
                         <constraint firstItem="KTU-3D-Wq8" firstAttribute="leading" secondItem="hte-tC-jEp" secondAttribute="leading" constant="8" id="uld-hG-COT"/>
                     </constraints>

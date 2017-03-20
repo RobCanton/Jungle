@@ -13,20 +13,20 @@ enum FollowingStatus {
     case None, Following, Requested, CurrentUser
 }
 
-//func checkFollowingStatus (uid:String) -> FollowingStatus {
-//    
-//    let current_uid = mainStore.state.userState.uid
-//    if uid == current_uid {
-//        return .CurrentUser
-//    }
-//    
-//    let following = mainStore.state.socialState.following
-//    if following.contains(uid) {
-//        return .Following
-//    }
-//
-//    return .None
-//}
+func checkFollowingStatus (uid:String) -> FollowingStatus {
+    
+    let current_uid = mainStore.state.userState.uid
+    if uid == current_uid {
+        return .CurrentUser
+    }
+    
+    let following = mainStore.state.socialState.following
+    if following.contains(uid) {
+        return .Following
+    }
+
+    return .None
+}
 
 
 

@@ -27,7 +27,7 @@ protocol CameraDelegate {
 
 var globalContainerRef:ContainerViewController?
 
-class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate, ScrollDelegate {
+class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UIScrollViewDelegate {
     
     var screenMode:ScreenMode = .Camera
 
@@ -120,10 +120,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         self.addChildViewController(cameraView)
         
         cameraView.didMove(toParentViewController: self)
-        
-        
-        recordBtn.tappedHandler = recordButtonTapped
-        recordBtn.pressedHandler = cameraView.pressed
+    
         recordBtn.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
         
         flashView = UIView(frame: view.bounds)
@@ -200,9 +197,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         animator = UIViewPropertyAnimator(duration: 1, curve: .linear) {
             self.blurView.effect = nil
         }
-        
-        snapContainer.scrollDelegate = self
-        
+
         
         self.view.addSubview(cameraView.view)
         self.view.addSubview(blurView)
@@ -220,32 +215,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
-    
-    func recordButtonTapped() {
-        print("RECORD TAPPED")
-        switch screenMode {
-        case .Transitioning:
-            break
-        case .Places:
-            print("SHOW CAMERA")
-            snapContainer.scrollView.setContentOffset(CGPoint(x:v1.view.frame.width, y: 0), animated: true)
-            break
-        case .Camera:
-            
-            print("CAMERA")
-            cameraView.didPressTakePhoto()
-            break
-        case .Profile:
-            snapContainer.middleVertScrollVc.scrollView.setContentOffset(CGPoint(x:0, y: UIScreen.main.bounds.height), animated: true)
-            break
-        case .Saved:
-            snapContainer.middleVertScrollVc.scrollView.setContentOffset(CGPoint(x:0, y: UIScreen.main.bounds.height), animated: true)
-            break
-        case .Activity:
-            snapContainer.scrollView.setContentOffset(CGPoint(x:v1.view.frame.width, y: 0), animated: true)
-            break
-        }
-    }
+
     
     
     func sendButtonTapped(sender: UIButton) {
@@ -261,7 +231,6 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
         let controller = nav.viewControllers[0] as! SendViewController
         controller.upload = upload
-        controller.containerRef = self
         
         self.present(nav, animated: false, completion: nil)
         
@@ -334,97 +303,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         }
     }
     
-    func didEndHorizontalScroll(_ offset: CGPoint) {
-        print("END HORIZONTAL SCROLL")
-        let x = offset.x
-        let width = UIScreen.main.bounds.width
-        if x == 0 {
-            print("PLACES ACTIVE")
-            screenMode = .Places
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = false
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-            
-        } else if x >= width && x < width * 2.0 {
-            print("CAMERA ACTIVE")
-            screenMode = .Camera
-            recordBtn.addGestures()
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = true
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-        } else if x >= width * 2.0 {
-            print("FOLLOWING ACTIVE")
-            screenMode = .Activity
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = false
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-            
-        }
-    }
-    
-    func didScrollVertically(_ offset: CGPoint) {
-        print("VERTICAL SCROLL: \(offset)")
-        screenMode = .Transitioning
-        recordBtn.removeGestures()
-        let height = UIScreen.main.bounds.height
-        let y = offset.y
-        if y < height {
-            let alpha = 1 - y / height
-            
-            var recordBtnFrame = cameraBtnFrame
-            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
-            recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
-            recordBtn.dot.alpha = 1 - alpha
-            mapContainer.alpha = 1 - alpha
-            animator?.fractionComplete = 1 - alpha
-            blurView.isHidden = false
-            
-        } else if y > height {
-            let alpha = (y - height) / height
-            
-            var recordBtnFrame = cameraBtnFrame
-            recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
-            recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
-            recordBtn.dot.alpha = 1 - alpha
-            mapContainer.alpha = 1 - alpha
-            animator?.fractionComplete = 1 - alpha
-            blurView.isHidden = false
-        }
-    }
-    
-    func didEndVerticalScroll(_ offset: CGPoint) {
-        print("END VERTICAL SCROLL")
-        let y = offset.y
-        let height = UIScreen.main.bounds.height
-        if y == 0 {
-            print("PROFILE ACTIVE")
-            screenMode = .Profile
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = true
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-        } else if y >= height && y < height * 2.0 {
-            screenMode = .Camera
-            recordBtn.addGestures()
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = true
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-        } else if y >= height * 2 {
-            print("Saved ACTIVE")
-            screenMode = .Saved
-            UIView.animate(withDuration: 0.25, animations: {
-                self.statusBarIsLight = false
-                self.setNeedsStatusBarAppearanceUpdate()
-            })
-            
-        }
-    }
+
     
 //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
     
@@ -571,18 +450,4 @@ extension ContainerViewController: GPSServiceDelegate {
     }
 }
 
-enum CameraState {
-    case Off, Initiating, Running, DidPressTakePhoto, PhotoTaken, VideoTaken, Recording
-}
 
-enum CameraMode {
-    case Front, Back
-}
-
-enum FlashMode {
-    case Off, On, Auto
-}
-
-enum ScreenMode {
-    case Transitioning, Camera, Places, Activity, Profile, Saved
-}
