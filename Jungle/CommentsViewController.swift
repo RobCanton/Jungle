@@ -42,7 +42,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         header.closeHandler = dismissHandle
         
         
-        view.backgroundColor = UIColor(white: 0.0, alpha: 0.7)
+        view.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
         
         tableView = UITableView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - navHeight))
         let nib = UINib(nibName: "CommentCell", bundle: nil)
@@ -76,9 +76,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         commentBar.frame = CGRect(x: 0, y: view.frame.height - 50.0, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
         commentBar.sendHandler = sendComment
-        
-    
-
         self.view.addSubview(commentBar)
     
     }
@@ -91,7 +88,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
-        globalContainerRef?.statusBar(hide: true)
+        globalMainRef?.statusBar(hide: true, animated: true)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -241,6 +238,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         print("SEND COMMENT: \(comment)")
         UploadService.addComment(post: item, comment: comment)
         commentBar.textField.resignFirstResponder()
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        get {
+            return true
+        }
     }
 
 }

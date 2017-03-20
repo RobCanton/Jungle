@@ -89,7 +89,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         mainStore.subscribe(self)
-        globalContainerRef?.statusBar(hide: false)
+        globalMainRef?.statusBar(hide: false, animated: true)
         navigationController?.setNavigationBarHidden(false, animated: true)
         
         

@@ -73,6 +73,9 @@
 		B0F8949C1E7E3C3E00E490C4 /* SavedCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */; };
 		B0F8949E1E7E3E8500E490C4 /* MyProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */; };
 		B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */; };
+		B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894A11E7F17AE00E490C4 /* MainViewController.swift */; };
+		B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */; };
+		B0F894A61E7F250F00E490C4 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -145,6 +148,9 @@
 		B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SavedCollectionView.swift; sourceTree = "<group>"; };
 		B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyProfileViewController.swift; sourceTree = "<group>"; };
 		B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MyProfileViewController.storyboard; sourceTree = "<group>"; };
+		B0F894A11E7F17AE00E490C4 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainNavigationController.swift; sourceTree = "<group>"; };
+		B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		BF3CBDF2A4BC805F21E5120B /* Pods-Jungle.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -190,7 +196,11 @@
 				B093FFA21E790CD500011B43 /* Info.plist */,
 				B093FFA81E790D5E00011B43 /* CameraButton.swift */,
 				B093FFA91E790D5E00011B43 /* ContainerViewController.swift */,
+				B0F894A11E7F17AE00E490C4 /* MainViewController.swift */,
 				B093FFDC1E79BEB100011B43 /* CameraViewController.swift */,
+				B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */,
+				B093FFB01E790D5E00011B43 /* PlacesViewController.swift */,
+				B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */,
 				B0F894871E7BD51A00E490C4 /* State */,
 				B0F894681E7B436A00E490C4 /* Models */,
 				B0F894661E7B434400E490C4 /* Services */,
@@ -201,7 +211,6 @@
 				B093FFAF1E790D5E00011B43 /* PhotoCell.swift */,
 				B093FFCC1E79135A00011B43 /* PhotoCell.xib */,
 				B093FFAB1E790D5E00011B43 /* KDCircularProgress.swift */,
-				B093FFB01E790D5E00011B43 /* PlacesViewController.swift */,
 				B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */,
 				B093FFCE1E791F4E00011B43 /* extensions.swift */,
 				B093FFB11E790D5E00011B43 /* SendProfileViewCell.swift */,
@@ -482,6 +491,7 @@
 				B093FFD51E79399C00011B43 /* StoriesViewController.swift in Sources */,
 				B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */,
 				B093FFCF1E791F4E00011B43 /* extensions.swift in Sources */,
+				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */,
 				B0F8947C1E7BC59600E490C4 /* UserStoryTableViewCell.swift in Sources */,
 				B0F894931E7BD68800E490C4 /* SocialReducer.swift in Sources */,
@@ -504,12 +514,14 @@
 				B093FFBE1E790D5E00011B43 /* PhotoCell.swift in Sources */,
 				B093FFB81E790D5E00011B43 /* ContainerViewController.swift in Sources */,
 				B0F894861E7BD43F00E490C4 /* Utilities.swift in Sources */,
+				B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */,
 				B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */,
 				B0F8946D1E7B9D5A00E490C4 /* CommentCell.swift in Sources */,
 				B093FFC11E790D5E00011B43 /* SendTableViewController.swift in Sources */,
 				B0F894891E7BD52C00E490C4 /* AppState.swift in Sources */,
 				B093FFBB1E790D5E00011B43 /* Location.swift in Sources */,
 				B0AE229C1E7A509E00141709 /* PostHeaderView.swift in Sources */,
+				B0F894A61E7F250F00E490C4 /* MainTabBarController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -320,7 +320,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             var recordBtnFrame = cameraBtnFrame
             recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
             
         } else if x > width  {
@@ -329,7 +329,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             var recordBtnFrame = cameraBtnFrame
             recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
         }
     }
@@ -377,7 +377,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             var recordBtnFrame = cameraBtnFrame
             recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
             mapContainer.alpha = 1 - alpha
             animator?.fractionComplete = 1 - alpha
@@ -389,7 +389,7 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
             var recordBtnFrame = cameraBtnFrame
             recordBtnFrame!.origin.y = cameraBtnFrame.origin.y + cameraBtnFrame.height * 0.6 * alpha
             recordBtn.frame = recordBtnFrame!
-            recordBtn.alpha = 0.5 + 0.5 * (1 - alpha)
+            recordBtn.alpha = 0.6 + 0.4 * (1 - alpha)
             recordBtn.dot.alpha = 1 - alpha
             mapContainer.alpha = 1 - alpha
             animator?.fractionComplete = 1 - alpha

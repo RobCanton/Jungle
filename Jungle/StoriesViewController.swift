@@ -47,8 +47,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         if self.navigationController!.delegate !== transitionController {
             self.collectionView.reloadData()
         }
-        containerRef?.statusBar(hide: true)
-        containerRef?.hideOverlay()
+        globalMainRef?.statusBar(hide: true, animated: false)
+        //globalMainRef?.hideOverlay()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -74,7 +74,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        containerRef?.statusBar(hide: false)
+        //containerRef?.statusBar(hide: false)
         
         NotificationCenter.default.removeObserver(self)
     }
@@ -85,7 +85,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         for cell in collectionView.visibleCells as! [StoryViewController] {
             cell.cleanUp()
         }
-        containerRef?.showOverlay()
+        //containerRef?.showOverlay()
     }
     
     var textField:UITextView!
@@ -253,7 +253,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         controller.title = "Comments"
         controller.storyRef = cell
         controller.item = item
-        controller.containerRef = containerRef
+        //controller.containerRef = containerRef
         let nav = UINavigationController(rootViewController: controller)
         nav.navigationBar.isTranslucent = false
         nav.navigationBar.tintColor = UIColor.black

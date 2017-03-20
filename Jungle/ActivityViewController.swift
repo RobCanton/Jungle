@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import View2ViewTransition
 
-class ActivityViewController: UITableViewController, UISearchBarDelegate {
+class ActivityViewController: temp, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
     var myStory:Story?
 
@@ -25,6 +25,8 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
     var responseRef:FIRDatabaseReference?
     
     var statusBarShouldHide = false
+    
+    var tableView:UITableView!
     
     override var prefersStatusBarHidden: Bool
         {
@@ -44,8 +46,10 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
         myStoryRef?.removeAllObservers()
         responseRef?.removeAllObservers()
+        
         
         NotificationCenter.default.removeObserver(self)
     }
@@ -55,7 +59,7 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
         for story in self.userStories {
             story.determineState()
         }
-        tableView?.reloadData()
+        tableView.reloadData()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -113,11 +117,12 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        //navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         self.automaticallyAdjustsScrollViewInsets = false
-        self.view.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.isTranslucent = false
         self.title = "Activity"
+        
+        tableView = UITableView(frame: view.bounds)
         
         let nib = UINib(nibName: "UserStoryTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "UserStoryCell")
@@ -128,12 +133,8 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
         tableView.isPagingEnabled = false
         tableView.showsVerticalScrollIndicator = false
         tableView.tableFooterView = UIView(frame: CGRect(x: 0,y: 0,width: tableView!.frame.width,height: 160))
-        tableView!.separatorColor = UIColor(white: 0.08, alpha: 1.0)
-        tableView!.reloadData()
-        
-        let inboxButton = UIBarButtonItem(image: UIImage(named: "inbox"), style: .plain, target: self, action: #selector(showMessages))
-        inboxButton.tintColor = UIColor.black
-        navigationItem.rightBarButtonItem = inboxButton
+        tableView.separatorColor = UIColor(white: 0.08, alpha: 1.0)
+        tableView.reloadData()
         
     }
     
@@ -149,12 +150,12 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
         searchBar.resignFirstResponder()
     }
     
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UINib(nibName: "ListHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! ListHeaderView
         if section == 0 {
             headerView.isHidden = true
@@ -167,7 +168,7 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
     }
     
     
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 1 && userStories.count > 0 {
             return 28
         }
@@ -175,14 +176,14 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
     }
 
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch indexPath.section {
         default:
             return 76
         }
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
             return 1
@@ -194,7 +195,7 @@ class ActivityViewController: UITableViewController, UISearchBarDelegate {
         
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
             let cell = tableView.dequeueReusableCell(withIdentifier: "UserStoryCell", for: indexPath) as! UserStoryTableViewCell
             if myStory != nil {
