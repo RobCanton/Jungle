@@ -26,7 +26,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="426" height="274"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     </view>
-                    <blurEffect style="light"/>
+                    <blurEffect style="extraLight"/>
                 </visualEffectView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kf6-uD-DhY">
                     <rect key="frame" x="0.0" y="0.0" width="426" height="274"/>
@@ -47,6 +47,7 @@
                             </state>
                             <connections>
                                 <action selector="handleMessageButton:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="TvE-eY-jj1"/>
+                                <action selector="messageButtonDown:" destination="U6b-Vx-4bR" eventType="touchDown" id="YXE-tg-Bmt"/>
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oPm-jg-59w">

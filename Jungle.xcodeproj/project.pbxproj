@@ -43,6 +43,17 @@
 		B0AE229D1E7A509E00141709 /* PostHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AE229B1E7A509E00141709 /* PostHeaderView.xib */; };
 		B0AE229F1E7A526500141709 /* StoryInfoView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AE229E1E7A526500141709 /* StoryInfoView.xib */; };
 		B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D301E7FC6B40067E004 /* Listeners.swift */; };
+		B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D321E805DC50067E004 /* ChatViewController.swift */; };
+		B0C86D361E8078190067E004 /* MessagesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D351E8078190067E004 /* MessagesTableViewController.swift */; };
+		B0C86D381E8078800067E004 /* ConversationViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D371E8078800067E004 /* ConversationViewCell.swift */; };
+		B0C86D3C1E807B9C0067E004 /* ConversationViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C86D3A1E807B9C0067E004 /* ConversationViewCell.xib */; };
+		B0C86D3F1E80831F0067E004 /* ConversationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D3D1E80831F0067E004 /* ConversationCell.swift */; };
+		B0C86D401E80831F0067E004 /* ConversationCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C86D3E1E80831F0067E004 /* ConversationCell.xib */; };
+		B0C86D421E8098850067E004 /* MasterNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D411E8098850067E004 /* MasterNavigationController.swift */; };
+		B0C86D451E80B7E00067E004 /* FollowingHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D441E80B7E00067E004 /* FollowingHeader.swift */; };
+		B0C86D471E80B7F90067E004 /* FollowingHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C86D461E80B7F90067E004 /* FollowingHeader.xib */; };
+		B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D481E80B9440067E004 /* UserStoryCollectionViewCell.swift */; };
+		B0C86D4B1E80B9440067E004 /* UserStoryCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */; };
 		B0F8945D1E7B216500E490C4 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8945C1E7B216500E490C4 /* UserService.swift */; };
 		B0F894601E7B2EF400E490C4 /* SnapContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8945E1E7B2EF400E490C4 /* SnapContainerViewController.swift */; };
 		B0F894611E7B2EF400E490C4 /* VerticalScrollViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8945F1E7B2EF400E490C4 /* VerticalScrollViewController.swift */; };
@@ -119,6 +130,17 @@
 		B0AE229B1E7A509E00141709 /* PostHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostHeaderView.xib; sourceTree = "<group>"; };
 		B0AE229E1E7A526500141709 /* StoryInfoView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StoryInfoView.xib; sourceTree = "<group>"; };
 		B0C86D301E7FC6B40067E004 /* Listeners.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Listeners.swift; sourceTree = "<group>"; };
+		B0C86D321E805DC50067E004 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
+		B0C86D351E8078190067E004 /* MessagesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesTableViewController.swift; sourceTree = "<group>"; };
+		B0C86D371E8078800067E004 /* ConversationViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationViewCell.swift; sourceTree = "<group>"; };
+		B0C86D3A1E807B9C0067E004 /* ConversationViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ConversationViewCell.xib; sourceTree = "<group>"; };
+		B0C86D3D1E80831F0067E004 /* ConversationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationCell.swift; sourceTree = "<group>"; };
+		B0C86D3E1E80831F0067E004 /* ConversationCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ConversationCell.xib; sourceTree = "<group>"; };
+		B0C86D411E8098850067E004 /* MasterNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasterNavigationController.swift; sourceTree = "<group>"; };
+		B0C86D441E80B7E00067E004 /* FollowingHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowingHeader.swift; sourceTree = "<group>"; };
+		B0C86D461E80B7F90067E004 /* FollowingHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FollowingHeader.xib; sourceTree = "<group>"; };
+		B0C86D481E80B9440067E004 /* UserStoryCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserStoryCollectionViewCell.swift; sourceTree = "<group>"; };
+		B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserStoryCollectionViewCell.xib; sourceTree = "<group>"; };
 		B0F8945C1E7B216500E490C4 /* UserService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		B0F8945E1E7B2EF400E490C4 /* SnapContainerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapContainerViewController.swift; path = "Snapchat-Swipe-View-master/SnapchatSwipeView/SnapContainerViewController.swift"; sourceTree = "<group>"; };
 		B0F8945F1E7B2EF400E490C4 /* VerticalScrollViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VerticalScrollViewController.swift; path = "Snapchat-Swipe-View-master/SnapchatSwipeView/VerticalScrollViewController.swift"; sourceTree = "<group>"; };
@@ -199,19 +221,19 @@
 				B093FFA81E790D5E00011B43 /* CameraButton.swift */,
 				B093FFA91E790D5E00011B43 /* ContainerViewController.swift */,
 				B0F894A11E7F17AE00E490C4 /* MainViewController.swift */,
+				B0C86D411E8098850067E004 /* MasterNavigationController.swift */,
 				B093FFDC1E79BEB100011B43 /* CameraViewController.swift */,
 				B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */,
-				B093FFB01E790D5E00011B43 /* PlacesViewController.swift */,
 				B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */,
 				B0F894871E7BD51A00E490C4 /* State */,
 				B0F894681E7B436A00E490C4 /* Models */,
 				B0F894661E7B434400E490C4 /* Services */,
+				B0C86D431E80B7820067E004 /* Places */,
 				B0F894671E7B435500E490C4 /* Stories */,
 				B0F894821E7BD3C000E490C4 /* Login */,
 				B0F894771E7BC54400E490C4 /* Following */,
 				B0F894941E7C521900E490C4 /* Profile */,
-				B093FFAF1E790D5E00011B43 /* PhotoCell.swift */,
-				B093FFCC1E79135A00011B43 /* PhotoCell.xib */,
+				B0C86D341E805DCD0067E004 /* Messages */,
 				B093FFAB1E790D5E00011B43 /* KDCircularProgress.swift */,
 				B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */,
 				B093FFCE1E791F4E00011B43 /* extensions.swift */,
@@ -224,6 +246,33 @@
 				B0F894851E7BD43F00E490C4 /* Utilities.swift */,
 			);
 			path = Jungle;
+			sourceTree = "<group>";
+		};
+		B0C86D341E805DCD0067E004 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				B0C86D321E805DC50067E004 /* ChatViewController.swift */,
+				B0C86D351E8078190067E004 /* MessagesTableViewController.swift */,
+				B0C86D371E8078800067E004 /* ConversationViewCell.swift */,
+				B0C86D3A1E807B9C0067E004 /* ConversationViewCell.xib */,
+				B0C86D3D1E80831F0067E004 /* ConversationCell.swift */,
+				B0C86D3E1E80831F0067E004 /* ConversationCell.xib */,
+			);
+			name = Messages;
+			sourceTree = "<group>";
+		};
+		B0C86D431E80B7820067E004 /* Places */ = {
+			isa = PBXGroup;
+			children = (
+				B093FFB01E790D5E00011B43 /* PlacesViewController.swift */,
+				B0C86D481E80B9440067E004 /* UserStoryCollectionViewCell.swift */,
+				B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */,
+				B0C86D441E80B7E00067E004 /* FollowingHeader.swift */,
+				B0C86D461E80B7F90067E004 /* FollowingHeader.xib */,
+				B093FFAF1E790D5E00011B43 /* PhotoCell.swift */,
+				B093FFCC1E79135A00011B43 /* PhotoCell.xib */,
+			);
+			name = Places;
 			sourceTree = "<group>";
 		};
 		B0F894661E7B434400E490C4 /* Services */ = {
@@ -309,9 +358,9 @@
 		B0F894941E7C521900E490C4 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */,
 				B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */,
+				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
 				B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */,
@@ -401,17 +450,21 @@
 			files = (
 				B093FFA11E790CD500011B43 /* LaunchScreen.storyboard in Resources */,
 				B0F894811E7BC8EE00E490C4 /* ListHeaderView.xib in Resources */,
+				B0C86D471E80B7F90067E004 /* FollowingHeader.xib in Resources */,
 				B093FFC71E790F6800011B43 /* GoogleService-Info.plist in Resources */,
 				B093FFCB1E7910E700011B43 /* SendProfileViewCell.xib in Resources */,
 				B093FFC91E7910B100011B43 /* mapStyle.json in Resources */,
 				B0AE229F1E7A526500141709 /* StoryInfoView.xib in Resources */,
 				B0AE229D1E7A509E00141709 /* PostHeaderView.xib in Resources */,
+				B0C86D4B1E80B9440067E004 /* UserStoryCollectionViewCell.xib in Resources */,
 				B0F894741E7BAC5800E490C4 /* CommentsHeaderView.xib in Resources */,
 				B093FF9E1E790CD500011B43 /* Assets.xcassets in Resources */,
 				B0F8947D1E7BC59600E490C4 /* UserStoryTableViewCell.xib in Resources */,
 				B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */,
 				B0F8949A1E7C717F00E490C4 /* ProfileHeaderView.xib in Resources */,
+				B0C86D401E80831F0067E004 /* ConversationCell.xib in Resources */,
 				B0F8946E1E7B9D5A00E490C4 /* CommentCell.xib in Resources */,
+				B0C86D3C1E807B9C0067E004 /* ConversationViewCell.xib in Resources */,
 				B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */,
 				B093FFCD1E79135A00011B43 /* PhotoCell.xib in Resources */,
 				B0F894631E7B33DE00E490C4 /* StoryDetailsView.xib in Resources */,
@@ -482,19 +535,25 @@
 				B0F894651E7B33F500E490C4 /* StoryDetailsView.swift in Sources */,
 				B093FF991E790CD500011B43 /* ViewController.swift in Sources */,
 				B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */,
+				B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */,
 				B0F8948B1E7BD55A00E490C4 /* Tree.swift in Sources */,
 				B093FFBF1E790D5E00011B43 /* PlacesViewController.swift in Sources */,
 				B093FFDD1E79BEB100011B43 /* CameraViewController.swift in Sources */,
 				B0F8945D1E7B216500E490C4 /* UserService.swift in Sources */,
+				B0C86D361E8078190067E004 /* MessagesTableViewController.swift in Sources */,
 				B0F894761E7BAED100E490C4 /* CommentsHeaderView.swift in Sources */,
 				B0F894991E7C717F00E490C4 /* ProfileHeaderView.swift in Sources */,
 				B0F8946A1E7B7E1500E490C4 /* CommentsViewController.swift in Sources */,
 				B0F894841E7BD41400E490C4 /* CreateAccountViewController.swift in Sources */,
 				B093FFC41E790D5E00011B43 /* UploadService.swift in Sources */,
 				B0F894801E7BC8EE00E490C4 /* ListHeaderView.swift in Sources */,
+				B0C86D451E80B7E00067E004 /* FollowingHeader.swift in Sources */,
+				B0C86D3F1E80831F0067E004 /* ConversationCell.swift in Sources */,
 				B093FFD51E79399C00011B43 /* StoriesViewController.swift in Sources */,
 				B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */,
 				B093FFCF1E791F4E00011B43 /* extensions.swift in Sources */,
+				B0C86D421E8098850067E004 /* MasterNavigationController.swift in Sources */,
+				B0C86D381E8078800067E004 /* ConversationViewCell.swift in Sources */,
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */,
 				B0F8947C1E7BC59600E490C4 /* UserStoryTableViewCell.swift in Sources */,
@@ -518,6 +577,7 @@
 				B093FFBE1E790D5E00011B43 /* PhotoCell.swift in Sources */,
 				B093FFB81E790D5E00011B43 /* ContainerViewController.swift in Sources */,
 				B0F894861E7BD43F00E490C4 /* Utilities.swift in Sources */,
+				B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */,
 				B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */,
 				B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */,
 				B0F8946D1E7B9D5A00E490C4 /* CommentCell.swift in Sources */,

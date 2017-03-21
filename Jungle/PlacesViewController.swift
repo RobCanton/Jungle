@@ -28,6 +28,11 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     var locations = [Location]()
     
     var sortMode:SortedBy = .Recent
+    var userStories = [UserStory]()
+    var postKeys = [String]()
+    
+    var storiesDictionary = [String:[String]]()
+    var responseRef:FIRDatabaseReference?
     
     var inboxButton:UIButton!
     
@@ -35,7 +40,6 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     override func viewDidLoad() {
         super.viewDidLoad()
         
-               //self.navigationController?.navigationBar.isTranslucent = false
         
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = true
@@ -56,7 +60,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
-        let headerNib = UINib(nibName: "ProfileHeaderView", bundle: nil)
+        let headerNib = UINib(nibName: "FollowingHeader", bundle: nil)
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
         
@@ -75,15 +79,21 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         collectionView.addSubview(refresher)
         
         view.addSubview(collectionView)
-
         
         let segmentedControl = UISegmentedControl(items: ["Recent", "Popular", "Nearest"])
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.center = CGPoint(x: view.frame.width/2, y: 22)
         segmentedControl.tintColor = UIColor.darkGray
         segmentedControl.addTarget(self, action: #selector(changeSort), for: .valueChanged)
-        view.addSubview(segmentedControl)
+        //view.addSubview(segmentedControl)
         //self.navigationItem.titleView = segmentedControl
+        
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width - 96, height: 44))
+        label.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightHeavy)
+        label.text = "Jungle"
+        label.textAlignment = .center
+        label.center = CGPoint(x: view.frame.width/2, y: 22)
+        view.addSubview(label)
         
         inboxButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
         inboxButton.setImage(UIImage(named:"restart"), for: .normal)
@@ -94,6 +104,20 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
 
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionElementKindSectionHeader {
+            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
+            view.setup()
+            return view
+        }
+        
+        return UICollectionReusableView()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.size.width, height: 90)
     }
     
     var activityIndicator:UIActivityIndicatorView?
@@ -121,8 +145,62 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         super.viewWillAppear(animated)
         //globalContainerRef?.snapContainer.scrollView.isScrollEnabled = true
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        
+        requestActivity()
+        listenToActivityResponse()
     }
+    
+    func requestActivity() {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("api/requests/activity/\(uid)")
+        ref.setValue(true)
+    }
+    
+    func listenToActivityResponse() {
+        let uid = mainStore.state.userState.uid
+        responseRef = UserService.ref.child("api/responses/activity/\(uid)")
+        responseRef?.removeAllObservers()
+        responseRef?.observe(.value, with: { snapshot in
+            var tempStories = [UserStory]()
+            if snapshot.exists() {
+                
+                for user in snapshot.children {
+                    
+                    let userSnap = user as! FIRDataSnapshot
+
+                    if let _postKeys = userSnap.value as? [String:Double] {
+                        let story = UserStory(postKeys: _postKeys.valueKeySorted, uid: userSnap.key)
+                        tempStories.append(story)
+                    }
+                }
+                
+                self.crossCheckStories(tempStories: tempStories)
+                self.responseRef?.removeValue()
+            }
+        })
+    }
+    
+    func crossCheckStories(tempStories:[UserStory]) {
+
+        var mutableStories = tempStories
+        var myStory:UserStory?
+        
+        for i in 0..<tempStories.count {
+            let story = tempStories[i]
+            
+            if story.getUserId() == mainStore.state.userState.uid {
+                myStory = story
+                mutableStories.remove(at: i)
+            }
+        }
+        
+        if myStory != nil {
+            mutableStories.insert(myStory!, at: 0)
+        }
+        
+        self.userStories = mutableStories
+        getHeader()?.setupStories(_userStories: self.userStories)
+    }
+    
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -240,6 +318,10 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
+    }
+    
+    func getHeader() -> FollowingHeader? {
+        return collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? FollowingHeader
     }
     
 }

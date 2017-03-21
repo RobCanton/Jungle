@@ -19,6 +19,9 @@ class ProfileHeaderView: UICollectionReusableView {
     override func awakeFromNib() {
         super.awakeFromNib()
         print("I'm awake, i'm awake")
+        followButton.backgroundColor = UIColor.white
+        messageButton.backgroundColor = UIColor.white//UIColor(red: 0.0, green: 128/255, blue: 255/255, alpha: 1.0)
+        followButton.tintColor = accentColor
  
     }
 
@@ -26,6 +29,9 @@ class ProfileHeaderView: UICollectionReusableView {
     @IBOutlet weak var followersLabel: UILabel!
     
     @IBOutlet weak var followingLabel: UILabel!
+    
+    var followHandler:(()->())?
+    var messageHandler:(()->())?
     
     var status:FollowingStatus = .None
     var user:User?
@@ -40,17 +46,19 @@ class ProfileHeaderView: UICollectionReusableView {
         
         followButton.layer.cornerRadius = followButton.frame.width/2.0
         followButton.clipsToBounds = true
-        followButton.backgroundColor = UIColor(red: 0.0, green: 128/255, blue: 255/255, alpha: 1.0)
+        
         followButton.applyShadow(radius: 1, opacity: 0.25, height: 1.0, shouldRasterize: false)
         followButton.tintColor = UIColor.white
         
         messageButton.layer.cornerRadius = messageButton.frame.width/2.0
         messageButton.clipsToBounds = true
-        messageButton.backgroundColor = UIColor.white//UIColor(red: 0.0, green: 128/255, blue: 255/255, alpha: 1.0)
+        
         messageButton.applyShadow(radius: 1, opacity: 0.25, height: 1.0, shouldRasterize: false)
 
         guard let user = _user else {return}
         self.user = _user
+        
+        
         
         loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromFile in
             self.imageView.image = image
@@ -68,9 +76,20 @@ class ProfileHeaderView: UICollectionReusableView {
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 0, y: 1)
         gradientView.layer.insertSublayer(gradient, at: 0)
+        
+        setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
     }
     
-    @IBAction func handleFollowButton(_ sender: Any) {
+    
+    @IBAction func handleFollowButton(_ sender: UIButton) {
+        
+        sender.transform = CGAffineTransform(scaleX: 0.50, y: 0.50)
+        
+        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
+            sender.transform = CGAffineTransform.identity
+        }, completion: nil)
+        
+        followHandler?()
         guard let user = self.user else { return }
 
         switch status {
@@ -88,13 +107,21 @@ class ProfileHeaderView: UICollectionReusableView {
         }
     }
     
+    @IBAction func messageButtonDown(_ sender: Any) {
+        //messageButton.transform = CGAffineTransform(scaleX: 0.67, y: 0.67)
+    }
+    
     @IBAction func handleMessageButton(_ sender: Any) {
+        messageButton.transform = CGAffineTransform(scaleX: 0.50, y: 0.50)
         
+        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
+            self.messageButton.transform = CGAffineTransform.identity
+        }, completion: nil)
+        messageHandler?()
     }
     
     func setUserStatus(status:FollowingStatus) {
         
-        if self.status == status { return }
         self.status = status
         switch status {
         case .CurrentUser:

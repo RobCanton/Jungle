@@ -161,13 +161,66 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             self.posts = [StoryItem]()
             self.collectionView.reloadData()
         }
-        
+    }
+    
+    var presentingEmptyConversation = false
+    
+    func handleMessageTapped() {
+        print("MESSAGE")
+        let current_uid = mainStore.state.userState.uid
+        guard let partner_uid = uid else { return }
+        if current_uid == partner_uid { return }
+        if let conversation = checkForExistingConversation(partner_uid: current_uid) {
+            prepareConversationForPresentation(conversation: conversation)
+        } else {
+            
+            let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
+            let ref = UserService.ref.child("conversations/\(pairKey)")
+            ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
+                
+                let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
+                recipientUserRef.child(current_uid).setValue(true)
+                
+                let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
+                currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
+                    let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
+                    self.presentingEmptyConversation = true
+                    self.prepareConversationForPresentation(conversation: conversation)
+                })
+            })
+        }
+    }
+    
+    var presentConversation:Conversation?
+    var partnerImage:UIImage?
+    
+    func prepareConversationForPresentation(conversation:Conversation) {
+        conversation.listen()
+        UserService.getUser(uid, completion: { user in
+            if user != nil {
+                self.presentConversation(conversation: conversation, user: user!)
+            }
+        })
+    }
+    
+    func presentConversation(conversation:Conversation, user:User) {
+        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
+            let controller = ChatViewController()
+            controller.conversation = conversation
+            controller.partnerImage = image
+            controller.popUpMode = true
+            let nav = UINavigationController(rootViewController: controller)
+            nav.navigationBar.isTranslucent = false
+            nav.navigationBar.tintColor = UIColor.black
+            self.present(nav, animated: true, completion: nil)
+        })
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
             view.setupHeader(_user:self.user)
+            view.messageHandler = handleMessageTapped
             return view
         }
         

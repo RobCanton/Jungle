@@ -19,6 +19,7 @@ class MainTabBarController: UITabBarController {
         self.edgesForExtendedLayout = []
         
         
+        
     }
     
 }
@@ -41,6 +42,8 @@ class temp:UIViewController {
         backDrop.clipsToBounds = true
         
         self.view.addSubview(backDrop)
+        
+    
 
         
     }

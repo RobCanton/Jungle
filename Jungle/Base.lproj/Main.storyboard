@@ -169,7 +169,7 @@
                     <view key="view" contentMode="scaleToFill" id="CSt-eA-qz6">
                         <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" id="hgP-BU-deQ"/>
                 </viewController>
@@ -258,7 +258,7 @@
                         <viewControllerLayoutGuide type="bottom" id="D86-JT-oDX"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="1px-Od-QBQ">
-                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
@@ -374,6 +374,7 @@
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
                     <toolbarItems/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="QiW-sC-M6u">
+                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </tabBar>
@@ -409,10 +410,10 @@
             </objects>
             <point key="canvasLocation" x="3712.8000000000002" y="1806.7466266866568"/>
         </scene>
-        <!--Activity View Controller-->
+        <!--Messages View Controller-->
         <scene sceneID="3el-XO-49U">
             <objects>
-                <viewController storyboardIdentifier="ActivityViewController" id="VD3-gI-m50" customClass="ActivityViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MessagesViewController" id="VD3-gI-m50" customClass="MessagesViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="u3Q-so-AUZ"/>
                         <viewControllerLayoutGuide type="bottom" id="0jY-P2-vpU"/>
@@ -420,7 +421,7 @@
                     <view key="view" contentMode="scaleToFill" id="Ydj-Lg-TGh">
                         <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
                     <navigationItem key="navigationItem" id="QsR-iH-cOB"/>
@@ -578,7 +579,7 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="H6M-M2-RCL" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="1Mh-Zn-NYX">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="1Mh-Zn-NYX">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

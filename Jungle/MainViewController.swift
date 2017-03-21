@@ -80,6 +80,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         let definiteBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
         
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
         cameraBtnFrame = recordBtn.frame
         cameraBtnFrame.origin.y = definiteBounds.height - 140
@@ -106,6 +108,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         var v2  = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MainTabBarController") as! MainTabBarController
         v2.view.backgroundColor = UIColor.clear
         v2.view.frame = view.bounds
+        
         
         let nav1 = v2.viewControllers![0] as! UINavigationController
         places = nav1.viewControllers[0] as! PlacesViewController
@@ -160,7 +163,14 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
+        self.navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.barStyle = .black
+        self.navigationController?.view.backgroundColor = UIColor.clear
+        //self.navigationController?.navigationBar.isUserInteractionEnabled = false
+
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -168,6 +178,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         returningPlacesCell?.fadeInInfo(animated: true)
         returningPlacesCell = nil
         statusBar(hide: false, animated: true)
+        //self.navigationController?.navigationBar.isUserInteractionEnabled = false
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -208,11 +219,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         get {
-            if statusBarIsLight {
-                return .lightContent
-            } else {
-                return .default
-            }
+            return .lightContent
         }
     }
     

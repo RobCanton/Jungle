@@ -17,18 +17,21 @@ class Listeners {
     
     fileprivate static var listeningToFollowers = false
     fileprivate static var listeningToFollowing = false
+    fileprivate static var listeningToConversations = false
 
     
     static func stopListeningToAll() {
 
         stopListeningToFollowers()
         stopListeningToFollowing()
+        stopListeningToConversatons()
     }
     
    
     static func startListeningToFollowers() {
         if !listeningToFollowers {
             listeningToFollowers = true
+            print("listeningToFollowers")
             let current_uid = mainStore.state.userState.uid
             let followersRef = ref.child("users/social/followers/\(current_uid)")
             
@@ -56,6 +59,7 @@ class Listeners {
     static func startListeningToFollowing() {
         if !listeningToFollowing {
             listeningToFollowing = true
+            print("listeningToFollowing")
             let current_uid = mainStore.state.userState.uid
             let followingRef = ref.child("users/social/following/\(current_uid)")
             
@@ -64,7 +68,9 @@ class Listeners {
              */
             followingRef.observe(.childAdded, with: { snapshot in
                 if snapshot.exists() {
+                    print("YEUH")
                     if snapshot.value! is Bool {
+                        print("NOICE")
                         mainStore.dispatch(AddFollowing(uid: snapshot.key))
                     }
                     
@@ -78,6 +84,7 @@ class Listeners {
             followingRef.observe(.childRemoved, with: { snapshot in
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
+                        print("YEUHa")
                         mainStore.dispatch(RemoveFollowing(uid: snapshot.key))
                     }
                 }
@@ -96,6 +103,32 @@ class Listeners {
         let current_uid = mainStore.state.userState.uid
         ref.child("users/social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowing = false
+    }
+    
+    static func startListeningToConversations() {
+        if !listeningToConversations {
+            listeningToConversations = true
+            
+            let uid = mainStore.state.userState.uid
+            let conversationsRef = ref.child("users/conversations/\(uid)")
+            conversationsRef.observe(.childAdded, with: { snapshot in
+                if snapshot.exists() {
+                    
+                    let partner = snapshot.key
+                    let pairKey = createUserIdPairKey(uid1: uid, uid2: partner)
+                    let listening = snapshot.value! as! Bool
+                    let conversation = Conversation(key: pairKey, partner_uid: partner, listening: listening)
+                    mainStore.dispatch(ConversationAdded(conversation: conversation))
+                }
+            })
+        }
+    }
+    
+    static func stopListeningToConversatons() {
+        let uid = mainStore.state.userState.uid
+        let conversationsRef = ref.child("users/conversations/\(uid)")
+        conversationsRef.removeAllObservers()
+        listeningToConversations = false
     }
     
     

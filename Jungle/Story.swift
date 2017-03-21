@@ -17,6 +17,22 @@ protocol StoryProtocol {
     func stateChange(_ state: UserStoryState)
 }
 
+class UserStory:Story {
+    fileprivate var uid:String
+    
+    init(postKeys:[(String,Double)], uid:String) {
+        self.uid = uid
+        super.init(postKeys: postKeys)
+    }
+    
+    func getUserId() -> String {
+        return uid
+    }
+    
+    
+}
+
+
 class Story: ItemDelegate {
     fileprivate var postKeys:[(String,Double)]
     fileprivate var posts:[String]

@@ -43,6 +43,9 @@ class LoginViewController: UIViewController {
             UserService.getUser(user.uid, completion: { user in
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
+                    Listeners.startListeningToFollowers()
+                    Listeners.startListeningToFollowing()
+                    Listeners.startListeningToConversations()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })

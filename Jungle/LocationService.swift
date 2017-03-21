@@ -109,9 +109,6 @@ class LocationService: NSObject {
                 var postKeys = [(String,Double)]()
                 if let _postsKeys = dict["posts"] as? [String:Double] {
                     postKeys = _postsKeys.valueKeySorted
-                    for (key, value) in postKeys {
-                        print(key, value)
-                    }
                 }
                 
                 var contributers = [String:Any]()
