@@ -26,6 +26,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     var refresher:UIRefreshControl!
     
     var locations = [Location]()
+    var locationStories = [LocationStory]()
     
     var sortMode:SortedBy = .Recent
     var userStories = [UserStory]()
@@ -99,10 +100,12 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         inboxButton.setImage(UIImage(named:"restart"), for: .normal)
         inboxButton.center = CGPoint(x: view.frame.width - 20 - 8, y: 22)
         inboxButton.addTarget(self, action: #selector(refreshData), for: .touchUpInside)
+        inboxButton.tintColor = UIColor.black
         view.addSubview(inboxButton)
         
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
+        self.collectionView.reloadData()
 
     }
     
@@ -249,14 +252,33 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         print("NEW LOCATIONS")
         print(locations)
         
-        self.locations = getSortedLocations(locations)
-
-        collectionView.reloadData()
-        stopRefresher()
+        //self.locations = getSortedLocations(locations)
+        
+        var tempStories = [LocationStory]()
+        
+        var count = 0
+        for i in 0..<locations.count {
+            let location = locations[i]
+            
+            LocationService.sharedInstance.getLocationStory(location.getKey(), completon: { story in
+                print("GOT STORY")
+                if story != nil {
+                    tempStories.append(story!)
+                }
+                count += 1
+                if count >= locations.count {
+                    count = -1
+                    print("STORIES READY")
+                    self.locationStories = tempStories
+                    self.collectionView.reloadData()
+                    self.stopRefresher()
+                }
+            })
+        }
     }
     
     func getSortedLocations(_ locations:[Location]) -> [Location] {
-        
+        /*
         switch sortMode {
         case .Recent:
             return locations.sorted(by: { $0.getStory() > $1.getStory()})
@@ -264,17 +286,18 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
             return locations.sorted(by: { $0.getContributers().count > $1.getContributers().count})
         case .Nearest:
             return locations.sorted(by: { $0.getDistance() < $1.getDistance()})
-        }
+        }*/
+        return locations
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return locations.count
+        return locationStories.count
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        cell.setupLocationCell(locations[indexPath.row])
+        cell.setupLocationCell(locationStories[indexPath.row])
         return cell
     }
     
@@ -288,31 +311,19 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
-        let story = locations[indexPath.item].getStory()
+        let story = locationStories[indexPath.item]
         if story.state == .contentLoaded {
             self.selectedIndexPath = indexPath
-            
-            let storiesViewController: StoriesViewController = StoriesViewController()
-            
-            storiesViewController.locations = self.locations
-            storiesViewController.transitionController = globalMainRef?.transitionController
-            globalMainRef?.transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]
-            
-            if let nav = globalMainRef!.navigationController {
-                nav.delegate = globalMainRef?.transitionController
-                storiesViewController.containerRef = container
-                globalMainRef!.transitionController.push(viewController: storiesViewController, on: globalMainRef!, attached: storiesViewController)
-            }
+            globalMainRef?.presentPlaceStory(locationStories: self.locationStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         } else {
             story.downloadStory()
-            
         }
         
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print("COLLECTION OFFSET: \(scrollView.contentOffset.y)")
+        
     }
     
     var itemSideLength:CGFloat!

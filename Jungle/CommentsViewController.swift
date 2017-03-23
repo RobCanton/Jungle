@@ -13,7 +13,8 @@ import Firebase
 class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     
     var comments = [Comment]()
-    var storyRef:StoryViewController!
+    var storyRef:StoryViewController?
+    var postRef:PostViewController?
     var item:StoryItem!
     
     var tableView:UITableView!
@@ -157,15 +158,19 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewWillDisappear(animated)
         commentsRef?.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
-        storyRef.footerView.setCommentsLabel(numComments: item.comments.count)
-        
+        storyRef?.footerView.setCommentsLabel(numComments: item.comments.count)
+        postRef?.footerView.setCommentsLabel(numComments: item.comments.count)
     }
     
     func dismissHandle() {
 
-        storyRef.fadeInDetails()
-        storyRef.commentsActive = false
-        storyRef.resumeStory()
+        storyRef?.fadeInDetails()
+        storyRef?.commentsActive = false
+        storyRef?.resumeStory()
+        
+        postRef?.fadeInDetails()
+        postRef?.commentsActive = false
+
         self.dismiss(animated: true, completion: nil)
     }
     

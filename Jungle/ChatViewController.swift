@@ -53,6 +53,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     var activityIndicator:UIActivityIndicatorView!
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         messages = [JSQMessage]()
         // Do any additional setup after loading the view, typically from a nib.
@@ -62,6 +63,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         collectionView?.collectionViewLayout.outgoingAvatarViewSize = .zero
         
         collectionView?.collectionViewLayout.springinessEnabled = true
+        collectionView?.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         activityIndicator = UIActivityIndicatorView(frame: CGRect(x:0,y:0,width:50,height:50))
         activityIndicator.activityIndicatorViewStyle = .gray

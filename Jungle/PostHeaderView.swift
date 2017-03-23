@@ -29,6 +29,16 @@ class PostHeaderView: UIView {
         timeLabel.text = location.getShortAddress()
     }
     
+    func setupLocation(withPlaceId id:String) {
+        
+        LocationService.sharedInstance.getLocationInfo(id, completion: { location in
+            if location != nil {
+                self.locationTitle.text = location!.getName()
+                self.timeLabel.text = location!.getShortAddress()
+            }
+        })
+    }
+    
     
     
    }

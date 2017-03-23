@@ -72,6 +72,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
 //                    if likelihood.likelihood >= 0.25 {
 //                        temp.append(likelihood)
 //                    }
+                    
+                    
                     temp.append(likelihood)
                 }
                 self.likelihoods = temp

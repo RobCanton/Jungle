@@ -241,7 +241,7 @@
                     <connections>
                         <outlet property="createAccountButton" destination="k8P-LD-SLl" id="r2v-1Q-LG4"/>
                         <outlet property="loginButton" destination="3h6-ge-V2p" id="myT-bA-kxF"/>
-                        <segue destination="H6M-M2-RCL" kind="show" identifier="login" id="mtz-34-6DA"/>
+                        <segue destination="H6M-M2-RCL" kind="show" identifier="login" animates="NO" id="mtz-34-6DA"/>
                         <segue destination="Qq6-WR-0Mb" kind="show" identifier="toCreateAccount" id="Gw5-tH-ibZ"/>
                     </connections>
                 </viewController>
@@ -377,6 +377,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                        <color key="tintColor" red="0.058823529411764705" green="0.88627450980392153" blue="0.45882352941176469" alpha="1" colorSpace="calibratedRGB"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="tintColor">
+                                <color key="value" red="0.0" green="0.88627450980392153" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </tabBar>
                     <connections>
                         <segue destination="arx-PM-LH5" kind="relationship" relationship="viewControllers" id="zGf-Gg-Y2f"/>

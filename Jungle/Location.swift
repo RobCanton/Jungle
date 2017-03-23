@@ -11,28 +11,43 @@ import CoreLocation
 
 class Location: NSObject {
     
-    fileprivate var id:String                    // Key in database
+    fileprivate var key:String                    // Key in database
     fileprivate var name:String
     fileprivate var address:String
     fileprivate var coordinates:CLLocation
-    fileprivate var story:Story
-    fileprivate var contributers:[String:Any]
     
-    init(key:String, name:String, address:String, coordinates:CLLocation, postKeys: [(String,Double)], contributers: [String:Any])
+    init(key:String, name:String, address:String, coordinates:CLLocation)
     {
-        self.id          = key
+        self.key          = key
         self.name        = name
         self.address     = address
         self.coordinates = coordinates
-        self.story       = Story(postKeys: postKeys)
-        self.contributers = contributers
+
+    }
+    
+    required convenience init(coder decoder: NSCoder) {
+        
+        let key = decoder.decodeObject(forKey: "key") as! String
+        let name = decoder.decodeObject(forKey: "name") as! String
+        let address = decoder.decodeObject(forKey: "address") as! String
+        let coordinates = decoder.decodeObject(forKey: "coordinates") as! CLLocation
+        self.init(key: key, name: name, address: address, coordinates: coordinates)
+        
+    }
+    
+    
+    func encode(with coder: NSCoder) {
+        coder.encode(key, forKey: "key")
+        coder.encode(name, forKey: "name")
+        coder.encode(address, forKey: "address")
+        coder.encode(coordinates, forKey: "coordinates")
     }
     
     /* Getters */
     
-    func getId() -> String
+    func getKey() -> String
     {
-        return id
+        return key
     }
     
     func getName()-> String
@@ -64,13 +79,13 @@ class Location: NSObject {
         return coordinates
     }
     
-    func getStory() -> Story {
+    /*func getStory() -> Story {
         return story
     }
     
     func getContributers() -> [String:Any] {
         return contributers
-    }
+    }*/
     
     func getDistance() -> Double {
         let lastLocation = GPSService.sharedInstance.lastLocation!

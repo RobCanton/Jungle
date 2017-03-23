@@ -37,23 +37,27 @@ class PhotoCell: UICollectionViewCell {
     var gradient:CAGradientLayer?
     
 
-    func setupLocationCell (_ location:Location) {
-        self.location = location
-        nameLabel.text = location.getName()
+    func setupLocationCell (_ locationStory:LocationStory) {
         
-        let lastPost = location.getStory().getPostKeys().first!
-        let key = lastPost.0
-        let time = lastPost.1
-        
-        let date = Date(timeIntervalSince1970: time/1000)
-        self.timeLabel.text = date.timeStringSinceNow()
         
         self.imageView.image = nil
         self.colorView.alpha = 0.0
         
 
         
-       
+        LocationService.sharedInstance.getLocationInfo(locationStory.getLocationKey(), completion: { location in
+            if location != nil {
+                self.location = location
+                self.nameLabel.text = location!.getName()
+            }
+        })
+        
+        let lastPost = locationStory.getPostKeys().first!
+        let key = lastPost.0
+        let time = lastPost.1
+        
+        let date = Date(timeIntervalSince1970: time/1000)
+        self.timeLabel.text = date.timeStringSinceNow()
  
         self.colorView.backgroundColor = UIColor.clear
         

@@ -106,7 +106,7 @@ class LocationService: NSObject {
                 let address      = info["address"] as! String
                 let coord = CLLocation(latitude: lat, longitude: lon)
                 
-                var postKeys = [(String,Double)]()
+                /*var postKeys = [(String,Double)]()
                 if let _postsKeys = dict["posts"] as? [String:Double] {
                     postKeys = _postsKeys.valueKeySorted
                 }
@@ -114,17 +114,57 @@ class LocationService: NSObject {
                 var contributers = [String:Any]()
                 if snapshot.hasChild("contributers") {
                     contributers = dict["contributers"] as! [String:Any]
-                }
+                }*/
                 
-                location = Location(key: snapshot.key, name: name, address: address, coordinates: coord, postKeys: postKeys, contributers: contributers)
+                location = Location(key: snapshot.key, name: name, address: address, coordinates: coord)
             }
             
             completion(location)
         })
     }
+    
+    func getLocationInfo(_ locationKey:String, completion: @escaping (_ location:Location?)->()) {
+        
+        if let cachedLocation = dataCache.object(forKey: "place-\(locationKey)" as NSString) as? Location {
+            completion(cachedLocation)
+        } else {
+            let locRef = ref.child("places/\(locationKey)/info")
+            
+            locRef.observeSingleEvent(of: .value, with: { snapshot in
+                var location:Location?
+                
+                if snapshot.exists() {
+                    let dict         = snapshot.value as! [String:AnyObject]
+                    let name         = dict["name"] as! String
+                    let lat          = dict["lat"] as! Double
+                    let lon          = dict["lon"] as! Double
+                    let address      = dict["address"] as! String
+                    let coord = CLLocation(latitude: lat, longitude: lon)
+                    
+                    
+                    location = Location(key: snapshot.key, name: name, address: address, coordinates: coord)
+                    dataCache.setObject(location!, forKey: "place-\(locationKey)" as NSString)
+                }
+                
+                completion(location)
+            })
+        }
+    }
+    
+    func getLocationStory(_ locationKey:String, completon: @escaping (_ story: LocationStory?)->()) {
+        
+        let locRef = ref.child("places/\(locationKey)/posts")
+        
+        locRef.observeSingleEvent(of: .value, with: { snapshot in
+            var story:LocationStory?
 
-    
-    
+            if let _postsKeys = snapshot.value as? [String:Double] {
+                let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                story = LocationStory(postKeys: postKeys, locationKey: locationKey)
+            }
+            completon(story)
+        })
+    }
 }
 
 extension Dictionary where Value: Comparable {

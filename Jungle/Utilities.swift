@@ -53,7 +53,7 @@ func downloadImageWithURLString(_ _url:String, completion: @escaping (_ image:UI
                 }
                 
                 let image = UIImage(data: data!)
-                return completion(image!, false)
+                return completion(image, false)
             }
             
     }).resume()

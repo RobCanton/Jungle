@@ -32,6 +32,20 @@ class UserStory:Story {
     
 }
 
+class LocationStory:Story {
+    fileprivate var locationKey:String
+    
+    init(postKeys:[(String,Double)], locationKey:String) {
+        self.locationKey = locationKey
+        super.init(postKeys: postKeys)
+    }
+    
+    func getLocationKey() -> String {
+        return locationKey
+    }
+    
+    
+}
 
 class Story: ItemDelegate {
     fileprivate var postKeys:[(String,Double)]

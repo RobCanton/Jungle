@@ -46,10 +46,13 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     var userStories = [UserStory]()
     
     func setupStories(_userStories:[UserStory]) {
-        userStories = _userStories
-        
-        print("SETUP STORIES: \(userStories)")
-        collectionView.reloadData()
+        print("SETUP STORIES CALLED")
+        if userStories.count == 0 {
+            userStories = _userStories
+            
+            print("SETUP STORIES: \(userStories)")
+            collectionView.reloadData()
+        }
         
         
     }
@@ -78,6 +81,11 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         return CGSize(width: self.frame.height * 0.60, height: self.frame.height * 0.85)
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath) as! UserStoryCollectionViewCell
+        globalMainRef?.presentUserStory(stories: userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        collectionView.deselectItem(at: indexPath, animated: true)
+    }
     
     
 }

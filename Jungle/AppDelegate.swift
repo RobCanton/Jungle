@@ -13,7 +13,9 @@ import Firebase
 import ReSwift
 import AVFoundation
 
-let accentColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
+//UIColor(red: 15/255, green: 226/255, blue: 117/255, alpha: 1.0) //#0fe275
+
+let accentColor = UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
 let mainStore = Store<AppState>(
@@ -45,8 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } catch _ as NSError {
             //print(error.localizedDescription)
         }
-        
-        
+               
         return true
     }
 

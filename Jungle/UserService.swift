@@ -55,6 +55,26 @@ class UserService {
             })
         }
     }
+    
+    static func getUser(_ uid:String,withCheck check:Int, completion: @escaping (_ user:User?,_ check:Int) -> Void) {
+        if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
+            completion(cachedUser, check)
+        } else {
+            ref.child("users/profile/\(uid)").observe(.value, with: { snapshot in
+                var user:User?
+                if snapshot.exists() {
+                    let dict = snapshot.value as! [String:AnyObject]
+                    guard let username = dict["username"] as? String else { return completion(user, check) }
+                    guard let imageURL = dict["imageURL"] as? String else { return completion(user, check) }
+                    
+                    user = User(uid: uid, username: username, imageURL: imageURL)
+                    dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
+                }
+                
+                completion(user, check)
+            })
+        }
+    }
 //
     
 
@@ -166,6 +186,49 @@ class UserService {
     }
 
 
+    static func listenToFollowers(uid:String, completion:@escaping (_ followers:[String])->()) {
+        let followersRef = ref.child("users/social/followers/\(uid)")
+        followersRef.observe(.value, with: { snapshot in
+            var _users = [String]()
+            if snapshot.exists() {
+                let dict = snapshot.value as! [String:Bool]
+                
+                for (uid, _) in dict {
+                    _users.append(uid)
+                }
+            }
+            completion(_users)
+        })
+    }
+    
+    
+    
+    static func listenToFollowing(uid:String, completion:@escaping (_ following:[String])->()) {
+        let followingRef = ref.child("users/social/following/\(uid)")
+        followingRef.observe(.value, with: { snapshot in
+            var _users = [String]()
+            if snapshot.exists() {
+                let dict = snapshot.value as! [String:Bool]
+                
+                for (uid, _) in dict {
+                    _users.append(uid)
+                }
+            }
+            completion(_users)
+        })
+    }
+    
+    static func stopListeningToFollowers(uid:String) {
+        if uid != mainStore.state.userState.uid {
+            ref.child("users/social/followers/\(uid)").removeAllObservers()
+        }
+    }
+    
+    static func stopListeningToFollowing(uid:String) {
+        if uid != mainStore.state.userState.uid {
+            ref.child("users/social/following/\(uid)").removeAllObservers()
+        }
+    }
     
     
     

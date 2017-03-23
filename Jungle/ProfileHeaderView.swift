@@ -25,7 +25,6 @@ class ProfileHeaderView: UICollectionReusableView {
  
     }
 
-    @IBOutlet weak var gradientView: UIView!
     @IBOutlet weak var followersLabel: UILabel!
     
     @IBOutlet weak var followingLabel: UILabel!
@@ -58,26 +57,22 @@ class ProfileHeaderView: UICollectionReusableView {
         guard let user = _user else {return}
         self.user = _user
         
-        
-        
         loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromFile in
             self.imageView.image = image
             self.largeImageView.image = image
         })
         
-        followersLabel.styleFollowerText(count: 1242, text: "followers", color: UIColor.darkGray, color2: UIColor.black)
-        
-        followingLabel.styleFollowerText(count: 42422, text: "following", color: UIColor.darkGray, color2: UIColor.black)
-        
-        let gradient = CAGradientLayer()
-        gradient.frame = gradientView.bounds
-        gradient.colors = [UIColor.clear.cgColor, UIColor(white: 1.0, alpha: 0.5).cgColor]
-        gradient.locations = [0.0, 1.0]
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
-        gradientView.layer.insertSublayer(gradient, at: 0)
-        
         setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
+        
+        if user.getUserId() == mainStore.state.userState.uid {
+            messageButton.setImage(UIImage(named: "edit"), for: .normal)
+            messageButton.backgroundColor = UIColor.white
+            messageButton.tintColor = UIColor.black
+        } else {
+            messageButton.setImage(UIImage(named: "speech"), for: .normal)
+            messageButton.backgroundColor = accentColor
+            messageButton.tintColor = UIColor.white
+        }
     }
     
     
@@ -137,17 +132,33 @@ class ProfileHeaderView: UICollectionReusableView {
         case .Requested:
             followButton.backgroundColor = UIColor.white
             followButton.setImage(UIImage(named: "plus"), for: .normal)
-            followButton.tintColor = accentColor
+            followButton.tintColor = UIColor.black
             followButton.isHidden = false
             break
         case .Following:
             followButton.backgroundColor = UIColor.white
             followButton.setImage(UIImage(named: "check"), for: .normal)
-            followButton.tintColor = accentColor
+            followButton.tintColor = UIColor.black
             followButton.isHidden = false
             break
         }
     }
     
+    
+    func setFollowersCount(_ count:Int) {
+        if count == 1 {
+            followersLabel.styleFollowerText(count: count, text: "follower", color: UIColor.darkGray, color2: UIColor.black)
+        } else {
+            followersLabel.styleFollowerText(count: count, text: "follower", color: UIColor.darkGray, color2: UIColor.black)
+        }
+    }
+    
+    func setFollowingCount(_ count:Int) {
+        if count == 1 {
+            followingLabel.styleFollowerText(count: count, text: "following", color: UIColor.darkGray, color2: UIColor.black)
+        } else {
+            followingLabel.styleFollowerText(count: count, text: "following", color: UIColor.darkGray, color2: UIColor.black)
+        }
+    }
 
 }

@@ -30,9 +30,10 @@
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pineapple" translatesAutoresizingMaskIntoConstraints="NO" id="Ase-SQ-Tgu">
                                 <rect key="frame" x="3" y="3" width="124" height="124"/>
+                                <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="Ase-SQ-Tgu" secondAttribute="trailing" constant="3" id="Vh7-ez-dkV"/>
                             <constraint firstItem="Ase-SQ-Tgu" firstAttribute="leading" secondItem="JVW-WJ-S1e" secondAttribute="leading" constant="3" id="Xvi-gG-a8f"/>
@@ -43,6 +44,7 @@
                     </view>
                 </subviews>
             </view>
+            <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="JVW-WJ-S1e" secondAttribute="trailing" constant="10" id="4Yi-QR-BCy"/>
                 <constraint firstItem="YYo-BG-D5S" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="bottom" constant="3" id="Ao4-mq-CxQ"/>

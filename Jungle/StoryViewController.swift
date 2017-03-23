@@ -59,31 +59,26 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var shouldPlay = false
     
     var story:Story!
-    var location:Location?
     
     var flagLabel:UILabel?
     
     func addFlagLabel() {
        
     }
-
     
-    func prepareStory(withStory story:Story, atIndex index:Int?) {
+    func prepareStory(withLocation location:LocationStory) {
+        self.story = location
+        self.story.delegate = self
+        shouldPlay = false
+        headerView.setupLocation(withPlaceId: location.getLocationKey())
+        story.determineState()
+    }
+    
+    func prepareStory(withStory story:UserStory) {
         self.story = story
         self.story.delegate = self
         shouldPlay = false
-
-        story.determineState()
-
-    }
     
-    func prepareStory(withLocation location:Location) {
-        self.location = location
-        self.story = location.getStory()
-        self.story.delegate = self
-        shouldPlay = false
-        
-        headerView.setupLocation(self.location!)
         
         story.determineState()
     }
@@ -198,6 +193,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                 self.footerView.setInfo( item: item, user: user!)
             }
         })
+        
+        if let _ = story as? UserStory {
+            headerView.setupLocation(withPlaceId: item.getLocationKey())
+        }
      
     }
 
@@ -429,12 +428,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
 
     var keyboardUp = false
-    
-    var dragGesture:UIPanGestureRecognizer!
-    
-    
-    var scrollView:UIScrollView!
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -446,41 +440,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         contentView.addSubview(headerView)
         contentView.addSubview(footerView)
         
-        dragGesture = UIPanGestureRecognizer(target: self, action: #selector(dragView))
-        //footerView.addGestureRecognizer(dragGesture)
-        
         footerTapped = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
         footerView.isUserInteractionEnabled = true
         footerView.addGestureRecognizer(footerTapped)
-        
-        let width: CGFloat = (UIScreen.main.bounds.size.width)
-        let height: CGFloat = (UIScreen.main.bounds.size.height)
-        scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-        
-        
-        let v1 = UIView()
-        v1.frame = scrollView.frame
-        v1.backgroundColor = UIColor.clear
-        
-        let v2 = UIView()
-        v2.frame = v1.frame
-        v2.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
-        
-        var v2Frame = v2.frame
-        v2Frame.origin.y = height
-        v2.frame = v2Frame
-        
-        self.scrollView.delegate = self
-        self.scrollView.bounces = false
-        self.scrollView.isPagingEnabled = true
-        self.scrollView.addSubview(v1)
-        self.scrollView.addSubview(v2)
-        self.scrollView.contentSize = CGSize(width: width, height: height * 2)
-        self.scrollView.isUserInteractionEnabled = false
-        contentView.addSubview(scrollView)
-
-        
-        
     }
     
     var commentsActive = false
@@ -493,8 +455,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             self.progressBar?.alpha = 0
             self.headerView.alpha = 0
         })
-       // scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
-
     }
     
     func fadeInDetails() {
@@ -503,43 +463,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             self.progressBar?.alpha = 1
             self.headerView.alpha = 1
         })
-    }
-    
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let y = scrollView.contentOffset.y
-        let alpha = 1 - (y / scrollView.frame.height)
-        self.footerView.alpha = alpha
-        self.progressBar?.alpha = alpha
-        self.headerView.alpha = alpha
-    }
-    
-    func dragView(sender: UIPanGestureRecognizer) {
-        
-        
-        
-        
-        let state = sender.state
-        if state == .ended {
-            var frame = sender.view!.frame
-            if frame.origin.y < self.frame.height / 2 {
-                frame.origin.y = 0
-            } else {
-                frame.origin.y = self.frame.height - frame.height
-            }
-            frame.origin.y = self.frame.height - frame.height
-            
-            UIView.animate(withDuration: 0.25, animations: {
-                
-                sender.view!.frame = frame
-            })
-        } else {
-            let translation = sender.translation(in: self)
-            var frame = sender.view!.frame
-            frame.origin.y += translation.y
-            sender.view!.frame = frame
-        }
-        
-        sender.setTranslation(CGPoint.zero, in: self)
     }
     
     public lazy var content: UIImageView = {

@@ -27,6 +27,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     var places:PlacesViewController!
     
     var returningPlacesCell:PhotoCell?
+    var returningStoriesCell:UserStoryCollectionViewCell?
     var flashView:UIView!
     
     var uploadCoordinate:CLLocation?
@@ -38,6 +39,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     var mapContainer:UIView!
     
     var screenMode:ScreenMode = .Camera
+    
+    var storyType:StoryType = .PlaceStory
     
     lazy var cancelButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
@@ -163,7 +166,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -177,6 +180,16 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         super.viewDidAppear(animated)
         returningPlacesCell?.fadeInInfo(animated: true)
         returningPlacesCell = nil
+        returningStoriesCell?.activateCell(true)
+        returningStoriesCell = nil
+        
+        /*if let header = places.getHeader() {
+            print("EACH CELL")
+            for cell in header.collectionView.visibleCells {
+                let storyCell = cell as! UserStoryCollectionViewCell
+                storyCell.activateCell(false)
+            }
+        }*/
         statusBar(hide: false, animated: true)
         //self.navigationController?.navigationBar.isUserInteractionEnabled = false
     }
@@ -190,7 +203,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             let alpha = y / height
             let reverseAlpha = 1 - alpha
             
-            let color = UIColor(hue: 0.6, saturation: alpha, brightness: 1.0, alpha: 1.0)
+            let color = UIColor(hue: 149/360, saturation: alpha * 1.0, brightness: 0.88, alpha: 1.0)
             recordBtn.ring.layer.borderColor = color.cgColor
             recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: alpha)
             recordBtn.transform = CGAffineTransform(scaleX: 0.8 + 0.2 * reverseAlpha, y: 0.8 + 0.2 * reverseAlpha)
@@ -236,6 +249,42 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     }
     
     let transitionController: TransitionController = TransitionController()
+    
+    func presentPlaceStory(locationStories:[LocationStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .PlaceStory
+        
+        let storiesViewController: StoriesViewController = StoriesViewController()
+        storiesViewController.storyType = storyType
+        storiesViewController.locationStories = locationStories
+        
+        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
+                                         "initialIndexPath": initialIndexPath as AnyObject]
+        
+        storiesViewController.transitionController = transitionController
+        
+        nav.delegate = transitionController
+        globalMainRef!.transitionController.push(viewController: storiesViewController, on: globalMainRef!, attached: storiesViewController)
+
+    }
+    
+    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .UserStory
+        print("PRESENT USER STORY")
+        let storiesViewController: StoriesViewController = StoriesViewController()
+        storiesViewController.storyType = storyType
+        storiesViewController.userStories = stories
+        
+        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
+                                         "initialIndexPath": initialIndexPath as AnyObject]
+        
+        storiesViewController.transitionController = transitionController
+        
+        nav.delegate = transitionController
+        globalMainRef!.transitionController.push(viewController: storiesViewController, on: globalMainRef!, attached: storiesViewController)
+        
+    }
 }
 
 extension MainViewController: CameraDelegate {
@@ -348,22 +397,44 @@ extension MainViewController: View2ViewTransitionPresenting {
         }
         
         let i =  IndexPath(row: indexPath.item, section: 0)
-        let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
-        let image_frame = cell.imageView.frame
-        let x = cell.frame.origin.x + 1
-        let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-        let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
-        let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-        return view.convert(rect, to: view)
+        
+        if storyType == .PlaceStory {
+            let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let image_frame = cell.imageView.frame
+            let x = cell.frame.origin.x + 1
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else {
+            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
+            let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
+            let image_frame = convertedFrame
+            let x = cell.frame.origin.x + 10 + 1
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 18 //+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        }
     }
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
         
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as! PhotoCell
-        print("INITIAL VIEW")
-        return cell.imageView
+        if storyType == .PlaceStory {
+            let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as! PhotoCell
+            return cell.imageView
+        } else {
+            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else {
+                return UIView()
+            }
+            cell.imageContainer.layer.cornerRadius = 0
+            cell.imageContainer.layer.borderColor = UIColor.clear.cgColor
+            cell.imageContainer.clipsToBounds = false
+            return cell.imageContainer
+        }
+        
     }
     
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
@@ -372,18 +443,36 @@ extension MainViewController: View2ViewTransitionPresenting {
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
         
-        if !isPresenting {
-            if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
-                returningPlacesCell?.fadeInInfo(animated: false)
-                returningPlacesCell = cell
-                returningPlacesCell!.fadeOutInfo()
+        if isPresenting {
+            if storyType == .UserStory {
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
+                    returningStoriesCell = cell
+                }
             }
         }
         
-        if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-            places.collectionView!.reloadData()
-            places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
-            places.collectionView!.layoutIfNeeded()
+        if !isPresenting {
+            if storyType == .PlaceStory {
+                if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
+                    returningPlacesCell?.fadeInInfo(animated: false)
+                    returningPlacesCell = cell
+                    returningPlacesCell!.fadeOutInfo()
+                }
+            } else {
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
+
+                    returningStoriesCell?.activateCell(false)
+            
+                    returningStoriesCell = cell
+                }
+            }
+        }
+        if storyType == .PlaceStory {
+            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                places.collectionView!.reloadData()
+                places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                places.collectionView!.layoutIfNeeded()
+            }
         }
     }
     
@@ -460,4 +549,8 @@ enum FlashMode {
 
 enum ScreenMode {
     case Transitioning, Camera, CameraHidden
+}
+
+enum StoryType {
+    case PlaceStory, UserStory
 }
