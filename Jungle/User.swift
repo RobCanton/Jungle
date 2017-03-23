@@ -63,12 +63,14 @@ class User:NSObject, NSCoding {
     fileprivate var uid: String
     fileprivate var username: String
     fileprivate var imageURL: String
+    fileprivate var bio: String
     
-    init(uid:String, username:String, imageURL:String)
+    init(uid:String, username:String, imageURL:String, bio:String)
     {
         self.uid       = uid
         self.username  = username
         self.imageURL  = imageURL
+        self.bio       = bio
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -76,7 +78,8 @@ class User:NSObject, NSCoding {
         let uid = decoder.decodeObject(forKey: "uid") as! String
         let username = decoder.decodeObject(forKey: "username") as! String
         let imageURL = decoder.decodeObject(forKey: "imageURL") as! String
-        self.init(uid: uid, username: username, imageURL: imageURL)
+        let bio = decoder.decodeObject(forKey: "bio") as! String
+        self.init(uid: uid, username: username, imageURL: imageURL, bio: bio)
 
     }
 
@@ -85,6 +88,7 @@ class User:NSObject, NSCoding {
         coder.encode(uid, forKey: "uid")
         coder.encode(username, forKey: "username")
         coder.encode(imageURL, forKey: "imageURL")
+        coder.encode(bio, forKey: "bio")
     }
     
 
@@ -100,6 +104,10 @@ class User:NSObject, NSCoding {
 
     func getImageUrl() -> String {
         return imageURL
+    }
+    
+    func getBio() -> String {
+        return bio
     }
     
     

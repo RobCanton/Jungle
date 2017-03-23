@@ -91,7 +91,8 @@ class CreateAccountViewController: UIViewController, UINavigationControllerDeleg
                         let userRef = FIRDatabase.database().reference().child("users/profile/\(user!.uid)")
                         userRef.setValue([
                             "username": username,
-                            "imageURL": url
+                            "imageURL": url,
+                            "bio":""
                             ], withCompletionBlock: { error, ref in
                                 self.dismiss(animated: true, completion: nil)
                         })

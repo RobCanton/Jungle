@@ -13,7 +13,7 @@ import Firebase
 
 
 
-class UserProfileViewController: UIViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout {
+class UserProfileViewController: UIViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout, EditProfileProtocol {
     
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
@@ -194,29 +194,44 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var presentingEmptyConversation = false
     
     func handleMessageTapped() {
-        print("MESSAGE")
+        
         let current_uid = mainStore.state.userState.uid
-        guard let partner_uid = uid else { return }
-        if current_uid == partner_uid { return }
-        if let conversation = checkForExistingConversation(partner_uid: current_uid) {
-            prepareConversationForPresentation(conversation: conversation)
+        
+        if uid == current_uid {
+            let controller = UIStoryboard(name: "EditProfileViewController", bundle: nil)
+                .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
+            let c = controller.viewControllers[0] as! EditProfileViewController
+            c.delegate = self
+            self.present(controller, animated: true, completion: nil)
         } else {
-            
-            let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
-            let ref = UserService.ref.child("conversations/\(pairKey)")
-            ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
+            guard let partner_uid = uid else { return }
+            if current_uid == partner_uid { return }
+            if let conversation = checkForExistingConversation(partner_uid: current_uid) {
+                prepareConversationForPresentation(conversation: conversation)
+            } else {
                 
-                let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                recipientUserRef.child(current_uid).setValue(true)
-                
-                let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
-                currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
-                    let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
-                    self.presentingEmptyConversation = true
-                    self.prepareConversationForPresentation(conversation: conversation)
+                let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
+                let ref = UserService.ref.child("conversations/\(pairKey)")
+                ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
+                    
+                    let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
+                    recipientUserRef.child(current_uid).setValue(true)
+                    
+                    let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
+                    currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
+                        let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
+                        self.presentingEmptyConversation = true
+                        self.prepareConversationForPresentation(conversation: conversation)
+                    })
                 })
-            })
+            }
         }
+    }
+    
+    
+    func getFullUser() {
+        self.user = mainStore.state.userState.user
+        self.collectionView.reloadData()
     }
     
     var presentConversation:Conversation?
@@ -249,6 +264,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
             view.setupHeader(_user:self.user)
             view.messageHandler = handleMessageTapped
+            view.unfollowHandler = unfollowHandler
             return view
         }
         
@@ -258,14 +274,14 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let staticHeight:CGFloat = 8 + 140
         if user != nil {
-            text = "Here is my bio about absolutely nothing important. but u can catch me out side mannn dem."
-            if let text = text {
-                if text != "" {
-                    var size =  UILabel.size(withText: text, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightMedium))
-                    let height2 = size.height + staticHeight + 12  // +8 for some bio padding
-                    size.height = height2
-                    return size
-                }
+            let bio = user!.getBio()
+            
+            //text = "Here is my bio about absolutely nothing important. but u can catch me out side mannn dem."
+            if bio != "" {
+                var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightMedium))
+                let height2 = size.height + staticHeight + 12  // +8 for some bio padding
+                size.height = height2
+                return size
             }
             
         }
@@ -328,6 +344,25 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         return nil
     }
     
+    
+    func unfollowHandler() {
+        guard let user = self.user else { return }
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
+        { action -> Void in
+            
+            UserService.unfollowUser(uid: user.getUserId())
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+        
+    }
     
     
 }

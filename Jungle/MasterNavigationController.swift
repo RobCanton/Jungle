@@ -33,7 +33,7 @@ class MyNavigationBar: UINavigationBar {
     }
 }
 
-extension UINavigationBar {
+/*extension UINavigationBar {
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if !self.isTranslucent {
             let v = super.hitTest(point, with: event)
@@ -42,4 +42,4 @@ extension UINavigationBar {
             return nil
         }
     }
-}
+}*/

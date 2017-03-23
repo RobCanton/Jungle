@@ -10,6 +10,8 @@
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
 		B07169A91E83681B00AF6A41 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A71E83681B00AF6A41 /* GalleryViewController.swift */; };
 		B07169AA1E83681B00AF6A41 /* PostViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A81E83681B00AF6A41 /* PostViewController.swift */; };
+		B07169AD1E838C6400AF6A41 /* EditProfileViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */; };
+		B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */; };
 		B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF961E790CD500011B43 /* AppDelegate.swift */; };
 		B093FF991E790CD500011B43 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF981E790CD500011B43 /* ViewController.swift */; };
 		B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9A1E790CD500011B43 /* Main.storyboard */; };
@@ -97,6 +99,8 @@
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
 		B07169A71E83681B00AF6A41 /* GalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
 		B07169A81E83681B00AF6A41 /* PostViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostViewController.swift; sourceTree = "<group>"; };
+		B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = EditProfileViewController.storyboard; sourceTree = "<group>"; };
+		B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditProfileViewController.swift; sourceTree = "<group>"; };
 		B093FF931E790CD500011B43 /* Jungle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jungle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B093FF961E790CD500011B43 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B093FF981E790CD500011B43 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -377,6 +381,8 @@
 				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
+				B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */,
+				B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */,
 				B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */,
 			);
 			name = Profile;
@@ -481,6 +487,7 @@
 				B0C86D3C1E807B9C0067E004 /* ConversationViewCell.xib in Resources */,
 				B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */,
 				B093FFCD1E79135A00011B43 /* PhotoCell.xib in Resources */,
+				B07169AD1E838C6400AF6A41 /* EditProfileViewController.storyboard in Resources */,
 				B0F894631E7B33DE00E490C4 /* StoryDetailsView.xib in Resources */,
 				B0F894721E7BA68A00E490C4 /* CommentBar.xib in Resources */,
 			);
@@ -545,6 +552,7 @@
 				B0F8948F1E7BD60900E490C4 /* UserReducer.swift in Sources */,
 				B093FFBA1E790D5E00011B43 /* KDCircularProgress.swift in Sources */,
 				B093FFDB1E793AC100011B43 /* ProgressIndicator.swift in Sources */,
+				B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */,
 				B0F8949C1E7E3C3E00E490C4 /* SavedCollectionView.swift in Sources */,
 				B0F894651E7B33F500E490C4 /* StoryDetailsView.swift in Sources */,
 				B093FF991E790CD500011B43 /* ViewController.swift in Sources */,

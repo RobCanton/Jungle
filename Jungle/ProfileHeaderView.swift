@@ -11,10 +11,9 @@ import UIKit
 class ProfileHeaderView: UICollectionReusableView {
 
     @IBOutlet weak var imageView: UIImageView!
-
-    @IBOutlet weak var largeImageView: UIImageView!
     @IBOutlet weak var messageButton: UIButton!
     
+    @IBOutlet weak var bioLabel: UILabel!
     @IBOutlet weak var followButton: UIButton!
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -29,7 +28,10 @@ class ProfileHeaderView: UICollectionReusableView {
     
     @IBOutlet weak var followingLabel: UILabel!
     
+
+    
     var followHandler:(()->())?
+    var unfollowHandler:(()->())?
     var messageHandler:(()->())?
     
     var status:FollowingStatus = .None
@@ -57,9 +59,10 @@ class ProfileHeaderView: UICollectionReusableView {
         guard let user = _user else {return}
         self.user = _user
         
+        bioLabel.text = user.getBio()
+        
         loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromFile in
             self.imageView.image = image
-            self.largeImageView.image = image
         })
         
         setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
@@ -91,7 +94,7 @@ class ProfileHeaderView: UICollectionReusableView {
         case .CurrentUser:
             break
         case .Following:
-            UserService.unfollowUser(uid: user.getUserId())
+            unfollowHandler?()
             break
         case .None:
             setUserStatus(status: .Requested)
@@ -160,5 +163,7 @@ class ProfileHeaderView: UICollectionReusableView {
             followingLabel.styleFollowerText(count: count, text: "following", color: UIColor.darkGray, color2: UIColor.black)
         }
     }
+    
+    
 
 }

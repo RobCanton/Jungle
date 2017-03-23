@@ -50,7 +50,7 @@
         <!--Me-->
         <scene sceneID="lME-MX-6Qw">
             <objects>
-                <viewController id="w25-hP-UUA" customClass="CreateAccountViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CreateAccountViewController" id="w25-hP-UUA" customClass="CreateAccountViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="nKI-rl-6jA"/>
                         <viewControllerLayoutGuide type="bottom" id="Bf1-Z9-OgT"/>
@@ -156,7 +156,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sgX-TN-V5t" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1768.8" y="1312.8935532233884"/>
+            <point key="canvasLocation" x="1823" y="1313"/>
         </scene>
         <!--Places View Controller-->
         <scene sceneID="Q4s-5b-aqd">
@@ -190,7 +190,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pineapple" translatesAutoresizingMaskIntoConstraints="NO" id="hfb-u0-ehE">
-                                <rect key="frame" x="152" y="245.5" width="70" height="70"/>
+                                <rect key="frame" x="152" y="246" width="70" height="70"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="If3-dK-Tz2"/>
                                     <constraint firstAttribute="width" secondItem="hfb-u0-ehE" secondAttribute="height" multiplier="1:1" id="sVj-m3-Cex"/>
