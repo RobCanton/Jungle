@@ -30,6 +30,7 @@ class CommentsHeaderView: UIView {
             if user != nil {
                 self.imageView.loadImageAsync(user!.getImageUrl(), completion: { result in })
                 self.usernameLabel.text = "\(user!.getUsername())'s post"
+                
             }
         })
     }

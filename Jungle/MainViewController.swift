@@ -25,6 +25,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     var cameraCenter:CGPoint!
     
     var places:PlacesViewController!
+    var profile:MyProfileViewController!
     
     var returningPlacesCell:PhotoCell?
     var returningStoriesCell:UserStoryCollectionViewCell?
@@ -116,6 +117,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         let nav1 = v2.viewControllers![0] as! UINavigationController
         places = nav1.viewControllers[0] as! PlacesViewController
         
+        let nav5 = v2.viewControllers![4] as! UINavigationController
+        profile = nav5.viewControllers[0] as! MyProfileViewController
+        
         var v2Frame: CGRect = CGRect(x: 0, y: 0, width: definiteBounds.width, height: definiteBounds.height - 20.0)
         v2Frame.origin.y = definiteBounds.height + 20.0
         v2.view.frame = v2Frame
@@ -172,6 +176,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.barStyle = .black
         self.navigationController?.view.backgroundColor = UIColor.clear
+        self.activateNavbar(false)
         //self.navigationController?.navigationBar.isUserInteractionEnabled = false
 
     }
@@ -194,6 +199,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         //self.navigationController?.navigationBar.isUserInteractionEnabled = false
     }
     
+    func activateNavbar(_ activate: Bool) {
+        guard let nav = self.navigationController as? MasterNavigationController else { return }
+        nav.activateNavbar(activate)
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         screenMode = .Transitioning
         recordBtn.removeGestures()
@@ -202,12 +212,13 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         if y < height {
             let alpha = y / height
             let reverseAlpha = 1 - alpha
-            
-            let color = UIColor(hue: 149/360, saturation: alpha * 1.0, brightness: 0.88, alpha: 1.0)
-            recordBtn.ring.layer.borderColor = color.cgColor
-            recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: alpha)
-            recordBtn.transform = CGAffineTransform(scaleX: 0.8 + 0.2 * reverseAlpha, y: 0.8 + 0.2 * reverseAlpha)
             recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * alpha)
+            let multiple = reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha
+            let color = UIColor(hue: 149/360, saturation: 1 - multiple, brightness: 0.88, alpha: 1.0)
+            recordBtn.transform = CGAffineTransform(scaleX: 0.8 + 0.2 * multiple, y: 0.8 + 0.2 * multiple)
+            recordBtn.ring.layer.borderColor = color.cgColor
+            recordBtn.dot.alpha = multiple
+            recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 1 - multiple)
             flashView.alpha = alpha
         }
     }
@@ -264,7 +275,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         storiesViewController.transitionController = transitionController
         
         nav.delegate = transitionController
-        globalMainRef!.transitionController.push(viewController: storiesViewController, on: globalMainRef!, attached: storiesViewController)
+        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
 
     }
     
@@ -282,7 +293,21 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         storiesViewController.transitionController = transitionController
         
         nav.delegate = transitionController
-        globalMainRef!.transitionController.push(viewController: storiesViewController, on: globalMainRef!, attached: storiesViewController)
+        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
+    }
+    
+    func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .ProfileStory
+        print("PRESENT PROFILE STORY")
+        let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.uid = mainStore.state.userState.uid
+        galleryViewController.posts = posts
+        galleryViewController.transitionController = self.transitionController
+        self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        
+        nav.delegate = transitionController
+        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
         
     }
 }
@@ -406,13 +431,21 @@ extension MainViewController: View2ViewTransitionPresenting {
             let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
-        } else {
+        } else if storyType == .UserStory {
             guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
             let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
             let image_frame = convertedFrame
-            let x = cell.frame.origin.x + 10 + 1
+            let x = cell.frame.origin.x + 8.0
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 18 //+ navHeight
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 8.0//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else {
+            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let image_frame = cell.imageView.frame
+            let x = cell.frame.origin.x + 1
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - profile.collectionView!.contentOffset.y//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
         }
@@ -425,7 +458,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         if storyType == .PlaceStory {
             let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as! PhotoCell
             return cell.imageView
-        } else {
+        } else if storyType == .UserStory {
             guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else {
                 return UIView()
             }
@@ -433,6 +466,9 @@ extension MainViewController: View2ViewTransitionPresenting {
             cell.imageContainer.layer.borderColor = UIColor.clear.cgColor
             cell.imageContainer.clipsToBounds = false
             return cell.imageContainer
+        } else {
+            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as! PhotoCell
+            return cell.imageView
         }
         
     }
@@ -458,13 +494,15 @@ extension MainViewController: View2ViewTransitionPresenting {
                     returningPlacesCell = cell
                     returningPlacesCell!.fadeOutInfo()
                 }
-            } else {
+            } else if storyType == .UserStory {
                 if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
 
                     returningStoriesCell?.activateCell(false)
             
                     returningStoriesCell = cell
                 }
+            } else {
+                
             }
         }
         if storyType == .PlaceStory {
@@ -472,6 +510,14 @@ extension MainViewController: View2ViewTransitionPresenting {
                 places.collectionView!.reloadData()
                 places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
                 places.collectionView!.layoutIfNeeded()
+            }
+        }
+        
+        if storyType == .ProfileStory {
+            if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                profile.collectionView!.reloadData()
+                profile.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                profile.collectionView!.layoutIfNeeded()
             }
         }
     }
@@ -552,5 +598,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case PlaceStory, UserStory
+    case PlaceStory, UserStory, ProfileStory
 }

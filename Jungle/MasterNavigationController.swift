@@ -11,35 +11,32 @@ import UIKit
 
 class MasterNavigationController: UINavigationController {
     
-    
-    
-}
-
-
-class MyNavigationBar: UINavigationBar {
-    private var secondTap = false
-    private var firstTapPoint = CGPoint.zero
-    
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        if !self.secondTap{
-            self.firstTapPoint = point
-        }
-        
-        defer{
-            self.secondTap = !self.secondTap
-        }
-        
-        return  super.point(inside: firstTapPoint, with: event)
+    func activateNavbar(_ activate: Bool) {
+        let navbar = navigationBar as! MasterNavigationBar
+        navbar.ignoreTouches = !activate
     }
 }
 
-/*extension UINavigationBar {
+
+class MasterNavigationBar: UINavigationBar {
+    var ignoreTouches = false
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if !self.isTranslucent {
+        if !ignoreTouches {
             let v = super.hitTest(point, with: event)
             return v
         } else {
             return nil
         }
     }
-}*/
+}
+
+//extension UINavigationBar {
+//    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+//        if !self.isTranslucent {
+//            let v = super.hitTest(point, with: event)
+//            return v
+//        } else {
+//            return nil
+//        }
+//    }
+//}

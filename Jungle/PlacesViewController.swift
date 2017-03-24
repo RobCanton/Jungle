@@ -9,12 +9,13 @@
 import UIKit
 import View2ViewTransition
 import Firebase
+import ReSwift
 
 enum SortedBy {
     case Recent,Popular,Nearest
 }
 
-class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataSource, LocationDelegate {
+class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataSource, LocationDelegate, StoreSubscriber {
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
     var screenWidth: CGFloat!
@@ -40,7 +41,6 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = true
@@ -100,7 +100,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         inboxButton.setImage(UIImage(named:"restart"), for: .normal)
         inboxButton.center = CGPoint(x: view.frame.width - 20 - 8, y: 22)
         inboxButton.addTarget(self, action: #selector(refreshData), for: .touchUpInside)
-        inboxButton.tintColor = UIColor.black
+        inboxButton.tintColor = UIColor.darkGray
         view.addSubview(inboxButton)
         
         LocationService.sharedInstance.delegate = self
@@ -112,7 +112,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
-            view.setup()
+            view.setupStories(_userStories: userStories)
             return view
         }
         
@@ -120,6 +120,9 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        if userStories.count == 0 {
+            return CGSize.zero
+        }
         return CGSize(width: collectionView.frame.size.width, height: 90)
     }
     
@@ -146,10 +149,9 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //globalContainerRef?.snapContainer.scrollView.isScrollEnabled = true
+        mainStore.subscribe(self)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        requestActivity()
-        listenToActivityResponse()
+        
     }
     
     func requestActivity() {
@@ -201,14 +203,21 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         }
         
         self.userStories = mutableStories
-        getHeader()?.setupStories(_userStories: self.userStories)
+        self.collectionView.reloadData()
+        //getHeader()?.setupStories(_userStories: self.userStories)
     }
     
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        requestActivity()
+        listenToActivityResponse()
         
+    }
+    
+    func newState(state: AppState) {
+        print("New State")
     }
     
     func changeSort(control: UISegmentedControl) {

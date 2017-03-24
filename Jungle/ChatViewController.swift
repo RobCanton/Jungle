@@ -55,6 +55,14 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         super.viewDidLoad()
         view.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
+        if !popUpMode {
+            if let navbar = navigationController?.navigationBar {
+                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+                blurView.frame = CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0)
+                self.view.insertSubview(blurView, belowSubview: navbar)
+            }
+        }
+        
         messages = [JSQMessage]()
         // Do any additional setup after loading the view, typically from a nib.
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
@@ -191,8 +199,6 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.barStyle = .default
-        self.navigationController?.navigationBar.isTranslucent = false
-        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -200,8 +206,9 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         NotificationCenter.default.removeObserver(self)
         downloadRef?.removeAllObservers()
         conversation.listen()
-        self.navigationController?.navigationBar.isTranslucent = true
+       // self.navigationController?.navigationBar.isTranslucent = true
         //self.navigationController?.navigationBar.isUserInteractionEnabled = false
+        self.navigationController?.view.backgroundColor = UIColor.clear
     }
     
     

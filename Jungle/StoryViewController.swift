@@ -487,7 +487,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }()
     
     public lazy var gradientView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.75, width: self.bounds.width, height: self.bounds.height * 0.25))
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.8, width: self.bounds.width, height: self.bounds.height * 0.20))
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0)

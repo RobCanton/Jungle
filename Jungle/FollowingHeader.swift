@@ -8,6 +8,10 @@
 
 import UIKit
 
+func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
+    
+}
+
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
     
@@ -39,22 +43,17 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
 
     }
     
-    func setup() {
-        self.collectionView.reloadData()
-    }
-    
     var userStories = [UserStory]()
     
     func setupStories(_userStories:[UserStory]) {
+        
+        
         print("SETUP STORIES CALLED")
-        if userStories.count == 0 {
-            userStories = _userStories
-            
-            print("SETUP STORIES: \(userStories)")
-            collectionView.reloadData()
-        }
+        userStories = _userStories
         
-        
+        print("SETUP STORIES: \(userStories)")
+        collectionView.reloadData()
+
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -67,10 +66,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let userCell = cell as! UserStoryCollectionViewCell
-        userCell.setup()
-    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -78,7 +73,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func getItemSize() -> CGSize {
-        return CGSize(width: self.frame.height * 0.60, height: self.frame.height * 0.85)
+        return CGSize(width: self.frame.height * 0.85, height: self.frame.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

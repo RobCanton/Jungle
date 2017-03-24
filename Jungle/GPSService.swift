@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import ReSwift
 
 protocol GPSServiceDelegate {
     func tracingLocation(_ currentLocation: CLLocation)
@@ -19,7 +20,6 @@ class GPSService: NSObject, CLLocationManagerDelegate {
     
     override init() {
         super.init()
-    
         self.locationManager = CLLocationManager()
         guard let locationManager = self.locationManager else {
             return

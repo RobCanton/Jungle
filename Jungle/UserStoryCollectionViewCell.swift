@@ -25,13 +25,7 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
     var check = 0
     
     func setup() {
-        imageView.layer.cornerRadius = imageView.frame.width / 2
-        imageView.clipsToBounds = true
         
-        imageContainer.layer.cornerRadius = imageContainer.frame.width / 2
-        imageContainer.layer.borderColor = accentColor.cgColor
-        imageContainer.layer.borderWidth = 2.0
-        imageContainer.clipsToBounds = true
         
 //        UserService.getUser(mainStore.state.userState.uid, completion: { user in
 //            self.imageView.loadImageAsync(user!.getImageUrl(), completion: { result in })
@@ -60,6 +54,14 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
             }
         })*/
         
+        self.imageView.layer.cornerRadius = self.imageView.frame.width / 2
+        self.imageView.clipsToBounds = true
+        
+        self.imageContainer.layer.cornerRadius = self.imageContainer.frame.width / 2
+        self.imageContainer.layer.borderColor = accentColor.cgColor
+        self.imageContainer.layer.borderWidth = 2.0
+        self.imageContainer.clipsToBounds = true
+        
         UserService.getUser(story.getUserId(), withCheck: check, completion: { user, check1 in
         
             if user != nil && check1 == self.check {
@@ -76,6 +78,8 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
                     self.usernameLabel.text = user!.getUsername()
                     self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightRegular)
                 }
+                
+                
             }
         })
     }

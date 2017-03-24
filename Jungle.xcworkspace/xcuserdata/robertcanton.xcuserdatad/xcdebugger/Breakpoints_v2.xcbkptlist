@@ -56,11 +56,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UserStoryCollectionViewCell.swift"
-            timestampString = "511901693.736187"
+            timestampString = "512030376.566307"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "145"
-            endingLineNumber = "145"
+            startingLineNumber = "149"
+            endingLineNumber = "149"
             landmarkName = "UserStoryCollectionViewCell"
             landmarkType = "3">
          </BreakpointContent>

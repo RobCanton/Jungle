@@ -34,8 +34,8 @@ class UserService {
 //            }
 //        }
 //    }
-
 //    
+
     static func getUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
             completion(cachedUser)

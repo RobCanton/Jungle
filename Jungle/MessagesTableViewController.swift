@@ -23,10 +23,11 @@ class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, 
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         self.automaticallyAdjustsScrollViewInsets = false
         
-        var searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width - 96, height: 44 - 16))
+        var searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width - 108, height: 44 - 16))
         searchBar.center = CGPoint(x: view.frame.width/2, y: 22)
         searchBar.barStyle = .default
         //searchBar.barTintColor = UIColor.red
+        searchBar.placeholder = "Search following"
         searchBar.searchBarStyle = .minimal
         view.addSubview(searchBar)
         
@@ -39,7 +40,7 @@ class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, 
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
-        tableView.backgroundColor = UIColor.clear
+        tableView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
@@ -118,6 +119,7 @@ class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, 
             controller.conversation = conversation
             controller.partnerImage = image
             globalMainRef?.navigationController?.delegate = nil
+            globalMainRef?.activateNavbar(true)
             globalMainRef?.navigationController?.pushViewController(controller, animated: true)
         })
     }

@@ -149,6 +149,8 @@ class ProfileHeaderView: UICollectionReusableView {
     
     
     func setFollowersCount(_ count:Int) {
+        guard let user = user else { return }
+
         if count == 1 {
             followersLabel.styleFollowerText(count: count, text: "follower", color: UIColor.darkGray, color2: UIColor.black)
         } else {

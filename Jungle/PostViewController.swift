@@ -73,6 +73,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         super.init(frame: frame)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
+        contentView.addSubview(gradientView)
         contentView.addSubview(headerView)
         contentView.addSubview(footerView)
 
@@ -289,6 +290,19 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         view.backgroundColor = UIColor.clear
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
+        return view
+    }()
+    
+    public lazy var gradientView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.8, width: self.bounds.width, height: self.bounds.height * 0.20))
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 0, y: 1)
+        let dark = UIColor(white: 0.0, alpha: 0.7)
+        gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
+        view.layer.insertSublayer(gradient, at: 0)
+        view.isUserInteractionEnabled = false
         return view
     }()
     

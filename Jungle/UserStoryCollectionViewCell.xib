@@ -13,44 +13,46 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gTV-IL-0wX" customClass="UserStoryCollectionViewCell" customModule="Jungle" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="150" height="153"/>
+            <rect key="frame" x="0.0" y="0.0" width="77" height="90"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                <rect key="frame" x="0.0" y="0.0" width="150" height="153"/>
+                <rect key="frame" x="0.0" y="0.0" width="77" height="90"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="robcanton" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YYo-BG-D5S">
-                        <rect key="frame" x="23" y="121" width="104" height="21"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JVW-WJ-S1e">
-                        <rect key="frame" x="10" y="18" width="130" height="130"/>
+                        <rect key="frame" x="8" y="8" width="61" height="61"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pineapple" translatesAutoresizingMaskIntoConstraints="NO" id="Ase-SQ-Tgu">
-                                <rect key="frame" x="3" y="3" width="124" height="124"/>
-                                <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ase-SQ-Tgu">
+                                <rect key="frame" x="3" y="3" width="55" height="55"/>
+                                <color key="backgroundColor" white="0.72241362576273283" alpha="1" colorSpace="calibratedWhite"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="Ase-SQ-Tgu" secondAttribute="trailing" constant="3" id="Vh7-ez-dkV"/>
-                            <constraint firstItem="Ase-SQ-Tgu" firstAttribute="leading" secondItem="JVW-WJ-S1e" secondAttribute="leading" constant="3" id="Xvi-gG-a8f"/>
-                            <constraint firstAttribute="width" secondItem="JVW-WJ-S1e" secondAttribute="height" multiplier="1:1" id="b7W-dX-aF1"/>
-                            <constraint firstItem="Ase-SQ-Tgu" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="top" constant="3" id="iXs-Wm-Bw7"/>
-                            <constraint firstAttribute="bottom" secondItem="Ase-SQ-Tgu" secondAttribute="bottom" constant="3" id="ubm-If-Wb8"/>
+                            <constraint firstAttribute="width" secondItem="JVW-WJ-S1e" secondAttribute="height" multiplier="1:1" id="B0B-3b-7c1"/>
+                            <constraint firstAttribute="trailing" secondItem="Ase-SQ-Tgu" secondAttribute="trailing" constant="3" id="UVW-wf-h6H"/>
+                            <constraint firstItem="Ase-SQ-Tgu" firstAttribute="leading" secondItem="JVW-WJ-S1e" secondAttribute="leading" constant="3" id="aMl-hU-Ore"/>
+                            <constraint firstAttribute="bottom" secondItem="Ase-SQ-Tgu" secondAttribute="bottom" constant="3" id="bGB-fx-YaI"/>
+                            <constraint firstItem="Ase-SQ-Tgu" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="top" constant="3" id="dzh-K4-Bj6"/>
                         </constraints>
                     </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="robcanton" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YYo-BG-D5S">
+                        <rect key="frame" x="0.0" y="69" width="77" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
             </view>
             <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstAttribute="trailing" secondItem="JVW-WJ-S1e" secondAttribute="trailing" constant="10" id="4Yi-QR-BCy"/>
-                <constraint firstItem="YYo-BG-D5S" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="bottom" constant="3" id="Ao4-mq-CxQ"/>
-                <constraint firstItem="JVW-WJ-S1e" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="18" id="MPg-CL-7c6"/>
-                <constraint firstItem="YYo-BG-D5S" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="Zgl-Wx-xDG"/>
-                <constraint firstItem="JVW-WJ-S1e" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="10" id="dAl-Ji-U2R"/>
+                <constraint firstItem="JVW-WJ-S1e" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="8" id="86Z-tz-tRS"/>
+                <constraint firstItem="JVW-WJ-S1e" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="8" id="AlI-nV-qK4"/>
+                <constraint firstItem="YYo-BG-D5S" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="H83-ak-gn1"/>
+                <constraint firstItem="YYo-BG-D5S" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="bottom" id="XBW-dM-DBe"/>
+                <constraint firstAttribute="trailing" secondItem="YYo-BG-D5S" secondAttribute="trailing" id="YBT-Vr-Wfu"/>
+                <constraint firstAttribute="bottom" secondItem="YYo-BG-D5S" secondAttribute="bottom" id="lid-2f-hmn"/>
+                <constraint firstAttribute="trailing" secondItem="JVW-WJ-S1e" secondAttribute="trailing" constant="8" id="mfv-hu-W7t"/>
             </constraints>
             <size key="customSize" width="117" height="137"/>
             <connections>
@@ -58,10 +60,7 @@
                 <outlet property="imageView" destination="Ase-SQ-Tgu" id="v53-wU-KV3"/>
                 <outlet property="usernameLabel" destination="YYo-BG-D5S" id="SJM-8z-OiN"/>
             </connections>
-            <point key="canvasLocation" x="58" y="95.5"/>
+            <point key="canvasLocation" x="57.5" y="95"/>
         </collectionViewCell>
     </objects>
-    <resources>
-        <image name="pineapple" width="1422" height="1422"/>
-    </resources>
 </document>

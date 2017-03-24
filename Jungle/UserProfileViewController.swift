@@ -51,10 +51,19 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         navigationController?.navigationBar.isTranslucent = false
+        
+        if let navbar = navigationController?.navigationBar {
+            let blurView = UIView(frame: CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0))
+            blurView.backgroundColor = UIColor.white
+            self.view.insertSubview(blurView, belowSubview: navbar)
+        }
+        
         self.view.backgroundColor = UIColor.white
 
         screenSize = self.view.frame
@@ -93,20 +102,20 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                 self.collectionView.reloadData()
             }
         })
-        
-        UserService.listenToFollowers(uid: uid, completion: { followers in
-            self.followers = followers
-        })
-        
-        UserService.listenToFollowing(uid: uid, completion: { following in
-            self.following = following
-        })
 
         
         if uid != mainStore.state.userState.uid {
             let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: nil)
             moreButton.tintColor = UIColor.black
             self.navigationItem.rightBarButtonItem = moreButton
+            
+            UserService.listenToFollowers(uid: uid, completion: { followers in
+                self.followers = followers
+            })
+            
+            UserService.listenToFollowing(uid: uid, completion: { following in
+                self.following = following
+            })
         }
     
     }
@@ -117,11 +126,13 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         mainStore.subscribe(self)
         globalMainRef?.statusBar(hide: false, animated: true)
         navigationController?.setNavigationBarHidden(false, animated: true)
-        listenToPosts()
         
+        setFollowing()
         if navigationController?.delegate === transitionController {
             statusBarShouldHide = false
             self.setNeedsStatusBarAppearanceUpdate()
+        } else {
+            listenToPosts()
         }
     }
     
@@ -131,17 +142,24 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         statusBarShouldHide = false
         self.setNeedsStatusBarAppearanceUpdate()
         
-        self.navigationController?.delegate = nil
+        if navigationController?.delegate === transitionController {
+            self.navigationController?.delegate = nil
+            listenToPosts()
+        }
+        
+        setFollowing()
 
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-
+        
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        mainStore.unsubscribe(self)
         stopListeningToPosts()
+        
         UserService.stopListeningToFollowers(uid: uid)
         UserService.stopListeningToFollowing(uid: uid)
     }
@@ -149,8 +167,28 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     func newState(state: AppState) {
         let status = checkFollowingStatus(uid: uid)
         getHeaderView()?.setUserStatus(status: status)
+        setFollowing()
+    }
+    
+    func setFollowing() {
+        if uid != mainStore.state.userState.uid { return }
+        let followers = mainStore.state.socialState.followers
+        var tempFollowers = [String]()
+        for follower in followers {
+            tempFollowers.append(follower)
+        }
+        
+        self.followers = tempFollowers
+        
+        let following = mainStore.state.socialState.following
+        var tempFollowing = [String]()
+        for follower in following {
+            tempFollowing.append(follower)
+        }
+        self.following = tempFollowing
     }
 
+    
     
     var postsRef:FIRDatabaseReference?
     

@@ -8,10 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
+		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
+		B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0697BA81E84ECAB0076EC87 /* AuthService.swift */; };
 		B07169A91E83681B00AF6A41 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A71E83681B00AF6A41 /* GalleryViewController.swift */; };
 		B07169AA1E83681B00AF6A41 /* PostViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A81E83681B00AF6A41 /* PostViewController.swift */; };
 		B07169AD1E838C6400AF6A41 /* EditProfileViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */; };
 		B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */; };
+		B07169B01E83B4D600AF6A41 /* ProfileTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */; };
+		B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */; };
 		B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF961E790CD500011B43 /* AppDelegate.swift */; };
 		B093FF991E790CD500011B43 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF981E790CD500011B43 /* ViewController.swift */; };
 		B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9A1E790CD500011B43 /* Main.storyboard */; };
@@ -97,10 +101,14 @@
 /* Begin PBXFileReference section */
 		24440022F614359253D5F062 /* Pods_Jungle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Jungle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
+		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		B0697BA81E84ECAB0076EC87 /* AuthService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		B07169A71E83681B00AF6A41 /* GalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
 		B07169A81E83681B00AF6A41 /* PostViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostViewController.swift; sourceTree = "<group>"; };
 		B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = EditProfileViewController.storyboard; sourceTree = "<group>"; };
 		B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditProfileViewController.swift; sourceTree = "<group>"; };
+		B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileTabHeader.swift; sourceTree = "<group>"; };
+		B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileTabHeader.xib; sourceTree = "<group>"; };
 		B093FF931E790CD500011B43 /* Jungle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jungle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B093FF961E790CD500011B43 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B093FF981E790CD500011B43 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -294,6 +302,7 @@
 			isa = PBXGroup;
 			children = (
 				B093FFAA1E790D5E00011B43 /* GPSService.swift */,
+				B0697BA81E84ECAB0076EC87 /* AuthService.swift */,
 				B093FFAD1E790D5E00011B43 /* LocationService.swift */,
 				B0F8945C1E7B216500E490C4 /* UserService.swift */,
 				B0C86D301E7FC6B40067E004 /* Listeners.swift */,
@@ -376,14 +385,17 @@
 			children = (
 				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
 				B07169A81E83681B00AF6A41 /* PostViewController.swift */,
-				B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */,
-				B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */,
 				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
 				B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */,
 				B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */,
 				B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */,
+				B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */,
+				B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */,
+				B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */,
+				B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */,
+				B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -472,6 +484,7 @@
 				B0F894811E7BC8EE00E490C4 /* ListHeaderView.xib in Resources */,
 				B0C86D471E80B7F90067E004 /* FollowingHeader.xib in Resources */,
 				B093FFC71E790F6800011B43 /* GoogleService-Info.plist in Resources */,
+				B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */,
 				B093FFCB1E7910E700011B43 /* SendProfileViewCell.xib in Resources */,
 				B093FFC91E7910B100011B43 /* mapStyle.json in Resources */,
 				B0AE229F1E7A526500141709 /* StoryInfoView.xib in Resources */,
@@ -555,6 +568,7 @@
 				B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */,
 				B0F8949C1E7E3C3E00E490C4 /* SavedCollectionView.swift in Sources */,
 				B0F894651E7B33F500E490C4 /* StoryDetailsView.swift in Sources */,
+				B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */,
 				B093FF991E790CD500011B43 /* ViewController.swift in Sources */,
 				B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */,
 				B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */,
@@ -579,6 +593,7 @@
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */,
 				B0F8947C1E7BC59600E490C4 /* UserStoryTableViewCell.swift in Sources */,
+				B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */,
 				B0F894931E7BD68800E490C4 /* SocialReducer.swift in Sources */,
 				B093FFD81E79399C00011B43 /* StoryProgressIndicator.swift in Sources */,
 				B093FFD91E79399C00011B43 /* StoryViewController.swift in Sources */,
@@ -609,6 +624,7 @@
 				B093FFBB1E790D5E00011B43 /* Location.swift in Sources */,
 				B07169A91E83681B00AF6A41 /* GalleryViewController.swift in Sources */,
 				B0AE229C1E7A509E00141709 /* PostHeaderView.swift in Sources */,
+				B07169B01E83B4D600AF6A41 /* ProfileTabHeader.swift in Sources */,
 				B0F894A61E7F250F00E490C4 /* MainTabBarController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

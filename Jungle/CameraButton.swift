@@ -38,7 +38,7 @@ class CameraButton: UIView {
         ring.backgroundColor = UIColor.clear
         ring.layer.cornerRadius = ring.frame.height/2
         ring.layer.borderColor = UIColor.white.cgColor
-        ring.layer.borderWidth = 4.0
+        ring.layer.borderWidth = 4.25
         ring.clipsToBounds = true
         ring.layer.masksToBounds = true
         ring.tintColor = UIColor.white
