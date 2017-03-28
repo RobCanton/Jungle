@@ -87,9 +87,6 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
     
     
     func activateCell(_ animated:Bool) {
-        if let s = story as? UserStory {
-           print("REACTIVATE OLD CELL: \(s.getUserId())")
-        }
 
         imageContainer.layer.cornerRadius = imageContainer.frame.width / 2
         imageContainer.clipsToBounds = true

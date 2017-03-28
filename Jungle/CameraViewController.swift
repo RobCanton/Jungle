@@ -140,7 +140,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
             
             videoFileOutput = AVCaptureMovieFileOutput()
             self.captureSession!.addOutput(videoFileOutput)
-            let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
+            /*let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
             do {
                 let audioInput: AVCaptureDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
                 self.captureSession!.addInput(audioInput)
@@ -148,7 +148,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
             } catch {
                 print("Unable to add audio device to the recording.")
             }
-            
+            */
             if captureSession?.canAddInput(input) != nil {
                 captureSession?.addInput(input)
                 stillImageOutput = AVCaptureStillImageOutput()

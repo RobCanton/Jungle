@@ -10,6 +10,7 @@ import UIKit
 import View2ViewTransition
 import Firebase
 import ReSwift
+import MapKit
 
 enum SortedBy {
     case Recent,Popular,Nearest
@@ -72,13 +73,6 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         collectionView.isPagingEnabled = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = UIColor.white
-        
-        refresher = UIRefreshControl()
-        collectionView.alwaysBounceVertical = true
-        refresher.tintColor = UIColor.lightGray
-        refresher.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        collectionView.addSubview(refresher)
-        
         view.addSubview(collectionView)
         
         let segmentedControl = UISegmentedControl(items: ["Recent", "Popular", "Nearest"])
@@ -156,13 +150,13 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     
     func requestActivity() {
         let uid = mainStore.state.userState.uid
-        let ref = UserService.ref.child("api/requests/activity/\(uid)")
+        let ref = UserService.ref.child("api/requests/story/\(uid)")
         ref.setValue(true)
     }
     
     func listenToActivityResponse() {
         let uid = mainStore.state.userState.uid
-        responseRef = UserService.ref.child("api/responses/activity/\(uid)")
+        responseRef = UserService.ref.child("api/responses/story/\(uid)")
         responseRef?.removeAllObservers()
         responseRef?.observe(.value, with: { snapshot in
             var tempStories = [UserStory]()
@@ -217,7 +211,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func newState(state: AppState) {
-        print("New State")
+
     }
     
     func changeSort(control: UISegmentedControl) {
@@ -258,8 +252,6 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func locationsUpdated(locations: [Location]) {
-        print("NEW LOCATIONS")
-        print(locations)
         
         //self.locations = getSortedLocations(locations)
         
@@ -270,14 +262,12 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
             let location = locations[i]
             
             LocationService.sharedInstance.getLocationStory(location.getKey(), completon: { story in
-                print("GOT STORY")
                 if story != nil {
                     tempStories.append(story!)
                 }
                 count += 1
                 if count >= locations.count {
                     count = -1
-                    print("STORIES READY")
                     self.locationStories = tempStories
                     self.collectionView.reloadData()
                     self.stopRefresher()

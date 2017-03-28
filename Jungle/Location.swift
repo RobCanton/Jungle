@@ -61,17 +61,7 @@ class Location: NSObject {
     }
     
     func getShortAddress() -> String {
-        if let index = address.lowercased().characters.index(of: ",") {
-            
-            let firstHalf = address.substring(to: index)
-            let secondHalf = address.substring(from: address.index(after: index))
-            if let i = secondHalf.lowercased().characters.index(of: ",") {
-                let secondCut = secondHalf.substring(to: i)
-                return "\(firstHalf),\(secondCut)"
-            }
-            return firstHalf
-        }
-        return address
+        return getShortFormattedAddress(address)
     }
     
     func getCoordinates() -> CLLocation
@@ -91,5 +81,19 @@ class Location: NSObject {
         let lastLocation = GPSService.sharedInstance.lastLocation!
         return lastLocation.distance(from: coordinates)
     }
+}
+
+func getShortFormattedAddress(_ address: String) -> String {
+    if let index = address.lowercased().characters.index(of: ",") {
+        
+        let firstHalf = address.substring(to: index)
+        let secondHalf = address.substring(from: address.index(after: index))
+        if let i = secondHalf.lowercased().characters.index(of: ",") {
+            let secondCut = secondHalf.substring(to: i)
+            return "\(firstHalf),\(secondCut)"
+        }
+        return firstHalf
+    }
+    return address
 }
 

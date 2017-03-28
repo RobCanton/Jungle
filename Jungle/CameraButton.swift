@@ -88,7 +88,7 @@ class CameraButton: UIView {
         interactionView.addGestureRecognizer(press)
         interactionView.isUserInteractionEnabled = true
         
-        addSubview(dot)
+        //addSubview(dot)
         addSubview(redCircle)
         addSubview(ring)
         addSubview(progresser)

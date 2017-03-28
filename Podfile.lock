@@ -71,6 +71,7 @@ PODS:
   - JSQMessagesViewController (7.3.4):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
+  - NVActivityIndicatorView (3.4)
   - ReSwift (3.0.0)
   - View2ViewTransition (1.0.0)
 
@@ -84,6 +85,7 @@ DEPENDENCIES:
   - GooglePlacePicker
   - GooglePlaces
   - JSQMessagesViewController
+  - NVActivityIndicatorView
   - ReSwift (= 3.0.0)
   - View2ViewTransition
 
@@ -105,9 +107,10 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 6f8d8b28b7e345549ac471071608170b31cb4977
   JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
+  NVActivityIndicatorView: 5754be63ceecd1df8af37d3c088d81872feeb8b8
   ReSwift: f0255f4b4f2dacd12c5d97d34d13fc5dad6d6371
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 2dcf086096d5bf7910767d67be3354816d4a3ebe
+PODFILE CHECKSUM: 60356532ba8c1f0db4045a5988859f2f89d7e11b
 
 COCOAPODS: 1.2.0

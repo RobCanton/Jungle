@@ -34,9 +34,11 @@ class SendProfileViewCell: UITableViewCell {
     func toggleSelection(_ selected: Bool) {
         
         if selected {
+            contentView.backgroundColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
             circleButton.setImage(UIImage(named: "circle_checked"), for: .normal)
             circleButton.tintColor = accentColor
         } else {
+            contentView.backgroundColor = UIColor.white
             circleButton.setImage(UIImage(named: "circle_unchecked"), for: .normal)
             circleButton.tintColor = UIColor.gray
         }

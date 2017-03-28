@@ -18,7 +18,9 @@ class MainTabBarController: UITabBarController {
         self.tabBar.isTranslucent = false
         self.edgesForExtendedLayout = []
         
-        
+        self.tabBar.setValue(true, forKey: "_hidesShadow")
+        self.tabBar.backgroundImage = UIImage()
+        self.tabBar.shadowImage = UIImage()
         
     }
     
@@ -42,6 +44,7 @@ class temp:UIViewController {
         backDrop.clipsToBounds = true
         
         self.view.addSubview(backDrop)
+        
         
     
 

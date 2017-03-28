@@ -92,7 +92,6 @@ class MyProfileViewController: temp, StoreSubscriber, UICollectionViewDelegate, 
         UserService.getUser(uid, completion: { user in
             if user != nil {
                 self.user = user
-                self.title = self.user!.getUsername()
                 self.collectionView.reloadData()
             }
         })

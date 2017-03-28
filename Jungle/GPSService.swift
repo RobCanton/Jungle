@@ -1,10 +1,15 @@
 import Foundation
 import CoreLocation
 import ReSwift
+import GoogleMaps
+import GooglePlaces
 
 protocol GPSServiceDelegate {
     func tracingLocation(_ currentLocation: CLLocation)
+    func significantLocationUpdate( _ location: CLLocation)
     func tracingLocationDidFailWithError(_ error: NSError)
+    
+    func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood])
 }
 
 class GPSService: NSObject, CLLocationManagerDelegate {
@@ -16,7 +21,14 @@ class GPSService: NSObject, CLLocationManagerDelegate {
     
     var locationManager: CLLocationManager?
     var lastLocation: CLLocation?
+    
+    var lastSignificantLocation: CLLocation?
+    
     var delegate: GPSServiceDelegate?
+    
+    var placesClient: GMSPlacesClient!
+    
+    var likelihoods = [GMSPlaceLikelihood]()
     
     override init() {
         super.init()
@@ -46,7 +58,7 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         }
         
         locationManager.desiredAccuracy = kCLLocationAccuracyBest // The accuracy of the location data
-        locationManager.distanceFilter = 25 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
+        locationManager.distanceFilter = 0 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
         locationManager.delegate = self
     }
     
@@ -84,10 +96,23 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         
         // singleton for get last location
         self.lastLocation = location
-        print("ALT: \(location.altitude)")
+        //print("ACCURACY: \(location.horizontalAccuracy)")
+        
+        if lastSignificantLocation == nil {
+            lastSignificantLocation = location
+            updateLocationSignificant(lastSignificantLocation!)
+        } else {
+            let dist = lastSignificantLocation!.distance(from: location)
+            if dist > 25.0 {
+                lastSignificantLocation = location
+                updateLocationSignificant(lastSignificantLocation!)
+            }
+        }
         
         // use for real time update location
         updateLocation(location)
+        
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -109,6 +134,16 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         delegate.tracingLocation(currentLocation)
     }
     
+    // Private function
+    fileprivate func updateLocationSignificant(_ location: CLLocation){
+        guard let delegate = self.delegate else {
+            return
+        }
+        getCurrentPlaces()
+        delegate.significantLocationUpdate(location)
+        
+    }
+    
     fileprivate func updateLocationDidFailWithError(_ error: NSError) {
         
         guard let delegate = self.delegate else {
@@ -116,6 +151,29 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         }
         
         delegate.tracingLocationDidFailWithError(error)
+    }
+    
+    func getCurrentPlaces() {
+        
+        placesClient = GMSPlacesClient.shared()
+        placesClient.currentPlace(callback: { (placeLikelihoodList, error) -> Void in
+            if let error = error {
+                print("Pick Place error: \(error.localizedDescription)")
+                return
+            }
+            
+            if let placeLikelihoodList = placeLikelihoodList {
+                var temp = [GMSPlaceLikelihood]()
+                for likelihood in placeLikelihoodList.likelihoods {
+                    if likelihood.likelihood >= 0.1 {
+                        temp.append(likelihood)
+                    }
+                }
+                self.likelihoods = temp
+                self.delegate?.nearbyPlacesUpdate(self.likelihoods)
+                
+            }
+        })
     }
 }
 

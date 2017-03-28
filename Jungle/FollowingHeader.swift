@@ -47,11 +47,9 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func setupStories(_userStories:[UserStory]) {
         
-        
-        print("SETUP STORIES CALLED")
+
         userStories = _userStories
         
-        print("SETUP STORIES: \(userStories)")
         collectionView.reloadData()
 
     }

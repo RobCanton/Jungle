@@ -25,15 +25,44 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var sendTap:UITapGestureRecognizer!
     var containerRef:MainViewController!
     
+    var headerView:UIView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        title = "Send To..."
         let nib = UINib(nibName: "SendProfileViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "profileCell")
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275))
+        
+        let location = GPSService.sharedInstance.lastSignificantLocation
+        let camera = GMSCameraPosition.camera(withTarget: location!.coordinate, zoom: 19.0)
+        let mapView = GMSMapView.map(withFrame: headerView.bounds, camera: camera)
+        headerView.addSubview(mapView)
+        mapView.backgroundColor = UIColor.black
+        mapView.isMyLocationEnabled = true
+        mapView.settings.scrollGestures = false
+        mapView.settings.rotateGestures = true
+        mapView.settings.tiltGestures = false
+        mapView.isBuildingsEnabled = true
+        mapView.isIndoorEnabled = true
+        
+        do {
+            // Set the map style by passing the URL of the local file.
+            if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
+                mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+            } else {
+                NSLog("Unable to find style.json")
+            }
+        } catch {
+            NSLog("One or more of the map styles failed to load. \(error)")
+        }
+        
+        tableView.tableHeaderView = headerView
         
         tableView.tableFooterView = UIView()
 
@@ -42,7 +71,15 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         sendTap = UITapGestureRecognizer(target: self, action: #selector(send))
         
         toggleSend()
-        getCurrentPlaces()
+        self.likelihoods = GPSService.sharedInstance.likelihoods
+        
+        for likelihood in self.likelihoods {
+            let marker = GMSMarker(position: likelihood.place.coordinate)
+            marker.title = likelihood.place.name
+            marker.map = mapView
+        }
+        
+        self.tableView.reloadData()
                 
     }
 
@@ -55,34 +92,6 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBAction func handleBack(_ sender: Any) {
         self.dismiss(animated: false, completion: nil)
     }
-    
-    
-    func getCurrentPlaces() {
-        
-        placesClient = GMSPlacesClient.shared()
-        placesClient.currentPlace(callback: { (placeLikelihoodList, error) -> Void in
-            if let error = error {
-                print("Pick Place error: \(error.localizedDescription)")
-                return
-            }
-
-            if let placeLikelihoodList = placeLikelihoodList {
-                var temp = [GMSPlaceLikelihood]()
-                for likelihood in placeLikelihoodList.likelihoods {
-//                    if likelihood.likelihood >= 0.25 {
-//                        temp.append(likelihood)
-//                    }
-                    
-                    
-                    temp.append(likelihood)
-                }
-                self.likelihoods = temp
-                self.tableView.reloadData()
-                
-            }
-        })
-    }
-    
 
     func sent() {
         containerRef.cameraView.cameraState = .Initiating

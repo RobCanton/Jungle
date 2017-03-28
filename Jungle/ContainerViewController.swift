@@ -206,9 +206,6 @@ class ContainerViewController: UIViewController, UIGestureRecognizerDelegate, UI
         self.view.addSubview(snapContainer.view)
         self.view.addSubview(recordBtn)
         
-        GPSService.sharedInstance.delegate = self
-        GPSService.sharedInstance.startUpdatingLocation()
-        
     }
     
     
@@ -400,54 +397,6 @@ extension ContainerViewController: CameraDelegate {
         sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         uploadCoordinate = nil
     }
-    
 
 }
-
-
-
-extension ContainerViewController: GPSServiceDelegate {
-    func tracingLocation(_ currentLocation: CLLocation) {
-        print("New location")
-        LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
-        // singleton for get last location
-        if mapView == nil {
-            
-            let camera = GMSCameraPosition.camera(withTarget: currentLocation.coordinate, zoom: 16.5)
-            
-            mapView = GMSMapView.map(withFrame: mapContainer.bounds, camera: camera)
-            mapContainer.addSubview(mapView!)
-            mapView!.backgroundColor = UIColor.black
-            mapView!.isMyLocationEnabled = false
-            mapView!.settings.scrollGestures = false
-            mapView!.settings.rotateGestures = false
-            mapView!.settings.tiltGestures = false
-            mapView!.isUserInteractionEnabled = false
-            mapView!.isBuildingsEnabled = true
-            mapView!.isIndoorEnabled = true
-            mapContainer.alpha = 0.75
-            
-            do {
-                // Set the map style by passing the URL of the local file.
-                if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
-                    mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-                } else {
-                    NSLog("Unable to find style.json")
-                }
-            } catch {
-                NSLog("One or more of the map styles failed to load. \(error)")
-            }
-            
-        } else{
-            mapView!.animate(toLocation: currentLocation.coordinate)
-        }
-    }
-    
-    func tracingLocationDidFailWithError(_ error: NSError) {
-        print(error.code)
-        
-        
-    }
-}
-
 

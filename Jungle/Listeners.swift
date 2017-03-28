@@ -31,7 +31,6 @@ class Listeners {
     static func startListeningToFollowers() {
         if !listeningToFollowers {
             listeningToFollowers = true
-            print("listeningToFollowers")
             let current_uid = mainStore.state.userState.uid
             let followersRef = ref.child("users/social/followers/\(current_uid)")
             
@@ -59,7 +58,6 @@ class Listeners {
     static func startListeningToFollowing() {
         if !listeningToFollowing {
             listeningToFollowing = true
-            print("listeningToFollowing")
             let current_uid = mainStore.state.userState.uid
             let followingRef = ref.child("users/social/following/\(current_uid)")
             
@@ -68,9 +66,7 @@ class Listeners {
              */
             followingRef.observe(.childAdded, with: { snapshot in
                 if snapshot.exists() {
-                    print("YEUH")
                     if snapshot.value! is Bool {
-                        print("NOICE")
                         mainStore.dispatch(AddFollowing(uid: snapshot.key))
                     }
                     
@@ -84,7 +80,6 @@ class Listeners {
             followingRef.observe(.childRemoved, with: { snapshot in
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
-                        print("YEUHa")
                         mainStore.dispatch(RemoveFollowing(uid: snapshot.key))
                     }
                 }

@@ -18,4 +18,5 @@ pod 'Firebase/Messaging'
 pod 'View2ViewTransition'
 pod 'ReSwift', '3.0.0'
 pod 'JSQMessagesViewController'
+pod 'NVActivityIndicatorView'
 end

@@ -24,7 +24,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/CommentsViewController.swift"
-            timestampString = "511932757.674096"
+            timestampString = "512035778.471767"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "53"
@@ -56,11 +56,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UserStoryCollectionViewCell.swift"
-            timestampString = "512030376.566307"
+            timestampString = "512080715.057464"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "149"
-            endingLineNumber = "149"
+            startingLineNumber = "146"
+            endingLineNumber = "146"
             landmarkName = "UserStoryCollectionViewCell"
             landmarkType = "3">
          </BreakpointContent>

@@ -20,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JVW-WJ-S1e">
-                        <rect key="frame" x="8" y="8" width="61" height="61"/>
+                        <rect key="frame" x="9" y="9" width="59" height="59"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ase-SQ-Tgu">
-                                <rect key="frame" x="3" y="3" width="55" height="55"/>
+                                <rect key="frame" x="3" y="3" width="53" height="53"/>
                                 <color key="backgroundColor" white="0.72241362576273283" alpha="1" colorSpace="calibratedWhite"/>
                             </imageView>
                         </subviews>
@@ -36,8 +36,8 @@
                             <constraint firstItem="Ase-SQ-Tgu" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="top" constant="3" id="dzh-K4-Bj6"/>
                         </constraints>
                     </view>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="robcanton" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YYo-BG-D5S">
-                        <rect key="frame" x="0.0" y="69" width="77" height="21"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YYo-BG-D5S">
+                        <rect key="frame" x="0.0" y="68" width="77" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -46,13 +46,13 @@
             </view>
             <color key="backgroundColor" white="0.92037072980000001" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstItem="JVW-WJ-S1e" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="8" id="86Z-tz-tRS"/>
-                <constraint firstItem="JVW-WJ-S1e" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="8" id="AlI-nV-qK4"/>
+                <constraint firstItem="JVW-WJ-S1e" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="9" id="86Z-tz-tRS"/>
+                <constraint firstItem="JVW-WJ-S1e" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="9" id="AlI-nV-qK4"/>
                 <constraint firstItem="YYo-BG-D5S" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="H83-ak-gn1"/>
                 <constraint firstItem="YYo-BG-D5S" firstAttribute="top" secondItem="JVW-WJ-S1e" secondAttribute="bottom" id="XBW-dM-DBe"/>
                 <constraint firstAttribute="trailing" secondItem="YYo-BG-D5S" secondAttribute="trailing" id="YBT-Vr-Wfu"/>
-                <constraint firstAttribute="bottom" secondItem="YYo-BG-D5S" secondAttribute="bottom" id="lid-2f-hmn"/>
-                <constraint firstAttribute="trailing" secondItem="JVW-WJ-S1e" secondAttribute="trailing" constant="8" id="mfv-hu-W7t"/>
+                <constraint firstAttribute="bottom" secondItem="YYo-BG-D5S" secondAttribute="bottom" constant="1" id="lid-2f-hmn"/>
+                <constraint firstAttribute="trailing" secondItem="JVW-WJ-S1e" secondAttribute="trailing" constant="9" id="mfv-hu-W7t"/>
             </constraints>
             <size key="customSize" width="117" height="137"/>
             <connections>

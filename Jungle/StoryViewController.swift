@@ -10,6 +10,7 @@
 import UIKit
 import AVFoundation
 import Firebase
+import NVActivityIndicatorView
 
 
 public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollViewDelegate {
@@ -18,6 +19,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var returnIndex:Int?
     var item:StoryItem?
     var delegate:PopupProtocol?
+    var activityView:NVActivityIndicatorView!
     
     var footerTapped:UITapGestureRecognizer!
 
@@ -116,11 +118,23 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var animateInitiated = false
     
     func animateIndicator() {
-
+        if !animateInitiated {
+            animateInitiated = true
+            DispatchQueue.main.async {
+                if self.story.state != .contentLoaded {
+                    self.activityView.startAnimating()
+                }
+            }
+        }
     }
     
     func stopIndicator() {
-
+        if activityView.animating {
+            DispatchQueue.main.async {
+                self.activityView.stopAnimating()
+                self.animateInitiated = false
+            }
+        }
     }
     
     
@@ -428,6 +442,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
 
     var keyboardUp = false
+    
+    var scrollView:UIScrollView!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -443,6 +459,32 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         footerTapped = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
         footerView.isUserInteractionEnabled = true
         footerView.addGestureRecognizer(footerTapped)
+        
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.white, padding: 1.0)
+        activityView.center = contentView.center
+        contentView.addSubview(activityView)
+        
+        let screenBounds = UIScreen.main.bounds
+        scrollView = UIScrollView(frame: screenBounds)
+        
+        //contentView.addSubview(scrollView)
+        
+        let v1 = UIView(frame: screenBounds)
+        v1.backgroundColor = UIColor.clear
+        
+        let v2 = UIView(frame: screenBounds)
+        v2.backgroundColor = UIColor.blue
+        
+        var v2Frame = v2.frame
+        v2Frame.origin.y = screenBounds.height
+        v2.frame = v2Frame
+        
+        scrollView.addSubview(v1)
+        scrollView.addSubview(v2)
+        scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 2.0)
+        scrollView.isPagingEnabled = true
+        scrollView.bounces = false
     }
     
     var commentsActive = false
