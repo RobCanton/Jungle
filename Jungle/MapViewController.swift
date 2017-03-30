@@ -14,6 +14,9 @@ import GooglePlaces
 
 class MapViewController: UIViewController {
     
+    let subscriberName = "MapViewController"
+    @IBOutlet weak var accuracyLabel: UILabel!
+    @IBOutlet weak var locationBGView: UIView!
     @IBOutlet weak var mapContainer: UIView!
     @IBOutlet weak var locationLabel: UILabel!
     @IBOutlet weak var locationAddressLabel: UILabel!
@@ -21,34 +24,43 @@ class MapViewController: UIViewController {
     
     var mapView:GMSMapView?
 
-    
     let cellIdentifier = "locationCell"
     
     @IBOutlet weak var nearbyLocationsLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        
         blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         blurView.frame = view.bounds
         view.insertSubview(blurView, at: 0)
         
         view.backgroundColor = UIColor.clear
-        GPSService.sharedInstance.delegate = self
-        GPSService.sharedInstance.startUpdatingLocation()
         
         if let labelSuperview = locationLabel.superview {
+            
             labelSuperview.layer.cornerRadius = labelSuperview.frame.height / 4
             labelSuperview.clipsToBounds = true
-            labelSuperview.layer.borderColor = UIColor.white.cgColor
-            labelSuperview.layer.borderWidth = 2.0
+            
+            let gradient = CAGradientLayer()
+            gradient.frame = locationBGView.bounds
+            gradient.colors = [
+                lightAccentColor.cgColor,
+                darkAccentColor.cgColor
+            ]
+            gradient.locations = [0.0, 1.0]
+            gradient.startPoint = CGPoint(x: 0, y: 0)
+            gradient.endPoint = CGPoint(x: 1, y: 0)
+            locationBGView.layer.insertSublayer(gradient, at: 0)
+            locationBGView.layer.masksToBounds = true
+            labelSuperview.applyShadow(radius: 1.0, opacity: 0.75, height: 0.0, shouldRasterize: false)
+            labelSuperview.layer.masksToBounds = true
+            //labelSuperview.layer.borderColor = UIColor.white.cgColor
+           // labelSuperview.layer.borderWidth = 2.0
         }
-        
     }
 }
 
-extension MapViewController: GPSServiceDelegate {
+extension MapViewController: GPSServiceProtocol {
     func tracingLocation(_ currentLocation: CLLocation) {
         //LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
         // singleton for get last location
@@ -89,8 +101,11 @@ extension MapViewController: GPSServiceDelegate {
     }
     
     func nearbyPlacesUpdate(_ likelihoods: [GMSPlaceLikelihood]) {
+        print("nearbyPlacesUpdate")
         if let first = likelihoods.first {
+            
             self.locationLabel.text = first.place.name
+            print("nearest location: \(first.place.name)")
             if let address = first.place.formattedAddress {
                 self.locationAddressLabel.text = getShortFormattedAddress(address)
             }
@@ -106,6 +121,7 @@ extension MapViewController: GPSServiceDelegate {
             }
             
         } else {
+            print("Nothing nearby")
             self.locationLabel.text = "Nothing nearby"
             self.locationAddressLabel.text = ""
             if let locationHeader = globalMainRef?.locationHeader {
@@ -123,5 +139,13 @@ extension MapViewController: GPSServiceDelegate {
     func tracingLocationDidFailWithError(_ error: NSError) {
         print(error.code)
         
+    }
+    
+    func horizontalAccuracyUpdated(_ accuracy: Double?) {
+        if let a = accuracy {
+          self.accuracyLabel.text = "Accuracy: \(roundToOneDecimal(a))m"
+        } else {
+        self.accuracyLabel.text = "Accuracy Unavailable"
+        }
     }
 }

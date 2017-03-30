@@ -10,6 +10,15 @@ import Foundation
 import AVFoundation
 import UIKit
 
+protocol CameraDelegate {
+    func showCameraOptions()
+    func hideCameraOptions()
+    func showEditOptions()
+    func hideEditOptions()
+    func takingPhoto()
+    func takingVideo()
+}
+
 class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
     
     
@@ -196,15 +205,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         if cameraState != .Running { return }
         cameraState = .DidPressTakePhoto
         
-//        flashView.alpha = 0.0
-//        UIView.animate(withDuration: 0.025, animations: {
-//            self.flashView.alpha = 0.75
-//        }, completion: { result in
-//            UIView.animate(withDuration: 0.25, animations: {
-//                self.flashView.alpha = 0.0
-//            }, completion: { result in })
-//        })
-        
         AudioServicesPlayAlertSound(1108)
         if let videoConnection = stillImageOutput?.connection(withMediaType: AVMediaTypeVideo)
         {
@@ -223,8 +223,11 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
                     } else {
                         image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation.right)
                     }
-                    self.cameraState = .PhotoTaken
-                    self.imageCaptureView.image = image
+                    
+                    DispatchQueue.main.async {
+                        self.cameraState = .PhotoTaken
+                        self.imageCaptureView.image = image
+                    }
                 }
             })
         }
@@ -237,16 +240,17 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         if progress > 0.99 {
             progressTimer.invalidate()
             videoFileOutput?.stopRecording()
+            recordBtnRef.updateProgress(progress: 1.0)
         } else {
             progress = progress + (CGFloat(0.025) / maxDuration)
-            //recordBtn.updateProgress(progress: progress)
+            recordBtnRef.updateProgress(progress: progress)
         }
         
     }
     
     func resetProgress() {
         progress = 0
-        //recordBtn.resetProgress()
+        recordBtnRef.resetProgress()
     }
     
     

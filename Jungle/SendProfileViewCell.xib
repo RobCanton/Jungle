@@ -19,7 +19,11 @@
                 <rect key="frame" x="0.0" y="0.0" width="442" height="63"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f0b-6H-NNS">
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FWL-3X-Rsz">
+                        <rect key="frame" x="0.0" y="0.0" width="442" height="63"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <button hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f0b-6H-NNS">
                         <rect key="frame" x="390" y="19" width="32" height="32"/>
                         <color key="tintColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <state key="normal" image="circle_unchecked"/>
@@ -40,11 +44,15 @@
                 <constraints>
                     <constraint firstItem="IrP-F1-jvz" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="1Mk-oo-1VD"/>
                     <constraint firstItem="f0b-6H-NNS" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="3DD-Ft-6HA"/>
+                    <constraint firstAttribute="trailing" secondItem="FWL-3X-Rsz" secondAttribute="trailing" id="EIP-rI-WM6"/>
+                    <constraint firstItem="FWL-3X-Rsz" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="F8I-mh-SD9"/>
                     <constraint firstItem="ZHt-KX-vMy" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="12" id="MmV-6G-u7C"/>
+                    <constraint firstItem="FWL-3X-Rsz" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="NWH-tu-Da5"/>
                     <constraint firstAttribute="leadingMargin" secondItem="ZHt-KX-vMy" secondAttribute="leading" id="PFa-xs-Vtl"/>
                     <constraint firstItem="IrP-F1-jvz" firstAttribute="baseline" secondItem="ZHt-KX-vMy" secondAttribute="baseline" id="PjJ-Cb-VE3"/>
                     <constraint firstAttribute="trailingMargin" secondItem="f0b-6H-NNS" secondAttribute="trailing" constant="12" id="RlN-ZT-eeP"/>
                     <constraint firstItem="IrP-F1-jvz" firstAttribute="leading" secondItem="ZHt-KX-vMy" secondAttribute="trailing" constant="8" id="SSm-vy-5ds"/>
+                    <constraint firstAttribute="bottom" secondItem="FWL-3X-Rsz" secondAttribute="bottom" id="Umi-Wn-Ujy"/>
                     <constraint firstItem="ZHt-KX-vMy" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="svB-X1-wsp"/>
                 </constraints>
                 <variation key="default">
@@ -56,6 +64,7 @@
             </tableViewCellContentView>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <connections>
+                <outlet property="bgView" destination="FWL-3X-Rsz" id="f4O-sY-scF"/>
                 <outlet property="circleButton" destination="f0b-6H-NNS" id="Xu3-EK-AzX"/>
                 <outlet property="label" destination="ZHt-KX-vMy" id="2HV-9o-7bv"/>
                 <outlet property="subtitle" destination="IrP-F1-jvz" id="eVi-lf-huc"/>

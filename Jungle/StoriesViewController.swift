@@ -169,7 +169,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
 
             let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-            if translate.y <= 0 {
+            if translate.y < 0 {
+                if translate.y < -3 {
+                    cell.showComments()
+                }
                 return false
             }
             

@@ -19,8 +19,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var tableView:UITableView!
     
-    var containerRef:ContainerViewController?
-    
     var closeButton:UIBarButtonItem!
     var a:UIBarButtonItem!
     var navHeight:CGFloat!
@@ -296,12 +294,10 @@ class tempViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        globalContainerRef?.statusBar(hide: false)
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        globalContainerRef?.statusBar(hide: true)
         super.viewWillDisappear(animated)
     }
 }

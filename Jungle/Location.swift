@@ -78,8 +78,9 @@ class Location: NSObject {
     }*/
     
     func getDistance() -> Double {
-        let lastLocation = GPSService.sharedInstance.lastLocation!
-        return lastLocation.distance(from: coordinates)
+       // let lastLocation = GPSService.sharedInstance.lastLocation!
+        //return lastLocation.distance(from: coordinates)
+        return 0 
     }
 }
 

@@ -14,8 +14,13 @@ import ReSwift
 import AVFoundation
 
 //UIColor(red: 15/255, green: 226/255, blue: 117/255, alpha: 1.0) //#0fe275
+//let lightAccentColor = UIColor(red: 220/266, green: 227/255, blue: 91/255, alpha: 1.0)
+//let darkAccentColor = UIColor(red: 69/266, green: 182/255, blue: 73/255, alpha: 1.0)
+let lightAccentColor = UIColor(red: 185/266, green: 216/255, blue: 86/255, alpha: 1.0)
+let darkAccentColor = UIColor(red: 79/266, green: 185/255, blue: 74/255, alpha: 1.0)
 
-let accentColor = UIColor(red: 83/255, green: 226/255, blue: 0/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
+
+let accentColor = UIColor(red: 124/255, green: 198/255, blue: 79/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
 let mainStore = Store<AppState>(

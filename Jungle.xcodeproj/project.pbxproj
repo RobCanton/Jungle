@@ -28,7 +28,6 @@
 		B093FF9E1E790CD500011B43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9D1E790CD500011B43 /* Assets.xcassets */; };
 		B093FFA11E790CD500011B43 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9F1E790CD500011B43 /* LaunchScreen.storyboard */; };
 		B093FFB71E790D5E00011B43 /* CameraButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFA81E790D5E00011B43 /* CameraButton.swift */; };
-		B093FFB81E790D5E00011B43 /* ContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFA91E790D5E00011B43 /* ContainerViewController.swift */; };
 		B093FFB91E790D5E00011B43 /* GPSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFAA1E790D5E00011B43 /* GPSService.swift */; };
 		B093FFBA1E790D5E00011B43 /* KDCircularProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFAB1E790D5E00011B43 /* KDCircularProgress.swift */; };
 		B093FFBB1E790D5E00011B43 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFAC1E790D5E00011B43 /* Location.swift */; };
@@ -96,7 +95,6 @@
 		B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894951E7C528800E490C4 /* UserProfileViewController.swift */; };
 		B0F894991E7C717F00E490C4 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */; };
 		B0F8949A1E7C717F00E490C4 /* ProfileHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */; };
-		B0F8949C1E7E3C3E00E490C4 /* SavedCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */; };
 		B0F8949E1E7E3E8500E490C4 /* MyProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */; };
 		B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */; };
 		B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894A11E7F17AE00E490C4 /* MainViewController.swift */; };
@@ -129,7 +127,6 @@
 		B093FFA01E790CD500011B43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B093FFA21E790CD500011B43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B093FFA81E790D5E00011B43 /* CameraButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraButton.swift; sourceTree = "<group>"; };
-		B093FFA91E790D5E00011B43 /* ContainerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContainerViewController.swift; sourceTree = "<group>"; };
 		B093FFAA1E790D5E00011B43 /* GPSService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSService.swift; sourceTree = "<group>"; };
 		B093FFAB1E790D5E00011B43 /* KDCircularProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KDCircularProgress.swift; sourceTree = "<group>"; };
 		B093FFAC1E790D5E00011B43 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
@@ -197,7 +194,6 @@
 		B0F894951E7C528800E490C4 /* UserProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
 		B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileHeaderView.xib; sourceTree = "<group>"; };
-		B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SavedCollectionView.swift; sourceTree = "<group>"; };
 		B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyProfileViewController.swift; sourceTree = "<group>"; };
 		B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MyProfileViewController.storyboard; sourceTree = "<group>"; };
 		B0F894A11E7F17AE00E490C4 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -268,7 +264,6 @@
 				B093FF9D1E790CD500011B43 /* Assets.xcassets */,
 				B093FF9F1E790CD500011B43 /* LaunchScreen.storyboard */,
 				B093FFA21E790CD500011B43 /* Info.plist */,
-				B093FFA91E790D5E00011B43 /* ContainerViewController.swift */,
 				B0F894871E7BD51A00E490C4 /* State */,
 				B0F894681E7B436A00E490C4 /* Models */,
 				B0F894661E7B434400E490C4 /* Services */,
@@ -408,7 +403,6 @@
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
 				B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */,
 				B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */,
-				B0F8949B1E7E3C3D00E490C4 /* SavedCollectionView.swift */,
 				B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */,
 				B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */,
 				B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */,
@@ -586,7 +580,6 @@
 				B093FFBA1E790D5E00011B43 /* KDCircularProgress.swift in Sources */,
 				B093FFDB1E793AC100011B43 /* ProgressIndicator.swift in Sources */,
 				B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */,
-				B0F8949C1E7E3C3E00E490C4 /* SavedCollectionView.swift in Sources */,
 				B0F894651E7B33F500E490C4 /* StoryDetailsView.swift in Sources */,
 				B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */,
 				B093FF991E790CD500011B43 /* ViewController.swift in Sources */,
@@ -635,7 +628,6 @@
 				B093FFD61E79399C00011B43 /* StoryInfoView.swift in Sources */,
 				B0550D801E8A1A94007DAAAC /* LocationHeaderView.swift in Sources */,
 				B093FFBE1E790D5E00011B43 /* PhotoCell.swift in Sources */,
-				B093FFB81E790D5E00011B43 /* ContainerViewController.swift in Sources */,
 				B0F894861E7BD43F00E490C4 /* Utilities.swift in Sources */,
 				B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */,
 				B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */,

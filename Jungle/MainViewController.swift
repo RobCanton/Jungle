@@ -17,6 +17,8 @@ var globalMainRef:MainViewController?
 
 class MainViewController: UIViewController, UIScrollViewDelegate {
 
+    var gps_service:GPSService!
+    
     var scrollView:UIScrollView!
     
     var cameraView:CameraViewController!
@@ -32,7 +34,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     var returningStoriesCell:UserStoryCollectionViewCell?
     var flashView:UIView!
     
-    var uploadCoordinate:CLLocation?
+    var uploadLikelihoods:[GMSPlaceLikelihood]!
     
     var flashButton:UIButton!
     var switchButton:UIButton!
@@ -49,7 +51,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         let definiteBounds = UIScreen.main.bounds
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
         button.setImage(UIImage(named: "delete"), for: .normal)
-        button.center = CGPoint(x: button.frame.width * 0.60, y: definiteBounds.height - button.frame.height * 0.60)
+        button.center = CGPoint(x: button.frame.width * 0.60, y: button.frame.height * 0.60)
         button.tintColor = UIColor.white
         button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
         return button
@@ -58,14 +60,14 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     lazy var sendButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
-        button.setImage(UIImage(named: "right_arrow"), for: .normal)
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        button.setImage(UIImage(named: "send_arrow"), for: .normal)
         button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.75, y: definiteBounds.height - button.frame.height * 0.75)
-        button.tintColor = UIColor.black
-        button.backgroundColor = UIColor.white
+        button.tintColor = UIColor.white
+        button.backgroundColor = UIColor(red: 69/255, green: 182/255, blue: 73/255, alpha: 1.0)
         button.layer.cornerRadius = button.frame.width / 2
         button.clipsToBounds = true
-        button.applyShadow(radius: 1.0, opacity: 0.75, height: 0.0, shouldRasterize: false)
+        button.applyShadow(radius: 5, opacity: 0.4, height: 2.5, shouldRasterize: false)
         return button
     }()
     
@@ -88,7 +90,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 80, height: 80))
+        recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 112, height: 112))
         cameraBtnFrame = recordBtn.frame
         cameraBtnFrame.origin.y = screenBounds.height - 140
         cameraBtnFrame.origin.x = self.view.bounds.width/2 - cameraBtnFrame.size.width/2
@@ -208,6 +210,13 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         self.scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height), animated: false)
         setToCameraMode()
+        
+        if gps_service == nil {
+            gps_service = GPSService(["MapViewController":mapViewController])
+            gps_service.startUpdatingLocation()
+            
+            places.gps_service = gps_service
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -221,9 +230,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         self.activateNavbar(false)
         //self.navigationController?.navigationBar.isUserInteractionEnabled = false
         
-        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name:NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name:NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
-
+        //NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name:NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+       // NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name:NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
+        if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
+            statusBar(hide: true, animated: true)
+        }
         
     }
     
@@ -233,7 +244,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         returningPlacesCell = nil
         returningStoriesCell?.activateCell(true)
         returningStoriesCell = nil
-        statusBar(hide: false, animated: true)
+        if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
+           //statusBar(hide: true, animated: false)
+        } else {
+            statusBar(hide: false, animated: true)
+        }
 
     }
     
@@ -242,15 +257,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         NotificationCenter.default.removeObserver(self)
     }
     
-    func appMovedToBackground() {
-        
-        //self.scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: false)
-    }
-    
-    func appWillEnterForeground() {
-        
-        self.scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: false)
-    }
     
     func activateNavbar(_ activate: Bool) {
         guard let nav = self.navigationController as? MasterNavigationController else { return }
@@ -282,7 +288,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             let reverseAlpha = 1 - alpha
             recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * reverseAlpha)
             let multiple = alpha * alpha * alpha * alpha * alpha
-            recordBtn.transform = CGAffineTransform(scaleX: 0.8 + 0.2 * multiple, y: 0.8 + 0.2 * multiple)
+            recordBtn.transform = CGAffineTransform(scaleX: 0.5 + 0.2 * multiple, y: 0.5 + 0.2 * multiple)
             recordBtn.ring.layer.borderColor = UIColor.white.cgColor
             recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 0)
             flashButton.center = CGPoint(x: cameraBtnFrame.origin.x / 2 + flashButton.frame.width * reverseAlpha, y: flashButton.center.y)
@@ -297,9 +303,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             let reverseAlpha = 1 - alpha
             recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * alpha)
             let multiple = reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha
-            let color = UIColor(hue: 98/360, saturation: 1 - multiple, brightness: 0.89, alpha: 1.0)
+            let color = UIColor(hue: 97/360, saturation: (1 - multiple) * 0.60, brightness: 0.78, alpha: 1.0)
                 //UIColor(hue: 149/360, saturation: 1 - multiple, brightness: 0.88, alpha: 1.0)
-            recordBtn.transform = CGAffineTransform(scaleX: 0.8 + 0.2 * multiple, y: 0.8 + 0.2 * multiple)
+            recordBtn.transform = CGAffineTransform(scaleX: 0.5 + 0.2 * multiple, y: 0.5 + 0.2 * multiple)
             recordBtn.ring.layer.borderColor = color.cgColor
             recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 1 - multiple)
             flashView.alpha = alpha
@@ -348,10 +354,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y )
 
-        recordBtn.transform = CGAffineTransform.identity
+        recordBtn.transform = CGAffineTransform(scaleX: 0.70, y: 0.70)
         recordBtn.ring.layer.borderColor = UIColor.white.cgColor
         recordBtn.ring.backgroundColor = UIColor.clear
         flashView.alpha = 0.0
+        recordBtn.addGestures()
     }
     
     func locationHeaderTapped() {
@@ -449,6 +456,17 @@ extension MainViewController: CameraDelegate {
     func takingPhoto() {
         self.mapContainer?.alpha = 0.0
         self.mapContainer?.isUserInteractionEnabled = false
+        flashView.backgroundColor = UIColor.white
+        flashView.alpha = 0.0
+        UIView.animate(withDuration: 0.025, animations: {
+            self.flashView.alpha = 0.85
+        }, completion: { result in
+            UIView.animate(withDuration: 0.25, animations: {
+                self.flashView.alpha = 0.0
+            }, completion: { result in
+                self.flashView.backgroundColor = UIColor.black
+            })
+        })
     }
     
     func showCameraOptions() {
@@ -481,8 +499,12 @@ extension MainViewController: CameraDelegate {
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         
-        uploadCoordinate = GPSService.sharedInstance.lastLocation!
+        //uploadCoordinate = GPSService.sharedInstance.lastLocation!
+        uploadLikelihoods = gps_service.getLikelihoods()
+    
     }
+    
+    
     
     func hideEditOptions() {
         cancelButton.removeFromSuperview()
@@ -491,7 +513,7 @@ extension MainViewController: CameraDelegate {
         
         cancelButton.removeTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        uploadCoordinate = nil
+        uploadLikelihoods = []
         statusBarShouldHide = false
         self.setNeedsStatusBarAppearanceUpdate()
     }
@@ -525,8 +547,10 @@ extension MainViewController: CameraDelegate {
         let nav = UIStoryboard(name: "Main", bundle: nil)
             .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
         let controller = nav.viewControllers[0] as! SendViewController
+        controller.gps_service = gps_service
         controller.upload = upload
         controller.containerRef = self
+        controller.likelihoods = uploadLikelihoods
         
         self.present(nav, animated: false, completion: nil)
         

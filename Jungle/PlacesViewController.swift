@@ -24,7 +24,6 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     var collectionView:UICollectionView!
     
     var masterNav:UINavigationController?
-    var container:ContainerViewController?
     var refresher:UIRefreshControl!
     
     var locations = [Location]()
@@ -38,6 +37,8 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     var responseRef:FIRDatabaseReference?
     
     var inboxButton:UIButton!
+    
+    var gps_service:GPSService!
     
     
     override func viewDidLoad() {
@@ -100,7 +101,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
         self.collectionView.reloadData()
-
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -132,13 +133,12 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
         self.view.addSubview(activityIndicator!)
         inboxButton.isHidden = true
         
-        if let lastLocation = GPSService.sharedInstance.lastLocation {
+        if let lastLocation = gps_service.getLastLocation() {
             LocationService.sharedInstance.requestNearbyLocations(lastLocation.coordinate.latitude, longitude: lastLocation.coordinate.longitude)
         } else {
             stopRefresher()
         }
         
-        //try! FIRAuth.auth()?.signOut()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -268,7 +268,7 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
                 count += 1
                 if count >= locations.count {
                     count = -1
-                    self.locationStories = tempStories
+                    self.locationStories = tempStories.sorted(by: {$0 > $1})
                     self.collectionView.reloadData()
                     self.stopRefresher()
                 }
@@ -277,8 +277,8 @@ class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataS
     }
     
     func getSortedLocations(_ locations:[Location]) -> [Location] {
-        /*
-        switch sortMode {
+        
+        /*switch sortMode {
         case .Recent:
             return locations.sorted(by: { $0.getStory() > $1.getStory()})
         case .Popular:

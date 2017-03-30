@@ -489,6 +489,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     var commentsActive = false
     func handleFooterTap(sender: UITapGestureRecognizer) {
+        showComments()
+    }
+    
+    func showComments() {
         delegate?.showComments()
         commentsActive = true
         pauseStory()

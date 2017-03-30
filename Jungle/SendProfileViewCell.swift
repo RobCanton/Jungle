@@ -17,7 +17,8 @@ class SendProfileViewCell: UITableViewCell {
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var subtitle: UILabel!
     
-    
+    @IBOutlet weak var bgView: UIView!
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -34,13 +35,15 @@ class SendProfileViewCell: UITableViewCell {
     func toggleSelection(_ selected: Bool) {
         
         if selected {
-            contentView.backgroundColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
-            circleButton.setImage(UIImage(named: "circle_checked"), for: .normal)
-            circleButton.tintColor = accentColor
+            bgView.backgroundColor = UIColor(red: 0.0, green: 128/255, blue: 1.0, alpha: 1.0)
+            label.textColor = UIColor.white
+            //circleButton.setImage(UIImage(named: "circle_checked"), for: .normal)
+            //circleButton.tintColor = accentColor
         } else {
-            contentView.backgroundColor = UIColor.white
-            circleButton.setImage(UIImage(named: "circle_unchecked"), for: .normal)
-            circleButton.tintColor = UIColor.gray
+            bgView.backgroundColor = UIColor.white
+            label.textColor = UIColor.black
+            //circleButton.setImage(UIImage(named: "circle_unchecked"), for: .normal)
+            //circleButton.tintColor = UIColor.gray
         }
     }
     

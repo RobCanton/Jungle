@@ -12,6 +12,7 @@ import GooglePlaces
 
 class SendViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
+    let subscriberName = "SendViewController"
     @IBOutlet weak var tableView: UITableView!
     
     @IBOutlet weak var sendView: UIView!
@@ -27,10 +28,27 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     var headerView:UIView!
 
+    var mapView:GMSMapView?
+    var gps_service: GPSService!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "Send To..."
+        
+        sendView.backgroundColor = UIColor.clear
+
+        let gradient = CAGradientLayer()
+        gradient.frame = sendView.bounds
+        gradient.colors = [
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
+        ]
+        gradient.locations = [0.0, 1.0]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 1, y: 0)
+        sendView.layer.insertSublayer(gradient, at: 0)
+        
         let nib = UINib(nibName: "SendProfileViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "profileCell")
         
@@ -39,29 +57,6 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
         headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275))
         
-        let location = GPSService.sharedInstance.lastSignificantLocation
-        let camera = GMSCameraPosition.camera(withTarget: location!.coordinate, zoom: 19.0)
-        let mapView = GMSMapView.map(withFrame: headerView.bounds, camera: camera)
-        headerView.addSubview(mapView)
-        mapView.backgroundColor = UIColor.black
-        mapView.isMyLocationEnabled = true
-        mapView.settings.scrollGestures = false
-        mapView.settings.rotateGestures = true
-        mapView.settings.tiltGestures = false
-        mapView.isBuildingsEnabled = true
-        mapView.isIndoorEnabled = true
-        
-        do {
-            // Set the map style by passing the URL of the local file.
-            if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
-                mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-            } else {
-                NSLog("Unable to find style.json")
-            }
-        } catch {
-            NSLog("One or more of the map styles failed to load. \(error)")
-        }
-        
         tableView.tableHeaderView = headerView
         
         tableView.tableFooterView = UIView()
@@ -69,14 +64,11 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.reloadData()
 
         sendTap = UITapGestureRecognizer(target: self, action: #selector(send))
+        sendView.isUserInteractionEnabled = true
+        sendView.addGestureRecognizer(sendTap)
         
-        toggleSend()
-        self.likelihoods = GPSService.sharedInstance.likelihoods
-        
-        for likelihood in self.likelihoods {
-            let marker = GMSMarker(position: likelihood.place.coordinate)
-            marker.title = likelihood.place.name
-            marker.map = mapView
+        if let location = gps_service.getLastLocation() {
+            setupMapView(withLocation: location)
         }
         
         self.tableView.reloadData()
@@ -87,10 +79,46 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: false)
         self.navigationController?.navigationBar.isTranslucent = false
+        gps_service.subscribe(subscriberName, subscriber: self)
         
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        gps_service.unsubscribe(subscriberName)
     }
     @IBAction func handleBack(_ sender: Any) {
         self.dismiss(animated: false, completion: nil)
+    }
+    
+    func setupMapView(withLocation location:CLLocation) {
+        let camera = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: 19.0)
+        mapView = GMSMapView.map(withFrame: headerView.bounds, camera: camera)
+        headerView.addSubview(mapView!)
+        mapView!.backgroundColor = UIColor.black
+        mapView!.isMyLocationEnabled = true
+        mapView!.settings.scrollGestures = false
+        mapView!.settings.rotateGestures = true
+        mapView!.settings.tiltGestures = false
+        mapView!.isBuildingsEnabled = true
+        mapView!.isIndoorEnabled = true
+        
+        do {
+            // Set the map style by passing the URL of the local file.
+            if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
+                mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+            } else {
+                NSLog("Unable to find style.json")
+            }
+        } catch {
+            NSLog("One or more of the map styles failed to load. \(error)")
+        }
+
+         for likelihood in self.likelihoods {
+            let marker = GMSMarker(position: likelihood.place.coordinate)
+            marker.title = likelihood.place.name
+            marker.map = mapView
+         }
     }
 
     func sent() {
@@ -98,6 +126,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         containerRef.recordBtn.isHidden = false
         self.dismiss(animated: true, completion: nil)
     }
+    
     
     func send() {
         let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
@@ -178,22 +207,26 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let currentCell = tableView.cellForRow(at: indexPath) as! SendProfileViewCell
         currentCell.toggleSelection(true)
         selectedIndex =  indexPath
-        
-        toggleSend()
-        tableView.deselectRow(at: indexPath, animated: true)
     }
-    
-    func toggleSend() {
-        if upload.place != nil {
-            sendView.backgroundColor = accentColor
-            sendLabel.textColor = UIColor.white
-            sendView.isUserInteractionEnabled = true
-            sendView.addGestureRecognizer(sendTap)
-        } else {
-            sendView.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
-            sendLabel.textColor = UIColor.lightGray
-            sendView.isUserInteractionEnabled = false
-            sendView.removeGestureRecognizer(sendTap)
+
+}
+
+extension SendViewController: GPSServiceProtocol {
+    func tracingLocation(_ currentLocation: CLLocation) {
+        //LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
+        // singleton for get last location
+        if mapView == nil {
+             setupMapView(withLocation: currentLocation)
+        } else{
+            mapView!.animate(toLocation: currentLocation.coordinate)
         }
     }
+ 
+    func significantLocationUpdate(_ location: CLLocation) {}
+    
+    func nearbyPlacesUpdate(_ likelihoods: [GMSPlaceLikelihood]) {}
+    
+    func tracingLocationDidFailWithError(_ error: NSError) {}
+    
+    func horizontalAccuracyUpdated(_ accuracy: Double?) {}
 }

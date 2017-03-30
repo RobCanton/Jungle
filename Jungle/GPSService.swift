@@ -4,34 +4,47 @@ import ReSwift
 import GoogleMaps
 import GooglePlaces
 
-protocol GPSServiceDelegate {
+protocol ServiceProtocol {}
+
+class Service: NSObject {
+    
+    fileprivate var subscribers: [String:ServiceProtocol]
+    
+    init(_ subscribers:[String:ServiceProtocol]) {
+        self.subscribers = subscribers
+    }
+    
+    func subscribe(_ name:String, subscriber:ServiceProtocol) {
+        subscribers[name] = subscriber
+    }
+    
+    func unsubscribe(_ name:String) {
+        self.subscribers[name] = nil
+    }
+
+}
+
+
+protocol GPSServiceProtocol:ServiceProtocol {
     func tracingLocation(_ currentLocation: CLLocation)
     func significantLocationUpdate( _ location: CLLocation)
     func tracingLocationDidFailWithError(_ error: NSError)
-    
     func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood])
+    func horizontalAccuracyUpdated(_ accuracy:Double?)
 }
 
-class GPSService: NSObject, CLLocationManagerDelegate {
+
+class GPSService: Service, CLLocationManagerDelegate {
     
-    static let sharedInstance : GPSService = {
-        let instance = GPSService()
-        return instance
-    }()
+    fileprivate var locationManager: CLLocationManager?
+    fileprivate var lastLocation: CLLocation?
+    fileprivate var currentAccuracy:Double?
+    fileprivate var lastSignificantLocation: CLLocation?
+    fileprivate var placesClient: GMSPlacesClient!
+    fileprivate var likelihoods = [GMSPlaceLikelihood]()
     
-    var locationManager: CLLocationManager?
-    var lastLocation: CLLocation?
-    
-    var lastSignificantLocation: CLLocation?
-    
-    var delegate: GPSServiceDelegate?
-    
-    var placesClient: GMSPlacesClient!
-    
-    var likelihoods = [GMSPlaceLikelihood]()
-    
-    override init() {
-        super.init()
+    override init(_ subscribers:[String:ServiceProtocol]) {
+        super.init(subscribers)
         self.locationManager = CLLocationManager()
         guard let locationManager = self.locationManager else {
             return
@@ -62,6 +75,19 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         locationManager.delegate = self
     }
     
+    internal override func subscribe(_ name: String, subscriber: ServiceProtocol) {
+        if subscriber is GPSServiceProtocol {
+            super.subscribe(name, subscriber: subscriber)
+        }
+    }
+    
+    fileprivate func getSubscribers() -> [String:GPSServiceProtocol]? {
+        guard let subscribers = subscribers as? [String:GPSServiceProtocol] else { return nil }
+        return subscribers
+    }
+    
+    func getLastLocation() -> CLLocation? { return lastLocation }
+    func getLikelihoods() -> [GMSPlaceLikelihood] { return likelihoods }
     
     func isAuthorized() -> Bool {
         if CLLocationManager.locationServicesEnabled() {
@@ -88,34 +114,34 @@ class GPSService: NSObject, CLLocationManagerDelegate {
     }
     
     // CLLocationManagerDelegate
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    internal func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
-        guard let location = locations.last else {
-            return
-        }
+        guard let location = locations.last else { return }
         
-        // singleton for get last location
+        guard let subscribers = getSubscribers() else { return }
+        currentAccuracy = location.horizontalAccuracy
+        subscribers.forEach { $0.value.horizontalAccuracyUpdated(currentAccuracy) }
+        if location.horizontalAccuracy > 100.0 { return }
         self.lastLocation = location
-        //print("ACCURACY: \(location.horizontalAccuracy)")
         
         if lastSignificantLocation == nil {
             lastSignificantLocation = location
-            updateLocationSignificant(lastSignificantLocation!)
+            subscribers.forEach { $0.value.significantLocationUpdate(location) }
+            getCurrentPlaces()
         } else {
             let dist = lastSignificantLocation!.distance(from: location)
             if dist > 25.0 {
                 lastSignificantLocation = location
-                updateLocationSignificant(lastSignificantLocation!)
+                subscribers.forEach { $0.value.significantLocationUpdate(location) }
+                getCurrentPlaces()
             }
         }
         
-        // use for real time update location
-        updateLocation(location)
-        
+        subscribers.forEach { $0.value.tracingLocation(location) }
         
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    internal func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         
         // do on error
         updateLocationDidFailWithError(error as NSError)
@@ -125,32 +151,9 @@ class GPSService: NSObject, CLLocationManagerDelegate {
         //delegate?.authorizationChange()
     }
     
-    
-    // Private function
-    fileprivate func updateLocation(_ currentLocation: CLLocation){
-        guard let delegate = self.delegate else {
-            return
-        }
-        delegate.tracingLocation(currentLocation)
-    }
-    
-    // Private function
-    fileprivate func updateLocationSignificant(_ location: CLLocation){
-        guard let delegate = self.delegate else {
-            return
-        }
-        getCurrentPlaces()
-        delegate.significantLocationUpdate(location)
-        
-    }
-    
-    fileprivate func updateLocationDidFailWithError(_ error: NSError) {
-        
-        guard let delegate = self.delegate else {
-            return
-        }
-        
-        delegate.tracingLocationDidFailWithError(error)
+    internal func updateLocationDidFailWithError(_ error: NSError) {
+        guard let subscribers = getSubscribers() else { return }
+        subscribers.forEach { $0.value.tracingLocationDidFailWithError(error)}
     }
     
     func getCurrentPlaces() {
@@ -170,10 +173,14 @@ class GPSService: NSObject, CLLocationManagerDelegate {
                     }
                 }
                 self.likelihoods = temp
-                self.delegate?.nearbyPlacesUpdate(self.likelihoods)
+                guard let subscribers = self.getSubscribers() else { return }
+                subscribers.forEach { $0.value.nearbyPlacesUpdate(self.likelihoods)}
                 
             }
         })
     }
+    
+    
 }
+
 
