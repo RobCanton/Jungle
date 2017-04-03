@@ -23,7 +23,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     var refreshControl: UIRefreshControl!
 
     //var containerDelegate:ContainerViewController?
-    let incomingBubble = JSQMessagesBubbleImageFactory().incomingMessagesBubbleImage(with: UIColor(white: 0.3, alpha: 1.0))
+    let incomingBubble = JSQMessagesBubbleImageFactory().incomingMessagesBubbleImage(with: UIColor(white: 0.85, alpha: 1.0))
     let outgoingBubble = JSQMessagesBubbleImageFactory().outgoingMessagesBubbleImage(with: accentColor)
     var messages:[JSQMessage]!
     
@@ -272,9 +272,9 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         let data = messages[indexPath.row]
         switch(data.senderId) {
         case self.senderId:
-            cell.textView?.textColor = UIColor(white: 0.96, alpha: 1.0)
+            cell.textView?.textColor = UIColor.white
         default:
-            cell.textView?.textColor = UIColor(white: 0.96, alpha: 1.0)
+            cell.textView?.textColor = UIColor.black
         }
         return cell
     }

@@ -8,56 +8,74 @@
 
 import UIKit
 
+protocol ProfileHeaderProtocol {
+    func showFollowers()
+    func showFollowing()
+    func showConversation()
+    func showEditProfile()
+    func changeFollowStatus()
+}
+
 class ProfileHeaderView: UICollectionReusableView {
 
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var messageButton: UIButton!
     
+    @IBOutlet weak var editProfileButton: UIButton!
     @IBOutlet weak var bioLabel: UILabel!
     @IBOutlet weak var followButton: UIButton!
+    
+    var delegate:ProfileHeaderProtocol?
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         print("I'm awake, i'm awake")
-        followButton.backgroundColor = UIColor.white
-        messageButton.backgroundColor = UIColor.white//UIColor(red: 0.0, green: 128/255, blue: 255/255, alpha: 1.0)
-        followButton.tintColor = accentColor
- 
+        followButton.backgroundColor = accentColor
+        messageButton.backgroundColor = accentColor
+        editProfileButton.setTitleColor(UIColor.black, for: .normal)
+        editProfileButton.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
+        followButton.isHidden = true
+        messageButton.isHidden = true
+        editProfileButton.isHidden = true
+        
+        postsLabel.styleProfileBlockText(count: 0, text: "posts", color: UIColor.gray, color2: UIColor.clear)
+        followersLabel.styleProfileBlockText(count: 0, text: "followers", color: UIColor.gray, color2: UIColor.clear)
+        followingLabel.styleProfileBlockText(count: 0, text: "following", color: UIColor.gray, color2: UIColor.clear)
     }
-
-    @IBOutlet weak var followersLabel: UILabel!
     
+    @IBOutlet weak var postsLabel: UILabel!
+    @IBOutlet weak var followersLabel: UILabel!
     @IBOutlet weak var followingLabel: UILabel!
     
 
     
-    var followHandler:(()->())?
-    var unfollowHandler:(()->())?
-    var messageHandler:(()->())?
-    
-    var status:FollowingStatus = .None
+    var followersTapped:UITapGestureRecognizer!
+    var followingTapped:UITapGestureRecognizer!
     var user:User?
     
-    func setupHeader(_user:User?) {
-        
+    func setupHeader(_user:User?, status: FollowingStatus, delegate: ProfileHeaderProtocol) {
+        self.delegate = delegate
+
         imageView.layer.cornerRadius = imageView.frame.width/2
         imageView.clipsToBounds = true
         
-        let imageContainer = imageView.superview!
-        imageContainer.applyShadow(radius: 1, opacity: 0.25, height: 1.0, shouldRasterize: false)
-        
-        followButton.layer.cornerRadius = followButton.frame.width/2.0
+        followButton.layer.cornerRadius = followButton.frame.height/2.0
         followButton.clipsToBounds = true
-        
-        followButton.applyShadow(radius: 1, opacity: 0.25, height: 1.0, shouldRasterize: false)
         followButton.tintColor = UIColor.white
         
-        messageButton.layer.cornerRadius = messageButton.frame.width/2.0
+        messageButton.layer.cornerRadius = messageButton.frame.height/2.0
         messageButton.clipsToBounds = true
         
-        messageButton.applyShadow(radius: 1, opacity: 0.25, height: 1.0, shouldRasterize: false)
+        editProfileButton.layer.cornerRadius = editProfileButton.frame.height/2.0
+        editProfileButton.clipsToBounds = true
 
         guard let user = _user else {return}
         self.user = _user
+        setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
+        
+        usernameLabel.text = "@\(user.getUsername())"
         
         bioLabel.text = user.getBio()
         
@@ -65,85 +83,113 @@ class ProfileHeaderView: UICollectionReusableView {
             self.imageView.image = image
         })
         
-        setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
+        followersTapped = UITapGestureRecognizer(target: self, action: #selector(followersTappedHandler))
+        followersLabel.isUserInteractionEnabled = true
+        followersLabel.addGestureRecognizer(followersTapped)
         
-        if user.getUserId() == mainStore.state.userState.uid {
-            messageButton.setImage(UIImage(named: "edit"), for: .normal)
-            messageButton.backgroundColor = UIColor.white
-            messageButton.tintColor = UIColor.black
-        } else {
-            messageButton.setImage(UIImage(named: "speech"), for: .normal)
-            messageButton.backgroundColor = accentColor
-            messageButton.tintColor = UIColor.white
-        }
+        followingTapped = UITapGestureRecognizer(target: self, action: #selector(followingTappedHandler))
+        followingLabel.isUserInteractionEnabled = true
+        followingLabel.addGestureRecognizer(followingTapped)
     }
     
+    func followersTappedHandler() {
+        delegate?.showFollowers()
+    }
+    
+    func followingTappedHandler() {
+        delegate?.showFollowing()
+    }
     
     @IBAction func handleFollowButton(_ sender: UIButton) {
         
-        sender.transform = CGAffineTransform(scaleX: 0.50, y: 0.50)
+        sender.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
         
         UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
             sender.transform = CGAffineTransform.identity
         }, completion: nil)
         
-        followHandler?()
-        guard let user = self.user else { return }
-
-        switch status {
-        case .CurrentUser:
+        delegate?.changeFollowStatus()
+    }
+    
+    @IBAction func buttonTouchCancel(_ sender: UIButton) {
+        sender.transform = CGAffineTransform.identity
+    }
+    
+    @IBAction func buttonTouchDown(_ sender: UIButton) {
+        sender.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+    }
+    
+    @IBAction func buttonTouchUpInside(_ sender: UIButton) {
+        sender.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
+            sender.transform = CGAffineTransform.identity
+        }, completion: nil)
+        
+        switch sender {
+        case followButton:
+            delegate?.changeFollowStatus()
             break
-        case .Following:
-            unfollowHandler?()
+        case messageButton:
+            delegate?.showConversation()
             break
-        case .None:
-            setUserStatus(status: .Requested)
-            UserService.followUser(uid: user.getUserId())
+        case editProfileButton:
+            delegate?.showEditProfile()
             break
-        case .Requested:
+        default:
             break
         }
     }
     
-    @IBAction func messageButtonDown(_ sender: Any) {
-        //messageButton.transform = CGAffineTransform(scaleX: 0.67, y: 0.67)
-    }
     
-    @IBAction func handleMessageButton(_ sender: Any) {
-        messageButton.transform = CGAffineTransform(scaleX: 0.50, y: 0.50)
-        
-        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
-            self.messageButton.transform = CGAffineTransform.identity
-        }, completion: nil)
-        messageHandler?()
+    @IBAction func handleEditButtonTouchUpInside(_ sender: Any) {
+        delegate?.showEditProfile()
     }
     
     func setUserStatus(status:FollowingStatus) {
-        
-        self.status = status
         switch status {
         case .CurrentUser:
             followButton.backgroundColor = UIColor.white
             followButton.isHidden = true
+            messageButton.isHidden = true
+            editProfileButton.isHidden = false
             break
         case .None:
             followButton.backgroundColor = accentColor
-            followButton.setImage(UIImage(named: "plus"), for: .normal)
-            followButton.tintColor = UIColor.white
+            followButton.setTitle("Follow", for: .normal)
+            followButton.setTitleColor(UIColor.white, for: .normal)
             followButton.isHidden = false
+            messageButton.isHidden = false
+            editProfileButton.isHidden = true
             break
         case .Requested:
-            followButton.backgroundColor = UIColor.white
-            followButton.setImage(UIImage(named: "plus"), for: .normal)
-            followButton.tintColor = UIColor.black
+            followButton.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
+            followButton.setTitle("Requested", for: .normal)
+            followButton.setTitleColor(UIColor.black, for: .normal)
             followButton.isHidden = false
+            messageButton.isHidden = false
+            editProfileButton.isHidden = true
             break
         case .Following:
-            followButton.backgroundColor = UIColor.white
-            followButton.setImage(UIImage(named: "check"), for: .normal)
-            followButton.tintColor = UIColor.black
+            followButton.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
+            followButton.setTitle("Following", for: .normal)
+            followButton.setTitleColor(UIColor.black, for: .normal)
             followButton.isHidden = false
+            messageButton.isHidden = false
+            editProfileButton.isHidden = true
             break
+        }
+ 
+    }
+    
+    
+    func setPostsCount(_ count:Int) {
+        guard let user = user else { return }
+        
+        if count == 1 {
+            postsLabel.styleProfileBlockText(count: count, text: "post", color: UIColor.gray, color2: UIColor.black)
+            
+        } else {
+            postsLabel.styleProfileBlockText(count: count, text: "posts", color: UIColor.gray, color2: UIColor.black)
         }
     }
     
@@ -152,18 +198,16 @@ class ProfileHeaderView: UICollectionReusableView {
         guard let user = user else { return }
 
         if count == 1 {
-            followersLabel.styleFollowerText(count: count, text: "follower", color: UIColor.darkGray, color2: UIColor.black)
+            followersLabel.styleProfileBlockText(count: count, text: "follower", color: UIColor.gray, color2: UIColor.black)
+
         } else {
-            followersLabel.styleFollowerText(count: count, text: "follower", color: UIColor.darkGray, color2: UIColor.black)
+            followersLabel.styleProfileBlockText(count: count, text: "followers", color: UIColor.gray, color2: UIColor.black)
         }
     }
     
     func setFollowingCount(_ count:Int) {
-        if count == 1 {
-            followingLabel.styleFollowerText(count: count, text: "following", color: UIColor.darkGray, color2: UIColor.black)
-        } else {
-            followingLabel.styleFollowerText(count: count, text: "following", color: UIColor.darkGray, color2: UIColor.black)
-        }
+        guard let user = user else { return }
+        followingLabel.styleProfileBlockText(count: count, text: "following", color: UIColor.gray, color2: UIColor.black)
     }
     
     

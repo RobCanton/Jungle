@@ -8,8 +8,8 @@
 
 import Foundation
 import UIKit
-
-class MainTabBarController: UITabBarController {
+import ReSwift
+class MainTabBarController: UITabBarController, StoreSubscriber{
     
     
     override func viewDidLoad() {
@@ -24,10 +24,45 @@ class MainTabBarController: UITabBarController {
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        mainStore.subscribe(self)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        mainStore.unsubscribe(self)
+    }
+    
+    func newState(state: AppState) {
+        
+        let notifications = state.notifications
+        var unseenNotifications = 0
+        for notification in notifications {
+            if !notification.getSeen() {
+                unseenNotifications += 1
+            }
+        }
+        
+        if unseenNotifications > 0 {
+            tabBar.items?[3].badgeValue = "\(unseenNotifications)"
+        } else {
+            tabBar.items?[3].badgeValue = nil
+        }
+        
+    }
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        if let _ = viewController as? DummyViewController {
+            return false
+        }
+        return true
+    }
+    
 }
 
 
-class temp:UIViewController {
+class RoundedViewController:UIViewController {
     
     var backDrop:UIView!
     
@@ -44,15 +79,14 @@ class temp:UIViewController {
         backDrop.clipsToBounds = true
         
         self.view.addSubview(backDrop)
-        
-        
-    
-
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
+}
+
+class DummyViewController: UIViewController {
+    
 }

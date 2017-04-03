@@ -138,27 +138,27 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
         
         if let videoURL = upload.videoURL {
-            //            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            //            let outputUrl = documentsURL.appendingPathComponent("output.mp4")
-            //
-            //            do {
-            //                try FileManager.default.removeItem(at: outputUrl)
-            //            }
-            //            catch let error as NSError {
-            //                if error.code != 4 && error.code != 2 {
-            //                    return print("Error \(error)")
-            //                }
-            //            }
-            //            upload.videoURL = outputUrl
-            //
-            //            UploadService.compressVideo(inputURL: videoURL, outputURL: outputUrl, handler: { session in
-            //                DispatchQueue.main.async {
-            //                    UploadService.uploadVideo(upload: self.upload, completion: { success in
-            //                        self.sent()
-            //                    })
-            //                }
-            //            })
-            
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let outputUrl = documentsURL.appendingPathComponent("output.mp4")
+
+            do {
+                try FileManager.default.removeItem(at: outputUrl)
+            }
+            catch let error as NSError {
+                if error.code != 4 && error.code != 2 {
+                    return print("Error \(error)")
+                }
+            }
+            upload.videoURL = outputUrl
+
+            UploadService.compressVideo(inputURL: videoURL, outputURL: outputUrl, handler: { session in
+                DispatchQueue.main.async {
+                    UploadService.uploadVideo(upload: self.upload, completion: { success in
+                        self.sent()
+                    })
+                }
+            })
+
         } else if upload.image != nil {
             UploadService.sendImage(upload: upload, completion: { success in
                 self.sent()

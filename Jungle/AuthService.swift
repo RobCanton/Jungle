@@ -23,11 +23,10 @@ class AuthService: NSObject {
     override init() {
         super.init()
         
-        
-        
     }
     
     func logout() {
+        mainStore.dispatch(ClearAllNotifications())
         mainStore.dispatch(ClearConversations())
         Listeners.stopListeningToAll()
         mainStore.dispatch(ClearSocialState())

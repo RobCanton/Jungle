@@ -28,7 +28,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     
     var places:PlacesViewController!
+    var notifications:NotificationsViewController!
     var profile:MyProfileViewController!
+    
     
     var returningPlacesCell:PhotoCell?
     var returningStoriesCell:UserStoryCollectionViewCell?
@@ -41,7 +43,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     var locationHeader:LocationHeaderView!
     
     var mapView:GMSMapView?
-    var mapContainer:UIView!
     
     var screenMode:ScreenMode = .Camera
     
@@ -90,9 +91,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 112, height: 112))
+        recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         cameraBtnFrame = recordBtn.frame
-        cameraBtnFrame.origin.y = screenBounds.height - 140
+        cameraBtnFrame.origin.y = screenBounds.height - cameraBtnFrame.height * 1.8
         cameraBtnFrame.origin.x = self.view.bounds.width/2 - cameraBtnFrame.size.width/2
         recordBtn.frame = cameraBtnFrame
         cameraCenter = recordBtn.center
@@ -150,6 +151,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         let nav1 = v2.viewControllers![0] as! UINavigationController
         places = nav1.viewControllers[0] as! PlacesViewController
         
+        let nav4 = v2.viewControllers![3] as! UINavigationController
+        notifications = nav4.viewControllers[0] as! NotificationsViewController
+        
         let nav5 = v2.viewControllers![4] as! UINavigationController
         profile = nav5.viewControllers[0] as! MyProfileViewController
         
@@ -187,20 +191,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         flashView.backgroundColor = UIColor.black
         flashView.alpha = 0.0
         
-        let height = view.frame.height - cameraBtnFrame.origin.y  + 60 + 60.0
-        
-        mapContainer = UIView(frame: CGRect(x: 8, y: 20 + 4, width: view.frame.width / 3, height: view.frame.width / 4))
-        mapContainer.clipsToBounds = true
-        let gradient = CAGradientLayer()
-        
-        gradient.frame = mapContainer.bounds
-        gradient.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
-        gradient.locations = [0.0, 0.45]
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
-        //mapContainer.layer.mask = gradient
-        
-        //view.addSubview(mapContainer)
         view.addSubview(flashView)
         view.addSubview(scrollView)
         view.addSubview(flashButton)
@@ -228,10 +218,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         self.navigationController?.navigationBar.barStyle = .black
         self.navigationController?.view.backgroundColor = UIColor.clear
         self.activateNavbar(false)
-        //self.navigationController?.navigationBar.isUserInteractionEnabled = false
-        
-        //NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name:NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
-       // NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name:NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
             statusBar(hide: true, animated: true)
         }
@@ -288,7 +274,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             let reverseAlpha = 1 - alpha
             recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * reverseAlpha)
             let multiple = alpha * alpha * alpha * alpha * alpha
-            recordBtn.transform = CGAffineTransform(scaleX: 0.5 + 0.2 * multiple, y: 0.5 + 0.2 * multiple)
+            recordBtn.transform = CGAffineTransform(scaleX: 0.55 + 0.15 * multiple, y: 0.55 + 0.15 * multiple)
             recordBtn.ring.layer.borderColor = UIColor.white.cgColor
             recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 0)
             flashButton.center = CGPoint(x: cameraBtnFrame.origin.x / 2 + flashButton.frame.width * reverseAlpha, y: flashButton.center.y)
@@ -303,9 +289,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             let reverseAlpha = 1 - alpha
             recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * alpha)
             let multiple = reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha
-            let color = UIColor(hue: 97/360, saturation: (1 - multiple) * 0.60, brightness: 0.78, alpha: 1.0)
+            let color = UIColor(hue: 144/360, saturation: (1 - multiple) * 0.99, brightness: 0.85, alpha: 1.0)
                 //UIColor(hue: 149/360, saturation: 1 - multiple, brightness: 0.88, alpha: 1.0)
-            recordBtn.transform = CGAffineTransform(scaleX: 0.5 + 0.2 * multiple, y: 0.5 + 0.2 * multiple)
+            recordBtn.transform = CGAffineTransform(scaleX: 0.55 + 0.15 * multiple, y: 0.55 + 0.15 * multiple)
             recordBtn.ring.layer.borderColor = color.cgColor
             recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 1 - multiple)
             flashView.alpha = alpha
@@ -444,18 +430,166 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
+    func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .NotificationPost
+        print("PRESENT NOTIFICATION STORY")
+        let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.uid = post.getAuthorId()
+        galleryViewController.posts = [post]
+        galleryViewController.transitionController = self.transitionController
+        self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        
+        nav.delegate = transitionController
+        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
+    }
+    
+}
+
+extension MainViewController: View2ViewTransitionPresenting {
+    
+    func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
+        
+        guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
+            return CGRect.zero
+        }
+        
+        let i =  IndexPath(row: indexPath.item, section: 0)
+        
+        if storyType == .PlaceStory {
+            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as? PhotoCell else { return CGRect.zero }
+            let image_frame = cell.imageView.frame
+            let x = cell.frame.origin.x + 1
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else if storyType == .UserStory {
+            guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
+            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
+            let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
+            let image_frame = convertedFrame
+            let x = cell.frame.origin.x + 10.0 - headerCollectionView.contentOffset.x
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 9.0//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else if storyType == .ProfileStory {
+            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let image_frame = cell.imageView.frame
+            let x = cell.frame.origin.x + 1
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + navHeight - profile.collectionView!.contentOffset.y//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else {
+            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
+            let image_frame = cell.postImageView.frame
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+            let y = cell.frame.origin.y + image_frame.origin.y + navHeight - notifications.tableView.contentOffset.y//+ navHeight
+            let rect = CGRect(x: image_frame.origin.x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        }
+    }
+    
+    func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
+        
+        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
+        let i = IndexPath(row: indexPath.item, section: 0)
+        if storyType == .PlaceStory {
+            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
+                return UIView()
+            }
+            return cell.imageView
+        } else if storyType == .UserStory {
+            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else {
+                return UIView()
+            }
+            cell.imageContainer.layer.cornerRadius = 0
+            cell.imageContainer.layer.borderColor = UIColor.clear.cgColor
+            cell.imageContainer.clipsToBounds = false
+            return cell.imageContainer
+        } else if storyType == .ProfileStory{
+            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as! PhotoCell
+            return cell.imageView
+        } else {
+            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
+            return cell.postImageView
+        }
+        
+    }
+    
+    func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
+        
+        print("PREP")
+        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
+        let i = IndexPath(row: indexPath.item, section: 0)
+        
+        if isPresenting {
+            if storyType == .UserStory {
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
+                    returningStoriesCell = cell
+                }
+            }
+        }
+        
+        if !isPresenting {
+            if storyType == .PlaceStory {
+                if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
+                    returningPlacesCell?.fadeInInfo(animated: false)
+                    returningPlacesCell = cell
+                    returningPlacesCell!.fadeOutInfo()
+                }
+            } else if storyType == .UserStory {
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
+
+                    returningStoriesCell?.activateCell(false)
+            
+                    returningStoriesCell = cell
+                }
+            } else {
+                
+            }
+        }
+        if storyType == .PlaceStory {
+            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                places.collectionView!.reloadData()
+                places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                places.collectionView!.layoutIfNeeded()
+            }
+        }
+        
+        if storyType == .ProfileStory {
+            if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                profile.collectionView!.reloadData()
+                profile.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                profile.collectionView!.layoutIfNeeded()
+            }
+        }
+    }
+    
+    func dismissInteractionEnded(_ completed: Bool) {
+        
+        //        if completed {
+        //            statusBarShouldHide = false
+        //            self.setNeedsStatusBarAppearanceUpdate()
+        //        }
+        
+    }
+    
 }
 
 extension MainViewController: CameraDelegate {
+    
     func takingVideo() {
+        statusBarShouldHide = true
+        self.setNeedsStatusBarAppearanceUpdate()
         UIView.animate(withDuration: 0.42, animations: {
-            self.mapContainer?.alpha = 0.0
+            self.setNeedsStatusBarAppearanceUpdate()
         })
     }
     
     func takingPhoto() {
-        self.mapContainer?.alpha = 0.0
-        self.mapContainer?.isUserInteractionEnabled = false
         flashView.backgroundColor = UIColor.white
         flashView.alpha = 0.0
         UIView.animate(withDuration: 0.025, animations: {
@@ -474,10 +608,6 @@ extension MainViewController: CameraDelegate {
         flashButton?.isHidden = false
         switchButton?.isHidden = false
         locationHeader?.isHidden = false
-        UIView.animate(withDuration: 0.15, animations: {
-            self.mapContainer?.alpha = 0.6
-            
-        })
     }
     
     func hideCameraOptions() {
@@ -485,8 +615,6 @@ extension MainViewController: CameraDelegate {
         flashButton?.isHidden = true
         switchButton?.isHidden = true
         locationHeader?.isHidden = true
-        self.mapContainer?.isUserInteractionEnabled = false
-        
     }
     
     func showEditOptions() {
@@ -501,7 +629,7 @@ extension MainViewController: CameraDelegate {
         
         //uploadCoordinate = GPSService.sharedInstance.lastLocation!
         uploadLikelihoods = gps_service.getLikelihoods()
-    
+        
     }
     
     
@@ -620,130 +748,6 @@ extension MainViewController: CameraDelegate {
     
 }
 
-extension MainViewController: View2ViewTransitionPresenting {
-    
-    func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
-        
-        guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
-            return CGRect.zero
-        }
-        
-        let i =  IndexPath(row: indexPath.item, section: 0)
-        
-        if storyType == .PlaceStory {
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as? PhotoCell else { return CGRect.zero }
-            let image_frame = cell.imageView.frame
-            let x = cell.frame.origin.x + 1
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-            return view.convert(rect, to: view)
-        } else if storyType == .UserStory {
-            guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
-            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
-            let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
-            let image_frame = convertedFrame
-            let x = cell.frame.origin.x + 10.0 - headerCollectionView.contentOffset.x
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 9.0//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-            return view.convert(rect, to: view)
-        } else {
-            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
-            let image_frame = cell.imageView.frame
-            let x = cell.frame.origin.x + 1
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - profile.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-            return view.convert(rect, to: view)
-        }
-    }
-    
-    func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
-        
-        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
-        if storyType == .PlaceStory {
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
-                return UIView()
-            }
-            return cell.imageView
-        } else if storyType == .UserStory {
-            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else {
-                return UIView()
-            }
-            cell.imageContainer.layer.cornerRadius = 0
-            cell.imageContainer.layer.borderColor = UIColor.clear.cgColor
-            cell.imageContainer.clipsToBounds = false
-            return cell.imageContainer
-        } else {
-            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as! PhotoCell
-            return cell.imageView
-        }
-        
-    }
-    
-    func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
-        
-        print("PREP")
-        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
-        
-        if isPresenting {
-            if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
-                    returningStoriesCell = cell
-                }
-            }
-        }
-        
-        if !isPresenting {
-            if storyType == .PlaceStory {
-                if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
-                    returningPlacesCell?.fadeInInfo(animated: false)
-                    returningPlacesCell = cell
-                    returningPlacesCell!.fadeOutInfo()
-                }
-            } else if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
-
-                    returningStoriesCell?.activateCell(false)
-            
-                    returningStoriesCell = cell
-                }
-            } else {
-                
-            }
-        }
-        if storyType == .PlaceStory {
-            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                places.collectionView!.reloadData()
-                places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
-                places.collectionView!.layoutIfNeeded()
-            }
-        }
-        
-        if storyType == .ProfileStory {
-            if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                profile.collectionView!.reloadData()
-                profile.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
-                profile.collectionView!.layoutIfNeeded()
-            }
-        }
-    }
-    
-    func dismissInteractionEnded(_ completed: Bool) {
-        
-        //        if completed {
-        //            statusBarShouldHide = false
-        //            self.setNeedsStatusBarAppearanceUpdate()
-        //        }
-        
-    }
-    
-}
-
-
 
 enum CameraState {
     case Off, Initiating, Running, DidPressTakePhoto, PhotoTaken, VideoTaken, Recording
@@ -762,5 +766,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case PlaceStory, UserStory, ProfileStory
+    case PlaceStory, UserStory, ProfileStory, NotificationPost
 }

@@ -18,9 +18,9 @@ class Comment: NSObject {
     
     init(key:String, author:String, text:String, timestamp:Double)
     {
-        self.key          = key
-        self.author       = author
-        self.text         = text
+        self.key     = key
+        self.author  = author
+        self.text    = text
         self.date    = Date(timeIntervalSince1970: timestamp/1000)
     }
     

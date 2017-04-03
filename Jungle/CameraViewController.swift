@@ -149,15 +149,8 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
             
             videoFileOutput = AVCaptureMovieFileOutput()
             self.captureSession!.addOutput(videoFileOutput)
-            /*let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
-            do {
-                let audioInput: AVCaptureDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-                self.captureSession!.addInput(audioInput)
-                
-            } catch {
-                print("Unable to add audio device to the recording.")
-            }
-            */
+            
+ 
             if captureSession?.canAddInput(input) != nil {
                 captureSession?.addInput(input)
                 stillImageOutput = AVCaptureStillImageOutput()
@@ -275,6 +268,17 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     }
     
     func recordVideo() {
+        let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
+        do {
+            
+            let audioInput: AVCaptureDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+            let canAddAudioInput = self.captureSession!.canAddInput(audioInput)
+            if self.captureSession!.canAddInput(audioInput) {
+               self.captureSession!.addInput(audioInput)
+            }
+        } catch {
+            print("Unable to add audio device to the recording.")
+        }
         cameraState = .Recording
         progressTimer = Timer.scheduledTimer(timeInterval: 0.025, target: self, selector: #selector(updateProgress), userInfo: nil, repeats: true)
         

@@ -30,7 +30,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         if self.navigationController!.delegate !== transitionController {
             self.collectionView.reloadData()
         }
-        
+        globalMainRef?.statusBar(hide: true, animated: false)
         //statusBarShouldHide = true
         //setNeedsStatusBarAppearanceUpdate()
     }

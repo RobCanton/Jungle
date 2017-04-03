@@ -16,7 +16,7 @@ enum SortedBy {
     case Recent,Popular,Nearest
 }
 
-class PlacesViewController:temp, UICollectionViewDelegate, UICollectionViewDataSource, LocationDelegate, StoreSubscriber {
+class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, LocationDelegate, StoreSubscriber {
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
     var screenWidth: CGFloat!

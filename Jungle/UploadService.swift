@@ -49,9 +49,11 @@ class UploadService {
                 }
                 
                 DispatchQueue.main.async {
-                    
-                    let image = UIImage(data: data!)
-                    return completion(image!)
+                    var image:UIImage?
+                    if data != nil {
+                        image = UIImage(data: data!)
+                    }
+                    return completion(image)
                 }
                 
         }).resume()
@@ -187,6 +189,125 @@ class UploadService {
                 }
             }
             completion()
+        }
+    }
+    
+    static func uploadVideo(upload:Upload, completion:(_ success:Bool)->()){
+        
+        //If upload has no destination do not upload it
+        guard let place = upload.place else { return }
+        
+        if upload.videoURL == nil { return }
+        
+        let uid = mainStore.state.userState.uid
+        let url = upload.videoURL!
+        
+        let ref = FIRDatabase.database().reference()
+        let dataRef = ref.child("uploads").childByAutoId()
+        let postKey = dataRef.key
+        
+        completion(true)
+        
+        uploadVideoStill(url: url, postKey: postKey, completion: { thumbURL in
+            
+            let data = NSData(contentsOf: url)
+            
+            let metadata = FIRStorageMetadata()
+            let contentTypeStr = "video"
+            let playerItem = AVAsset(url: url)
+            let length = CMTimeGetSeconds(playerItem.duration)
+            metadata.contentType = contentTypeStr
+            
+            let storageRef = FIRStorage.storage().reference()
+            let uploadTask = storageRef.child("user_uploads/videos/\(uid)/\(postKey)").put(data as! Data, metadata: metadata) { metadata, error in
+                if (error != nil) {
+                    // HANDLE ERROR
+
+                } else {
+                    // Metadata contains file metadata such as size, content-type, and download URL.
+                    
+                    let downloadURL = metadata!.downloadURL()
+                    let obj = [
+                        "author": uid,
+                        "caption": upload.caption,
+                        "placeID": place.placeID,
+                        "url": thumbURL,
+                        "videoURL": downloadURL!.absoluteString,
+                        "contentType": contentTypeStr,
+                        "dateCreated": [".sv": "timestamp"],
+                        "length": length
+                        ] as [String : Any]
+                    
+                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
+                        if error == nil {
+                            
+                            let updateValues: [String : Any] = [
+                                "places/\(place.placeID)/info/name": place.name,
+                                "places/\(place.placeID)/info/lat": place.coordinate.latitude,
+                                "places/\(place.placeID)/info/lon": place.coordinate.longitude,
+                                "places/\(place.placeID)/info/address": place.formattedAddress,
+                                "places/\(place.placeID)/posts/\(postKey)": [".sv": "timestamp"],
+                                "places/\(place.placeID)/contributers/\(uid)": true,
+                                "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
+                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
+                            ]
+                            
+                            ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
+                                
+                            })
+                        } else {
+                            
+                        }
+                    })
+                }
+            }
+            
+        })
+    }
+    
+    private static func uploadVideoStill(url:URL, postKey:String, completion:@escaping (_ thumb_url:String)->()) {
+        let storageRef = FIRStorage.storage().reference()
+        if let videoStill = generateVideoStill(url: url) {
+            if let data = UIImageJPEGRepresentation(videoStill, 0.5) {
+                let stillMetaData = FIRStorageMetadata()
+                stillMetaData.contentType = "image/jpg"
+                let uid = mainStore.state.userState.uid
+                _ = storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: stillMetaData) { metadata, error in
+                    if (error != nil) {
+                        
+                    } else {
+                        let thumbURL = metadata!.downloadURL()!
+                        completion(thumbURL.absoluteString)
+                    }
+                }
+            }
+        }
+    }
+    
+    private static func generateVideoStill(url:URL) -> UIImage?{
+        do {
+            let asset = AVAsset(url: url)
+            let imgGenerator = AVAssetImageGenerator(asset: asset)
+            imgGenerator.appliesPreferredTrackTransform = true
+            let cgImage = try imgGenerator.copyCGImage(at: CMTimeMake(0, 1), actualTime: nil)
+            let image = UIImage(cgImage: cgImage)
+            return image
+        } catch let error as NSError {
+            print("Error generating thumbnail: \(error)")
+            return nil
+        }
+    }
+    
+    static func compressVideo(inputURL: URL, outputURL: URL, handler:@escaping (_ session: AVAssetExportSession)-> Void) {
+        let urlAsset = AVURLAsset(url: inputURL, options: nil)
+        if let exportSession = AVAssetExportSession(asset: urlAsset, presetName: AVAssetExportPresetMediumQuality) {
+            exportSession.outputURL = outputURL
+            exportSession.outputFileType = AVFileTypeMPEG4
+            exportSession.shouldOptimizeForNetworkUse = true
+            
+            exportSession.exportAsynchronously { () -> Void in
+                handler(exportSession)
+            }
         }
     }
     

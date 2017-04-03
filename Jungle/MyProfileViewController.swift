@@ -13,7 +13,7 @@ import Firebase
 
 
 
-class MyProfileViewController: temp, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout, EditProfileProtocol {
+class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout, EditProfileProtocol {
     
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
@@ -260,9 +260,6 @@ class MyProfileViewController: temp, StoreSubscriber, UICollectionViewDelegate, 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
-            view.setupHeader(_user:self.user)
-            view.messageHandler = handleMessageTapped
-            view.unfollowHandler = unfollowHandler
             return view
         }
         

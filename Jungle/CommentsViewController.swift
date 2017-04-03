@@ -23,7 +23,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var a:UIBarButtonItem!
     var navHeight:CGFloat!
     
-    var header:CommentsHeaderView!
     var commentBar:CommentBar!
     
     var commentsRef:FIRDatabaseReference?
@@ -35,18 +34,31 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.automaticallyAdjustsScrollViewInsets = false
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
 
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
-        header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: navHeight)
-        view.addSubview(header)
+        let closeButton = UIBarButtonItem(image: UIImage(named:"delete"), style: .plain, target: self, action: #selector(dismissHandle))
+        closeButton.tintColor = UIColor.white
+        navigationItem.leftBarButtonItem = closeButton
         
-        header.closeHandler = dismissHandle
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+        blurView.frame = view.bounds
+        view.addSubview(blurView)
         
+        let animator = UIViewPropertyAnimator(duration: 1.0, curve: .easeOut, animations: {
+            blurView.effect = nil
+        })
         
-        view.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
+        animator.isReversed = true
+        animator.startAnimation()
+        
+        UIView.animate(withDuration: 0.5, animations: {}, completion: { _ in
+            animator.stopAnimation(true)
+        })
+        
+        view.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
         
         tableView = UITableView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - navHeight))
         let nib = UINib(nibName: "CommentCell", bundle: nil)
@@ -77,28 +89,27 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         self.tableView.reloadData()
         
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
-        commentBar.frame = CGRect(x: 0, y: view.frame.height - 50.0, width: view.frame.width, height: 50.0)
+        commentBar.frame = CGRect(x: 0, y: view.frame.height - (navHeight) , width: view.frame.width, height: navHeight - 20.0)
         commentBar.textField.delegate = self
         commentBar.sendHandler = sendComment
         self.view.addSubview(commentBar)
-        
-        tapGesture = UITapGestureRecognizer(target: self, action: #selector(authorTitleTapped))
-        header.imageView.superview!.addGestureRecognizer(tapGesture)
-        header.imageView.superview!.isUserInteractionEnabled = true
-    
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        header.setUserInfo(uid: item.getAuthorId())
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        //self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.barStyle = .black
+        self.navigationController?.view.backgroundColor = UIColor.clear
         
-        navigationController?.setNavigationBarHidden(true, animated: true)
-        globalMainRef?.statusBar(hide: true, animated: true)
+        
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -266,7 +277,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override var prefersStatusBarHidden: Bool {
         get {
-            return true
+            return false
         }
     }
 

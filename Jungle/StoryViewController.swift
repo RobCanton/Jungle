@@ -195,7 +195,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         }
         
         UserService.getUser(item.authorId, completion: { user in
-            print("USER: \(user)")
             if user != nil {
                 let caption = "\(user!.getUsername()) \(item.caption)"
                 let width = self.frame.width - (42 + 50)

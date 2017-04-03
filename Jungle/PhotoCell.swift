@@ -17,8 +17,7 @@ class PhotoCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     
     var location:Location!
-    
-//    @IBOutlet weak var gradientView: UIView!
+    var gradient:CAGradientLayer?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -27,23 +26,13 @@ class PhotoCell: UICollectionViewCell {
         self.layer.borderWidth = 0.0
         //self.layer.cornerRadius = 4.0
         self.clipsToBounds = true
-        
-        
-        
-        
-
     }
-    
-    var gradient:CAGradientLayer?
-    
 
     func setupLocationCell (_ locationStory:LocationStory) {
         
         
         self.imageView.image = nil
         self.colorView.alpha = 0.0
-        
-
         
         LocationService.sharedInstance.getLocationInfo(locationStory.getLocationKey(), completion: { location in
             if location != nil {
@@ -75,18 +64,19 @@ class PhotoCell: UICollectionViewCell {
                         self.imageView.alpha = 1.0
                     }
                     
-                    
-                    let avgColor = image!.areaAverage()
-                    let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
-                    self.gradient?.removeFromSuperlayer()
-                    self.gradient = CAGradientLayer()
-                    self.gradient!.frame = self.colorView.bounds
-                    self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
-                    self.gradient!.locations = [0.0, 1.0]
-                    self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                    self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                    self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                    self.colorView.alpha = 0.7
+                    if image != nil {
+                        let avgColor = image!.areaAverage()
+                        let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
+                        self.gradient?.removeFromSuperlayer()
+                        self.gradient = CAGradientLayer()
+                        self.gradient!.frame = self.colorView.bounds
+                        self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
+                        self.gradient!.locations = [0.0, 1.0]
+                        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+                        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+                        self.colorView.layer.insertSublayer(self.gradient!, at: 0)
+                        self.colorView.alpha = 0.7
+                    }
  
                     self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
                     self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)

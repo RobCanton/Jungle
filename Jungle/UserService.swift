@@ -143,12 +143,13 @@ class UserService {
             error, ref in
         })
         
-//        let followRequestRef = ref.child("api/requests/social").childByAutoId()
-//        followRequestRef.setValue([
-//            "type": "FOLLOW",
-//            "sender": current_uid,
-//            "recipient": uid
-//            ])
+        let followRequestRef = ref.child("api/requests/social").childByAutoId()
+        followRequestRef.setValue([
+            "type": "FOLLOW",
+            "sender": current_uid,
+            "recipient": uid,
+            "timestamp": [".sv":"timestamp"] as AnyObject
+            ])
         
         
         //unblockUser(uid: uid, completionHandler: { success in })
@@ -232,6 +233,11 @@ class UserService {
         }
     }
     
+    static func markNotificationAsSeen(notification:Notification) {
+        let uid = mainStore.state.userState.uid
+        let notificationRef = ref.child("notifications/\(uid)/\(notification.getKey())/seen")
+        notificationRef.setValue(true)
+    }
     
     
 }

@@ -19,14 +19,23 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var screenSize: CGRect!
     var screenWidth: CGFloat!
     var screenHeight: CGFloat!
+    var navHeight: CGFloat!
     
+    var postsRef:FIRDatabaseReference?
     var posts = [StoryItem]()
     var postKeys = [String]()
+    
     var collectionView:UICollectionView!
     var user:User?
     
     var uid:String!
     var statusBarShouldHide = false
+    
+    var presentingEmptyConversation = false
+    var presentConversation:Conversation?
+    var partnerImage:UIImage?
+    
+    var status:FollowingStatus = .None
     
     override var prefersStatusBarHidden: Bool
         {
@@ -50,13 +59,11 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        
+        navHeight = self.navigationController!.navigationBar.frame.height + 20.0
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
-        navigationController?.navigationBar.isTranslucent = false
+        //navigationController?.navigationBar.isTranslucent = false
         
         if let navbar = navigationController?.navigationBar {
             let blurView = UIView(frame: CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0))
@@ -65,7 +72,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         }
         
         self.view.backgroundColor = UIColor.white
-
+        self.title = "Profile"
         screenSize = self.view.frame
         screenWidth = screenSize.width
         screenHeight = screenSize.height
@@ -76,7 +83,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         layout.minimumInteritemSpacing = 1.0
         layout.minimumLineSpacing = 1.0
         
-        collectionView = UICollectionView(frame: CGRect(x: 0,y: 0,width: view.frame.width,height: view.frame.height), collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: CGRect(x: 0,y: navHeight,width: view.frame.width,height: view.frame.height - navHeight), collectionViewLayout: layout)
         
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
@@ -95,10 +102,12 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.view.addSubview(collectionView)
         collectionView.reloadData()
         
+        
+        self.status = checkFollowingStatus(uid: uid)
         UserService.getUser(uid, completion: { user in
             if user != nil {
                 self.user = user
-                self.title = self.user!.getUsername()
+                //self.title = self.user!.getUsername()
                 self.collectionView.reloadData()
             }
         })
@@ -124,7 +133,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         mainStore.subscribe(self)
-        globalMainRef?.statusBar(hide: false, animated: true)
+        self.navigationController?.navigationBar.barStyle = .default
+        //self.navigationController?.view.backgroundColor = UIColor.white
         navigationController?.setNavigationBarHidden(false, animated: true)
         
         setFollowing()
@@ -165,7 +175,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     
     func newState(state: AppState) {
-        let status = checkFollowingStatus(uid: uid)
+        self.status = checkFollowingStatus(uid: uid)
         getHeaderView()?.setUserStatus(status: status)
         setFollowing()
     }
@@ -187,10 +197,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         }
         self.following = tempFollowing
     }
-
-    
-    
-    var postsRef:FIRDatabaseReference?
     
     func listenToPosts() {
         
@@ -207,6 +213,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             }
             print("KEYS: \(postKeys)")
             self.postKeys = postKeys
+            self.getHeaderView()?.setPostsCount(postKeys.count)
             self.downloadStory(postKeys: postKeys)
         })
     }
@@ -229,80 +236,16 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         }
     }
     
-    var presentingEmptyConversation = false
-    
-    func handleMessageTapped() {
-        
-        let current_uid = mainStore.state.userState.uid
-        
-        if uid == current_uid {
-            let controller = UIStoryboard(name: "EditProfileViewController", bundle: nil)
-                .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
-            let c = controller.viewControllers[0] as! EditProfileViewController
-            c.delegate = self
-            self.present(controller, animated: true, completion: nil)
-        } else {
-            guard let partner_uid = uid else { return }
-            if current_uid == partner_uid { return }
-            if let conversation = checkForExistingConversation(partner_uid: current_uid) {
-                prepareConversationForPresentation(conversation: conversation)
-            } else {
-                
-                let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
-                let ref = UserService.ref.child("conversations/\(pairKey)")
-                ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
-                    
-                    let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                    recipientUserRef.child(current_uid).setValue(true)
-                    
-                    let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
-                    currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
-                        let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
-                        self.presentingEmptyConversation = true
-                        self.prepareConversationForPresentation(conversation: conversation)
-                    })
-                })
-            }
-        }
-    }
-    
-    
     func getFullUser() {
         self.user = mainStore.state.userState.user
         self.collectionView.reloadData()
     }
     
-    var presentConversation:Conversation?
-    var partnerImage:UIImage?
-    
-    func prepareConversationForPresentation(conversation:Conversation) {
-        conversation.listen()
-        UserService.getUser(uid, completion: { user in
-            if user != nil {
-                self.presentConversation(conversation: conversation, user: user!)
-            }
-        })
-    }
-    
-    func presentConversation(conversation:Conversation, user:User) {
-        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
-            let controller = ChatViewController()
-            controller.conversation = conversation
-            controller.partnerImage = image
-            controller.popUpMode = true
-            let nav = UINavigationController(rootViewController: controller)
-            nav.navigationBar.isTranslucent = false
-            nav.navigationBar.tintColor = UIColor.black
-            self.present(nav, animated: true, completion: nil)
-        })
-    }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
-            view.setupHeader(_user:self.user)
-            view.messageHandler = handleMessageTapped
-            view.unfollowHandler = unfollowHandler
+            view.setupHeader(_user:self.user, status: status, delegate: self)
             return view
         }
         
@@ -310,14 +253,13 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     var text:String?
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let staticHeight:CGFloat = 8 + 140
+        let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
+        
         if user != nil {
             let bio = user!.getBio()
-            
-            //text = "Here is my bio about absolutely nothing important. but u can catch me out side mannn dem."
             if bio != "" {
-                var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightMedium))
-                let height2 = size.height + staticHeight + 12  // +8 for some bio padding
+                var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightRegular))
+                let height2 = size.height + staticHeight + 8  // +8 for some bio padding
                 size.height = height2
                 return size
             }
@@ -381,9 +323,101 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         }
         return nil
     }
+}
+
+extension UserProfileViewController: ProfileHeaderProtocol {
     
+    func showFollowers() {
+        guard let followers = followers else { return }
+        let controller = UsersListViewController()
+        controller.title = "Followers"
+        controller.tempIds = followers
+        self.navigationController?.pushViewController(controller, animated: true)
+    }
     
-    func unfollowHandler() {
+    func showFollowing() {
+        guard let following = following else { return }
+        let controller = UsersListViewController()
+        controller.title = "Following"
+        controller.tempIds = following
+        self.navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    func showConversation() {
+        let current_uid = mainStore.state.userState.uid
+        guard let partner_uid = uid else { return }
+        if current_uid == partner_uid { return }
+        if let conversation = checkForExistingConversation(partner_uid: current_uid) {
+            prepareConversationForPresentation(conversation: conversation)
+        } else {
+            
+            let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
+            let ref = UserService.ref.child("conversations/\(pairKey)")
+            ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
+                
+                let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
+                recipientUserRef.child(current_uid).setValue(true)
+                
+                let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
+                currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
+                    let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
+                    self.presentingEmptyConversation = true
+                    self.prepareConversationForPresentation(conversation: conversation)
+                })
+            })
+        }
+    }
+    
+    func prepareConversationForPresentation(conversation:Conversation) {
+        conversation.listen()
+        UserService.getUser(uid, completion: { user in
+            if user != nil {
+                self.presentConversation(conversation: conversation, user: user!)
+            }
+        })
+    }
+    
+    func presentConversation(conversation:Conversation, user:User) {
+        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
+            let controller = ChatViewController()
+            controller.conversation = conversation
+            controller.partnerImage = image
+            controller.popUpMode = true
+            let nav = UINavigationController(rootViewController: controller)
+            nav.navigationBar.isTranslucent = false
+            nav.navigationBar.tintColor = UIColor.black
+            self.present(nav, animated: true, completion: nil)
+        })
+    }
+    
+    func showEditProfile() {
+        let current_uid = mainStore.state.userState.uid
+        if uid == current_uid {
+            let controller = UIStoryboard(name: "EditProfileViewController", bundle: nil)
+                .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
+            let c = controller.viewControllers[0] as! EditProfileViewController
+            c.delegate = self
+            self.present(controller, animated: true, completion: nil)
+        }
+    }
+    
+    func changeFollowStatus() {
+        switch status {
+        case .CurrentUser:
+            break
+        case .Following:
+            unfollow()
+            break
+        case .None:
+            getHeaderView()?.setUserStatus(status: .Requested)
+            UserService.followUser(uid: uid)
+            break
+        case .Requested:
+            break
+        }
+    }
+    
+    func unfollow() {
         guard let user = self.user else { return }
         let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
         
@@ -402,7 +436,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
     }
     
-    
 }
 
 extension UserProfileViewController: View2ViewTransitionPresenting {
@@ -413,9 +446,9 @@ extension UserProfileViewController: View2ViewTransitionPresenting {
             return CGRect.zero
         }
         let navHeight = navigationController!.navigationBar.frame.height
-        var y = attributes.frame.origin.y + navHeight
+        var y = attributes.frame.origin.y //+ navHeight
         if !isPresenting {
-            y += 20.0
+            //y += 20.0
         }
         
         let rect = CGRect(x: attributes.frame.origin.x, y: y, width: attributes.frame.width, height: attributes.frame.height)

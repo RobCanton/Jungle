@@ -270,7 +270,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         nav.navigationBar.tintColor = UIColor.black
         
         nav.modalPresentationStyle = .overCurrentContext
-        
+        globalMainRef?.statusBar(hide: false, animated: true)
         self.present(nav, animated: true, completion: nil)
         
     }

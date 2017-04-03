@@ -9,7 +9,7 @@
 import ReSwift
 import UIKit
 
-class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
+class MessagesViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
 
     let cellIdentifier = "conversationCell"
     
@@ -27,7 +27,7 @@ class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, 
         searchBar.center = CGPoint(x: view.frame.width/2, y: 22)
         searchBar.barStyle = .default
         //searchBar.barTintColor = UIColor.red
-        searchBar.placeholder = "Search following"
+        searchBar.placeholder = "Search"
         searchBar.searchBarStyle = .minimal
         view.addSubview(searchBar)
         
@@ -93,6 +93,8 @@ class MessagesViewController: temp, UITableViewDelegate, UITableViewDataSource, 
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! ConversationViewCell
         
         cell.conversation = conversations[indexPath.item]
+        let labelX = cell.usernameLabel.frame.origin.x
+        cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
         return cell
     }
     

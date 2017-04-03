@@ -18,6 +18,7 @@ class Listeners {
     fileprivate static var listeningToFollowers = false
     fileprivate static var listeningToFollowing = false
     fileprivate static var listeningToConversations = false
+    fileprivate static var listeningToNotifications = false
 
     
     static func stopListeningToAll() {
@@ -25,6 +26,7 @@ class Listeners {
         stopListeningToFollowers()
         stopListeningToFollowing()
         stopListeningToConversatons()
+        stopListeningToNotifications()
     }
     
    
@@ -126,6 +128,34 @@ class Listeners {
         listeningToConversations = false
     }
     
+    static func startListeningToNotifications() {
+        if !listeningToNotifications {
+            listeningToNotifications = true
+            let current_uid = mainStore.state.userState.uid
+            let notificationsRef = ref.child("notifications/\(current_uid)")
+            notificationsRef.observe(.childAdded, with: { snapshot in
+                if snapshot.exists() {
+                    let key          = snapshot.key
+                    let dict         = snapshot.value as! [String:AnyObject]
+                    let sender       = dict["sender"] as! String
+                    let timestamp    = dict["timestamp"] as! Double
+                    let type         = dict["type"] as! String
+                    let seen         = dict["seen"] as! Bool
+                    let postKey      = dict["postKey"] as? String
+                    let date         = Date(timeIntervalSince1970: timestamp/1000)
+                    let notification = Notification(key: key, type: type, date: date, sender: sender, seen: seen, postKey: postKey)
+                    mainStore.dispatch(AddNotification(notification: notification))
+                }
+            })
+        }
+    }
+    
+    static func stopListeningToNotifications() {
+        let uid = mainStore.state.userState.uid
+        let notificationsRef = ref.child("notifications/\(uid)")
+        notificationsRef.removeAllObservers()
+        listeningToNotifications = false
+    }
     
     
 }

@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import View2ViewTransition
 
-class ActivityViewController: temp, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+class ActivityViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
     var myStory:Story?
 

@@ -11,17 +11,16 @@ import UIKit
 import Firebase
 
 
-class LoginViewController: UIViewController {
-
-    @IBOutlet weak var loginButton: UIButton!
+class LoginViewController: UIViewController, UITextFieldDelegate {
     
-    @IBOutlet weak var createAccountButton: UIButton!
-
+    
+    @IBOutlet weak var signupButton: UIButton!
+    
     var gradientView:UIView!
     var gradient:CAGradientLayer?
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         gradientView = UIView(frame: view.bounds)
         self.view.insertSubview(gradientView, at: 0)
         gradientView.backgroundColor = UIColor.white
@@ -30,29 +29,17 @@ class LoginViewController: UIViewController {
         self.gradient = CAGradientLayer()
         self.gradient!.frame = self.gradientView.bounds
         self.gradient!.colors = [
-            UIColor(red: 220/255, green: 227/255, blue: 91/255, alpha: 1.0).cgColor,
-            UIColor(red: 69/255, green: 182/255, blue: 73/255, alpha: 1.0).cgColor
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
         ]
         self.gradient!.locations = [0.0, 1.0]
         self.gradient!.startPoint = CGPoint(x: 0, y: 0)
         self.gradient!.endPoint = CGPoint(x: 0, y: 1)
         self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
 
+        signupButton.layer.cornerRadius = 8.0
+        signupButton.clipsToBounds = true
         
-        loginButton.layer.borderWidth = 2.0
-        loginButton.layer.borderColor = UIColor.black.cgColor
-        
-        createAccountButton.layer.borderWidth = 2.0
-        createAccountButton.layer.borderColor = UIColor.black.cgColor
-
-//        FIRAuth.auth()?.signInAnonymously() { (user, error) in
-//            if error == nil {
-//                self.performSegue(withIdentifier: "login", sender: self)
-//            } else {
-//                print(error!.localizedDescription)
-//            }
-//            
-//        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -65,15 +52,112 @@ class LoginViewController: UIViewController {
                     Listeners.startListeningToFollowers()
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
+                    Listeners.startListeningToNotifications()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })
             
         }
     }
+    @IBAction func handleSignup(_ sender: Any) {
+        //self.performSegue(withIdentifier: "toCreateAccount", sender: self)
+    }
     
-    @IBAction func handleCreateAccount(_ sender: Any) {
-        
-        self.performSegue(withIdentifier: "toCreateAccount", sender: self)
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    override var prefersStatusBarHidden: Bool
+        {
+        get {
+            return true
+        }
     }
 }
+
+class SignInViewController: UIViewController, UITextFieldDelegate {
+    
+    var gradientView:UIView!
+    var gradient:CAGradientLayer?
+    
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    
+    @IBOutlet weak var signinButton: UIButton!
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        gradientView = UIView(frame: view.bounds)
+        self.view.insertSubview(gradientView, at: 0)
+        gradientView.backgroundColor = UIColor.white
+        
+        self.gradient?.removeFromSuperlayer()
+        self.gradient = CAGradientLayer()
+        self.gradient!.frame = self.gradientView.bounds
+        self.gradient!.colors = [
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
+        ]
+        self.gradient!.locations = [0.0, 1.0]
+        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+        self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
+        
+        emailTextField.layer.cornerRadius = 8.0
+        emailTextField.clipsToBounds = true
+        emailTextField.delegate = self
+        
+        passwordTextField.layer.cornerRadius = 8.0
+        passwordTextField.clipsToBounds = true
+        passwordTextField.delegate = self
+        
+        signinButton.layer.cornerRadius = 8.0
+        signinButton.clipsToBounds = true
+        
+    }
+    
+    @IBAction func handleSignin(_ sender: Any) {
+        guard let email = emailTextField.text else { return }
+        guard let pass = passwordTextField.text else { return }
+        
+        FIRAuth.auth()?.signIn(withEmail: email, password: pass, completion: { (user, error) in
+            if error == nil && user != nil {
+                self.dismiss(animated: true, completion: nil)
+            }
+        })
+    }
+    
+    @IBAction func handleDismiss(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    override var prefersStatusBarHidden: Bool
+        {
+        get {
+            return true
+        }
+    }
+    
+}
+
+
+class InsetTextField: UITextField {
+    
+    // placeholder position
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 10 , dy: 0)
+    }
+    
+    // text position
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 10 , dy: 0)
+    }
+
+}
+

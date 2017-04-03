@@ -31,7 +31,7 @@ class CameraButton: UIView {
         ring.backgroundColor = UIColor.clear
         ring.layer.cornerRadius = ring.frame.height/2
         ring.layer.borderColor = UIColor.white.cgColor
-        ring.layer.borderWidth = 6.0
+        ring.layer.borderWidth = 7
         ring.clipsToBounds = true
         ring.layer.masksToBounds = true
         ring.tintColor = UIColor.white
@@ -40,12 +40,12 @@ class CameraButton: UIView {
         //ring.applyShadow(1, opacity: 0.25, height: 1, shouldRasterize: false)
         self.isUserInteractionEnabled = true
         
-        let pMargin:CGFloat = 12.75
+        let pMargin:CGFloat = 12.0
         let pFrame = CGRect(x: ring.frame.origin.x - pMargin, y: ring.frame.origin.y - pMargin, width: ring.frame.width + pMargin * 2, height: ring.frame.height + pMargin * 2)
         progresser = KDCircularProgress(frame: pFrame)
         progresser.startAngle = -90
-        progresser.progressThickness = 0.15
-        progresser.trackThickness = 0.15
+        progresser.progressThickness = 0.25
+        progresser.trackThickness = 0.25
         progresser.trackColor = UIColor.clear
         progresser.clockwise = true
         progresser.glowAmount = 0.0
@@ -76,7 +76,7 @@ class CameraButton: UIView {
         interactionView.addGestureRecognizer(tap)
         
         press = UILongPressGestureRecognizer(target: self, action: #selector(pressed))
-        press.minimumPressDuration = 0.5
+        press.minimumPressDuration = 0.3
         interactionView.addGestureRecognizer(press)
         interactionView.isUserInteractionEnabled = true
         addSubview(redCircle)
@@ -106,7 +106,7 @@ class CameraButton: UIView {
         switch state {
         case .began:
             UIView.animate(withDuration: 1.0, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0, options: [.curveEaseInOut], animations: {
-                self.ring.alpha = 0.20
+                self.ring.alpha = 0.333
                 //self.ring.transform = CGAffineTransform(scaleX: 0.65, y: 0.65)
                 self.redCircle.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
                 self.transform = CGAffineTransform.identity
