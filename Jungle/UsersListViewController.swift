@@ -16,6 +16,7 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     var postKey:String?
     var tableView:UITableView!
     var showFollowButton = true
+    var navHeight:CGFloat!
     
     let cellIdentifier = "userCell"
     var user:User?
@@ -32,6 +33,7 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         mainStore.subscribe(self)
+        self.navigationController?.navigationBar.barStyle = .default
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
@@ -52,10 +54,12 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+        self.addNavigationBarBackdrop()
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        tableView = UITableView(frame:  CGRect(x: 0,y: 0,width: view.frame.width,height: view.frame.height))
+        tableView = UITableView(frame:  CGRect(x: 0,y: navHeight, width: view.frame.width,height: view.frame.height - navHeight))
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = UIColor.white

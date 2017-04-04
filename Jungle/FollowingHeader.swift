@@ -47,7 +47,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func setupStories(_userStories:[UserStory]) {
         
-
         userStories = _userStories
         
         collectionView.reloadData()
@@ -71,7 +70,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func getItemSize() -> CGSize {
-        return CGSize(width: self.frame.height * 0.85, height: self.frame.height)
+        return CGSize(width: self.frame.height, height: self.frame.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

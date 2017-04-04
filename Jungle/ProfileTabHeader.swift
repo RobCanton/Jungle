@@ -20,10 +20,11 @@ class ProfileTabHeader: UIView {
     @IBAction func handleSettings(_ sender: Any) {
         print("YEH")
         let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SettingsContainerViewController")
-        globalMainRef?.navigationController?.delegate = nil
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+        /*globalMainRef?.navigationController?.delegate = nil
         globalMainRef?.activateNavbar(true)
         globalMainRef?.navigationController?.pushViewController(controller, animated: true)
-        
+        */
     }
 
 }

@@ -15,6 +15,20 @@ import GooglePlaces
 
 var globalMainRef:MainViewController?
 
+var globalMainInterfaceProtocol:MainInterfaceProtocol?
+
+protocol MainInterfaceProtocol {
+    func navigationPush(withController controller: UIViewController, animated: Bool)
+}
+
+extension MainViewController: MainInterfaceProtocol {
+    func navigationPush(withController controller: UIViewController, animated: Bool) {
+        navigationController?.delegate = nil
+        activateNavbar(true)
+        navigationController?.pushViewController(controller, animated: animated)
+    }
+}
+
 class MainViewController: UIViewController, UIScrollViewDelegate {
 
     var gps_service:GPSService!
@@ -44,7 +58,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     var mapView:GMSMapView?
     
-    var screenMode:ScreenMode = .Camera
+    var screenMode:ScreenMode = .Main
     
     var storyType:StoryType = .PlaceStory
     
@@ -85,6 +99,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        globalMainInterfaceProtocol = self
         globalMainRef = self
         let screenBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
@@ -198,8 +213,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         view.addSubview(locationHeader)
         view.addSubview(recordBtn)
         
-        self.scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height), animated: false)
-        setToCameraMode()
+        self.scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 2.0), animated: false)
+        //setToCameraMode()
         
         if gps_service == nil {
             gps_service = GPSService(["MapViewController":mapViewController])
@@ -230,6 +245,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         returningPlacesCell = nil
         returningStoriesCell?.activateCell(true)
         returningStoriesCell = nil
+        if self.navigationController?.delegate === transitionController {
+            self.navigationController?.delegate = nil
+            recordBtn.isUserInteractionEnabled = true
+            scrollView.isScrollEnabled = true
+        }
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
            //statusBar(hide: true, animated: false)
         } else {
@@ -395,6 +415,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         storiesViewController.transitionController = transitionController
         
         nav.delegate = transitionController
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
         transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
 
     }
@@ -411,7 +433,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
                                          "initialIndexPath": initialIndexPath as AnyObject]
         
         storiesViewController.transitionController = transitionController
-        
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
         nav.delegate = transitionController
         transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
     }
@@ -425,7 +448,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
-        
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
         nav.delegate = transitionController
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
@@ -435,11 +459,13 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         storyType = .NotificationPost
         print("PRESENT NOTIFICATION STORY")
         let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.isSingleItem = true
         galleryViewController.uid = post.getAuthorId()
         galleryViewController.posts = [post]
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
-        
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
         nav.delegate = transitionController
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
@@ -469,9 +495,9 @@ extension MainViewController: View2ViewTransitionPresenting {
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
             let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
             let image_frame = convertedFrame
-            let x = cell.frame.origin.x + 10.0 - headerCollectionView.contentOffset.x
+            let x = cell.frame.origin.x + 15.0 - headerCollectionView.contentOffset.x
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 9.0//+ navHeight
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 6.0//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
@@ -510,10 +536,12 @@ extension MainViewController: View2ViewTransitionPresenting {
             cell.imageContainer.clipsToBounds = false
             return cell.imageContainer
         } else if storyType == .ProfileStory{
-            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as! PhotoCell
+            guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
+                return UIView()
+            }
             return cell.imageView
         } else {
-            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
+            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
             return cell.postImageView
         }
         

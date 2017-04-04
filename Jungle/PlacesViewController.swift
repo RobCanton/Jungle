@@ -24,7 +24,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     var collectionView:UICollectionView!
     
     var masterNav:UINavigationController?
-    var refresher:UIRefreshControl!
     
     var locations = [Location]()
     var locationStories = [LocationStory]()
@@ -36,8 +35,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     var storiesDictionary = [String:[String]]()
     var responseRef:FIRDatabaseReference?
     
-    var inboxButton:UIButton!
-    
     var gps_service:GPSService!
     
     
@@ -47,6 +44,12 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = true
         //navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        
+        
+        let tabHeader = UINib(nibName: "PlacesTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PlacesTabHeader
+        tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 44)
+        
+        self.view.addSubview(tabHeader)
         
         screenSize = self.view.frame
         screenWidth = screenSize.width
@@ -81,22 +84,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         segmentedControl.center = CGPoint(x: view.frame.width/2, y: 22)
         segmentedControl.tintColor = UIColor.darkGray
         segmentedControl.addTarget(self, action: #selector(changeSort), for: .valueChanged)
-        //view.addSubview(segmentedControl)
-        //self.navigationItem.titleView = segmentedControl
-        
-        let label = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width - 96, height: 44))
-        label.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightHeavy)
-        label.text = "Jungle"
-        label.textAlignment = .center
-        label.center = CGPoint(x: view.frame.width/2, y: 22)
-        view.addSubview(label)
-        
-        inboxButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-        inboxButton.setImage(UIImage(named:"restart"), for: .normal)
-        inboxButton.center = CGPoint(x: view.frame.width - 20 - 8, y: 22)
-        inboxButton.addTarget(self, action: #selector(refreshData), for: .touchUpInside)
-        inboxButton.tintColor = UIColor.darkGray
-        view.addSubview(inboxButton)
         
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
@@ -121,18 +108,16 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         return CGSize(width: collectionView.frame.size.width, height: 90)
     }
     
-    var activityIndicator:UIActivityIndicatorView?
-    
     func refreshData() {
         
-        activityIndicator?.stopAnimating()
+        /*activityIndicator?.stopAnimating()
         activityIndicator?.removeFromSuperview()
         activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         activityIndicator?.startAnimating()
         activityIndicator?.center = inboxButton.center
         self.view.addSubview(activityIndicator!)
         inboxButton.isHidden = true
-        
+        */
         if let lastLocation = gps_service.getLastLocation() {
             LocationService.sharedInstance.requestNearbyLocations(lastLocation.coordinate.latitude, longitude: lastLocation.coordinate.longitude)
         } else {
@@ -246,9 +231,9 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     
     func stopRefresher()
     {
-        activityIndicator?.stopAnimating()
-        activityIndicator?.removeFromSuperview()
-        inboxButton.isHidden = false
+        //activityIndicator?.stopAnimating()
+        //activityIndicator?.removeFromSuperview()
+        //inboxButton.isHidden = false
     }
     
     func locationsUpdated(locations: [Location]) {

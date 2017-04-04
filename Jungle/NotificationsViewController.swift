@@ -94,6 +94,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: followCellIdentifier, for: indexPath) as! NotificationFollowCell
             cell.setup(withNotification: notifications[indexPath.row])
+            cell.unfollowHandler = unfollowHandler
             let labelX = cell.messageLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
             return cell
@@ -108,10 +109,27 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
             
             if let item = cell.post {
                 let i = IndexPath(item: indexPath.row, section: 0)
-                globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: i, initialIndexPath: i)
+                globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             }
         }
         
+    }
+    
+    func unfollowHandler(user:User) {
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
+        { action -> Void in
+            
+            UserService.unfollowUser(uid: user.getUserId())
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
     }
 
 }

@@ -15,6 +15,11 @@ class StoryDetailsView: UIView {
 
     @IBOutlet weak var commentsLabel: UILabel!
     
+    @IBOutlet weak var likeButton: UIButton!
+    
+    var liked = false
+    
+    fileprivate var toggleLikeHandler:((_ like:Bool)->())?
     /*
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
@@ -32,7 +37,9 @@ class StoryDetailsView: UIView {
 
     }
     
-    func setInfo(item:StoryItem, user:User) {
+    
+    func setInfo(item:StoryItem, user:User, likeHandler:((_ like:Bool)->())?) {
+        toggleLikeHandler = likeHandler
         let username = user.getUsername()
         let str = "\(username) \(item.caption)"
         
@@ -55,20 +62,55 @@ class StoryDetailsView: UIView {
         
         
         captionLabel.attributedText = title
-        setCommentsLabel(numComments: item.comments.count)
+        setCommentsLabel(numLikes: item.likes.count,numComments: item.comments.count)
         
     }
     
-    func setCommentsLabel(numComments:Int) {
+    func setCommentsLabel(numLikes:Int, numComments:Int) {
+        var likesStr = ""
+        if numLikes > 0 {
+            likesStr = "♥ \(numLikes) · "
+        }
+        
         if numComments > 0 {
             if numComments == 1 {
-                commentsLabel.text = "1 comment"
+                commentsLabel.text = "\(likesStr)1 comment"
             } else {
-                commentsLabel.text = "\(numComments) comments"
+                commentsLabel.text = "\(likesStr)\(numComments) comments"
             }
            
         } else {
             commentsLabel.text = "Write a comment"
+        }
+    }
+    
+    @IBAction func likeTapped(_ sender: UIButton) {
+        setLikedStatus(!self.liked, animated: true)
+        toggleLikeHandler?(liked)
+        
+    }
+    
+    func setLikedStatus(_ _liked:Bool, animated: Bool) {
+        self.liked = _liked
+        
+        if self.liked  {
+            likeButton.setImage(UIImage(named: "liked"), for: .normal)
+            if animated {
+                likeButton.setImage(UIImage(named: "liked"), for: .normal)
+                self.likeButton.transform = CGAffineTransform(scaleX: 1.6, y: 1.6)
+                
+                UIView.animate(withDuration: 0.5, delay: 0.0,
+                               usingSpringWithDamping: 0.5,
+                               initialSpringVelocity: 1.6,
+                               options: .curveEaseOut,
+                               animations: {
+                                self.likeButton.transform = CGAffineTransform.identity
+                },
+                               completion: nil)
+            }
+            
+        } else {
+            likeButton.setImage(UIImage(named:"like"), for: .normal)
         }
     }
 

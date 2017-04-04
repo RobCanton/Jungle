@@ -30,11 +30,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
             setItem()
         }
     }
-    
-    func showUser(_ uid: String) {
-        print("SHOW USER: \(uid)")
-        delegate?.showUser(uid)
-    }
+
     
     func showViewers() {
 
@@ -122,7 +118,6 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         }
         
         UserService.getUser(item.authorId, completion: { user in
-            print("USER: \(user)")
             if user != nil {
                 let caption = "\(user!.getUsername()) \(item.caption)"
                 let width = self.frame.width - (42 + 50)
@@ -131,11 +126,11 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!)
+                self.footerView.setInfo( item: item, user: user!, likeHandler: nil)
             }
         })
         
-        headerView.setupLocation(withPlaceId: item.getLocationKey())
+        headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
         
     
     }

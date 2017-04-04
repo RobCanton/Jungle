@@ -120,9 +120,7 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
             let controller = ChatViewController()
             controller.conversation = conversation
             controller.partnerImage = image
-            globalMainRef?.navigationController?.delegate = nil
-            globalMainRef?.activateNavbar(true)
-            globalMainRef?.navigationController?.pushViewController(controller, animated: true)
+            globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
         })
     }
     

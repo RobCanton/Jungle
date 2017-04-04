@@ -26,7 +26,7 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="leh-68-xnH">
-                            <rect key="frame" x="448" y="0.0" width="57" height="57"/>
+                            <rect key="frame" x="446" y="0.0" width="57" height="57"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="leh-68-xnH" secondAttribute="height" multiplier="1:1" id="h7x-DP-H22"/>
                             </constraints>
@@ -40,7 +40,7 @@
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstItem="gmO-Jn-As5" firstAttribute="centerY" secondItem="Mpg-vz-mX9" secondAttribute="centerY" id="9S8-hh-SZR"/>
-                        <constraint firstAttribute="trailing" secondItem="leh-68-xnH" secondAttribute="trailing" id="l9X-TC-xLA"/>
+                        <constraint firstAttribute="trailing" secondItem="leh-68-xnH" secondAttribute="trailing" constant="2" id="l9X-TC-xLA"/>
                         <constraint firstItem="leh-68-xnH" firstAttribute="top" secondItem="Mpg-vz-mX9" secondAttribute="top" id="oCp-nq-WS0"/>
                         <constraint firstItem="gmO-Jn-As5" firstAttribute="centerX" secondItem="Mpg-vz-mX9" secondAttribute="centerX" id="v4r-8m-Ost"/>
                         <constraint firstAttribute="bottom" secondItem="leh-68-xnH" secondAttribute="bottom" id="zPc-M4-gyB"/>

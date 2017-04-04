@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
+		B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */; };
+		B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */; };
 		B0550D761E85E438007DAAAC /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D751E85E437007DAAAC /* MapViewController.swift */; };
 		B0550D791E889977007DAAAC /* LocationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D771E889977007DAAAC /* LocationTableViewCell.swift */; };
 		B0550D7A1E889977007DAAAC /* LocationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0550D781E889977007DAAAC /* LocationTableViewCell.xib */; };
@@ -126,6 +128,8 @@
 		24440022F614359253D5F062 /* Pods_Jungle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Jungle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
+		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
 		B0550D751E85E437007DAAAC /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B0550D771E889977007DAAAC /* LocationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationTableViewCell.swift; sourceTree = "<group>"; };
 		B0550D781E889977007DAAAC /* LocationTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LocationTableViewCell.xib; sourceTree = "<group>"; };
@@ -379,6 +383,8 @@
 				B0C86D461E80B7F90067E004 /* FollowingHeader.xib */,
 				B093FFAF1E790D5E00011B43 /* PhotoCell.swift */,
 				B093FFCC1E79135A00011B43 /* PhotoCell.xib */,
+				B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */,
+				B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */,
 			);
 			name = Places;
 			sourceTree = "<group>";
@@ -588,6 +594,7 @@
 				B0550D7A1E889977007DAAAC /* LocationTableViewCell.xib in Resources */,
 				B0F8949A1E7C717F00E490C4 /* ProfileHeaderView.xib in Resources */,
 				B0550DA51E90A60E007DAAAC /* NotificationFollowCell.xib in Resources */,
+				B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */,
 				B0C86D401E80831F0067E004 /* ConversationCell.xib in Resources */,
 				B0F8946E1E7B9D5A00E490C4 /* CommentCell.xib in Resources */,
 				B0550DAB1E91EE25007DAAAC /* UserViewCell.xib in Resources */,
@@ -725,6 +732,7 @@
 				B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */,
 				B0550D881E8E17A2007DAAAC /* NotificationTableViewCell.swift in Sources */,
 				B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */,
+				B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */,
 				B0550D761E85E438007DAAAC /* MapViewController.swift in Sources */,
 				B0550D9B1E8E21C4007DAAAC /* JiroTextField.swift in Sources */,
 				B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */,

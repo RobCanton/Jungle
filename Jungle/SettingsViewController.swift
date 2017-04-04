@@ -14,11 +14,7 @@ class SettingsContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Settings"
-        if let navbar = navigationController?.navigationBar {
-            let blurView = UIView(frame: CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0))
-            blurView.backgroundColor = UIColor.white
-            self.view.insertSubview(blurView, belowSubview: navbar)
-        }
+        self.addNavigationBarBackdrop()
         
         self.navigationController?.navigationBar.tintColor = UIColor.black
         

@@ -10,6 +10,62 @@ import Foundation
 import UIKit
 import Firebase
 
+class FirstViewController:UIViewController {
+    
+    @IBOutlet weak var viewBackdrop: UIView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        viewBackdrop.layer.cornerRadius = 16.0
+        viewBackdrop.clipsToBounds = true
+        
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        get {
+            return .lightContent
+        }
+    }
+    
+}
+
+class FirstAuthViewController: FirstViewController {
+    
+    
+    var authFetched = false
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let user = FIRAuth.auth()?.currentUser {
+            UserService.getUser(user.uid, completion: { user in
+                self.authFetched = true
+                if user != nil {
+                    mainStore.dispatch(UserIsAuthenticated(user: user!))
+                    Listeners.startListeningToFollowers()
+                    Listeners.startListeningToFollowing()
+                    Listeners.startListeningToConversations()
+                    Listeners.startListeningToNotifications()
+                    self.performSegue(withIdentifier: "login", sender: self)
+                } else {
+                    self.performSegue(withIdentifier: "toLoginScreen", sender: self)
+                }
+            })
+        } else {
+            authFetched = true
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if authFetched && FIRAuth.auth()?.currentUser == nil {
+            self.performSegue(withIdentifier: "toLoginScreen", sender: self)
+        }
+        
+        
+    }
+}
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
     
@@ -56,7 +112,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })
-            
         }
     }
     @IBAction func handleSignup(_ sender: Any) {

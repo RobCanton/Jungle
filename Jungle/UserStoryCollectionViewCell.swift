@@ -24,14 +24,6 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
     
     var check = 0
     
-    func setup() {
-        
-        
-//        UserService.getUser(mainStore.state.userState.uid, completion: { user in
-//            self.imageView.loadImageAsync(user!.getImageUrl(), completion: { result in })
-//        })
-    }
-    
     func setupStoryInfo(story: UserStory) {
         
         self.story = story
@@ -39,20 +31,6 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
         stateChange(story.state)
         
         check += 1
-        
-        /*UserService.getUser(story.getUserId(), completion: { user in
-            if user != nil {
-                self.imageView.loadImageAsync(user!.getImageUrl(), completion: { result in })
-                if story.getUserId() == mainStore.state.userState.uid {
-                    self.usernameLabel.text = "Me"
-                    self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightBold)
-                } else {
-                    self.usernameLabel.text = user!.getUsername()
-                    self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightRegular)
-                }
-
-            }
-        })*/
         
         self.imageView.layer.cornerRadius = self.imageView.frame.width / 2
         self.imageView.clipsToBounds = true
@@ -62,24 +40,33 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
         self.imageContainer.layer.borderWidth = 2.0
         self.imageContainer.clipsToBounds = true
         
-        UserService.getUser(story.getUserId(), withCheck: check, completion: { user, check1 in
+        getUserAndImage(withCheck: check, uid: story.getUserId(), completion: { check, user, image, fromCache in
+            if self.check != check { return }
+            if image != nil {
+                self.imageView.image = image
+            }
+            
+            if story.getUserId() == mainStore.state.userState.uid {
+                self.usernameLabel.text = "Me"
+                self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightBold)
+            } else {
+                self.usernameLabel.text = user.getUsername()
+                self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightRegular)
+            }
+            
+        })
         
-            if user != nil && check1 == self.check {
-                loadImageCheckingCache(withUrl: user!.getImageUrl(), check: self.check, completion: { image, fromCache, check2 in
-                    if image != nil && check2 == self.check {
-                        self.imageView.image = image
-                    }
+        
+    }
+    
+    func getUserAndImage(withCheck check:Int, uid:String, completion: @escaping((_ check:Int, _ user:User, _ image: UIImage?, _ fromCache: Bool)->())) {
+        
+        UserService.getUser(uid, completion: { user in
+            
+            if user != nil  {
+                loadImageUsingCacheWithURL(user!.getImageUrl(), completion: { image, fromCache in
+                    completion(check, user!, image, fromCache)
                 })
-                
-                if story.getUserId() == mainStore.state.userState.uid {
-                    self.usernameLabel.text = "Me"
-                    self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightBold)
-                } else {
-                    self.usernameLabel.text = user!.getUsername()
-                    self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightRegular)
-                }
-                
-                
             }
         })
     }

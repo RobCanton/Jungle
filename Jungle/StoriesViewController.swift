@@ -11,8 +11,6 @@ import UIKit
 import View2ViewTransition
 
 protocol PopupProtocol {
-    func showUser(_ uid:String)
-    func showUsersList(_ uids:[String], _ title:String)
     func showOptions()
     func showComments()
     func dismissPopup(_ animated:Bool)
@@ -54,13 +52,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         automaticallyAdjustsScrollViewInsets = false
-
+         globalMainRef?.statusBar(hide: true, animated: false)
         self.navigationController?.delegate = transitionController
         
         if let cell = getCurrentCell() {
-            
             cell.setForPlay()
-            //cell.phaseInCaption(animated:true)
         }
         
         if let gestureRecognizers = self.view.gestureRecognizers {
@@ -95,7 +91,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.view.backgroundColor = UIColor.black
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
-        
         
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.itemSize = UIScreen.main.bounds.size
@@ -160,7 +155,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         if let _ = gestureRecognizer as? UITapGestureRecognizer  {
             return true
         }
-        
 
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
@@ -175,9 +169,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
                 }
                 return false
             }
-            
-            
-
             return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
         }
         return false
@@ -210,7 +201,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         cell.contentView.backgroundColor = UIColor.black
         cell.delegate = self
         if storyType == .UserStory {
-            //cell.prepareStory(withLocation: locations[indexPath.item])
             cell.prepareStory(withStory: userStories[indexPath.item])
         } else {
             cell.prepareStory(withLocation: locationStories[indexPath.item])
@@ -249,7 +239,103 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
 
     func showOptions() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else {
+            cell.resumeStory()
+            return }
         
+        if item.getAuthorId() == mainStore.state.userState.uid {
+            
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resumeStory()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
+                
+                /*UploadService.deleteItem(item: item, completion: { success in
+                    if success {
+                        self.dismissPopup(true)
+                    }
+                })*/
+            }
+            actionSheet.addAction(deleteActionButton)
+            
+            self.present(actionSheet, animated: true, completion: nil)
+        } else {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resumeStory()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
+                let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+                    cell.resumeStory()
+                }
+                alertController.addAction(cancelAction)
+                
+                let OKAction = UIAlertAction(title: "It's Inappropriate", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Inappropriate, showNotification: true, completion: { success in
+                        if success {
+                            let reportAlert = UIAlertController(title: "Report Sent.",
+                                                                message: "Thanks for lettings us know. We will act upon this report within 24 hours.", preferredStyle: .alert)
+                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
+                                cell.resumeStory()
+                            }))
+                            
+                            self.present(reportAlert, animated: true, completion: nil)
+                        } else {
+                            let reportAlert = UIAlertController(title: "Report Failed to Send.",
+                                                                message: "Please try again.", preferredStyle: .alert)
+                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
+                                cell.resumeStory()
+                            }))
+                            
+                            self.present(reportAlert, animated: true, completion: nil)
+                        }
+                        
+                        
+                    })
+                }
+                alertController.addAction(OKAction)
+                
+                let OKAction2 = UIAlertAction(title: "It's Spam", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Spam, showNotification: true, completion: { success in
+                        if success {
+                            let reportAlert = UIAlertController(title: "Report Sent",
+                                                                message: "Thanks for lettings us know. We will act upon this report within 24 hours.", preferredStyle: .alert)
+                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
+                                cell.resumeStory()
+                            }))
+                            
+                            self.present(reportAlert, animated: true, completion: nil)
+                        } else {
+                            let reportAlert = UIAlertController(title: "Report Failed to Send",
+                                                                message: "Please try again.", preferredStyle: .alert)
+                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
+                                cell.resumeStory()
+                            }))
+                            
+                            self.present(reportAlert, animated: true, completion: nil)
+                        }
+                        
+                        
+                    })
+                }
+                alertController.addAction(OKAction2)
+                
+                self.present(alertController, animated: true, completion: nil)
+            }
+            actionSheet.addAction(OKAction)
+            
+            self.present(actionSheet, animated: true, completion: nil)
+        }
     }
     
     func showComments() {
@@ -264,7 +350,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             controller.shouldShowKeyboard = true
         }
         
-        //controller.containerRef = containerRef
         let nav = UINavigationController(rootViewController: controller)
         nav.navigationBar.isTranslucent = false
         nav.navigationBar.tintColor = UIColor.black
@@ -292,8 +377,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             cell.pauseVideo()
         }
     }
-    
-
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let xOffset = scrollView.contentOffset.x

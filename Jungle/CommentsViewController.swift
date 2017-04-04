@@ -43,6 +43,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         closeButton.tintColor = UIColor.white
         navigationItem.leftBarButtonItem = closeButton
         
+        let likeButton = UIBarButtonItem(image: UIImage(named:"like"), style: .plain, target: self, action: nil)
+        likeButton.tintColor = UIColor.white
+        navigationItem.rightBarButtonItem = likeButton
+        
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         blurView.frame = view.bounds
         view.addSubview(blurView)
@@ -167,8 +171,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewWillDisappear(animated)
         commentsRef?.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
-        storyRef?.footerView.setCommentsLabel(numComments: item.comments.count)
-        postRef?.footerView.setCommentsLabel(numComments: item.comments.count)
+        storyRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
+        postRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
     }
     
     func dismissHandle() {

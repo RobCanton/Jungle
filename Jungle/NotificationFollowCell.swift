@@ -16,6 +16,8 @@ class NotificationFollowCell: UITableViewCell {
     
     @IBOutlet weak var followButton: UIButton!
     
+    var unfollowHandler:((_ user:User)->())?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -34,7 +36,7 @@ class NotificationFollowCell: UITableViewCell {
     func setup(withNotification notification: Notification) {
         if notification.getType() != .follow { return }
         
-        followButton.layer.cornerRadius = 2.0
+        followButton.layer.cornerRadius = 4.0
         followButton.clipsToBounds = true
         followButton.backgroundColor = accentColor
         
@@ -121,7 +123,7 @@ class NotificationFollowCell: UITableViewCell {
         case .CurrentUser:
             break
         case .Following:
-            //unfollowHandler?()
+            unfollowHandler?(user)
             break
         case .None:
             setUserStatus(status: .Requested)

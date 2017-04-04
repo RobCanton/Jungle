@@ -27,15 +27,31 @@
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YhS-RQ-Q1p">
+                    <rect key="frame" x="473" y="0.0" width="50" height="50"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="CTp-zP-y9k"/>
+                        <constraint firstAttribute="width" constant="50" id="KMl-Ju-vpl"/>
+                    </constraints>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <state key="normal" image="more">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                </button>
             </subviews>
             <constraints>
                 <constraint firstItem="w3j-Zu-JcG" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="8Qk-ho-xUG"/>
                 <constraint firstItem="w3j-Zu-JcG" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="8" id="F26-l1-5xg"/>
+                <constraint firstItem="YhS-RQ-Q1p" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="GJm-al-egw"/>
                 <constraint firstItem="wbv-RH-mac" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="RS3-en-H5f"/>
                 <constraint firstItem="wbv-RH-mac" firstAttribute="top" secondItem="w3j-Zu-JcG" secondAttribute="bottom" constant="4" id="Te2-G1-tNg"/>
+                <constraint firstAttribute="trailing" secondItem="YhS-RQ-Q1p" secondAttribute="trailing" id="ra4-Hi-APK"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <point key="canvasLocation" x="100.5" y="-243.5"/>
         </view>
     </objects>
+    <resources>
+        <image name="more" width="16" height="16"/>
+    </resources>
 </document>

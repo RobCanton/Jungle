@@ -21,16 +21,17 @@ class PostHeaderView: UIView {
     }
     
     var location:Location!
+    var moreHandler:(()->())?
     
-    func setupLocation(_ location:Location) {
+    func setup(_ location:Location, optionsHandler:(()->())?) {
         self.location = location
-        
+        moreHandler = optionsHandler
         locationTitle.text = location.getName()
         timeLabel.text = location.getShortAddress()
     }
     
-    func setupLocation(withPlaceId id:String) {
-        
+    func setup(withPlaceId id:String, optionsHandler:(()->())?) {
+        moreHandler = optionsHandler
         LocationService.sharedInstance.getLocationInfo(id, completion: { location in
             if location != nil {
                 self.locationTitle.text = location!.getName()
@@ -39,6 +40,9 @@ class PostHeaderView: UIView {
         })
     }
     
+    @IBAction func moreTapped(_ sender: UIButton) {
+        moreHandler?()
+    }
     
     
    }

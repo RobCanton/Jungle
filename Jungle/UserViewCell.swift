@@ -26,7 +26,7 @@ class UserViewCell: UITableViewCell {
         contentImageView.layer.cornerRadius = contentImageView.frame.width/2
         contentImageView.clipsToBounds = true
         
-        followButton.layer.cornerRadius = 2.0
+        followButton.layer.cornerRadius = 4.0
         followButton.clipsToBounds = true
         followButton.layer.borderWidth = 1.0
         followButton.isHidden = false    }
@@ -99,7 +99,7 @@ class UserViewCell: UITableViewCell {
     @IBAction func handleFollowTap(sender: AnyObject) {
         guard let user = self.user else { return }
         guard let status = self.status else { return }
-        
+        print("SUH DUDE")
         switch status {
         case .CurrentUser:
             break

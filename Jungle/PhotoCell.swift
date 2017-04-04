@@ -18,6 +18,8 @@ class PhotoCell: UICollectionViewCell {
     
     var location:Location!
     var gradient:CAGradientLayer?
+    
+    var check:Int = 0
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -30,7 +32,7 @@ class PhotoCell: UICollectionViewCell {
 
     func setupLocationCell (_ locationStory:LocationStory) {
         
-        
+        check += 1
         self.imageView.image = nil
         self.colorView.alpha = 0.0
         
@@ -50,37 +52,44 @@ class PhotoCell: UICollectionViewCell {
  
         self.colorView.backgroundColor = UIColor.clear
         
+        getUploadImage(withCheck: check, key: key, completion: { check, image, fromFile in
+            
+            if self.check != check { return }
+            self.imageView.image = image
+            if !fromFile {
+                self.imageView.alpha = 0.0
+                UIView.animate(withDuration: 0.25, animations: {
+                    self.imageView.alpha = 1.0
+                })
+            } else {
+                self.imageView.alpha = 1.0
+            }
+            
+            if image != nil {
+                let avgColor = image!.areaAverage()
+                let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
+                self.gradient?.removeFromSuperlayer()
+                self.gradient = CAGradientLayer()
+                self.gradient!.frame = self.colorView.bounds
+                self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
+                self.gradient!.locations = [0.0, 1.0]
+                self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+                self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+                self.colorView.layer.insertSublayer(self.gradient!, at: 0)
+                self.colorView.alpha = 0.7
+            }
+            
+            self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
+        
+        })
+    }
+    
+    func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
-                
                 UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
-                    self.imageView.image = image
-                    if !fromFile {
-                        self.imageView.alpha = 0.0
-                        UIView.animate(withDuration: 0.25, animations: {
-                            self.imageView.alpha = 1.0
-                        })
-                    } else {
-                        self.imageView.alpha = 1.0
-                    }
-                    
-                    if image != nil {
-                        let avgColor = image!.areaAverage()
-                        let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
-                        self.gradient?.removeFromSuperlayer()
-                        self.gradient = CAGradientLayer()
-                        self.gradient!.frame = self.colorView.bounds
-                        self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
-                        self.gradient!.locations = [0.0, 1.0]
-                        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                        self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                        self.colorView.alpha = 0.7
-                    }
- 
-                    self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
-                    self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
- 
+                    completion(check, image, fromFile)
                 })
             }
         })

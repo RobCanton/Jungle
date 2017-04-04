@@ -178,7 +178,6 @@ class StoryItem: NSObject, NSCoding {
     }
     
     func download() {
-        
         UploadService.retrieveImage(byKey: key, withUrl: downloadUrl, completion: { image, fromFile in
             self.image = image
             if self.contentType == .image {
@@ -191,8 +190,6 @@ class StoryItem: NSObject, NSCoding {
                         self.delegate?.itemDownloaded()
                     })
                 }
-                
-                
             }
         })
     }
@@ -203,6 +200,16 @@ class StoryItem: NSObject, NSCoding {
         }
         
         self.comments.append(comment)
+        cache()
+    }
+    
+    func addLike(_ uid:String) {
+        self.likes[uid] = 0
+        cache()
+    }
+    
+    func removeLike(_ uid:String) {
+        self.likes[uid] = nil
         cache()
     }
 

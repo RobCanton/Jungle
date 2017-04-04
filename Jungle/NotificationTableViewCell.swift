@@ -30,7 +30,6 @@ class NotificationTableViewCell: UITableViewCell {
     
     func setup(withNotification notification: Notification) {
         
-        
         if notification.getType() == .comment {
             UserService.getUser(notification.getSender(), completion: { user in
                 if user != nil {
@@ -45,8 +44,9 @@ class NotificationTableViewCell: UITableViewCell {
                         UploadService.getUpload(key: postKey, completion: { item in
                             if item != nil {
                                 self.post = item
-                                self.postImageView.loadImageAsync(item!.getDownloadUrl().absoluteString, completion: { fromCache in })
-                                
+                                UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
+                                    self.postImageView.image = image
+                                })
                                 self.setCommentLabel(username: user!.getUsername(), item: item!, date: notification.getDate())
                             }
                         })

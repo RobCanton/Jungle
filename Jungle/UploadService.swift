@@ -72,6 +72,19 @@ class UploadService {
         }
     }
     
+    static func retrieveImageWithReturnKey(byKey key: String, withUrl url:URL, completion: @escaping (_ image:UIImage?, _ fromFile:Bool, _ key:String)->()) {
+        if let image = readImageFromFile(withKey: key) {
+            completion(image, true, key)
+        } else {
+            downloadImage(withUrl: url, completion: { image in
+                if image != nil {
+                    writeImageToFile(withKey: key, image: image!)
+                }
+                completion(image, false, key)
+            })
+        }
+    }
+    
     static func writeVideoToFile(withKey key:String, video:Data) -> URL {
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_video-\(key).mp4"))
         try! video.write(to: fileURL, options: [.atomic])
@@ -374,6 +387,9 @@ class UploadService {
                     var viewers = [String:Double]()
                    
                     var likes = [String:Double]()
+                    if snapshot.hasChild("likes") {
+                        likes = dict["likes"] as! [String:Double]
+                    }
                     
                     var comments = [Comment]()
                     if snapshot.hasChild("comments") {
@@ -401,6 +417,8 @@ class UploadService {
         })
     }
     
+    
+    
     static func addComment(post:StoryItem, comment:String) {
         if comment == "" { return }
         let ref = FIRDatabase.database().reference()
@@ -417,7 +435,71 @@ class UploadService {
         ])
     }
     
+    static func addView(postKey:String) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        
+        let postRef = ref.child("uploads/\(postKey)/views/\(uid)")
+        postRef.setValue([".sv":"timestamp"])
+    }
     
+    static func addLike(post:StoryItem) {
+        
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        
+        let postRef = ref.child("api/requests/like").childByAutoId()
+        postRef.setValue([
+            "sender": uid,
+            "recipient": post.getAuthorId(),
+            "postKey": post.getKey(),
+            "isVideo": post.getContentType() == .video,
+            "timestamp":[".sv":"timestamp"]
+            ])
+    }
+    
+    static func removeLike(postKey:String) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        
+        let postRef = ref.child("uploads/\(postKey)/likes/\(uid)")
+        postRef.removeValue()
+    }
+    
+    static func deleteItem(item:StoryItem, completion:@escaping ((_ success:Bool)->())){
+        completion(true)
+    }
+    
+    static func reportItem(item:StoryItem, type:ReportType, showNotification:Bool, completion:@escaping ((_ success:Bool)->())) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        let reportRef = ref.child("reports/\(uid):\(item.getKey())")
+        let value: [String: Any] = [
+            "sender": uid,
+            "itemKey": item.getKey(),
+            "type": type.rawValue,
+            "timestamp": [".sv": "timestamp"]
+        ]
+        reportRef.setValue(value, withCompletionBlock: { error, ref in
+            completion(error == nil )
+        })
+        
+        if type == .Inappropriate {
+            let uploadRef = ref.child("uploads/\(item.getKey())/flagged")
+            uploadRef.setValue(true)
+        }
+    }
 
+}
+
+enum ReportType:String {
+    case Inappropriate = "InappropriateContent"
+    case Spam          = "SpamContent"
+    case InappropriateProfile = "InappropriateProfile"
+    case Harassment = "Harassment"
+    case Bot = "Bot"
+    case Other = "Other"
+    case InappropriateMessages = "InappropriateMessages"
+    case SpamMessages = "SpamMessages"
 }
 

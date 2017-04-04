@@ -56,11 +56,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         view.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         if !popUpMode {
-            if let navbar = navigationController?.navigationBar {
-                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
-                blurView.frame = CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0)
-                self.view.insertSubview(blurView, belowSubview: navbar)
-            }
+            self.addNavigationBarBackdrop()
         }
         
         messages = [JSQMessage]()

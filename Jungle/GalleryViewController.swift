@@ -20,6 +20,8 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     var currentIndex:IndexPath!
     var collectionView:UICollectionView!
     
+    var isSingleItem = false
+    
     var statusBarShouldHide = false
     
     
@@ -125,8 +127,10 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
         let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
+        if !isSingleItem {
+            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+        }
         self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-        self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
         
         let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
         let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
@@ -159,9 +163,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         getCurrentCell()?.pauseVideo()
         getCurrentCell()?.destroyVideoPlayer()
         if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
-            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
+            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
+            if !isSingleItem {
+                self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+            }
             self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+            
             navigationController?.popViewController(animated: animated)
         }
     }
@@ -217,8 +224,10 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
         let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
+        if !isSingleItem {
+            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+        }
         self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-        self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
         
         let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
         let translate: CGPoint = panGestureRecognizer.translation(in: self.view)

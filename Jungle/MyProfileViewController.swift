@@ -27,6 +27,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     var uid:String!
     var statusBarShouldHide = false
+    var status:FollowingStatus = .None
     
     override var prefersStatusBarHidden: Bool
         {
@@ -167,6 +168,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
                 }
             }
             self.postKeys = postKeys
+            self.getHeaderView()?.setPostsCount(postKeys.count)
             self.downloadStory(postKeys: postKeys)
         })
     }
@@ -260,21 +262,21 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
+            view.setupHeader(_user:self.user, status: status, delegate: self)
             return view
         }
         
         return UICollectionReusableView()
     }
-    var text:String?
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let staticHeight:CGFloat = 8 + 140
+        let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
+        
         if user != nil {
             let bio = user!.getBio()
-            
-            //text = "Here is my bio about absolutely nothing important. but u can catch me out side mannn dem."
             if bio != "" {
-                var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightMedium))
-                let height2 = size.height + staticHeight + 12  // +8 for some bio padding
+                var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightRegular))
+                let height2 = size.height + staticHeight + 8  // +8 for some bio padding
                 size.height = height2
                 return size
             }
@@ -307,19 +309,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         globalMainRef?.presentProfileStory(posts: posts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         
         collectionView.deselectItem(at: indexPath, animated: true)
-        /*
-        let galleryViewController: GalleryViewController = GalleryViewController()
-        galleryViewController.uid = uid
-        galleryViewController.posts = self.posts
-        galleryViewController.transitionController = self.transitionController
-        self.transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]
-        
-        if let nav = navigationController {
-            //statusBarShouldHide = true
-            nav.delegate = transitionController
-            transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
-        }*/
-        
     }
     
     
@@ -342,28 +331,45 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         }
         return nil
     }
+
     
+}
+
+extension MyProfileViewController: ProfileHeaderProtocol {
     
-    func unfollowHandler() {
-        guard let user = self.user else { return }
-        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
-        
-        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-        }
-        actionSheet.addAction(cancelActionButton)
-        
-        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
-        { action -> Void in
-            
-            UserService.unfollowUser(uid: user.getUserId())
-        }
-        actionSheet.addAction(saveActionButton)
-        
-        self.present(actionSheet, animated: true, completion: nil)
-        
+    func showFollowers() {
+        guard let followers = followers else { return }
+        let controller = UsersListViewController()
+        controller.title = "Followers"
+        controller.tempIds = followers
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+        ///self.navigationController?.pushViewController(controller, animated: true)
     }
     
+    func showFollowing() {
+        guard let following = following else { return }
+        let controller = UsersListViewController()
+        controller.title = "Following"
+        controller.tempIds = following
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+        //self.navigationController?.pushViewController(controller, animated: true)
+    }
     
+    func showConversation() {}
+    
+    
+    func showEditProfile() {
+        let current_uid = mainStore.state.userState.uid
+        if uid == current_uid {
+            let controller = UIStoryboard(name: "EditProfileViewController", bundle: nil)
+                .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
+            let c = controller.viewControllers[0] as! EditProfileViewController
+            c.delegate = self
+            self.present(controller, animated: true, completion: nil)
+        }
+    }
+    
+    func changeFollowStatus() {}
 }
 
 

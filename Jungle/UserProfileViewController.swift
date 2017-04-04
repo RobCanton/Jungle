@@ -11,7 +11,15 @@ import ReSwift
 import View2ViewTransition
 import Firebase
 
-
+extension UIViewController {
+    func addNavigationBarBackdrop() {
+        if let navbar = navigationController?.navigationBar {
+            let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+            blurView.frame = CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0)
+            self.view.insertSubview(blurView, belowSubview: navbar)
+        }
+    }
+}
 
 class UserProfileViewController: UIViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout, EditProfileProtocol {
     
@@ -63,13 +71,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
-        //navigationController?.navigationBar.isTranslucent = false
         
-        if let navbar = navigationController?.navigationBar {
-            let blurView = UIView(frame: CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0))
-            blurView.backgroundColor = UIColor.white
-            self.view.insertSubview(blurView, belowSubview: navbar)
-        }
+        self.addNavigationBarBackdrop()
         
         self.view.backgroundColor = UIColor.white
         self.title = "Profile"
@@ -211,7 +214,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                     postKeys.append(key)
                 }
             }
-            print("KEYS: \(postKeys)")
             self.postKeys = postKeys
             self.getHeaderView()?.setPostsCount(postKeys.count)
             self.downloadStory(postKeys: postKeys)
@@ -251,7 +253,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         return UICollectionReusableView()
     }
-    var text:String?
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
         

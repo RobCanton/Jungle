@@ -22,33 +22,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var activityView:NVActivityIndicatorView!
     
     var footerTapped:UITapGestureRecognizer!
-
-    func showUser(_ uid: String) {
-        returnIndex = viewIndex
-        delegate?.showUser(uid)
-    }
-    
-    func showViewers() {
-        guard let item = self.item else { return }
-    }
-    
-    func showLikes() {
-        guard let item = self.item else { return }
-    }
-    
-    func more() {
-
-    }
-    
-    func sendComment(_ comment: String) {
-        guard let item = self.item else { return }
-
-    }
-    
-    func toggleLike(_ like: Bool) {
-        guard let item = self.item else { return }
-
-    }
     
     var playerLayer:AVPlayerLayer?
     var currentProgress:Double = 0.0
@@ -68,11 +41,25 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
        
     }
     
+    func toggleLike(_ like: Bool) {
+        guard let item = self.item else { return }
+        
+        if like {
+            UploadService.addLike(post: item)
+            item.addLike(mainStore.state.userState.uid)
+        } else {
+            UploadService.removeLike(postKey: item.getKey())
+            item.removeLike(mainStore.state.userState.uid)
+        }
+        //headerView.setLikes(post: item)
+    }
+    
     func prepareStory(withLocation location:LocationStory) {
         self.story = location
         self.story.delegate = self
         shouldPlay = false
-        headerView.setupLocation(withPlaceId: location.getLocationKey())
+        headerView.setup(withPlaceId: location.getLocationKey(), optionsHandler: delegate?.showOptions)
+        
         story.determineState()
     }
     
@@ -203,13 +190,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!)
+                self.footerView.setInfo( item: item, user: user!, likeHandler: self.toggleLike)
             }
         })
         
         if let _ = story as? UserStory {
-            headerView.setupLocation(withPlaceId: item.getLocationKey())
+            headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
         }
+        
+        let current_uid = mainStore.state.userState.uid
+        footerView.setLikedStatus(item.likes[current_uid] != nil, animated: false)
+        footerView.likeButton.isHidden = item.authorId == current_uid
      
     }
 
