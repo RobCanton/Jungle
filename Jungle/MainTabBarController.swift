@@ -36,10 +36,9 @@ class MainTabBarController: UITabBarController, StoreSubscriber{
     
     func newState(state: AppState) {
         
-        let notifications = state.notifications
         var unseenNotifications = 0
-        for notification in notifications {
-            if !notification.getSeen() {
+        for (_, seen) in state.notifications {
+            if !seen {
                 unseenNotifications += 1
             }
         }

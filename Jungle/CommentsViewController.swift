@@ -124,7 +124,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         
         commentsRef?.removeAllObservers()
-        commentsRef = UserService.ref.child("uploads/\(item.getKey())/comments")
+        commentsRef = UserService.ref.child("uploads/data/\(item.getKey())/comments")
         
         if let lastItem = item.comments.last {
             let lastKey = lastItem.getKey()

@@ -126,7 +126,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!, likeHandler: nil)
+                self.footerView.setInfo( item: item, user: user!, actionHandler: nil)
             }
         })
         

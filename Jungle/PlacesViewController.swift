@@ -48,6 +48,7 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         
         let tabHeader = UINib(nibName: "PlacesTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PlacesTabHeader
         tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 44)
+        tabHeader.refreshHandler = refreshData
         
         self.view.addSubview(tabHeader)
         

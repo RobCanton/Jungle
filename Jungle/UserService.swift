@@ -233,11 +233,4 @@ class UserService {
         }
     }
     
-    static func markNotificationAsSeen(notification:Notification) {
-        let uid = mainStore.state.userState.uid
-        let notificationRef = ref.child("notifications/\(uid)/\(notification.getKey())/seen")
-        notificationRef.setValue(true)
-    }
-    
-    
 }

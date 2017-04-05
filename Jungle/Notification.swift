@@ -21,10 +21,9 @@ class Notification: NSObject {
     fileprivate var type:NotificationType
     fileprivate var date:Date
     fileprivate var sender:String
-    fileprivate var seen:Bool
     fileprivate var postKey:String?
     
-    init(key:String, type:String, date:Date, sender:String, seen:Bool, postKey:String?)
+    init(key:String, type:String, date:Date, sender:String, postKey:String?)
     {
         self.key          = key
         switch type {
@@ -41,7 +40,6 @@ class Notification: NSObject {
         
         self.date = date
         self.sender = sender
-        self.seen = seen
         self.postKey = postKey
     }
     
@@ -51,9 +49,8 @@ class Notification: NSObject {
         let type = decoder.decodeObject(forKey: "type") as! String
         let date = decoder.decodeObject(forKey: "date") as! Date
         let sender = decoder.decodeObject(forKey: "sender") as! String
-        let seen = decoder.decodeBool(forKey: "seen")
         let postKey = decoder.decodeObject(forKey: "postKey") as? String
-        self.init(key: key, type: type, date: date, sender: sender, seen: seen, postKey: postKey)
+        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey)
         
     }
     
@@ -63,7 +60,6 @@ class Notification: NSObject {
         coder.encode(type.rawValue, forKey: "type")
         coder.encode(date, forKey: "date")
         coder.encode(sender, forKey: "sender")
-        coder.encode(seen, forKey: "seen")
         coder.encode(postKey, forKey: "postKey")
     }
     
@@ -83,16 +79,8 @@ class Notification: NSObject {
         return sender
     }
     
-    func getSeen() -> Bool {
-        return seen
-    }
-    
     func getPostKey() -> String? {
         return postKey
-    }
-    
-    func markAsSeen() {
-        seen = true
     }
 }
 

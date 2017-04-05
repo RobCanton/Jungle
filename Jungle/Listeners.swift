@@ -132,21 +132,17 @@ class Listeners {
         if !listeningToNotifications {
             listeningToNotifications = true
             let current_uid = mainStore.state.userState.uid
-            let notificationsRef = ref.child("notifications/\(current_uid)")
+            
+            let notificationsRef = ref.child("users/notifications/\(current_uid)")
             notificationsRef.observe(.childAdded, with: { snapshot in
                 if snapshot.exists() {
-                    let key          = snapshot.key
-                    let dict         = snapshot.value as! [String:AnyObject]
-                    let sender       = dict["sender"] as! String
-                    let timestamp    = dict["timestamp"] as! Double
-                    let type         = dict["type"] as! String
-                    let seen         = dict["seen"] as! Bool
-                    let postKey      = dict["postKey"] as? String
-                    let date         = Date(timeIntervalSince1970: timestamp/1000)
-                    let notification = Notification(key: key, type: type, date: date, sender: sender, seen: seen, postKey: postKey)
-                    mainStore.dispatch(AddNotification(notification: notification))
+                    print("YUH")
+                    guard let seen = snapshot.value as? Bool else { return }
+                    print("YAH")
+                    mainStore.dispatch(AddNotification(notificationKey: snapshot.key, seen: seen))
                 }
             })
+            
         }
     }
     

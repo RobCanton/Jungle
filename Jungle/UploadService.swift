@@ -139,7 +139,7 @@ class UploadService {
         if upload.image == nil { return }
         
         let ref = FIRDatabase.database().reference()
-        let dataRef = ref.child("uploads").childByAutoId()
+        let dataRef = ref.child("uploads/data").childByAutoId()
         let postKey = dataRef.key
         
         let uid = mainStore.state.userState.uid
@@ -172,9 +172,6 @@ class UploadService {
                         "dateCreated": [".sv": "timestamp"],
                         "length": 6.0
                     ] as [String : Any]
-                    
-                    
-                    
                     
                     dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
@@ -216,7 +213,7 @@ class UploadService {
         let url = upload.videoURL!
         
         let ref = FIRDatabase.database().reference()
-        let dataRef = ref.child("uploads").childByAutoId()
+        let dataRef = ref.child("uploads/data").childByAutoId()
         let postKey = dataRef.key
         
         completion(true)
@@ -352,7 +349,7 @@ class UploadService {
         }
         
         let ref = FIRDatabase.database().reference()
-        let postRef = ref.child("uploads/\(key)")
+        let postRef = ref.child("uploads/data/\(key)")
         
         postRef.observeSingleEvent(of: .value, with: { snapshot in
             
@@ -467,7 +464,15 @@ class UploadService {
     }
     
     static func deleteItem(item:StoryItem, completion:@escaping ((_ success:Bool)->())){
-        completion(true)
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        let postRef = ref.child("api/requests/delete").childByAutoId()
+        postRef.setValue([
+            "sender": uid,
+            "postKey": item.getKey()
+            ], withCompletionBlock: { error, ref in
+            completion(error == nil)
+        })
     }
     
     static func reportItem(item:StoryItem, type:ReportType, showNotification:Bool, completion:@escaping ((_ success:Bool)->())) {

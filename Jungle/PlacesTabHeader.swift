@@ -12,11 +12,16 @@ class PlacesTabHeader: UIView {
 
     @IBOutlet weak var refreshButton: UIButton!
     @IBOutlet weak var sortinButton: UIButton!
+    
+    var refreshHandler:(()->())?
+    var sortHandler:(()->())?
 
     @IBAction func handleRefresh(_ sender: Any) {
+        refreshHandler?()
     }
 
     @IBAction func handleSort(_ sender: Any) {
+        sortHandler?()
     }
 
 }

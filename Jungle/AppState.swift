@@ -13,7 +13,7 @@ struct AppState: StateType {
     var conversations = [Conversation]()
     var socialState: SocialState
     var supportedVersion:Bool = false
-    var notifications = [Notification]()
+    var notifications = [String:Bool]()
 }
 
 
@@ -54,23 +54,23 @@ func SupportedVersionReducer(_ action: Action, state:Bool?) -> Bool {
 }
 
 
-func NotificationsReducer(_ action: Action, state:[Notification]?) -> [Notification] {
-    var state = state ?? [Notification]()
+func NotificationsReducer(_ action: Action, state:[String:Bool]?) -> [String:Bool] {
+    var state = state ?? [String:Bool]()
     switch action {
     case _ as AddNotification:
         let a = action as! AddNotification
-        state.append(a.notification)
+        state[a.notificationKey] = a.seen
         break
     case _ as MarkAllNotifcationsAsSeen:
-        for notification in state {
-            if !notification.getSeen() {
-                notification.markAsSeen()
-                UserService.markNotificationAsSeen(notification: notification)
+        for (key, seen) in state {
+            if !seen {
+                NotificationService.markNotificationAsSeen(key: key)
+                state[key] = true
             }
         }
         break
     case _ as ClearAllNotifications:
-        state = [Notification]()
+        state = [String:Bool]()
         break
     default:
         break
@@ -79,7 +79,8 @@ func NotificationsReducer(_ action: Action, state:[Notification]?) -> [Notificat
 }
 
 struct AddNotification: Action {
-    let notification: Notification
+    let notificationKey: String
+    let seen: Bool
 }
 
 struct MarkAllNotifcationsAsSeen: Action {}

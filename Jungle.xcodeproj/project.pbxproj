@@ -11,6 +11,7 @@
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
 		B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */; };
 		B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */; };
+		B04DFB591E94C8300016FE5D /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB581E94C8300016FE5D /* NotificationService.swift */; };
 		B0550D761E85E438007DAAAC /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D751E85E437007DAAAC /* MapViewController.swift */; };
 		B0550D791E889977007DAAAC /* LocationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D771E889977007DAAAC /* LocationTableViewCell.swift */; };
 		B0550D7A1E889977007DAAAC /* LocationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0550D781E889977007DAAAC /* LocationTableViewCell.xib */; };
@@ -130,6 +131,7 @@
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
 		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
+		B04DFB581E94C8300016FE5D /* NotificationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B0550D751E85E437007DAAAC /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B0550D771E889977007DAAAC /* LocationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationTableViewCell.swift; sourceTree = "<group>"; };
 		B0550D781E889977007DAAAC /* LocationTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LocationTableViewCell.xib; sourceTree = "<group>"; };
@@ -398,6 +400,7 @@
 				B0F8945C1E7B216500E490C4 /* UserService.swift */,
 				B0C86D301E7FC6B40067E004 /* Listeners.swift */,
 				B093FFB51E790D5E00011B43 /* UploadService.swift */,
+				B04DFB581E94C8300016FE5D /* NotificationService.swift */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -707,6 +710,7 @@
 				B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */,
 				B0F894931E7BD68800E490C4 /* SocialReducer.swift in Sources */,
 				B093FFD81E79399C00011B43 /* StoryProgressIndicator.swift in Sources */,
+				B04DFB591E94C8300016FE5D /* NotificationService.swift in Sources */,
 				B093FFD91E79399C00011B43 /* StoryViewController.swift in Sources */,
 				B093FFBC1E790D5E00011B43 /* LocationService.swift in Sources */,
 				B0550DA41E90A60E007DAAAC /* NotificationFollowCell.swift in Sources */,

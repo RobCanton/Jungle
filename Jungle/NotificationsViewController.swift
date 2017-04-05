@@ -46,10 +46,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
-        
-        //conversations = getNonEmptyConversations()
-        //conversations.sort(by: { $0 > $1 })
-        notifications = mainStore.state.notifications
+        getAllNotifications()
         tableView.reloadData()
     }
     
@@ -65,10 +62,30 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     }
     
     func newState(state: AppState) {
-        notifications = mainStore.state.notifications
-        notifications.sort(by: { $0 > $1 })
-        tableView.reloadData()
+        getAllNotifications()
         
+    }
+    
+    func getAllNotifications() {
+        let notificationsDict = mainStore.state.notifications
+        print("GET ALL NOTIFICATIONS: \(notificationsDict.count)")
+        var tempNotifications = [Notification]()
+        var count = 0
+        for (key, _) in notificationsDict {
+            NotificationService.getNotification(key, completion: { notification, seen in
+                if notification != nil {
+                    tempNotifications.append(notification!)
+                    print("Got notification")
+                }
+                count += 1
+                if count >= notificationsDict.count {
+                    print("Got all notification")
+                    count = -1
+                    self.notifications = tempNotifications.sorted(by: { $0 > $1 })
+                    self.tableView.reloadData()
+                }
+            })
+        }
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {

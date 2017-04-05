@@ -11,6 +11,7 @@ import UIKit
 import View2ViewTransition
 
 protocol PopupProtocol {
+    func showDeleteOptions()
     func showOptions()
     func showComments()
     func dismissPopup(_ animated:Bool)
@@ -237,7 +238,36 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
     }
     
-
+    func showDeleteOptions() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else {
+            cell.resumeStory()
+            return }
+        if item.getAuthorId() != mainStore.state.userState.uid { return }
+        cell.pauseStory()
+        
+        
+        let actionSheet = UIAlertController(title: "Delete post?", message: nil, preferredStyle: .alert)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+            cell.resumeStory()
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
+            
+            UploadService.deleteItem(item: item, completion: { success in
+                if success {
+                    self.dismissPopup(true)
+                }
+             })
+        }
+        actionSheet.addAction(deleteActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+        
+    }
+    
     func showOptions() {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else {

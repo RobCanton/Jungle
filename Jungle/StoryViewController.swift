@@ -41,16 +41,22 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
        
     }
     
-    func toggleLike(_ like: Bool) {
+    func handleFooterAction(_ like: Bool?) {
         guard let item = self.item else { return }
-        
-        if like {
-            UploadService.addLike(post: item)
-            item.addLike(mainStore.state.userState.uid)
+        if let like = like {
+            if like {
+                UploadService.addLike(post: item)
+                item.addLike(mainStore.state.userState.uid)
+            } else {
+                UploadService.removeLike(postKey: item.getKey())
+                item.removeLike(mainStore.state.userState.uid)
+            }
         } else {
-            UploadService.removeLike(postKey: item.getKey())
-            item.removeLike(mainStore.state.userState.uid)
+            delegate?.showDeleteOptions()
         }
+        
+        
+        
         //headerView.setLikes(post: item)
     }
     
@@ -190,7 +196,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!, likeHandler: self.toggleLike)
+                self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
             }
         })
         
@@ -200,7 +206,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
         let current_uid = mainStore.state.userState.uid
         footerView.setLikedStatus(item.likes[current_uid] != nil, animated: false)
-        footerView.likeButton.isHidden = item.authorId == current_uid
      
     }
 

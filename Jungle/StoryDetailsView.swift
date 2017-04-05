@@ -17,9 +17,10 @@ class StoryDetailsView: UIView {
     
     @IBOutlet weak var likeButton: UIButton!
     
+    var currentUserMode = false
     var liked = false
     
-    fileprivate var toggleLikeHandler:((_ like:Bool)->())?
+    fileprivate var actionButtonHandler:((_ like:Bool?)->())?
     /*
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
@@ -38,8 +39,19 @@ class StoryDetailsView: UIView {
     }
     
     
-    func setInfo(item:StoryItem, user:User, likeHandler:((_ like:Bool)->())?) {
-        toggleLikeHandler = likeHandler
+    func setInfo(item:StoryItem, user:User, actionHandler:((_ like:Bool?)->())?) {
+        actionButtonHandler = actionHandler
+        
+        if item.getAuthorId() == mainStore.state.userState.uid {
+            currentUserMode = true
+            likeButton.setImage(UIImage(named: "trash"), for: .normal)
+        } else {
+            currentUserMode = false
+            likeButton.setImage(UIImage(named: "like"), for: .normal)
+        }
+        
+        likeButton.isHidden = false
+        
         let username = user.getUsername()
         let str = "\(username) \(item.caption)"
         
@@ -85,12 +97,16 @@ class StoryDetailsView: UIView {
     }
     
     @IBAction func likeTapped(_ sender: UIButton) {
-        setLikedStatus(!self.liked, animated: true)
-        toggleLikeHandler?(liked)
-        
+        if currentUserMode {
+            actionButtonHandler?(nil)
+        } else {
+            setLikedStatus(!self.liked, animated: true)
+            actionButtonHandler?(liked)
+        }
     }
     
     func setLikedStatus(_ _liked:Bool, animated: Bool) {
+        if currentUserMode { return }
         self.liked = _liked
         
         if self.liked  {

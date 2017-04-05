@@ -11,6 +11,10 @@ import UIKit
 import View2ViewTransition
 
 class GalleryViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate,PopupProtocol {
+    internal func showDeleteOptions() {
+        
+    }
+
     
     weak var transitionController: TransitionController!
     
