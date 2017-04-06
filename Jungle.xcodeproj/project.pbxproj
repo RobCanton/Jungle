@@ -46,7 +46,6 @@
 		B07169B01E83B4D600AF6A41 /* ProfileTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */; };
 		B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */; };
 		B093FF971E790CD500011B43 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF961E790CD500011B43 /* AppDelegate.swift */; };
-		B093FF991E790CD500011B43 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FF981E790CD500011B43 /* ViewController.swift */; };
 		B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9A1E790CD500011B43 /* Main.storyboard */; };
 		B093FF9E1E790CD500011B43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9D1E790CD500011B43 /* Assets.xcassets */; };
 		B093FFA11E790CD500011B43 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9F1E790CD500011B43 /* LaunchScreen.storyboard */; };
@@ -132,6 +131,7 @@
 		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
 		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
 		B04DFB581E94C8300016FE5D /* NotificationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		B04DFB5A1E961F890016FE5D /* Jungle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Jungle.entitlements; sourceTree = "<group>"; };
 		B0550D751E85E437007DAAAC /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B0550D771E889977007DAAAC /* LocationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationTableViewCell.swift; sourceTree = "<group>"; };
 		B0550D781E889977007DAAAC /* LocationTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LocationTableViewCell.xib; sourceTree = "<group>"; };
@@ -168,7 +168,6 @@
 		B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileTabHeader.xib; sourceTree = "<group>"; };
 		B093FF931E790CD500011B43 /* Jungle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jungle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B093FF961E790CD500011B43 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		B093FF981E790CD500011B43 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		B093FF9B1E790CD500011B43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B093FF9D1E790CD500011B43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B093FFA01E790CD500011B43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -335,8 +334,8 @@
 		B093FF951E790CD500011B43 /* Jungle */ = {
 			isa = PBXGroup;
 			children = (
+				B04DFB5A1E961F890016FE5D /* Jungle.entitlements */,
 				B093FF961E790CD500011B43 /* AppDelegate.swift */,
-				B093FF981E790CD500011B43 /* ViewController.swift */,
 				B093FF9A1E790CD500011B43 /* Main.storyboard */,
 				B093FFC61E790F6800011B43 /* GoogleService-Info.plist */,
 				B093FF9D1E790CD500011B43 /* Assets.xcassets */,
@@ -552,7 +551,12 @@
 					B093FF921E790CD500011B43 = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = 6BES3VUFCX;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
+						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -675,7 +679,6 @@
 				B0F894651E7B33F500E490C4 /* StoryDetailsView.swift in Sources */,
 				B0550D9C1E8E21C4007DAAAC /* KaedeTextField.swift in Sources */,
 				B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */,
-				B093FF991E790CD500011B43 /* ViewController.swift in Sources */,
 				B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */,
 				B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */,
 				B0F8948B1E7BD55A00E490C4 /* Tree.swift in Sources */,
@@ -847,7 +850,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -873,11 +876,14 @@
 			baseConfigurationReference = BF3CBDF2A4BC805F21E5120B /* Pods-Jungle.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Jungle/Jungle.entitlements;
 				DEVELOPMENT_TEAM = 6BES3VUFCX;
 				INFOPLIST_FILE = Jungle/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.robcanton.Jungle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "62f9f52e-10be-4f0c-8cf6-66f8668b581d";
+				PROVISIONING_PROFILE_SPECIFIER = "Jungle-iOS-Development-Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -887,11 +893,15 @@
 			baseConfigurationReference = 2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Jungle/Jungle.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				DEVELOPMENT_TEAM = 6BES3VUFCX;
 				INFOPLIST_FILE = Jungle/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.robcanton.Jungle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "f6a3317b-269c-43fb-900b-7b6e13f36751";
+				PROVISIONING_PROFILE_SPECIFIER = "Jungle-iOS-Distribution-Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

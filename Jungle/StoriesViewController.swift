@@ -17,7 +17,12 @@ protocol PopupProtocol {
     func dismissPopup(_ animated:Bool)
 }
 
-class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate, PopupProtocol {
+class PostCollectionViewController:UIViewController {
+    weak var transitionController: TransitionController!
+    
+}
+
+class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
     weak var transitionController: TransitionController!
     var storyType:StoryType = .PlaceStory
@@ -213,6 +218,42 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         return cell
     }
     
+    func getCurrentCellIndex() -> IndexPath {
+        return collectionView.indexPathsForVisibleItems[0]
+    }
+    
+    func stopPreviousItem() {
+        if let cell = getCurrentCell() {
+            cell.pauseVideo()
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let xOffset = scrollView.contentOffset.x
+        
+        let newItem = Int(xOffset / self.collectionView.frame.width)
+        currentIndex = IndexPath(item: newItem, section: 0)
+        
+        if let cell = getCurrentCell() {
+            cell.setForPlay()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let cell = cell as! StoryViewController
+    
+        cell.reset()
+    }
+    
+    
+    override var prefersStatusBarHidden: Bool {
+        get {
+            return true
+        }
+    }
+}
+
+extension StoriesViewController: PopupProtocol {
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pauseVideo()
         getCurrentCell()?.destroyVideoPlayer()
@@ -260,7 +301,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
                 if success {
                     self.dismissPopup(true)
                 }
-             })
+            })
         }
         actionSheet.addAction(deleteActionButton)
         
@@ -286,10 +327,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
                 
                 /*UploadService.deleteItem(item: item, completion: { success in
-                    if success {
-                        self.dismissPopup(true)
-                    }
-                })*/
+                 if success {
+                 self.dismissPopup(true)
+                 }
+                 })*/
             }
             actionSheet.addAction(deleteActionButton)
             
@@ -369,7 +410,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func showComments() {
-
+        
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
         let controller = CommentsViewController()
@@ -396,40 +437,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             return cell
         }
         return nil
-    }
-    
-    func getCurrentCellIndex() -> IndexPath {
-        return collectionView.indexPathsForVisibleItems[0]
-    }
-    
-    func stopPreviousItem() {
-        if let cell = getCurrentCell() {
-            cell.pauseVideo()
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let xOffset = scrollView.contentOffset.x
-        
-        let newItem = Int(xOffset / self.collectionView.frame.width)
-        currentIndex = IndexPath(item: newItem, section: 0)
-        
-        if let cell = getCurrentCell() {
-            cell.setForPlay()
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let cell = cell as! StoryViewController
-    
-        cell.reset()
-    }
-    
-    
-    override var prefersStatusBarHidden: Bool {
-        get {
-            return true
-        }
     }
 }
 

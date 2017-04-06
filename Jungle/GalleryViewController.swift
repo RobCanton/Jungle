@@ -10,11 +10,7 @@ import Foundation
 import UIKit
 import View2ViewTransition
 
-class GalleryViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate,PopupProtocol {
-    internal func showDeleteOptions() {
-        
-    }
-
+class GalleryViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
     weak var transitionController: TransitionController!
     
@@ -163,54 +159,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         return cell
     }
     
-    func dismissPopup(_ animated:Bool) {
-        getCurrentCell()?.pauseVideo()
-        getCurrentCell()?.destroyVideoPlayer()
-        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
-            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
-            if !isSingleItem {
-                self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
-            }
-            self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-            
-            navigationController?.popViewController(animated: animated)
-        }
-    }
-    
-    func showUser(_ uid:String) {
-
-    }
-    
-    func showUsersList(_ uids:[String], _ title:String) {
-
-    }
-    
-    func showOptions() {
-    }
-    
-    func showComments() {
-        
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.storyItem else { return }
-        let controller = CommentsViewController()
-        controller.title = "Comments"
-        controller.postRef = cell
-        controller.item = item
-        if item.comments.count == 0 {
-            controller.shouldShowKeyboard = true
-        }
-        
-        //controller.containerRef = containerRef
-        let nav = UINavigationController(rootViewController: controller)
-        nav.navigationBar.isTranslucent = false
-        nav.navigationBar.tintColor = UIColor.black
-        
-        nav.modalPresentationStyle = .overCurrentContext
-        
-        self.present(nav, animated: true, completion: nil)
-        
-    }
-    
     func getCurrentCell() -> PostViewController? {
         if let cell = collectionView.visibleCells.first as? PostViewController {
             return cell
@@ -263,6 +211,76 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
 }
+
+extension GalleryViewController: PopupProtocol {
+    func dismissPopup(_ animated:Bool) {
+        getCurrentCell()?.pauseVideo()
+        getCurrentCell()?.destroyVideoPlayer()
+        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
+            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
+            if !isSingleItem {
+                self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+            }
+            self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
+            
+            navigationController?.popViewController(animated: animated)
+        }
+    }
+    
+    func showUser(_ uid:String) {
+        
+    }
+    
+    
+    func showOptions() {
+    }
+    
+    func showComments() {
+        
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        let controller = CommentsViewController()
+        controller.title = "Comments"
+        controller.postRef = cell
+        controller.item = item
+        if item.comments.count == 0 {
+            controller.shouldShowKeyboard = true
+        }
+        
+        //controller.containerRef = containerRef
+        let nav = UINavigationController(rootViewController: controller)
+        nav.navigationBar.isTranslucent = false
+        nav.navigationBar.tintColor = UIColor.black
+        
+        nav.modalPresentationStyle = .overCurrentContext
+        
+        self.present(nav, animated: true, completion: nil)
+        
+    }
+    
+    func showDeleteOptions() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        
+        
+        let actionSheet = UIAlertController(title: "Delete post?", message: nil, preferredStyle: .alert)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in}
+        actionSheet.addAction(cancelActionButton)
+        
+        let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
+            
+            UploadService.deleteItem(item: item, completion: { success in
+                if success {
+                    self.dismissPopup(true)
+                }
+            })
+        }
+        actionSheet.addAction(deleteActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+        
+    }}
 
 extension GalleryViewController: View2ViewTransitionPresented {
     

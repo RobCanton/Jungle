@@ -12,6 +12,7 @@ import Foundation
 enum NotificationType:String {
     case comment = "COMMENT"
     case follow  = "FOLLOW"
+    case like    = "LIKE"
     case none  = "NONE"
 }
 
@@ -33,6 +34,9 @@ class Notification: NSObject {
         case NotificationType.follow.rawValue:
             self.type = .follow
             break
+        case NotificationType.like.rawValue:
+            self.type = .like
+            break
         default:
             self.type = .none
             break
@@ -51,7 +55,6 @@ class Notification: NSObject {
         let sender = decoder.decodeObject(forKey: "sender") as! String
         let postKey = decoder.decodeObject(forKey: "postKey") as? String
         self.init(key: key, type: type, date: date, sender: sender, postKey: postKey)
-        
     }
     
     

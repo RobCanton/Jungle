@@ -102,11 +102,13 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let notification = notifications[indexPath.row]
-        if notification.getType() == .comment {
+        let type = notification.getType()
+        if type == .comment || type == .like {
             let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! NotificationTableViewCell
             cell.setup(withNotification: notifications[indexPath.row])
             let labelX = cell.messageLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            cell.userTappedHandler = showUser
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: followCellIdentifier, for: indexPath) as! NotificationFollowCell
@@ -121,15 +123,27 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let notification = notifications[indexPath.row]
-        if notification.getType() == .comment {
+        let type = notification.getType()
+        if type == .comment || type == .like {
             let cell = tableView.cellForRow(at: indexPath) as! NotificationTableViewCell
             
             if let item = cell.post {
                 let i = IndexPath(item: indexPath.row, section: 0)
                 globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             }
+        } else if type == .follow {
+            showUser(notification.getSender())
         }
         
+    }
+    
+    func showUser(_ uid:String) {
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = UserProfileViewController()
+        controller.uid = uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func unfollowHandler(user:User) {

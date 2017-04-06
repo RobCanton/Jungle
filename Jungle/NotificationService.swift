@@ -24,13 +24,13 @@ class NotificationService {
         notificationsRef.observe(.value, with: { snapshot in
             var notification:Notification?
             if snapshot.exists() {
-                let key                = snapshot.key
-                guard let dict         = snapshot.value as? [String:AnyObject] else { return completion(notification, false)}
-                guard let sender       = dict["sender"] as? String else { return completion(notification, false)}
-                guard let timestamp    = dict["timestamp"] as? Double else { return completion(notification, false)}
-                guard let type         = dict["type"] as? String else { return completion(notification, false)}
-                guard let postKey      = dict["postKey"] as? String else { return completion(notification, false)}
-                let date         = Date(timeIntervalSince1970: timestamp/1000)
+                let key             = snapshot.key
+                guard let dict      = snapshot.value as? [String:AnyObject] else { return completion(notification, false)}
+                guard let sender    = dict["sender"] as? String else { return completion(notification, false)}
+                guard let timestamp = dict["timestamp"] as? Double else { return completion(notification, false)}
+                guard let type      = dict["type"] as? String else { return completion(notification, false)}
+                let postKey         = dict["postKey"] as? String
+                let date            = Date(timeIntervalSince1970: timestamp/1000)
                 notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey)
                 dataCache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             }

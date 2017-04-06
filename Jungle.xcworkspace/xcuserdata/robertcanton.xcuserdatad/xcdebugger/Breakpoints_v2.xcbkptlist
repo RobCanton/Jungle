@@ -104,12 +104,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/NotificationTableViewCell.swift"
-            timestampString = "512993026.731137"
+            timestampString = "513118173.507093"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "76"
-            endingLineNumber = "76"
-            landmarkName = "setCommentLabel(username:item:date:)"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
+            landmarkName = "setMessageLabel(username:message:date:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -136,11 +136,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "139"
-            endingLineNumber = "139"
+            startingLineNumber = "135"
+            endingLineNumber = "135"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -152,11 +152,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "138"
-            endingLineNumber = "138"
+            startingLineNumber = "134"
+            endingLineNumber = "134"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -168,11 +168,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "129"
-            endingLineNumber = "129"
+            startingLineNumber = "125"
+            endingLineNumber = "125"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -184,11 +184,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "128"
-            endingLineNumber = "128"
+            startingLineNumber = "124"
+            endingLineNumber = "124"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -200,11 +200,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "131"
-            endingLineNumber = "131"
+            startingLineNumber = "127"
+            endingLineNumber = "127"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -216,11 +216,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "513032716.989494"
+            timestampString = "513155520.429697"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "130"
-            endingLineNumber = "130"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>

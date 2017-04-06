@@ -6,6 +6,16 @@ import GooglePlaces
 
 protocol ServiceProtocol {}
 
+let excludedTypes:[String] = [
+    "street_address",
+    "bus_station",
+    "transit_station",
+    "taxi_stand",
+    "cemetery",
+    "atm"
+]
+
+
 class Service: NSObject {
     
     fileprivate var subscribers: [String:ServiceProtocol]
@@ -42,6 +52,8 @@ class GPSService: Service, CLLocationManagerDelegate {
     fileprivate var lastSignificantLocation: CLLocation?
     fileprivate var placesClient: GMSPlacesClient!
     fileprivate var likelihoods = [GMSPlaceLikelihood]()
+    
+    
     
     override init(_ subscribers:[String:ServiceProtocol]) {
         super.init(subscribers)
@@ -169,17 +181,35 @@ class GPSService: Service, CLLocationManagerDelegate {
                 var temp = [GMSPlaceLikelihood]()
                 for likelihood in placeLikelihoodList.likelihoods {
                     if likelihood.likelihood >= 0.1 {
-                        temp.append(likelihood)
+                        let place = likelihood.place
+                        let types = place.types
+                        if !place.containsExcludedType() {
+                            temp.append(likelihood)
+                            print(likelihood.description)
+                        }
                     }
                 }
                 self.likelihoods = temp
+                
                 guard let subscribers = self.getSubscribers() else { return }
                 subscribers.forEach { $0.value.nearbyPlacesUpdate(self.likelihoods)}
                 
             }
         })
     }
+}
+
+extension GMSPlace {
     
+    func containsExcludedType() -> Bool {
+        let types = self.types
+        for excludedType in excludedTypes {
+            if types.contains(excludedType) {
+                return true
+            }
+        }
+        return false
+    }
     
 }
 

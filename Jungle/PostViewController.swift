@@ -36,7 +36,23 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
 
     }
     
-    func showLikes() {
+    func handleFooterAction(_ like: Bool?) {
+        guard let item = self.storyItem else { return }
+        if let like = like {
+            if like {
+                UploadService.addLike(post: item)
+                item.addLike(mainStore.state.userState.uid)
+            } else {
+                UploadService.removeLike(postKey: item.getKey())
+                item.removeLike(mainStore.state.userState.uid)
+            }
+        } else {
+            delegate?.showDeleteOptions()
+        }
+        
+        
+        
+        //headerView.setLikes(post: item)
     }
     
     func more() {
@@ -126,7 +142,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!, actionHandler: nil)
+                self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
             }
         })
         
