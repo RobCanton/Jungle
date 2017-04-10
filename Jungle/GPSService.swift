@@ -6,13 +6,16 @@ import GooglePlaces
 
 protocol ServiceProtocol {}
 
+
+let minimumAcceptedLikelihood = 0.15
 let excludedTypes:[String] = [
-    "street_address",
+    //"street_address",
     "bus_station",
     "transit_station",
     "taxi_stand",
     "cemetery",
-    "atm"
+    "atm",
+    "general_contractor"
 ]
 
 
@@ -180,7 +183,7 @@ class GPSService: Service, CLLocationManagerDelegate {
             if let placeLikelihoodList = placeLikelihoodList {
                 var temp = [GMSPlaceLikelihood]()
                 for likelihood in placeLikelihoodList.likelihoods {
-                    if likelihood.likelihood >= 0.1 {
+                    if likelihood.likelihood >= minimumAcceptedLikelihood {
                         let place = likelihood.place
                         let types = place.types
                         if !place.containsExcludedType() {
@@ -210,7 +213,31 @@ extension GMSPlace {
         }
         return false
     }
+}
+
+class GradientContainerView:UIView {
+    var gradientLayer: CAGradientLayer!
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        gradientLayer = CAGradientLayer()
+        gradientLayer.frame = self.bounds
+        gradientLayer.colors = [
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
+        ]
+        gradientLayer.locations = [0.0, 1.0]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0)
+        self.layer.insertSublayer(gradientLayer, at: 0)
+        self.layer.masksToBounds = true
+    }
+    
+    override func layoutSublayers(of layer: CALayer) {
+        super.layoutSublayers(of: layer)
+        gradientLayer.frame = self.bounds
+        
+    }
 }
 
 

@@ -190,7 +190,7 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+        print("viewDidAppear")
         requestActivity()
         listenToActivityResponse()
         

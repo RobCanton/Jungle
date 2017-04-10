@@ -30,8 +30,8 @@ class CommentCell: UITableViewCell {
         
         userImage.isUserInteractionEnabled = true
         
-        authorLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
-        commentLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
+        //authorLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
+        //commentLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
     }
     
     var tap:UITapGestureRecognizer!

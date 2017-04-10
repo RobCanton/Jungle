@@ -11,6 +11,7 @@ import UIKit
 import View2ViewTransition
 
 protocol PopupProtocol {
+    func newItem(_ item:StoryItem)
     func showDeleteOptions()
     func showOptions()
     func showComments()
@@ -63,12 +64,18 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         if let cell = getCurrentCell() {
             cell.setForPlay()
+            if let item = cell.item {
+               commentsViewController.setupItem(item)
+            }
         }
         
         if let gestureRecognizers = self.view.gestureRecognizers {
             for gestureRecognizer in gestureRecognizers {
                 if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
                     panGestureRecognizer.delegate = self
+                    scrollView.panGestureRecognizer.require(toFail: panGestureRecognizer)
+                    //scrollView.panGestureRecognizer.require(toFail: collectionView.panGestureRecognizer)
+                    scrollView.isScrollEnabled = true
                 }
             }
         }
@@ -88,6 +95,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
+    fileprivate var scrollView:UIScrollView!
+    fileprivate var commentsViewController:CommentsViewController!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -117,7 +126,35 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.isOpaque = true
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.decelerationRate = UIScrollViewDecelerationRateFast
-        self.view.addSubview(collectionView)
+        collectionView.reloadData()
+        
+        scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height * 2.0)
+        
+        
+        
+//        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+//        blurView.frame = v2.bounds
+//        v2.addSubview(blurView)
+        
+        self.scrollView.addSubview(collectionView)
+        self.view.addSubview(scrollView)
+        scrollView.isPagingEnabled = true
+        scrollView.decelerationRate = UIScrollViewDecelerationRateFast
+        scrollView.bounces = false
+        scrollView.canCancelContentTouches = false
+        scrollView.isScrollEnabled = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.delegate = self
+        
+        commentsViewController = CommentsViewController()
+        commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
+        
+        
+        self.addChildViewController(commentsViewController)
+        self.scrollView.addSubview(commentsViewController.view)
+        commentsViewController.didMove(toParentViewController: self)
+        
         
         label = UILabel(frame: CGRect(x:0,y:0,width:self.view.frame.width,height:100))
         label.textColor = UIColor.white
@@ -161,18 +198,21 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         if let _ = gestureRecognizer as? UITapGestureRecognizer  {
             return true
         }
+        
+        
 
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
             let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
             self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
-
+            
+            if scrollView.contentOffset.y != 0 {
+                return false
+            }
+            
             let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
             if translate.y < 0 {
-                if translate.y < -3 {
-                    cell.showComments()
-                }
                 return false
             }
             return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
@@ -254,6 +294,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 }
 
 extension StoriesViewController: PopupProtocol {
+    
+    func newItem(_ item:StoryItem) {
+        commentsViewController.setupItem(item)
+    }
+    
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pauseVideo()
         getCurrentCell()?.destroyVideoPlayer()
@@ -438,6 +483,35 @@ extension StoriesViewController: PopupProtocol {
         }
         return nil
     }
+}
+
+extension StoriesViewController: UIScrollViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView !== self.scrollView { return }
+        let yOffset = scrollView.contentOffset.y
+        
+        print("yOffset: \(yOffset)")
+        var cFrame = collectionView.frame
+        cFrame.origin.y = yOffset
+        collectionView.frame = cFrame
+        
+        if let cell = getCurrentCell() {
+            if yOffset > 0 {
+                cell.pauseStory()
+                cell.progressBar?.resetActiveIndicator()
+            } else {
+                //cell.progressBar?.resetActiveIndicator()
+                cell.setupItem()
+                cell.resumeStory()
+            }
+            let alpha = 1 - yOffset/view.frame.height
+            cell.setDetailFade(alpha * alpha * alpha * alpha * alpha)
+            collectionView.alpha = 0.65 + 0.35 * alpha
+            //animator.fractionComplete = alpha
+        }
+    }
+    
 }
 
 extension StoriesViewController: View2ViewTransitionPresented {

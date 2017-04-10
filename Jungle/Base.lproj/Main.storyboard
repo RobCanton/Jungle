@@ -11,42 +11,6 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
-        <scene sceneID="nbw-mR-cfW">
-            <objects>
-                <viewController storyboardIdentifier="CameraView" id="dYE-qP-Gpq" customClass="ViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="ZQa-b4-OZu"/>
-                        <viewControllerLayoutGuide type="bottom" id="D7a-hz-FhQ"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="oOT-6j-7Z2">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="PG0-Hw-z36" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4640.8000000000002" y="-36.431784107946029"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="jE9-i3-Fqx">
-            <objects>
-                <viewController storyboardIdentifier="ActivityView" id="w7Q-Oo-XEv" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="f5l-ek-55v"/>
-                        <viewControllerLayoutGuide type="bottom" id="o4M-n5-M0F"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="uLH-df-qme">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="CPh-Uq-25A" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="5272.8000000000002" y="-36.431784107946029"/>
-        </scene>
         <!--Places View Controller-->
         <scene sceneID="Q4s-5b-aqd">
             <objects>
@@ -97,7 +61,7 @@
                                     <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="F4g-Ec-Wg1">
                                         <rect key="frame" x="51" y="273" width="273" height="71"/>
                                         <subviews>
-                                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B79-c7-mOJ">
+                                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B79-c7-mOJ" customClass="GradientContainerView" customModule="Jungle" customModuleProvider="target">
                                                 <rect key="frame" x="16" y="-29" width="240" height="128"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </view>
@@ -290,7 +254,7 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="aPU-LD-FtM"/>
                                 </constraints>
-                                <nil key="textColor"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                 <userDefinedRuntimeAttributes>
@@ -469,8 +433,8 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S9h-Y6-sCB">
                                 <rect key="frame" x="0.0" y="623" width="375" height="44"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Send" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fqM-yg-h3k">
-                                        <rect key="frame" x="167" y="10" width="42" height="24"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Post" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fqM-yg-h3k">
+                                        <rect key="frame" x="170" y="10" width="36" height="24"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-Bold" family="Avenir Next" pointSize="17"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>
@@ -499,14 +463,6 @@
                             <constraint firstAttribute="topMargin" secondItem="nGq-Mk-nr4" secondAttribute="top" id="jhd-b1-r09"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="sAU-Ml-wl6">
-                        <barButtonItem key="leftBarButtonItem" image="left_arrow" id="utt-YA-ICg">
-                            <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                            <connections>
-                                <action selector="handleBack:" destination="M7r-Am-RZn" id="jQb-U0-1Qp"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
                     <connections>
                         <outlet property="sendLabel" destination="fqM-yg-h3k" id="R49-Qg-asy"/>
                         <outlet property="sendView" destination="S9h-Y6-sCB" id="ckk-gt-LcD"/>
@@ -516,24 +472,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c7P-tJ-uGx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="6389.6000000000004" y="606.74662668665667"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="tMy-co-2Lu">
-            <objects>
-                <navigationController storyboardIdentifier="SendNavigationController" automaticallyAdjustsScrollViewInsets="NO" id="JwT-eu-CYh" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="HUD-bD-75m">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="M7r-Am-RZn" kind="relationship" relationship="rootViewController" id="pep-c7-Pol"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="8Ko-4k-ReF" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="5447.1999999999998" y="606.74662668665667"/>
         </scene>
         <!--Main Tab Bar Controller-->
         <scene sceneID="2Ds-Qs-ygB">
@@ -1139,7 +1077,6 @@
     </scenes>
     <resources>
         <image name="home" width="25" height="25"/>
-        <image name="left_arrow" width="25" height="25"/>
         <image name="message" width="25" height="25"/>
         <image name="navback" width="25" height="25"/>
         <image name="nearby" width="25" height="25"/>

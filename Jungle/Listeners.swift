@@ -136,9 +136,7 @@ class Listeners {
             let notificationsRef = ref.child("users/notifications/\(current_uid)")
             notificationsRef.observe(.childAdded, with: { snapshot in
                 if snapshot.exists() {
-                    print("YUH")
                     guard let seen = snapshot.value as? Bool else { return }
-                    print("YAH")
                     mainStore.dispatch(AddNotification(notificationKey: snapshot.key, seen: seen))
                 }
             })

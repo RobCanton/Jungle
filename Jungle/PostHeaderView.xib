@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -16,12 +17,12 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E4h-Am-7pW">
-                    <rect key="frame" x="12" y="8" width="0.0" height="0.0"/>
+                    <rect key="frame" x="28" y="8" width="0.0" height="0.0"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wtc-QT-l6R">
+                <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wtc-QT-l6R">
                     <rect key="frame" x="12" y="12" width="0.0" height="0.0"/>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -41,24 +42,35 @@
                         <action selector="moreTapped:" destination="gtv-pI-kcX" eventType="touchUpInside" id="ZU7-Ta-w79"/>
                     </connections>
                 </button>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="nearby" translatesAutoresizingMaskIntoConstraints="NO" id="5NK-l3-xpi">
+                    <rect key="frame" x="6" y="8" width="20" height="20"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="J0S-Ha-aq8"/>
+                        <constraint firstAttribute="width" secondItem="5NK-l3-xpi" secondAttribute="height" multiplier="1:1" id="T7r-1y-yEx"/>
+                    </constraints>
+                </imageView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="ajY-fM-Bhn" secondAttribute="trailing" id="3SH-CC-oo9"/>
                 <constraint firstItem="Wtc-QT-l6R" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="12" id="6QJ-fJ-ReO"/>
+                <constraint firstItem="5NK-l3-xpi" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="6" id="6uG-g3-w2P"/>
                 <constraint firstItem="Wtc-QT-l6R" firstAttribute="top" secondItem="E4h-Am-7pW" secondAttribute="bottom" constant="4" id="GoH-u8-b4m"/>
+                <constraint firstItem="E4h-Am-7pW" firstAttribute="leading" secondItem="5NK-l3-xpi" secondAttribute="trailing" constant="2" id="JqH-7L-aRm"/>
                 <constraint firstItem="E4h-Am-7pW" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8" id="LRT-5i-TwB"/>
                 <constraint firstItem="ajY-fM-Bhn" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" id="VC9-yt-EhV"/>
-                <constraint firstItem="E4h-Am-7pW" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="12" id="hbb-S4-Vff"/>
+                <constraint firstItem="5NK-l3-xpi" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8" id="bWh-b3-llV"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="locationTitle" destination="E4h-Am-7pW" id="Umt-rl-MRv"/>
                 <outlet property="timeLabel" destination="Wtc-QT-l6R" id="af9-e0-etC"/>
             </connections>
-            <point key="canvasLocation" x="418" y="22"/>
+            <point key="canvasLocation" x="417.5" y="21.5"/>
         </view>
     </objects>
     <resources>
         <image name="more" width="16" height="16"/>
+        <image name="nearby" width="25" height="25"/>
     </resources>
 </document>

@@ -137,7 +137,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         super.viewWillAppear(animated)
         mainStore.subscribe(self)
         self.navigationController?.navigationBar.barStyle = .default
-        //self.navigationController?.view.backgroundColor = UIColor.white
         navigationController?.setNavigationBarHidden(false, animated: true)
         
         setFollowing()

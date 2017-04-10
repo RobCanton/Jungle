@@ -19,6 +19,7 @@ var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
 protocol MainInterfaceProtocol {
     func navigationPush(withController controller: UIViewController, animated: Bool)
+    func presentHomeScreen(animated: Bool)
 }
 
 extension MainViewController: MainInterfaceProtocol {
@@ -27,45 +28,53 @@ extension MainViewController: MainInterfaceProtocol {
         activateNavbar(true)
         navigationController?.pushViewController(controller, animated: animated)
     }
+    
+    func presentHomeScreen(animated: Bool) {
+        cameraView.cameraState = .Initiating
+        scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 2.0), animated: animated)
+        mainTabBar.selectedIndex = 0
+        
+    }
 }
 
 class MainViewController: UIViewController, UIScrollViewDelegate {
 
-    var gps_service:GPSService!
+    fileprivate var gps_service:GPSService!
     
-    var scrollView:UIScrollView!
+    fileprivate var scrollView:UIScrollView!
     
-    var cameraView:CameraViewController!
-    var recordBtn:CameraButton!
-    var cameraBtnFrame:CGRect!
-    var cameraCenter:CGPoint!
+    fileprivate var cameraView:CameraViewController!
+    fileprivate var recordBtn:CameraButton!
+    fileprivate var cameraBtnFrame:CGRect!
+    fileprivate var cameraCenter:CGPoint!
+    
+    fileprivate var mainTabBar:MainTabBarController!
+    
+    fileprivate var places:PlacesViewController!
+    fileprivate var notifications:NotificationsViewController!
+    fileprivate var profile:MyProfileViewController!
     
     
-    var places:PlacesViewController!
-    var notifications:NotificationsViewController!
-    var profile:MyProfileViewController!
+    fileprivate var returningPlacesCell:PhotoCell?
+    fileprivate var returningStoriesCell:UserStoryCollectionViewCell?
+    fileprivate var flashView:UIView!
     
+    fileprivate var uploadLikelihoods:[GMSPlaceLikelihood]!
     
-    var returningPlacesCell:PhotoCell?
-    var returningStoriesCell:UserStoryCollectionViewCell?
-    var flashView:UIView!
+    fileprivate var flashButton:UIButton!
+    fileprivate var switchButton:UIButton!
+    fileprivate var locationHeader:LocationHeaderView!
     
-    var uploadLikelihoods:[GMSPlaceLikelihood]!
+    fileprivate var mapView:GMSMapView?
     
-    var flashButton:UIButton!
-    var switchButton:UIButton!
-    var locationHeader:LocationHeaderView!
+    fileprivate var screenMode:ScreenMode = .Main
     
-    var mapView:GMSMapView?
+    fileprivate var storyType:StoryType = .PlaceStory
     
-    var screenMode:ScreenMode = .Main
-    
-    var storyType:StoryType = .PlaceStory
-    
-    lazy var cancelButton: UIButton = {
+    fileprivate lazy var cancelButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
-        button.setImage(UIImage(named: "delete"), for: .normal)
+        button.setImage(UIImage(named: "delete_thick"), for: .normal)
         button.center = CGPoint(x: button.frame.width * 0.60, y: button.frame.height * 0.60)
         button.tintColor = UIColor.white
         button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
@@ -73,7 +82,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
     }()
     
-    lazy var sendButton: UIButton = {
+    fileprivate lazy var sendButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
         button.setImage(UIImage(named: "send_arrow"), for: .normal)
@@ -86,7 +95,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         return button
     }()
     
-    lazy var captionButton: UIButton = {
+    fileprivate lazy var captionButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
         button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.5, y: button.frame.height * 0.5)
@@ -95,6 +104,22 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         button.clipsToBounds = true
         button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
         return button
+    }()
+    
+    fileprivate lazy var textView: UITextView = {
+        let definiteBounds = UIScreen.main.bounds
+        let textView = UITextView(frame: CGRect(x: 0,y: definiteBounds.height - 90,width: definiteBounds.width,height: 44))
+        
+        textView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
+        textView.textColor = UIColor.white
+        textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
+        textView.isHidden = false
+        textView.keyboardAppearance = .dark
+        textView.isScrollEnabled = false
+        textView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
+        textView.backgroundColor = UIColor.clear
+        textView.isUserInteractionEnabled = false
+        return textView
     }()
     
     override func viewDidLoad() {
@@ -146,30 +171,33 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         locationHeader = UINib(nibName: "LocationHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! LocationHeaderView
         locationHeader.frame = CGRect(x: 0, y: 20.0, width: view.frame.width, height: 44)
-        locationHeader.isHidden = true
+        locationHeader.isHidden = false
+        locationHeader.isSearching(true)
         
         let locationHeaderTap = UITapGestureRecognizer(target: self, action: #selector(locationHeaderTapped))
         locationHeader.addGestureRecognizer(locationHeaderTap)
+       
         
         let mapViewController  = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MapViewController") as! MapViewController
         mapViewController.view.frame = view.bounds
+        mapViewController.locationHeaderRef = locationHeader
         
         let v1  = UIViewController()
         v1.view.backgroundColor = UIColor.clear
         v1.view.frame = view.bounds
         
-        let v2  = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MainTabBarController") as! MainTabBarController
-        v2.view.backgroundColor = UIColor.clear
-        v2.view.frame = view.bounds
+        mainTabBar  = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MainTabBarController") as! MainTabBarController
+        mainTabBar.view.backgroundColor = UIColor.clear
+        mainTabBar.view.frame = view.bounds
         
         
-        let nav1 = v2.viewControllers![0] as! UINavigationController
+        let nav1 = mainTabBar.viewControllers![0] as! UINavigationController
         places = nav1.viewControllers[0] as! PlacesViewController
         
-        let nav4 = v2.viewControllers![3] as! UINavigationController
+        let nav4 = mainTabBar.viewControllers![3] as! UINavigationController
         notifications = nav4.viewControllers[0] as! NotificationsViewController
         
-        let nav5 = v2.viewControllers![4] as! UINavigationController
+        let nav5 = mainTabBar.viewControllers![4] as! UINavigationController
         profile = nav5.viewControllers[0] as! MyProfileViewController
         
         var v1Frame: CGRect = CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.height)
@@ -178,7 +206,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         
         var v2Frame: CGRect = CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.height - 20.0)
         v2Frame.origin.y = screenBounds.height * 2 + 20.0
-        v2.view.frame = v2Frame
+        mainTabBar.view.frame = v2Frame
         
         
         scrollView = UIScrollView(frame: view.bounds)
@@ -191,9 +219,9 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         self.scrollView.addSubview(v1.view)
         v1.didMove(toParentViewController: self)
         
-        self.addChildViewController(v2)
-        self.scrollView.addSubview(v2.view)
-        v2.didMove(toParentViewController: self)
+        self.addChildViewController(mainTabBar)
+        self.scrollView.addSubview(mainTabBar.view)
+        mainTabBar.didMove(toParentViewController: self)
         
         self.scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 3)
         self.scrollView.isPagingEnabled = true
@@ -214,6 +242,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         view.addSubview(recordBtn)
         
         self.scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 2.0), animated: false)
+        self.screenMode = .Main
         //setToCameraMode()
         
         if gps_service == nil {
@@ -236,6 +265,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
             statusBar(hide: true, animated: true)
         }
+        textView.resignFirstResponder()
         
     }
     
@@ -260,7 +290,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self)
+        textView.resignFirstResponder()
     }
     
     
@@ -302,7 +332,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             switchButton.center = CGPoint(x: view.frame.width - cameraBtnFrame.origin.x / 2 - switchButton.frame.width * reverseAlpha, y: switchButton.center.y)
             switchButton.alpha = multiple
             
-            locationHeader.alpha = multiple
+            //locationHeader.alpha = multiple
             locationHeader.center = CGPoint(x: locationHeader.center.x, y: 20 + 22 - (locationHeader.frame.height * 2.0 * reverseAlpha))
         } else if y > height && y <= height * 2.0 {
             let alpha = (y - height) / height
@@ -317,7 +347,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
             flashView.alpha = alpha
             flashButton.alpha = multiple
             switchButton.alpha = multiple
-            locationHeader.alpha = multiple
+            //locationHeader.alpha = multiple
         }
     }
     
@@ -424,7 +454,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
         storyType = .UserStory
-        print("PRESENT USER STORY")
         let storiesViewController: StoriesViewController = StoriesViewController()
         storiesViewController.storyType = storyType
         storiesViewController.userStories = stories
@@ -442,7 +471,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
         storyType = .ProfileStory
-        print("PRESENT PROFILE STORY")
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.uid = mainStore.state.userState.uid
         galleryViewController.posts = posts
@@ -457,7 +485,6 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
         storyType = .NotificationPost
-        print("PRESENT NOTIFICATION STORY")
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.isSingleItem = true
         galleryViewController.uid = post.getAuthorId()
@@ -468,6 +495,253 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         scrollView.isScrollEnabled = false
         nav.delegate = transitionController
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
+    }
+    
+}
+
+extension MainViewController: CameraDelegate, UITextViewDelegate {
+    
+    func takingVideo() {
+        statusBarShouldHide = true
+        self.setNeedsStatusBarAppearanceUpdate()
+        UIView.animate(withDuration: 0.42, animations: {
+            self.setNeedsStatusBarAppearanceUpdate()
+        })
+    }
+    
+    func takingPhoto() {
+        flashView.backgroundColor = UIColor.white
+        flashView.alpha = 0.0
+        UIView.animate(withDuration: 0.025, animations: {
+            self.flashView.alpha = 0.85
+        }, completion: { result in
+            UIView.animate(withDuration: 0.25, animations: {
+                self.flashView.alpha = 0.0
+            }, completion: { result in
+                self.flashView.backgroundColor = UIColor.black
+            })
+        })
+    }
+    
+    func showCameraOptions() {
+        scrollView?.isUserInteractionEnabled = true
+        flashButton?.isHidden = false
+        switchButton?.isHidden = false
+        locationHeader?.isHidden = false
+    }
+    
+    func hideCameraOptions() {
+        scrollView?.isUserInteractionEnabled = false
+        flashButton?.isHidden = true
+        switchButton?.isHidden = true
+        locationHeader?.isHidden = true
+    }
+    
+    func showEditOptions() {
+        statusBarShouldHide = true
+        self.setNeedsStatusBarAppearanceUpdate()
+        self.view.addSubview(cancelButton)
+        self.view.addSubview(sendButton)
+        self.view.addSubview(captionButton)
+        self.view.addSubview(textView)
+        
+        textView.resignFirstResponder()
+        textView.isUserInteractionEnabled = false
+        textView.text = ""
+        textView.delegate = self
+        textView.backgroundColor = UIColor.clear
+ 
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
+        captionButton.addTarget(self, action: #selector(editCaption), for: .touchUpInside)
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        //uploadCoordinate = GPSService.sharedInstance.lastLocation!
+        uploadLikelihoods = gps_service.getLikelihoods()
+    }
+    
+    func hideEditOptions() {
+        cancelButton.removeFromSuperview()
+        sendButton.removeFromSuperview()
+        captionButton.removeFromSuperview()
+        textView.removeFromSuperview()
+        
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        
+        cancelButton.removeTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
+        captionButton.removeTarget(self, action: #selector(editCaption), for: .touchUpInside)
+        uploadLikelihoods = []
+        statusBarShouldHide = false
+        self.setNeedsStatusBarAppearanceUpdate()
+    }
+    
+    func recordButtonTapped() {
+        print("RECORD TAPPED: \(screenMode)")
+        switch screenMode {
+        case .Camera:
+            cameraView.didPressTakePhoto()
+            break
+        case .Main:
+            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+            break
+        case .Map:
+            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+            break
+        case .Transitioning:
+            break
+        }
+    }
+    
+    func sendButtonTapped(sender: UIButton) {
+        
+        let upload = Upload()
+        if cameraView.cameraState == .PhotoTaken {
+            upload.image = cameraView.imageCaptureView.image!
+        } else if cameraView.cameraState == .VideoTaken {
+            upload.videoURL = cameraView.videoUrl
+        }
+        
+        upload.caption = textView.text
+        
+        //let nav = UIStoryboard(name: "Main", bundle: nil)
+           // .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
+        let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SendViewController") as! SendViewController
+        controller.gps_service = gps_service
+        controller.upload = upload
+        controller.likelihoods = uploadLikelihoods
+        controller.cameraViewRef = self.cameraView
+        
+        navigationPush(withController: controller, animated: false)
+        
+    }
+    
+    func cancelButtonTapped(sender: UIButton) {
+        
+        cameraView.destroyVideoPreview()
+        
+        recordBtn.isHidden = false
+        
+        if cameraView.captureSession != nil && cameraView.captureSession!.isRunning {
+            cameraView.cameraState = .Running
+        } else {
+            cameraView.cameraState = .Initiating
+        }
+    }
+    
+    func editCaption(sender: UIButton) {
+        textView.becomeFirstResponder()
+    }
+    
+    func keyboardWillAppear(notification: NSNotification) {
+        
+        guard let info = notification.userInfo else { return }
+        guard let keyboardValue = info[UIKeyboardFrameEndUserInfoKey] as? NSValue else { return }
+        let keyboardFrame: CGRect = keyboardValue.cgRectValue
+        
+        captionButton.isUserInteractionEnabled = false
+        
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            let height = self.view.frame.height
+            let textViewFrame = self.textView.frame
+            let textViewY = height - keyboardFrame.height - textViewFrame.height
+            self.textView.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
+            self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.42)
+        }, completion: { _ in
+            self.textView.isUserInteractionEnabled = true
+        })
+    }
+    
+    func keyboardWillDisappear(notification: NSNotification) {
+       
+        textView.isUserInteractionEnabled = false
+        captionButton.isUserInteractionEnabled = true
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            let height = self.view.frame.height
+            let textViewFrame = self.textView.frame
+            let textViewStart = height - textViewFrame.height - 90
+            self.textView.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
+            
+            if self.textView.text != "" {
+                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.42)
+            } else {
+                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
+            }
+        })
+    }
+    
+    func updateTextAndCommentViews() {
+        let oldHeight = textView.frame.size.height
+        textView.fitHeightToContent()
+        let change = textView.frame.height - oldHeight
+        
+        textView.center = CGPoint(x: textView.center.x, y: textView.center.y - change)
+    }
+    
+    public func textViewDidChange(_ textView: UITextView) {
+        updateTextAndCommentViews()
+    }
+    
+    public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            return false
+        }
+        return textView.text.characters.count + (text.characters.count - range.length) <= 140
+    }
+    
+    func switchFlashMode(sender:UIButton!) {
+        if let avDevice = cameraView.cameraDevice
+        {
+            // check if the device has torch
+            if avDevice.hasTorch {
+                // lock your device for configuration
+                do {
+                    _ = try avDevice.lockForConfiguration()
+                } catch {
+                }
+                switch cameraView.flashMode {
+                case .On:
+                    
+                    avDevice.flashMode = .auto
+                    cameraView.flashMode = .Auto
+                    flashButton.setImage(UIImage(named: "flashauto"), for: .normal)
+                    break
+                case .Auto:
+                    avDevice.flashMode = .off
+                    cameraView.flashMode = .Off
+                    flashButton.setImage(UIImage(named: "flashoff"), for: .normal)
+                    break
+                case .Off:
+                    avDevice.flashMode = .on
+                    cameraView.flashMode = .On
+                    flashButton.setImage(UIImage(named: "flashon"), for: .normal)
+                    break
+                }
+                // unlock your device
+                avDevice.unlockForConfiguration()
+            }
+        }
+        
+    }
+    
+    func switchCamera(sender:UIButton!) {
+        switch cameraView.cameraMode {
+        case .Back:
+            flashButton.isHidden = false
+            cameraView.cameraMode = .Front
+            break
+        case .Front:
+            flashButton.isHidden = true
+            cameraView.cameraMode = .Back
+            break
+        }
+        cameraView.reloadCamera()
     }
     
 }
@@ -483,7 +757,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         let i =  IndexPath(row: indexPath.item, section: 0)
         
         if storyType == .PlaceStory {
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as? PhotoCell else { return CGRect.zero }
+            guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
             let image_frame = cell.imageView.frame
             let x = cell.frame.origin.x + 1
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
@@ -495,7 +769,7 @@ extension MainViewController: View2ViewTransitionPresenting {
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
             let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
             let image_frame = convertedFrame
-            let x = cell.frame.origin.x + 15.0 - headerCollectionView.contentOffset.x
+            let x = cell.frame.origin.x + 8 + 1 - headerCollectionView.contentOffset.x
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
             let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 6.0//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
@@ -570,9 +844,9 @@ extension MainViewController: View2ViewTransitionPresenting {
                 }
             } else if storyType == .UserStory {
                 if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
-
+                    
                     returningStoriesCell?.activateCell(false)
-            
+                    
                     returningStoriesCell = cell
                 }
             } else {
@@ -603,175 +877,6 @@ extension MainViewController: View2ViewTransitionPresenting {
         //            self.setNeedsStatusBarAppearanceUpdate()
         //        }
         
-    }
-    
-}
-
-extension MainViewController: CameraDelegate {
-    
-    func takingVideo() {
-        statusBarShouldHide = true
-        self.setNeedsStatusBarAppearanceUpdate()
-        UIView.animate(withDuration: 0.42, animations: {
-            self.setNeedsStatusBarAppearanceUpdate()
-        })
-    }
-    
-    func takingPhoto() {
-        flashView.backgroundColor = UIColor.white
-        flashView.alpha = 0.0
-        UIView.animate(withDuration: 0.025, animations: {
-            self.flashView.alpha = 0.85
-        }, completion: { result in
-            UIView.animate(withDuration: 0.25, animations: {
-                self.flashView.alpha = 0.0
-            }, completion: { result in
-                self.flashView.backgroundColor = UIColor.black
-            })
-        })
-    }
-    
-    func showCameraOptions() {
-        scrollView?.isUserInteractionEnabled = true
-        flashButton?.isHidden = false
-        switchButton?.isHidden = false
-        locationHeader?.isHidden = false
-    }
-    
-    func hideCameraOptions() {
-        scrollView?.isUserInteractionEnabled = false
-        flashButton?.isHidden = true
-        switchButton?.isHidden = true
-        locationHeader?.isHidden = true
-    }
-    
-    func showEditOptions() {
-        statusBarShouldHide = true
-        self.setNeedsStatusBarAppearanceUpdate()
-        self.view.addSubview(cancelButton)
-        self.view.addSubview(sendButton)
-        self.view.addSubview(captionButton)
-        
-        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        
-        //uploadCoordinate = GPSService.sharedInstance.lastLocation!
-        uploadLikelihoods = gps_service.getLikelihoods()
-        
-    }
-    
-    
-    
-    func hideEditOptions() {
-        cancelButton.removeFromSuperview()
-        sendButton.removeFromSuperview()
-        captionButton.removeFromSuperview()
-        
-        cancelButton.removeTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        uploadLikelihoods = []
-        statusBarShouldHide = false
-        self.setNeedsStatusBarAppearanceUpdate()
-    }
-    
-    func recordButtonTapped() {
-        print("RECORD TAPPED: \(screenMode)")
-        switch screenMode {
-        case .Camera:
-            cameraView.didPressTakePhoto()
-            break
-        case .Main:
-            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
-            break
-        case .Map:
-            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
-            break
-        case .Transitioning:
-            break
-        }
-    }
-    
-    func sendButtonTapped(sender: UIButton) {
-        
-        let upload = Upload()
-        if cameraView.cameraState == .PhotoTaken {
-            upload.image = cameraView.imageCaptureView.image!
-        } else if cameraView.cameraState == .VideoTaken {
-            upload.videoURL = cameraView.videoUrl
-        }
-        
-        let nav = UIStoryboard(name: "Main", bundle: nil)
-            .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
-        let controller = nav.viewControllers[0] as! SendViewController
-        controller.gps_service = gps_service
-        controller.upload = upload
-        controller.containerRef = self
-        controller.likelihoods = uploadLikelihoods
-        
-        self.present(nav, animated: false, completion: nil)
-        
-    }
-    
-    func cancelButtonTapped(sender: UIButton) {
-        
-        cameraView.destroyVideoPreview()
-        
-        recordBtn.isHidden = false
-        
-        if cameraView.captureSession != nil && cameraView.captureSession!.isRunning {
-            cameraView.cameraState = .Running
-        } else {
-            cameraView.cameraState = .Initiating
-        }
-    }
-    
-    func switchFlashMode(sender:UIButton!) {
-        if let avDevice = cameraView.cameraDevice
-        {
-            // check if the device has torch
-            if avDevice.hasTorch {
-                // lock your device for configuration
-                do {
-                    _ = try avDevice.lockForConfiguration()
-                } catch {
-                }
-                switch cameraView.flashMode {
-                case .On:
-                    
-                    avDevice.flashMode = .auto
-                    cameraView.flashMode = .Auto
-                    flashButton.setImage(UIImage(named: "flashauto"), for: .normal)
-                    break
-                case .Auto:
-                    avDevice.flashMode = .off
-                    cameraView.flashMode = .Off
-                    flashButton.setImage(UIImage(named: "flashoff"), for: .normal)
-                    break
-                case .Off:
-                    avDevice.flashMode = .on
-                    cameraView.flashMode = .On
-                    flashButton.setImage(UIImage(named: "flashon"), for: .normal)
-                    break
-                }
-                // unlock your device
-                avDevice.unlockForConfiguration()
-            }
-        }
-        
-    }
-    
-    func switchCamera(sender:UIButton!) {
-        switch cameraView.cameraMode {
-        case .Back:
-            flashButton.isHidden = false
-            cameraView.cameraMode = .Front
-            break
-        case .Front:
-            flashButton.isHidden = true
-            cameraView.cameraMode = .Back
-            break
-        }
-        cameraView.reloadCamera()
     }
     
 }

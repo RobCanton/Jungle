@@ -19,13 +19,19 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EI7-ki-lwL">
                     <rect key="frame" x="0.0" y="0.0" width="433" height="64"/>
                     <subviews>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VGL-Hw-0HS">
-                            <rect key="frame" x="42" y="8" width="341" height="0.0"/>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="robcanton" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VGL-Hw-0HS">
+                            <rect key="frame" x="42" y="8" width="327" height="19.5"/>
                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="358-qW-sQP">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="robcanton" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kas-vg-do8">
+                            <rect key="frame" x="53" y="32" width="327" height="0.0"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="358-qW-sQP">
                             <rect key="frame" x="42" y="34" width="233" height="22"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="25" id="Kw1-Sk-UzQ"/>
@@ -46,9 +52,12 @@
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstItem="358-qW-sQP" firstAttribute="leading" secondItem="DaP-4e-zIh" secondAttribute="trailing" constant="8" id="9vg-Yk-eW0"/>
+                        <constraint firstAttribute="trailing" secondItem="kas-vg-do8" secondAttribute="trailing" constant="64" id="Ca5-uS-fSN"/>
+                        <constraint firstItem="kas-vg-do8" firstAttribute="top" secondItem="DaP-4e-zIh" secondAttribute="bottom" id="L6W-Eg-NiL"/>
                         <constraint firstItem="DaP-4e-zIh" firstAttribute="leading" secondItem="EI7-ki-lwL" secondAttribute="leading" constant="8" id="PV0-W8-Ee7"/>
                         <constraint firstItem="VGL-Hw-0HS" firstAttribute="leading" secondItem="DaP-4e-zIh" secondAttribute="trailing" constant="8" id="QVL-dm-nPZ"/>
-                        <constraint firstAttribute="trailing" secondItem="VGL-Hw-0HS" secondAttribute="trailing" constant="50" id="job-CL-OB5"/>
+                        <constraint firstItem="kas-vg-do8" firstAttribute="leading" secondItem="DaP-4e-zIh" secondAttribute="trailing" constant="8" id="UdI-aL-Zhk"/>
+                        <constraint firstAttribute="trailing" secondItem="VGL-Hw-0HS" secondAttribute="trailing" constant="64" id="job-CL-OB5"/>
                         <constraint firstItem="DaP-4e-zIh" firstAttribute="top" secondItem="EI7-ki-lwL" secondAttribute="top" constant="4" id="kx2-LG-xfl"/>
                         <constraint firstItem="VGL-Hw-0HS" firstAttribute="top" secondItem="EI7-ki-lwL" secondAttribute="top" constant="8" id="scv-Cq-Tco"/>
                         <constraint firstAttribute="bottom" secondItem="358-qW-sQP" secondAttribute="bottom" constant="8" id="seH-H4-8Bz"/>
@@ -58,6 +67,7 @@
                     <rect key="frame" x="369" y="0.0" width="64" height="64"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="Og2-fJ-cc1" secondAttribute="height" multiplier="1:1" id="V7o-fY-bDW"/>
+                        <constraint firstAttribute="height" constant="64" id="oJC-Z7-Ef0"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <state key="normal" image="like">
@@ -75,14 +85,14 @@
                 <constraint firstItem="EI7-ki-lwL" firstAttribute="leading" secondItem="mhE-jf-z5X" secondAttribute="leading" id="BC8-iK-2Sk"/>
                 <constraint firstAttribute="bottom" secondItem="EI7-ki-lwL" secondAttribute="bottom" id="aaF-1Y-hIz"/>
                 <constraint firstAttribute="bottom" secondItem="Og2-fJ-cc1" secondAttribute="bottom" id="fD9-TC-Ujr"/>
-                <constraint firstItem="Og2-fJ-cc1" firstAttribute="top" secondItem="mhE-jf-z5X" secondAttribute="top" id="qRN-s7-7kW"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
-                <outlet property="captionLabel" destination="VGL-Hw-0HS" id="TLd-8d-LAo"/>
+                <outlet property="captionLabel" destination="kas-vg-do8" id="ycU-kX-Aav"/>
                 <outlet property="commentsLabel" destination="358-qW-sQP" id="cqQ-ss-8D8"/>
                 <outlet property="imageView" destination="DaP-4e-zIh" id="UJP-Wh-ZEz"/>
                 <outlet property="likeButton" destination="Og2-fJ-cc1" id="3kz-by-OLM"/>
+                <outlet property="usenameLabel" destination="VGL-Hw-0HS" id="Bv4-vC-scD"/>
             </connections>
             <point key="canvasLocation" x="-50.5" y="-39"/>
         </view>

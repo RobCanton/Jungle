@@ -24,18 +24,22 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var upload:Upload!
     
     var sendTap:UITapGestureRecognizer!
-    var containerRef:MainViewController!
     
     var headerView:UIView!
 
     var mapView:GMSMapView?
     var gps_service: GPSService!
+    var cameraViewRef:CameraViewController?
+    var navHeight:CGFloat!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "Send To..."
-        
+        navHeight = self.navigationController!.navigationBar.frame.height + 20.0
+        self.addNavigationBarBackdrop()
+        title = "Post To..."
+        self.navigationController?.navigationBar.titleTextAttributes = [ NSFontAttributeName: UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightSemibold)]
+        self.navigationController?.navigationBar.tintColor = accentColor
         sendView.backgroundColor = UIColor.clear
 
         let gradient = CAGradientLayer()
@@ -55,12 +59,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.delegate = self
         tableView.dataSource = self
         
-        headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275))
+        headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275 + navHeight))
         
         tableView.tableHeaderView = headerView
-        
         tableView.tableFooterView = UIView()
-
         tableView.reloadData()
 
         sendTap = UITapGestureRecognizer(target: self, action: #selector(send))
@@ -77,8 +79,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
-        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.barStyle = .default
+        navigationController?.setNavigationBarHidden(false, animated: true)
         gps_service.subscribe(subscriberName, subscriber: self)
         
     }
@@ -88,12 +90,12 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         gps_service.unsubscribe(subscriberName)
     }
     @IBAction func handleBack(_ sender: Any) {
-        self.dismiss(animated: false, completion: nil)
+        //self.dismiss(animated: false, completion: nil)
     }
     
     func setupMapView(withLocation location:CLLocation) {
         let camera = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: 19.0)
-        mapView = GMSMapView.map(withFrame: headerView.bounds, camera: camera)
+        mapView = GMSMapView.map(withFrame: CGRect(x: 0, y: navHeight, width: headerView.bounds.width, height: headerView.bounds.height - navHeight), camera: camera)
         headerView.addSubview(mapView!)
         mapView!.backgroundColor = UIColor.black
         mapView!.isMyLocationEnabled = true
@@ -122,9 +124,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
 
     func sent() {
-        containerRef.cameraView.cameraState = .Initiating
-        containerRef.recordBtn.isHidden = false
-        self.dismiss(animated: true, completion: nil)
+        globalMainInterfaceProtocol?.presentHomeScreen(animated: true)
+        self.navigationController?.popViewController(animated: false)
     }
     
     
@@ -190,6 +191,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             as! SendProfileViewCell
         cell.label.text = likelihoods[indexPath.row].place.name
         cell.subtitle.text = "\(likelihoods[indexPath.row].likelihood)"
+        cell.toggleSelection(false)
         return cell
     }
     

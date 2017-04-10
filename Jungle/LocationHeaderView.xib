@@ -19,12 +19,27 @@
                 <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P7k-eb-ZW2">
                     <rect key="frame" x="113" y="2" width="273" height="60"/>
                     <subviews>
+                        <visualEffectView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mRQ-Ha-L6c">
+                            <rect key="frame" x="0.0" y="0.0" width="273" height="60"/>
+                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="zxM-en-koJ">
+                                <rect key="frame" x="0.0" y="0.0" width="273" height="60"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </view>
+                            <blurEffect style="light"/>
+                        </visualEffectView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NMg-OD-I4X">
                             <rect key="frame" x="86" y="25" width="137" height="21"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
+                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="kAx-cj-TMY">
+                            <rect key="frame" x="33" y="29" width="20" height="20"/>
+                            <constraints>
+                                <constraint firstAttribute="width" secondItem="kAx-cj-TMY" secondAttribute="height" multiplier="1:1" id="Bn0-ZC-tmg"/>
+                                <constraint firstAttribute="height" constant="22" id="Psk-8p-NGj"/>
+                            </constraints>
+                        </activityIndicatorView>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="nearby" translatesAutoresizingMaskIntoConstraints="NO" id="rJo-Qf-aN1">
                             <rect key="frame" x="8" y="8" width="70" height="63"/>
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -36,10 +51,16 @@
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
+                        <constraint firstAttribute="trailing" secondItem="mRQ-Ha-L6c" secondAttribute="trailing" id="0j8-8P-CRu"/>
+                        <constraint firstItem="kAx-cj-TMY" firstAttribute="centerY" secondItem="rJo-Qf-aN1" secondAttribute="centerY" id="2rn-T0-iaC"/>
+                        <constraint firstAttribute="bottom" secondItem="mRQ-Ha-L6c" secondAttribute="bottom" id="60f-fh-Zq4"/>
                         <constraint firstAttribute="trailing" secondItem="NMg-OD-I4X" secondAttribute="trailing" constant="18" id="CEq-Ks-6qN"/>
                         <constraint firstAttribute="bottom" secondItem="NMg-OD-I4X" secondAttribute="bottom" constant="8" id="K30-in-0Qk"/>
                         <constraint firstItem="rJo-Qf-aN1" firstAttribute="centerY" secondItem="NMg-OD-I4X" secondAttribute="centerY" id="KYI-eW-5vl"/>
                         <constraint firstItem="rJo-Qf-aN1" firstAttribute="leading" secondItem="P7k-eb-ZW2" secondAttribute="leading" constant="8" id="L4T-QT-Bji"/>
+                        <constraint firstItem="kAx-cj-TMY" firstAttribute="centerX" secondItem="rJo-Qf-aN1" secondAttribute="centerX" id="QrX-u9-yti"/>
+                        <constraint firstItem="mRQ-Ha-L6c" firstAttribute="top" secondItem="P7k-eb-ZW2" secondAttribute="top" id="Ryx-xE-WPB"/>
+                        <constraint firstItem="mRQ-Ha-L6c" firstAttribute="leading" secondItem="P7k-eb-ZW2" secondAttribute="leading" id="a2x-Qh-Jag"/>
                         <constraint firstItem="NMg-OD-I4X" firstAttribute="leading" secondItem="rJo-Qf-aN1" secondAttribute="trailing" constant="6" id="dri-Cz-pre"/>
                         <constraint firstItem="NMg-OD-I4X" firstAttribute="top" secondItem="P7k-eb-ZW2" secondAttribute="top" constant="8" id="lrB-HR-kD5"/>
                     </constraints>
@@ -51,7 +72,9 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="activityIndicator" destination="kAx-cj-TMY" id="kI4-Ue-OVw"/>
                 <outlet property="locationLabel" destination="NMg-OD-I4X" id="jjc-fb-c6t"/>
+                <outlet property="nearbyIcon" destination="rJo-Qf-aN1" id="2H1-uF-1XI"/>
             </connections>
             <point key="canvasLocation" x="86" y="-249"/>
         </view>

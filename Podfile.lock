@@ -13,6 +13,9 @@ PODS:
   - Firebase/Messaging (3.12.0):
     - Firebase/Core
     - FirebaseMessaging (= 1.2.1)
+  - Firebase/RemoteConfig (3.12.0):
+    - Firebase/Core
+    - FirebaseRemoteConfig (= 1.3.2)
   - Firebase/Storage (3.12.0):
     - Firebase/Core
     - FirebaseStorage (= 1.0.5)
@@ -39,6 +42,12 @@ PODS:
     - GoogleInterchangeUtilities (~> 1.2)
     - GoogleSymbolUtilities (~> 1.1)
     - GoogleToolboxForMac/Logger (~> 2.1)
+  - FirebaseRemoteConfig (1.3.2):
+    - FirebaseAnalytics (~> 3.6)
+    - FirebaseInstanceID (~> 1.0)
+    - GoogleInterchangeUtilities (~> 1.2)
+    - GoogleSymbolUtilities (~> 1.1)
+    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
   - FirebaseStorage (1.0.5):
     - FirebaseAnalytics (~> 3.5)
     - GTMSessionFetcher/Core (~> 1.1)
@@ -80,6 +89,7 @@ DEPENDENCIES:
   - Firebase/Auth
   - Firebase/Database
   - Firebase/Messaging
+  - Firebase/RemoteConfig
   - Firebase/Storage
   - GoogleMaps
   - GooglePlacePicker
@@ -97,6 +107,7 @@ SPEC CHECKSUMS:
   FirebaseDatabase: 6de92187481ff0e8e124064f21742e95ee883b02
   FirebaseInstanceID: ba1e640935235e5fac39dfa816fe7660e72e1a8a
   FirebaseMessaging: acf66347e43c5637c697060c3001d25c809a4131
+  FirebaseRemoteConfig: a03e73abef495c0a0063e2ff461f0c4e8af4b57f
   FirebaseStorage: 5738284835edb57f0e81d4ae5832bb17c1e4b5fa
   GoogleInterchangeUtilities: d5bc4d88d5b661ab72f9d70c58d02ca8c27ad1f7
   GoogleMaps: a5b5bbe47734e2443bde781a6aa64e69fdb6d785
@@ -111,6 +122,6 @@ SPEC CHECKSUMS:
   ReSwift: f0255f4b4f2dacd12c5d97d34d13fc5dad6d6371
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 60356532ba8c1f0db4045a5988859f2f89d7e11b
+PODFILE CHECKSUM: 1d3d8ca62d65aeb21b6225aef9d13282f8e2b12c
 
 COCOAPODS: 1.2.0

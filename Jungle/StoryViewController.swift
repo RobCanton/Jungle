@@ -180,6 +180,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
         let item = items[viewIndex]
         self.item = item
+        
+        print("SET UP ITEM")
+        
+        delegate?.newItem(item)
 
         if item.contentType == .image {
             prepareImageContent(item: item)
@@ -189,11 +193,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
         UserService.getUser(item.authorId, completion: { user in
             if user != nil {
-                let caption = "\(user!.getUsername()) \(item.caption)"
-                let width = self.frame.width - (42 + 50)
+                let caption = "\(user!.getUsername())\n\(item.caption)"
+                let width = self.frame.width - (42 + 64)
                 var size:CGFloat = 8.0 + 25 + 2
                 
-                size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
+                size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8 + 20
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
                 self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
@@ -373,10 +377,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         if !keyboardUp {
            looping = false
         }
+        
     }
     
     func pauseStory() {
         looping = true
+        killTimer()
     }
     
     func focusItem() {
@@ -491,6 +497,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         delegate?.showComments()
         commentsActive = true
         pauseStory()
+        fadeOutDetails()
+    }
+    
+    func fadeOutDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 0
             self.progressBar?.alpha = 0
@@ -504,6 +514,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             self.progressBar?.alpha = 1
             self.headerView.alpha = 1
         })
+    }
+    
+    func setDetailFade(_ alpha:CGFloat) {
+        self.footerView.alpha = alpha
+        self.progressBar?.alpha = alpha
+        self.headerView.alpha = alpha
     }
     
     public lazy var content: UIImageView = {

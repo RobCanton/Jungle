@@ -213,6 +213,11 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
 }
 
 extension GalleryViewController: PopupProtocol {
+    
+    func newItem(_ item: StoryItem) {
+        
+    }
+    
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pauseVideo()
         getCurrentCell()?.destroyVideoPlayer()

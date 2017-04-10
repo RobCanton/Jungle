@@ -183,8 +183,6 @@ class ProfileHeaderView: UICollectionReusableView {
     
     
     func setPostsCount(_ count:Int) {
-        guard let user = user else { return }
-        
         if count == 1 {
             postsLabel.styleProfileBlockText(count: count, text: "post", color: UIColor.gray, color2: UIColor.black)
             
@@ -195,8 +193,6 @@ class ProfileHeaderView: UICollectionReusableView {
     
     
     func setFollowersCount(_ count:Int) {
-        guard let user = user else { return }
-
         if count == 1 {
             followersLabel.styleProfileBlockText(count: count, text: "follower", color: UIColor.gray, color2: UIColor.black)
 
@@ -206,7 +202,6 @@ class ProfileHeaderView: UICollectionReusableView {
     }
     
     func setFollowingCount(_ count:Int) {
-        guard let user = user else { return }
         followingLabel.styleProfileBlockText(count: count, text: "following", color: UIColor.gray, color2: UIColor.black)
     }
     

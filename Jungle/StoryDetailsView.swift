@@ -13,6 +13,7 @@ class StoryDetailsView: UIView {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var captionLabel: UILabel!
 
+    @IBOutlet weak var usenameLabel: UILabel!
     @IBOutlet weak var commentsLabel: UILabel!
     
     @IBOutlet weak var likeButton: UIButton!
@@ -53,27 +54,29 @@ class StoryDetailsView: UIView {
         likeButton.isHidden = false
         
         let username = user.getUsername()
-        let str = "\(username) \(item.caption)"
-        
+        usenameLabel.text = username
+        captionLabel.text = item.caption
+//        let str = item.caption
+//        
         imageView.loadImageAsync(user.getImageUrl(), completion: nil)
-        
-        
-        let attributes: [String: AnyObject] = [
-            NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightLight)
-        ]
-        
-        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
-        
-        if let range = str.range(of: username) {// .rangeOfString(countStr) {
-            let index = str.distance(from: str.startIndex, to: range.lowerBound)//str.startIndex.distance(fromt:range.lowerBound)
-            let a: [String: AnyObject] = [
-                NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightBold),
-            ]
-            title.addAttributes(a, range: NSRange(location: index, length: username.characters.count))
-        }
-        
-        
-        captionLabel.attributedText = title
+//        
+//        
+//        let attributes: [String: AnyObject] = [
+//            NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightLight)
+//        ]
+//        
+//        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+//        
+//        if let range = str.range(of: username) {// .rangeOfString(countStr) {
+//            let index = str.distance(from: str.startIndex, to: range.lowerBound)//str.startIndex.distance(fromt:range.lowerBound)
+//            let a: [String: AnyObject] = [
+//                NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightBold),
+//            ]
+//            title.addAttributes(a, range: NSRange(location: index, length: username.characters.count))
+//        }
+//        
+//        
+//        captionLabel.attributedText = title
         setCommentsLabel(numLikes: item.likes.count,numComments: item.comments.count)
         
     }

@@ -37,6 +37,7 @@ class ProgressIndicator: UIView {
     
     func startAnimating(duration:Double) {
         removeAnimation()
+        paused = false
         let animation = CABasicAnimation(keyPath: "bounds.size.width")
         animation.duration = duration
         animation.fromValue = progress.bounds.width
@@ -44,6 +45,7 @@ class ProgressIndicator: UIView {
         animation.fillMode = kCAFillModeForwards
         animation.isRemovedOnCompletion = false
         
+        progress.layer.speed = 1.0
         progress.layer.anchorPoint = CGPoint(x: 0,y: 0.5)
         progress.layer.add(animation, forKey: "bounds")
     }

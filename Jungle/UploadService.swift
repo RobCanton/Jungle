@@ -393,12 +393,17 @@ class UploadService {
                         let commentsDict = dict["comments"] as! [String:AnyObject]
                         for (key, object) in commentsDict {
                             let key = key
-                            let author = object["author"] as! String
-                            let text = object["text"] as! String
-                            let timestamp = object["timestamp"] as! Double
+                            print("OBJECT")
+                            print(object)
                             
-                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                            comments.append(comment)
+                            let author = object.value(forKey: "author") as? String
+                            let text = object.value(forKey: "text") as? String
+                            let timestamp = object.value(forKey: "timestamp") as? Double
+                            
+                            if author != nil && text != nil && timestamp != nil {
+                                let comment = Comment(key: key, author: author!, text: text!, timestamp: timestamp!)
+                                comments.append(comment)
+                            }
                         }
                     }
                     
