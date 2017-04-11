@@ -455,7 +455,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
         contentView.addSubview(headerView)
-        contentView.addSubview(footerView)
+        //contentView.addSubview(footerView)
         
         footerTapped = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
         footerView.isUserInteractionEnabled = true

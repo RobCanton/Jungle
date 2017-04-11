@@ -16,12 +16,15 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var storyRef:StoryViewController?
     var postRef:PostViewController?
     var item:StoryItem!
+    var scrollViewRef:UIScrollView!
     
     var tableView:UITableView!
     
     var closeButton:UIBarButtonItem!
     var a:UIBarButtonItem!
     var navHeight:CGFloat!
+    
+    var header:CommentsHeaderView!
     
     var commentBar:CommentBar!
     
@@ -32,43 +35,36 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var shouldShowKeyboard:Bool = false
     
+    var headerCell: CommentCell!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.automaticallyAdjustsScrollViewInsets = false
         navHeight = 44.0 + 20.0
 
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        let closeButton = UIBarButtonItem(image: UIImage(named:"delete"), style: .plain, target: self, action: #selector(dismissHandle))
-        closeButton.tintColor = UIColor.white
-        navigationItem.leftBarButtonItem = closeButton
-        
-        let likeButton = UIBarButtonItem(image: UIImage(named:"like"), style: .plain, target: self, action: nil)
-        likeButton.tintColor = UIColor.white
-        navigationItem.rightBarButtonItem = likeButton
-        
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         blurView.frame = view.bounds
-        view.addSubview(blurView)
         
-        let animator = UIViewPropertyAnimator(duration: 1.0, curve: .easeOut, animations: {
-            blurView.effect = nil
-        })
+        view.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
+
+        header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
+        header.frame = CGRect(x: 0, y: 0 , width: view.frame.width, height: navHeight)
+        header.closeHandler = handleDismiss
+        view.addSubview(header)
         
-        view.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
-        
-        tableView = UITableView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - 0))
+        tableView = UITableView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
         let nib = UINib(nibName: "CommentCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "commentCell")
 //        tableView.delegate = self
 //        tableView.dataSource = self
         
-        let header = nib.instantiate(withOwner: nil, options: nil)[0] as! CommentCell
+        headerCell = nib.instantiate(withOwner: nil, options: nil)[0] as! CommentCell
         //header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
-        tableView.separatorColor = UIColor(white: 0.1, alpha: 0)
+        tableView.separatorColor = UIColor(white: 1.0, alpha: 0.20)
         tableView.separatorInset = UIEdgeInsets.zero
         tableView.backgroundColor = UIColor.clear//(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
-        tableView.tableHeaderView = header
+        tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
         //tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 74))
@@ -103,6 +99,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     func setupItem(_ item: StoryItem) {
         self.item = item
         
+        header.setUserInfo(uid: item.getAuthorId())
+        /*
         if item.caption != "" {
             captionComment = Comment(key: "\(item.getKey())-caption", author: item.authorId, text: item.caption, timestamp: item.dateCreated.timeIntervalSince1970 * 1000)
         }
@@ -110,8 +108,15 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         self.comments = item.comments
         
         if captionComment != nil {
-            self.comments.insert(captionComment!, at: 0)
-        }
+            if comments.count > 0 {
+                let first = self.comments[0]
+                if first.getKey() != captionComment!.getKey() {
+                    self.comments.insert(captionComment!, at: 0)
+                }
+            }
+        }*/
+        
+        self.comments = item.comments
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -172,16 +177,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         postRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
     }
     
-    func dismissHandle() {
-
-        storyRef?.fadeInDetails()
-        storyRef?.commentsActive = false
-        storyRef?.resumeStory()
-        
-        postRef?.fadeInDetails()
-        postRef?.commentsActive = false
-
-        self.dismiss(animated: true, completion: nil)
+    func handleDismiss() {
+        if scrollViewRef.isScrollEnabled {
+            scrollViewRef.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        } else {
+            commentBar.textField.resignFirstResponder()
+        }
     }
     
     func authorTitleTapped(sender:UITapGestureRecognizer) {
@@ -194,7 +195,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
         let controller = UserProfileViewController()
         controller.uid = uid
-        self.navigationController?.pushViewController(controller, animated: true)
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
 
@@ -210,9 +211,9 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         let comment = comments[indexPath.row]
         let text = comment.getText()
-        let width = tableView.frame.width - (12 + 10 + 10 + 32)
+        let width = tableView.frame.width - (12 + 12 + 10 + 32)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 26 + 14 + 2  // +8 for some bio padding
+        let height2 = size.height + 26 + 14 + 2 + 6  // +8 for some bio padding
         return height2
     }
     
@@ -221,6 +222,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
         cell.setContent(comment: comments[indexPath.row])
         cell.authorTapped = showUser
+        let labelX = cell.authorLabel.frame.origin.x
+        cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
         return cell
     }
     
@@ -234,6 +237,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         let info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
 
+        scrollViewRef.isScrollEnabled = false
+        
         self.commentBar.sendButton.isEnabled = true
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
@@ -258,6 +263,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
 
         self.commentBar.sendButton.isEnabled = false
 
+        scrollViewRef.isScrollEnabled = true
+        
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             
             let height = self.view.frame.height

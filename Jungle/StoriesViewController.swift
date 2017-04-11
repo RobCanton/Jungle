@@ -148,6 +148,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView.delegate = self
         
         commentsViewController = CommentsViewController()
+        commentsViewController.scrollViewRef = self.scrollView
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
         
         
@@ -276,6 +277,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         if let cell = getCurrentCell() {
             cell.setForPlay()
+            if let item = cell.item {
+                commentsViewController.setupItem(item)
+            }
         }
     }
     
@@ -506,10 +510,14 @@ extension StoriesViewController: UIScrollViewDelegate {
                 cell.resumeStory()
             }
             let alpha = 1 - yOffset/view.frame.height
-            cell.setDetailFade(alpha * alpha * alpha * alpha * alpha)
-            collectionView.alpha = 0.65 + 0.35 * alpha
-            //animator.fractionComplete = alpha
+            let multiple = alpha * alpha * alpha * alpha * alpha
+            cell.setDetailFade(multiple)
+            collectionView.alpha = 0.5 + 0.5 * alpha
         }
+    }
+    
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        scrollViewDidEndDecelerating(scrollView)
     }
     
 }

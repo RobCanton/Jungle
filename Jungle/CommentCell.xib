@@ -66,11 +66,11 @@
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="6WB-zi-X86" secondAttribute="top" id="oYp-xV-tVw"/>
                     <constraint firstAttribute="leadingMargin" secondItem="6WB-zi-X86" secondAttribute="leading" id="uJx-2D-0u4"/>
                     <constraint firstAttribute="trailing" secondItem="J7m-wK-Gyg" secondAttribute="trailing" constant="10" id="uOR-Di-PzB"/>
-                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="10" id="vMx-7K-LRz"/>
-                    <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="vTq-Ac-A1J"/>
-                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="29" id="xmw-ve-WBR"/>
-                    <constraint firstAttribute="bottom" secondItem="J7m-wK-Gyg" secondAttribute="bottom" constant="5" id="z3o-cj-mYL"/>
-                    <constraint firstItem="K8S-yc-OWp" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="10" id="zvp-U4-LBg"/>
+                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="12" id="vMx-7K-LRz"/>
+                    <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="vTq-Ac-A1J"/>
+                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="31" id="xmw-ve-WBR"/>
+                    <constraint firstAttribute="bottom" secondItem="J7m-wK-Gyg" secondAttribute="bottom" constant="8" id="z3o-cj-mYL"/>
+                    <constraint firstItem="K8S-yc-OWp" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="12" id="zvp-U4-LBg"/>
                 </constraints>
                 <variation key="default">
                     <mask key="constraints">

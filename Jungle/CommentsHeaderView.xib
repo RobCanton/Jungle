@@ -13,27 +13,27 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="CommentsHeaderView" customModule="Jungle" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="476" height="47"/>
+            <rect key="frame" x="0.0" y="0.0" width="476" height="64"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DVW-eO-p6v">
-                    <rect key="frame" x="0.0" y="0.0" width="47" height="47"/>
+                    <rect key="frame" x="0.0" y="0.0" width="64" height="64"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="DVW-eO-p6v" secondAttribute="height" multiplier="1:1" id="a0a-MJ-q9C"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <state key="normal" image="delete">
+                    <state key="normal" image="down_arrow">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
                         <action selector="handleClose:" destination="iN0-l3-epB" eventType="touchUpInside" id="BQt-V4-5bi"/>
                     </connections>
                 </button>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wc6-eQ-kGb">
-                    <rect key="frame" x="0.0" y="46" width="476" height="1"/>
+                <view alpha="0.20000000000000001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wc6-eQ-kGb">
+                    <rect key="frame" x="0.0" y="63" width="476" height="1"/>
                     <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="1" id="poA-6J-RbR"/>
+                        <constraint firstAttribute="height" constant="0.5" id="poA-6J-RbR"/>
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P53-W6-4P1">
@@ -53,7 +53,7 @@
                     <rect key="frame" x="103" y="0.0" width="271" height="47"/>
                     <subviews>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KTU-3D-Wq8">
-                            <rect key="frame" x="8" y="16" width="15" height="15"/>
+                            <rect key="frame" x="8" y="16" width="32" height="32"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="KTU-3D-Wq8" secondAttribute="height" multiplier="1:1" id="oQs-oQ-oxI"/>
                             </constraints>
@@ -101,7 +101,7 @@
         </view>
     </objects>
     <resources>
-        <image name="delete" width="25" height="25"/>
+        <image name="down_arrow" width="25" height="25"/>
         <image name="more" width="16" height="16"/>
     </resources>
 </document>
