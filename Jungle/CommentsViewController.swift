@@ -26,8 +26,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var header:CommentsHeaderView!
     
-    var commentBar:CommentBar!
-    
     var commentsRef:FIRDatabaseReference?
     var captionComment:Comment?
     
@@ -37,11 +35,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var headerCell: CommentCell!
     
+    var handleDismiss:(()->())!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.automaticallyAdjustsScrollViewInsets = false
         navHeight = 44.0 + 20.0
-
         
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         blurView.frame = view.bounds
@@ -51,13 +50,16 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
         header.frame = CGRect(x: 0, y: 0 , width: view.frame.width, height: navHeight)
         header.closeHandler = handleDismiss
+        header.moreHandler = actionHandler
         view.addSubview(header)
         
-        tableView = UITableView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
+        let containerView = UIView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
+        view.addSubview(containerView)
+        containerView.clipsToBounds = true
+        
+        tableView = UITableView(frame: CGRect(x: 0, y:0, width: containerView.frame.width, height: containerView.frame.height))
         let nib = UINib(nibName: "CommentCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "commentCell")
-//        tableView.delegate = self
-//        tableView.dataSource = self
         
         headerCell = nib.instantiate(withOwner: nil, options: nil)[0] as! CommentCell
         //header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
@@ -67,16 +69,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
         //tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
-        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 74))
+        tableView.tableFooterView = UIView()
         
         
-        self.view.addSubview(tableView)
-        
-        commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
-        commentBar.frame = CGRect(x: 0, y: view.frame.height - 50.0 , width: view.frame.width, height: 50.0)
-        commentBar.textField.delegate = self
-        commentBar.sendHandler = sendComment
-        self.view.addSubview(commentBar)
+        containerView.addSubview(tableView)
     }
     
     override func viewDidLayoutSubviews() {
@@ -85,15 +81,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        
-        if shouldShowKeyboard {
-            commentBar.textField.becomeFirstResponder()
-            shouldShowKeyboard = false
-        }
     }
     
     func setupItem(_ item: StoryItem) {
@@ -177,13 +164,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         postRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
     }
     
-    func handleDismiss() {
-        if scrollViewRef.isScrollEnabled {
-            scrollViewRef.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        } else {
-            commentBar.textField.resignFirstResponder()
-        }
-    }
     
     func authorTitleTapped(sender:UITapGestureRecognizer) {
         showUser(uid: item.getAuthorId())
@@ -232,55 +212,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.deselectRow(at: indexPath, animated: false)
     }
     
-    func keyboardWillAppear(notification: NSNotification){
-
-        let info = notification.userInfo!
-        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-
-        scrollViewRef.isScrollEnabled = false
-        
-        self.commentBar.sendButton.isEnabled = true
-        UIView.animate(withDuration: 0.1, animations: { () -> Void in
-            let height = self.view.frame.height
-            let textViewFrame = self.commentBar.frame
-            let textViewY = height - keyboardFrame.height - textViewFrame.height
-            self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
-
-            self.commentBar.sendButton.alpha = 1.0
-            
-        })
-    }
-    
     func scrollBottom(animated:Bool) {
-        if comments.count > 0 {
-            let lastIndex = IndexPath(row: comments.count-1, section: 0)
-            self.tableView.scrollToRow(at: lastIndex, at: UITableViewScrollPosition.bottom, animated: animated)
-        }
-    }
-
-    
-    func keyboardWillDisappear(notification: NSNotification){
-
-        self.commentBar.sendButton.isEnabled = false
-
-        scrollViewRef.isScrollEnabled = true
-        
-        UIView.animate(withDuration: 0.1, animations: { () -> Void in
-            
-            let height = self.view.frame.height
-            let textViewFrame = self.commentBar.frame
-            let textViewStart = height - textViewFrame.height
-            self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
-
-        })
-        
-    }
-    
-    func sendComment(_ comment: String) {
-        guard let item = self.item else { return }
-        print("SEND COMMENT: \(comment)")
-        UploadService.addComment(post: item, comment: comment)
-        commentBar.textField.resignFirstResponder()
+            if self.comments.count > 0 {
+                let lastIndex = IndexPath(row: self.comments.count-1, section: 0)
+                self.tableView.scrollToRow(at: lastIndex, at: UITableViewScrollPosition.bottom, animated: animated)
+            }
     }
     
     override var prefersStatusBarHidden: Bool {
@@ -288,26 +224,27 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             return false
         }
     }
-
-}
-
-extension CommentsViewController: UITextFieldDelegate {
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let text = textField.text {
-            if !text.isEmpty {
-                textField.text = ""
-                sendComment(text)
-            }
-        }
-        return true
-    }
     
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
+    func actionHandler() {
+        guard let item = self.item else { return }
+        
+        let alert = UIAlertController(title: "Delete post?", message: "This is permanent.", preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            UploadService.deleteItem(item: item, completion: { success in
+                if success {
+                
+                }
+            })
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        self.present(alert, animated: true, completion: nil)
     }
+
 }
+
 
 class tempViewController: UIViewController {
 

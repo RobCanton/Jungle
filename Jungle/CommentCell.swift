@@ -49,8 +49,7 @@ class CommentCell: UITableViewCell {
     
     func setContent(comment:Comment) {
         self.comment = comment
-        userImage.layer.cornerRadius = userImage.frame.width / 2
-        userImage.clipsToBounds = true
+        userImage.cropToCircle()
         
         backgroundColor = UIColor.clear
         backgroundView = nil

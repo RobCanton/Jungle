@@ -54,6 +54,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
         
         globalMainRef?.statusBar(hide: true, animated: false)
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -95,6 +98,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
+    fileprivate var commentBar:CommentBar!
     fileprivate var scrollView:UIScrollView!
     fileprivate var commentsViewController:CommentsViewController!
     override func viewDidLoad() {
@@ -131,8 +135,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
         scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height * 2.0)
         
-        
-        
 //        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
 //        blurView.frame = v2.bounds
 //        v2.addSubview(blurView)
@@ -148,14 +150,19 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView.delegate = self
         
         commentsViewController = CommentsViewController()
-        commentsViewController.scrollViewRef = self.scrollView
+        commentsViewController.handleDismiss = handleDismiss
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
-        
         
         self.addChildViewController(commentsViewController)
         self.scrollView.addSubview(commentsViewController.view)
         commentsViewController.didMove(toParentViewController: self)
         
+        commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
+        commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
+        commentBar.textField.delegate = self
+        commentBar.sendHandler = sendComment
+        
+        self.view.addSubview(commentBar)
         
         label = UILabel(frame: CGRect(x:0,y:0,width:self.view.frame.width,height:100))
         label.textColor = UIColor.white
@@ -295,6 +302,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             return true
         }
     }
+    var shouldScrollToBottom = false
+    
+    var redbar:UIView?
+    var greenBar:UIView?
 }
 
 extension StoriesViewController: PopupProtocol {
@@ -481,12 +492,97 @@ extension StoriesViewController: PopupProtocol {
     }
     
     
+    
+    func sendComment(_ comment: String) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        print("SEND COMMENT: \(comment)")
+        UploadService.addComment(post: item, comment: comment)
+        //shouldScrollToBottom = true
+        commentBar.textField.resignFirstResponder()
+    }
+    
+    func keyboardWillAppear(notification: NSNotification){
+        
+        let info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        
+        scrollView.isScrollEnabled = false
+        
+        self.commentBar.sendButton.isEnabled = true
+        
+        let height = self.view.frame.height
+        let textViewFrame = self.commentBar.frame
+        let textViewY = height - keyboardFrame.height - textViewFrame.height
+        
+        let table = self.commentsViewController.tableView!
+        var tableFrame = table.frame
+        let tableContainerStart:CGFloat = table.superview!.frame.origin.y
+        let tableContentBottom = table.contentSize.height + tableContainerStart
+        print("tableContentBottom: \(tableContentBottom) | textViewY: \(textViewY)")
+        
+        
+        
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+
+            self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
+            
+            self.commentBar.sendButton.alpha = 1.0
+            
+            if tableContentBottom >= tableFrame.height {
+                let diff = tableContentBottom - textViewY
+                let max = min(diff, textViewY)
+                tableFrame.origin.y =  -keyboardFrame.height//tableContainerStart - textViewY//max//textViewY - tableFrame.height - table.superview!.frame.origin.y
+                table.frame = tableFrame
+            }
+            
+        })
+    }
+    
+    
+    func keyboardWillDisappear(notification: NSNotification){
+        
+        self.commentBar.sendButton.isEnabled = false
+        
+        scrollView.isScrollEnabled = true
+        
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            
+            let height = self.view.frame.height
+            let textViewFrame = self.commentBar.frame
+            let textViewStart = height - textViewFrame.height
+            self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
+            
+            let table = self.commentsViewController.tableView!
+            var tableFrame = table.frame
+            tableFrame.origin.y = 0
+            table.frame = tableFrame
+            
+        }, completion: { _ in
+            if self.shouldScrollToBottom {
+                self.shouldScrollToBottom = false
+                self.commentsViewController.scrollBottom(animated: true)
+            }
+        })
+    }
+    
+    func handleDismiss() {
+        if scrollView.isScrollEnabled {
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        } else {
+            commentBar.textField.resignFirstResponder()
+        }
+    }
+    
+    
     func getCurrentCell() -> StoryViewController? {
         if let cell = collectionView.visibleCells.first as? StoryViewController {
             return cell
         }
         return nil
     }
+    
+    
 }
 
 extension StoriesViewController: UIScrollViewDelegate {
@@ -494,11 +590,19 @@ extension StoriesViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView !== self.scrollView { return }
         let yOffset = scrollView.contentOffset.y
+        let alpha = 1 - yOffset/view.frame.height
+        let multiple = alpha * alpha * alpha * alpha * alpha
         
+        let ra = yOffset/view.frame.height
+        let ry = ra * ra
         print("yOffset: \(yOffset)")
         var cFrame = collectionView.frame
         cFrame.origin.y = yOffset
         collectionView.frame = cFrame
+        
+        var barFrame = commentBar.frame
+        barFrame.origin.y = view.frame.height - 50.0 * (ry)
+        commentBar.frame = barFrame
         
         if let cell = getCurrentCell() {
             if yOffset > 0 {
@@ -509,8 +613,7 @@ extension StoriesViewController: UIScrollViewDelegate {
                 cell.setupItem()
                 cell.resumeStory()
             }
-            let alpha = 1 - yOffset/view.frame.height
-            let multiple = alpha * alpha * alpha * alpha * alpha
+            
             cell.setDetailFade(multiple)
             collectionView.alpha = 0.5 + 0.5 * alpha
         }
@@ -520,6 +623,24 @@ extension StoriesViewController: UIScrollViewDelegate {
         scrollViewDidEndDecelerating(scrollView)
     }
     
+}
+
+extension StoriesViewController: UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if let text = textField.text {
+            if !text.isEmpty {
+                textField.text = ""
+                sendComment(text)
+            }
+        }
+        return true
+    }
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        return newLength <= 140 // Bool
+    }
 }
 
 extension StoriesViewController: View2ViewTransitionPresented {

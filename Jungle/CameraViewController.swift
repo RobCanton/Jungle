@@ -43,7 +43,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     var progressTimer : Timer!
     var progress : CGFloat! = 0
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -58,7 +57,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         
         imageCaptureView = UIImageView(frame: view.bounds)
         view.addSubview(imageCaptureView)
-        
+
         cameraState = .Initiating
         
     }
@@ -137,11 +136,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         {
             cameraDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
         }
-        
-        //        let captureTapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AutoFocusGesture))
-        //        captureTapGesture.numberOfTapsRequired = 1
-        //        captureTapGesture.numberOfTouchesRequired = 1
-        //        view.addGestureRecognizer(captureTapGesture)
         
         do {
             
@@ -326,41 +320,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     func endLoopVideo() {
         NotificationCenter.default.removeObserver(NSNotification.Name.AVPlayerItemDidPlayToEndTime, name: nil, object: nil)
     }
-    
-    func switchFlashMode(sender:UIButton!) {
-//        if let avDevice = cameraDevice
-//        {
-//            // check if the device has torch
-//            if avDevice.hasTorch {
-//                // lock your device for configuration
-//                do {
-//                    _ = try avDevice.lockForConfiguration()
-//                } catch {
-//                }
-//                switch flashMode {
-//                case .On:
-//                    
-//                    avDevice.flashMode = .auto
-//                    flashMode = .Auto
-//                    flashButton.setImage(UIImage(named: "flashauto"), for: .normal)
-//                    break
-//                case .Auto:
-//                    avDevice.flashMode = .off
-//                    flashMode = .Off
-//                    flashButton.setImage(UIImage(named: "flashoff"), for: .normal)
-//                    break
-//                case .Off:
-//                    avDevice.flashMode = .on
-//                    flashMode = .On
-//                    flashButton.setImage(UIImage(named: "flashon"), for: .normal)
-//                    break
-//                }
-//                // unlock your device
-//                avDevice.unlockForConfiguration()
-//            }
-//        }
-        
-    }
+   
     
     func switchCamera(sender:UIButton!) {
         switch cameraMode {
@@ -408,8 +368,9 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     }
     
     var animateActivity: Bool!
-    func AutoFocusGesture(RecognizeGesture: UITapGestureRecognizer){
-        let touchPoint: CGPoint = RecognizeGesture.location(in: self.cameraOutputView)
+    func autoFocusGesture(_ gestureRecognizer: UITapGestureRecognizer){
+        print("YAH")
+        let touchPoint: CGPoint = gestureRecognizer.location(in: self.cameraOutputView)
         //GET PREVIEW LAYER POINT
         let convertedPoint = self.previewLayer!.captureDevicePointOfInterest(for: touchPoint)
         
@@ -431,6 +392,39 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
                 device.unlockForConfiguration()
             }
         }
+        
+        let circleContainer = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+        
+        let circle = UIView(frame: circleContainer.bounds)
+        circle.layer.borderColor = UIColor.white.cgColor
+        circle.layer.borderWidth = 1.0
+        circle.cropToCircle()
+        
+        circleContainer.layer.masksToBounds = false
+        circleContainer.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
+        circleContainer.center = touchPoint
+        circleContainer.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
+        circleContainer.alpha = 0.0
+        
+        
+        circleContainer.addSubview(circle)
+        view.addSubview(circleContainer)
+        
+        UIView.animate(withDuration: 0.20, delay: 0.0, options: .curveEaseOut, animations: {
+            circleContainer.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            circleContainer.alpha = 1.0
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.25, delay: 0.25, options: .curveEaseIn, animations: {
+                circleContainer.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+                circleContainer.alpha = 0.0
+            }, completion: { _ in
+                circleContainer.removeFromSuperview()
+            })
+        })
+        
+        
     }
+    
+    
     
 }

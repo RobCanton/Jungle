@@ -37,7 +37,7 @@ extension MainViewController: MainInterfaceProtocol {
     }
 }
 
-class MainViewController: UIViewController, UIScrollViewDelegate {
+class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecognizerDelegate {
 
     fileprivate var gps_service:GPSService!
     
@@ -245,6 +245,13 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         self.screenMode = .Main
         //setToCameraMode()
         
+        flashView.isUserInteractionEnabled = true
+        let autoFocusTap = UITapGestureRecognizer(target: self, action: #selector(yuh))
+        autoFocusTap.numberOfTapsRequired = 1
+        autoFocusTap.numberOfTouchesRequired = 1
+        autoFocusTap.delegate = self
+        scrollView.addGestureRecognizer(autoFocusTap)
+        scrollView.isUserInteractionEnabled = true
         if gps_service == nil {
             gps_service = GPSService(["MapViewController":mapViewController])
             gps_service.startUpdatingLocation()
@@ -267,6 +274,19 @@ class MainViewController: UIViewController, UIScrollViewDelegate {
         }
         textView.resignFirstResponder()
         
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if screenMode == .Camera {
+            return true
+        }
+        return false
+    }
+    
+    
+    func yuh (_ gestureRecognizer: UITapGestureRecognizer) {
+        print("yuh")
+        cameraView.autoFocusGesture(gestureRecognizer)
     }
     
     override func viewDidAppear(_ animated: Bool) {

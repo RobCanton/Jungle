@@ -23,8 +23,7 @@ class UserViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        contentImageView.layer.cornerRadius = contentImageView.frame.width/2
-        contentImageView.clipsToBounds = true
+        contentImageView.cropToCircle()
         
         followButton.layer.cornerRadius = 4.0
         followButton.clipsToBounds = true

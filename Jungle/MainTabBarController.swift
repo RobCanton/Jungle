@@ -22,6 +22,15 @@ class MainTabBarController: UITabBarController, StoreSubscriber{
         self.tabBar.backgroundImage = UIImage()
         self.tabBar.shadowImage = UIImage()
         
+        let tabBarItem1 = tabBar.items![0] as UITabBarItem
+        let tabBarItem2 = tabBar.items![1] as UITabBarItem
+        let tabBarItem4 = tabBar.items![3] as UITabBarItem
+        let tabBarItem5 = tabBar.items![4] as UITabBarItem
+        
+        tabBarItem1.selectedImage = UIImage(named: "home_filled")
+        tabBarItem2.selectedImage = UIImage(named: "message_filled")
+        tabBarItem4.selectedImage = UIImage(named: "notifications_filled")
+        tabBarItem5.selectedImage = UIImage(named: "user_filled")
     }
     
     override func viewWillAppear(_ animated: Bool) {
