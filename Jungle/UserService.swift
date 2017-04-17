@@ -124,10 +124,7 @@ class UserService {
                     completion(nil)
                 }
             }
-            
-            
         }
-        
     }
     
     static func followUser(uid:String) {
@@ -143,15 +140,6 @@ class UserService {
             error, ref in
         })
         
-        let followRequestRef = ref.child("api/requests/social").childByAutoId()
-        followRequestRef.setValue([
-            "type": "FOLLOW",
-            "sender": current_uid,
-            "recipient": uid,
-            "timestamp": [".sv":"timestamp"] as AnyObject
-            ])
-        
-        
         //unblockUser(uid: uid, completionHandler: { success in })
         
         
@@ -166,26 +154,19 @@ class UserService {
         let currentUserRef = ref.child("users/social/following/\(current_uid)/\(uid)")
         currentUserRef.removeValue()
         
-//        let followRequestRef = ref.child("api/requests/social").childByAutoId()
-//        followRequestRef.setValue([
-//            "type": "UNFOLLOW",
-//            "sender": current_uid,
-//            "recipient": uid
-//            ])
     }
     
     static func sendMessage(conversation:Conversation, message:String, uploadKey:String?, completion: ((_ success:Bool)->())?) {
         let messageRef = ref.child("conversations/\(conversation.getKey())/messages").childByAutoId()
         let uid = mainStore.state.userState.uid
         
-        let requestRef = ref.child("api/requests/message").childByAutoId()
-        requestRef.setValue([
-            "conversation": conversation.getKey(),
-            "sender": uid as AnyObject,
-            "recipient": conversation.getPartnerId() as AnyObject,
+        messageRef.setValue([
+            "senderId": uid as AnyObject,
             "text": message as AnyObject,
             "timestamp": [".sv":"timestamp"] as AnyObject
             ])
+        
+        
     }
 
 

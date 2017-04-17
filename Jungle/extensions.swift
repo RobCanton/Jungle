@@ -79,6 +79,11 @@ extension UIView {
         self.layer.shadowRadius = radius
         self.layer.shouldRasterize = shouldRasterize
     }
+    
+    func cropToCircle() {
+        self.layer.cornerRadius = self.frame.width/2
+        self.clipsToBounds = true
+    }
 }
 
 extension Date

@@ -85,8 +85,8 @@ class GPSService: Service, CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         }
         
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest // The accuracy of the location data
-        locationManager.distanceFilter = 0 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
+        locationManager.desiredAccuracy = kCLLocationAccuracyKilometer // The accuracy of the location data
+        locationManager.distanceFilter = 50.0 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
         locationManager.delegate = self
     }
     
@@ -134,6 +134,8 @@ class GPSService: Service, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         
         guard let subscribers = getSubscribers() else { return }
+        
+
         currentAccuracy = location.horizontalAccuracy
         subscribers.forEach { $0.value.horizontalAccuracyUpdated(currentAccuracy) }
         if location.horizontalAccuracy > 100.0 { return }
@@ -144,8 +146,11 @@ class GPSService: Service, CLLocationManagerDelegate {
             subscribers.forEach { $0.value.significantLocationUpdate(location) }
             getCurrentPlaces()
         } else {
+            let age = location.timestamp.timeIntervalSince(lastSignificantLocation!.timestamp)
+            
             let dist = lastSignificantLocation!.distance(from: location)
-            if dist > 25.0 {
+            if age > 3.0 && dist > 25.0 {
+                print("Updating location -> age: \(age) dist: \(dist)")
                 lastSignificantLocation = location
                 subscribers.forEach { $0.value.significantLocationUpdate(location) }
                 getCurrentPlaces()

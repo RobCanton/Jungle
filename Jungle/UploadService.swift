@@ -173,7 +173,7 @@ class UploadService {
                         "length": 6.0
                     ] as [String : Any]
                     
-                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
+                    dataRef.child("meta").setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
@@ -248,7 +248,7 @@ class UploadService {
                         "length": length
                         ] as [String : Any]
                     
-                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
+                    dataRef.child("meta").setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
@@ -357,15 +357,16 @@ class UploadService {
             if snapshot.exists() {
                 
                 let dict = snapshot.value as! [String:AnyObject]
+                let meta = dict["meta"] as! [String:AnyObject]
                 
                 if dict["delete"] == nil {
                     let key = key
-                    guard let authorId       = dict["author"] as? String else { return completion(item) }
-                    guard let caption        = dict["caption"] as? String else { return completion(item) }
-                    guard let locationKey    = dict["placeID"] as? String else { return completion(item) }
-                    guard let downloadUrl    = dict["url"] as? String else { return completion(item) }
+                    guard let authorId       = meta["author"] as? String else { return completion(item) }
+                    guard let caption        = meta["caption"] as? String else { return completion(item) }
+                    guard let locationKey    = meta["placeID"] as? String else { return completion(item) }
+                    guard let downloadUrl    = meta["url"] as? String else { return completion(item) }
                     guard let url            = URL(string: downloadUrl) else { return completion(item) }
-                    guard let contentTypeStr = dict["contentType"] as? String else { return completion(item) }
+                    guard let contentTypeStr = meta["contentType"] as? String else { return completion(item) }
                     
                     var contentType = ContentType.invalid
                     var videoURL:URL?
@@ -373,13 +374,13 @@ class UploadService {
                         contentType = .image
                     } else if contentTypeStr == "video" {
                         contentType = .video
-                        if dict["videoURL"] != nil {
-                            videoURL = URL(string: dict["videoURL"] as! String)!
+                        if meta["videoURL"] != nil {
+                            videoURL = URL(string: meta["videoURL"] as! String)!
                         }
                     }
                     
-                    guard let dateCreated = dict["dateCreated"] as? Double else { return completion(item) }
-                    guard let length      = dict["length"] as? Double else { return completion(item) }
+                    guard let dateCreated = meta["dateCreated"] as? Double else { return completion(item) }
+                    guard let length      = meta["length"] as? Double else { return completion(item) }
                     
                     var viewers = [String:Double]()
                    
@@ -393,9 +394,6 @@ class UploadService {
                         let commentsDict = dict["comments"] as! [String:AnyObject]
                         for (key, object) in commentsDict {
                             let key = key
-                            print("OBJECT")
-                            print(object)
-                            
                             let author = object.value(forKey: "author") as? String
                             let text = object.value(forKey: "text") as? String
                             let timestamp = object.value(forKey: "timestamp") as? Double
@@ -426,15 +424,16 @@ class UploadService {
         let ref = FIRDatabase.database().reference()
         
         let uid = mainStore.state.userState.uid
-
-        let postRef = ref.child("api/requests/comment").childByAutoId()
-        postRef.setValue([
-            "sender": uid,
-            "recipient": post.getAuthorId(),
-            "postKey": post.getKey(),
+        
+        let uploadRef = ref.child("uploads/data/\(post.getKey())/comments").childByAutoId()
+        uploadRef.setValue([
+            "author": uid,
             "text":comment,
             "timestamp":[".sv":"timestamp"]
         ])
+        
+        // TODO
+        // add completion block
     }
     
     static func addView(postKey:String) {

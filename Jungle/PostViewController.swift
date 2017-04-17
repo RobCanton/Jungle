@@ -146,7 +146,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
             }
         })
         
-        headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
+        //headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
         
     
     }

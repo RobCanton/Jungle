@@ -19,7 +19,8 @@ class Listeners {
     fileprivate static var listeningToFollowing = false
     fileprivate static var listeningToConversations = false
     fileprivate static var listeningToNotifications = false
-
+    fileprivate static var listeningToNearbyActivity = false
+    fileprivate static var listeningToFollowingActivity = false
     
     static func stopListeningToAll() {
 
@@ -27,6 +28,8 @@ class Listeners {
         stopListeningToFollowing()
         stopListeningToConversatons()
         stopListeningToNotifications()
+        stopListeningToNearbyActivity()
+        stopListeningToFollowingActivity()
     }
     
    
@@ -141,6 +144,10 @@ class Listeners {
                 }
             })
             
+            notificationsRef.observe(.childRemoved, with: { snapshot in
+                mainStore.dispatch(RemoveNotification(notificationKey: snapshot.key))
+            })
+            
         }
     }
     
@@ -149,6 +156,74 @@ class Listeners {
         let notificationsRef = ref.child("notifications/\(uid)")
         notificationsRef.removeAllObservers()
         listeningToNotifications = false
+    }
+    
+    static func startListeningToNearbyActivity() {
+        if !listeningToNearbyActivity {
+            listeningToNearbyActivity = true
+            let current_uid = mainStore.state.userState.uid
+            
+            let nearbyActivityRef = ref.child("users/feed/nearby/\(current_uid)")
+            nearbyActivityRef.observe(.value, with: { snapshot in
+                var stories = [LocationStory]()
+                if snapshot.exists() {
+                    
+                    for place in snapshot.children {
+                        let placeSnapshot = place as! FIRDataSnapshot
+                        let placeId = placeSnapshot.key
+
+                        if let _postsKeys = placeSnapshot.value as? [String:Double] {
+                            let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                            let story = LocationStory(postKeys: postKeys, locationKey: placeId)
+                            stories.append(story)
+                        }
+                    }
+                }
+                print("New nearby place activity")
+                mainStore.dispatch(SetNearbyPlacesActivity(stories: stories))
+            })
+        }
+    }
+    
+    static func stopListeningToNearbyActivity() {
+        let uid = mainStore.state.userState.uid
+        let nearbyActivityRef = ref.child("notifications/\(uid)")
+        nearbyActivityRef.removeAllObservers()
+        listeningToNearbyActivity = false
+    }
+    
+    static func startListeningToFollowingActivity() {
+        if !listeningToFollowingActivity {
+            listeningToFollowingActivity = true
+            let current_uid = mainStore.state.userState.uid
+            
+            let followingActivityRef = ref.child("users/feed/following/\(current_uid)")
+            followingActivityRef.observe(.value, with: { snapshot in
+                var stories = [UserStory]()
+                if snapshot.exists() {
+                    
+                    for user in snapshot.children {
+                        let userSnapshot = user as! FIRDataSnapshot
+                        let userId = userSnapshot.key
+                        
+                        if let _postsKeys = userSnapshot.value as? [String:Double] {
+                            let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                            let story = UserStory(postKeys: postKeys, uid: userId)
+                            stories.append(story)
+                        }
+                    }
+                }
+                print("New nearby place activity")
+                mainStore.dispatch(SetFollowingActivity(stories: stories))
+            })
+        }
+    }
+    
+    static func stopListeningToFollowingActivity() {
+        let uid = mainStore.state.userState.uid
+        let followingActivityRef = ref.child("notifications/\(uid)")
+        followingActivityRef.removeAllObservers()
+        listeningToFollowingActivity = false
     }
     
     

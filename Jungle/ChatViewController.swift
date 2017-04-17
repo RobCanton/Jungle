@@ -407,24 +407,12 @@ extension ChatViewController {
             let timestamp = dict["timestamp"] as! Double
             
             let date = NSDate(timeIntervalSince1970: timestamp/1000)
-        
-//            if let uploadKey = snapshot.value!["upload"] as? String {
-//                let mediaItem = AsyncPhotoMediaItem(withURL: uploadKey)
-//                let mediaMessage = JSQMessage(senderId: senderId, senderDisplayName: "", date: date, media: mediaItem)
-//                let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date, text: text)
-//                self.messages.append(mediaMessage)
-//                self.messages.append(message)
-//                self.reloadMessagesView()
-//                self.stopActivityIndicator()
-//                self.finishReceivingMessageAnimated(true)
-//                //SocialService.deleteMessage(self.conversation, messageKey: snapshot.key)
-//                
-//            } else {
-                let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
-                self.messages.append(message!)
-                self.reloadMessagesView()
-                self.stopActivityIndicator()
-                self.finishReceivingMessage(animated: true)
+
+            let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
+            self.messages.append(message!)
+            self.reloadMessagesView()
+            self.stopActivityIndicator()
+            self.finishReceivingMessage(animated: true)
             //
         
         })

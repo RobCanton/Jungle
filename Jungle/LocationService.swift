@@ -22,7 +22,7 @@ class LocationService: NSObject {
 
     
     var nearbyLocations = [Location]()
-    var radius = 50
+    var radius = 10000
     
     var delegate:LocationDelegate?
     
@@ -35,20 +35,17 @@ class LocationService: NSObject {
     override init() {
         super.init()
         
-
     }
-    
     
     func requestNearbyLocations(_ latitude:Double, longitude:Double) {
         
         let uid = mainStore.state.userState.uid
-        let apiRef = ref.child("api/requests/location/\(uid)")
+        let apiRef = ref.child("users/location/coordinates/\(uid)")
         apiRef.setValue([
             "lat": latitude,
             "lon": longitude,
             "rad": radius
             ])
-        
     }
     
     func listenToResponses() {
@@ -66,7 +63,6 @@ class LocationService: NSObject {
             }
         })
     }
-    
     
     
     func getLocations(_ locationDict:[String:Double], completion: @escaping (_ locations: [Location]) -> ()) {
@@ -140,7 +136,6 @@ class LocationService: NSObject {
                     let lon          = dict["lon"] as! Double
                     let address      = dict["address"] as! String
                     let coord = CLLocation(latitude: lat, longitude: lon)
-                    
                     
                     location = Location(key: snapshot.key, name: name, address: address, coordinates: coord)
                     dataCache.setObject(location!, forKey: "place-\(locationKey)" as NSString)

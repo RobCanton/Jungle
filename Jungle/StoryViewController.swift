@@ -204,6 +204,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             }
         })
         
+        LocationService.sharedInstance.getLocationInfo(item.getLocationKey(), completion: { location in
+            if location != nil {
+                self.headerView.setupLocation(location: location!)
+            }
+        })
+        
         if let _ = story as? UserStory {
             //headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
         }

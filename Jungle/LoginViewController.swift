@@ -46,6 +46,8 @@ class FirstAuthViewController: FirstViewController {
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
                     Listeners.startListeningToNotifications()
+                    Listeners.startListeningToNearbyActivity()
+                    Listeners.startListeningToFollowingActivity()
                     self.performSegue(withIdentifier: "login", sender: self)
                 } else {
                     self.performSegue(withIdentifier: "toLoginScreen", sender: self)
@@ -109,6 +111,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
                     Listeners.startListeningToNotifications()
+                    Listeners.startListeningToNearbyActivity()
+                    Listeners.startListeningToFollowingActivity()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })

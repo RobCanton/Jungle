@@ -88,6 +88,8 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         
         LocationService.sharedInstance.delegate = self
         LocationService.sharedInstance.listenToResponses()
+        
+        locationStories = mainStore.state.nearbyPlacesActivity
         self.collectionView.reloadData()
         
     }
@@ -129,75 +131,34 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        mainStore.subscribe(self)
+        
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        
     }
     
-    func requestActivity() {
-        let uid = mainStore.state.userState.uid
-        let ref = UserService.ref.child("api/requests/story/\(uid)")
-        ref.setValue(true)
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        mainStore.unsubscribe(self)
     }
     
-    func listenToActivityResponse() {
-        let uid = mainStore.state.userState.uid
-        responseRef = UserService.ref.child("api/responses/story/\(uid)")
-        responseRef?.removeAllObservers()
-        responseRef?.observe(.value, with: { snapshot in
-            var tempStories = [UserStory]()
-            if snapshot.exists() {
-                
-                for user in snapshot.children {
-                    
-                    let userSnap = user as! FIRDataSnapshot
-
-                    if let _postKeys = userSnap.value as? [String:Double] {
-                        let story = UserStory(postKeys: _postKeys.valueKeySorted, uid: userSnap.key)
-                        tempStories.append(story)
-                    }
-                }
-                
-                self.crossCheckStories(tempStories: tempStories)
-                self.responseRef?.removeValue()
-            }
-        })
-    }
-    
-    func crossCheckStories(tempStories:[UserStory]) {
-
-        var mutableStories = tempStories
-        var myStory:UserStory?
-        
-        for i in 0..<tempStories.count {
-            let story = tempStories[i]
-            
-            if story.getUserId() == mainStore.state.userState.uid {
-                myStory = story
-                mutableStories.remove(at: i)
-            }
-        }
-        
-        if myStory != nil {
-            mutableStories.insert(myStory!, at: 0)
-        }
-        
-        self.userStories = mutableStories
-        self.collectionView.reloadData()
-        //getHeader()?.setupStories(_userStories: self.userStories)
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     }
     
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("viewDidAppear")
-        requestActivity()
-        listenToActivityResponse()
-        
+        mainStore.subscribe(self)
     }
     
     func newState(state: AppState) {
-
+        locationStories = state.nearbyPlacesActivity
+        locationStories.sort(by: { return $0 > $1})
+        
+        userStories = state.followingActivity
+        userStories.sort(by: { return $0 > $1 })
+        
+        self.collectionView.reloadData()
     }
     
     func changeSort(control: UISegmentedControl) {
@@ -226,8 +187,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
                 
             }
         }
-
-        
     }
     
     func stopRefresher()

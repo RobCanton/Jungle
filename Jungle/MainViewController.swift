@@ -84,7 +84,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     fileprivate lazy var sendButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
         button.setImage(UIImage(named: "send_arrow"), for: .normal)
         button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.75, y: definiteBounds.height - button.frame.height * 0.75)
         button.tintColor = UIColor.white
