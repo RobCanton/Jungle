@@ -60,7 +60,6 @@ class StoryProgressIndicator: UIView {
         if itemIndex >= 0 && itemIndex < storyItems.count {
             activeBarIndex = itemIndex
             
-            
             if activeBarIndex > 0 {
                 for i in 0..<activeBarIndex {
                     progressBars[i].completeAnimation()
@@ -75,23 +74,23 @@ class StoryProgressIndicator: UIView {
             let bar = progressBars[activeBarIndex]
             let item = storyItems[activeBarIndex]
             bar.startAnimating(duration: item.getLength())
-            
         }
     }
     
     func resetActiveIndicator() {
-        if activeBarIndex >= 0 && activeBarIndex < progressBars.count {
-            let bar = progressBars[activeBarIndex]
-            bar.removeAnimation()
-            bar.resetProgress()
-        }
+        getActiveIndicator()?.removeAnimation()
+        getActiveIndicator()?.resetProgress()
     }
     
     func pauseActiveIndicator() {
+        getActiveIndicator()?.pauseAnimation()
+    }
+    
+    private func getActiveIndicator() -> ProgressIndicator? {
         if activeBarIndex >= 0 && activeBarIndex < progressBars.count {
-            let bar = progressBars[activeBarIndex]
-            bar.pauseAnimation()
+            return progressBars[activeBarIndex]
         }
+        return nil
     }
     
     

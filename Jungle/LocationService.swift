@@ -22,28 +22,28 @@ class LocationService: NSObject {
 
     
     var nearbyLocations = [Location]()
-    var radius = 10000
+    var radius = 25
     
     var delegate:LocationDelegate?
+    var gps_service:GPSService?
     
     static let sharedInstance : LocationService = {
         let instance = LocationService()
         return instance
     }()
 
-    
     override init() {
         super.init()
-        
     }
     
-    func requestNearbyLocations(_ latitude:Double, longitude:Double) {
+    func requestNearbyLocations() {
         
+        guard let lastLocation = gps_service?.getLastLocation() else { return }
         let uid = mainStore.state.userState.uid
         let apiRef = ref.child("users/location/coordinates/\(uid)")
         apiRef.setValue([
-            "lat": latitude,
-            "lon": longitude,
+            "lat": lastLocation.coordinate.latitude,
+            "lon": lastLocation.coordinate.longitude,
             "rad": radius
             ])
     }
@@ -155,7 +155,7 @@ class LocationService: NSObject {
 
             if let _postsKeys = snapshot.value as? [String:Double] {
                 let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                story = LocationStory(postKeys: postKeys, locationKey: locationKey)
+                story = LocationStory(postKeys: postKeys, locationKey: locationKey, distance: 0)
             }
             completon(story)
         })

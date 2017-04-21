@@ -39,7 +39,6 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         self.addNavigationBarBackdrop()
         title = "Post To..."
         self.navigationController?.navigationBar.titleTextAttributes = [ NSFontAttributeName: UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightSemibold)]
-        self.navigationController?.navigationBar.tintColor = accentColor
         sendView.backgroundColor = UIColor.clear
 
         let gradient = CAGradientLayer()

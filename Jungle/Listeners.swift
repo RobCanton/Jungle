@@ -168,15 +168,28 @@ class Listeners {
                 var stories = [LocationStory]()
                 if snapshot.exists() {
                     
+                    
+                    
                     for place in snapshot.children {
                         let placeSnapshot = place as! FIRDataSnapshot
                         let placeId = placeSnapshot.key
-
-                        if let _postsKeys = placeSnapshot.value as? [String:Double] {
-                            let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                            let story = LocationStory(postKeys: postKeys, locationKey: placeId)
-                            stories.append(story)
+                        if let object = placeSnapshot.value as? [String:AnyObject] {
+                            print("OBJECT: \(object)")
+                            let distance = object["distance"] as! Double
+                            if let _postsKeys = object["posts"]  as? [String:Double] {
+                                let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                                let story = LocationStory(postKeys: postKeys, locationKey: placeId, distance: distance)
+                                stories.append(story)
+                            }
                         }
+                        
+                        /*let distance = placeSnapshot.value(forKey: "distance") as! Double
+
+                        if let _postsKeys = placeSnapshot.value(forKey: "posts")  as? [String:Double] {
+                            let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                            let story = LocationStory(postKeys: postKeys, locationKey: placeId, distance: distance)
+                            stories.append(story)
+                        }*/
                     }
                 }
                 print("New nearby place activity")

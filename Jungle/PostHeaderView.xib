@@ -4,7 +4,6 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -30,14 +29,6 @@
                         <action selector="moreTapped:" destination="gtv-pI-kcX" eventType="touchUpInside" id="ZU7-Ta-w79"/>
                     </connections>
                 </button>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KFe-EG-hp3">
-                    <rect key="frame" x="8" y="8" width="32" height="32"/>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="width" secondItem="KFe-EG-hp3" secondAttribute="height" multiplier="1:1" id="IID-rk-RAK"/>
-                        <constraint firstAttribute="height" constant="32" id="TCl-Co-hDE"/>
-                    </constraints>
-                </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YyZ-bC-fc4">
                     <rect key="frame" x="48" y="14" width="118" height="21"/>
                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="16"/>
@@ -56,17 +47,35 @@
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9h5-nk-yFJ">
+                    <rect key="frame" x="8" y="8" width="32" height="32"/>
+                    <subviews>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KFe-EG-hp3">
+                            <rect key="frame" x="0.0" y="0.0" width="32" height="32"/>
+                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
+                        </imageView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="KFe-EG-hp3" firstAttribute="leading" secondItem="9h5-nk-yFJ" secondAttribute="leading" id="2uP-If-fwt"/>
+                        <constraint firstAttribute="bottom" secondItem="KFe-EG-hp3" secondAttribute="bottom" id="FgU-aM-nqM"/>
+                        <constraint firstAttribute="trailing" secondItem="KFe-EG-hp3" secondAttribute="trailing" id="WRH-ZD-SWW"/>
+                        <constraint firstItem="KFe-EG-hp3" firstAttribute="top" secondItem="9h5-nk-yFJ" secondAttribute="top" id="ieY-zE-fQM"/>
+                        <constraint firstAttribute="width" secondItem="9h5-nk-yFJ" secondAttribute="height" multiplier="1:1" id="qpe-ds-Wwm"/>
+                        <constraint firstAttribute="height" constant="32" id="qr3-8d-ThY"/>
+                    </constraints>
+                </view>
             </subviews>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="ajY-fM-Bhn" secondAttribute="trailing" id="3SH-CC-oo9"/>
-                <constraint firstItem="UG1-Az-r6Z" firstAttribute="leading" secondItem="KFe-EG-hp3" secondAttribute="trailing" constant="8" id="A1Z-7R-MqC"/>
-                <constraint firstItem="ift-dx-w2j" firstAttribute="leading" secondItem="YyZ-bC-fc4" secondAttribute="trailing" constant="8" id="EjL-AB-CXD"/>
+                <constraint firstItem="YyZ-bC-fc4" firstAttribute="top" secondItem="9h5-nk-yFJ" secondAttribute="top" id="5PS-MC-y47"/>
+                <constraint firstItem="ift-dx-w2j" firstAttribute="leading" secondItem="YyZ-bC-fc4" secondAttribute="trailing" constant="8" id="5b5-ze-zgO"/>
+                <constraint firstItem="9h5-nk-yFJ" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="8" id="OnS-Mx-uwM"/>
+                <constraint firstItem="ift-dx-w2j" firstAttribute="centerY" secondItem="YyZ-bC-fc4" secondAttribute="centerY" id="V5k-AS-dXw"/>
                 <constraint firstItem="ajY-fM-Bhn" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" id="VC9-yt-EhV"/>
-                <constraint firstItem="KFe-EG-hp3" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="8" id="a9E-o4-v2V"/>
-                <constraint firstItem="YyZ-bC-fc4" firstAttribute="top" secondItem="KFe-EG-hp3" secondAttribute="top" id="fsc-Sr-6bp"/>
-                <constraint firstItem="YyZ-bC-fc4" firstAttribute="leading" secondItem="KFe-EG-hp3" secondAttribute="trailing" constant="8" id="kdu-hs-xX3"/>
-                <constraint firstItem="ift-dx-w2j" firstAttribute="centerY" secondItem="YyZ-bC-fc4" secondAttribute="centerY" id="mEJ-5c-yux"/>
-                <constraint firstItem="KFe-EG-hp3" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8" id="rTI-YT-4GV"/>
+                <constraint firstItem="UG1-Az-r6Z" firstAttribute="leading" secondItem="9h5-nk-yFJ" secondAttribute="trailing" constant="8" id="XBP-HE-wnv"/>
+                <constraint firstItem="9h5-nk-yFJ" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8" id="Xi3-JZ-qH1"/>
+                <constraint firstItem="YyZ-bC-fc4" firstAttribute="leading" secondItem="9h5-nk-yFJ" secondAttribute="trailing" constant="8" id="dc5-vC-NHb"/>
                 <constraint firstItem="UG1-Az-r6Z" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="1" id="vAf-XC-Qoj"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>

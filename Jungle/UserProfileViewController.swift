@@ -108,7 +108,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         self.status = checkFollowingStatus(uid: uid)
         UserService.getUser(uid, completion: { user in
-            if user != nil {
+            if user != nil && self.user == nil {
                 self.user = user
                 //self.title = self.user!.getUsername()
                 self.collectionView.reloadData()
@@ -277,16 +277,12 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        let post = posts[indexPath.item]
-        cell.nameLabel.isHidden = true
-        cell.timeLabel.isHidden = true
-        cell.imageView.loadImageAsync(post.getDownloadUrl().absoluteString, completion: nil)
+        cell.setupUserCell(posts[indexPath.item])
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
-        print("AYE")
         self.selectedIndexPath = indexPath
         
         let galleryViewController: GalleryViewController = GalleryViewController()

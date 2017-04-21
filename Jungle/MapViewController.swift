@@ -87,7 +87,7 @@ extension MapViewController: GPSServiceProtocol {
     }
     
     func significantLocationUpdate(_ location: CLLocation) {
-        LocationService.sharedInstance.requestNearbyLocations(location.coordinate.latitude, longitude: location.coordinate.longitude)
+        LocationService.sharedInstance.requestNearbyLocations()
     }
     
     func nearbyPlacesUpdate(_ likelihoods: [GMSPlaceLikelihood]) {

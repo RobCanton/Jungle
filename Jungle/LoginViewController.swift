@@ -42,6 +42,7 @@ class FirstAuthViewController: FirstViewController {
                 self.authFetched = true
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
+                    UserService.sendFCMToken()
                     Listeners.startListeningToFollowers()
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
@@ -107,6 +108,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             UserService.getUser(user.uid, completion: { user in
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
+                    UserService.sendFCMToken()
                     Listeners.startListeningToFollowers()
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()

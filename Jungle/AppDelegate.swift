@@ -11,13 +11,14 @@ import GooglePlaces
 import Firebase
 import ReSwift
 import AVFoundation
+import UserNotifications
 
 //UIColor(red: 15/255, green: 226/255, blue: 117/255, alpha: 1.0) //#0fe275
 //let lightAccentColor = UIColor(red: 220/266, green: 227/255, blue: 91/255, alpha: 1.0)
 //let darkAccentColor = UIColor(red: 69/266, green: 182/255, blue: 73/255, alpha: 1.0)
 let lightAccentColor = UIColor(red: 140/266, green: 216/255, blue: 86/255, alpha: 1.0)
 let darkAccentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)
-
+let photoCellColorAlpha:CGFloat = 0.7
 
 let accentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
@@ -56,8 +57,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             //print(error.localizedDescription)
         }
         
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]){
+                (granted,error) in
+                if granted{
+                    application.registerForRemoteNotifications()
+                } else {
+                    print("User Notification permission denied: \(error?.localizedDescription)")
+                }
+                
+            }
+        } else {
+            // Fallback on earlier versions
+            UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.sound, .alert, .badge], categories: nil))
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+        
         return true
     }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        //TODO: Add code here later to deal with tokens.
+    }
+    
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+        
+    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    }
+    
     
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

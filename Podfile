@@ -20,4 +20,6 @@ pod 'View2ViewTransition'
 pod 'ReSwift', '3.0.0'
 pod 'JSQMessagesViewController'
 pod 'NVActivityIndicatorView'
+pod 'TGPControls'
+pod 'TwicketSegmentedControl'
 end

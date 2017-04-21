@@ -139,7 +139,7 @@ class UploadService {
         if upload.image == nil { return }
         
         let ref = FIRDatabase.database().reference()
-        let dataRef = ref.child("uploads/data").childByAutoId()
+        let dataRef = ref.child("uploads/meta").childByAutoId()
         let postKey = dataRef.key
         
         let uid = mainStore.state.userState.uid
@@ -173,7 +173,7 @@ class UploadService {
                         "length": 6.0
                     ] as [String : Any]
                     
-                    dataRef.child("meta").setValue(obj, withCompletionBlock: { error, _ in
+                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
@@ -213,7 +213,7 @@ class UploadService {
         let url = upload.videoURL!
         
         let ref = FIRDatabase.database().reference()
-        let dataRef = ref.child("uploads/data").childByAutoId()
+        let dataRef = ref.child("uploads/meta").childByAutoId()
         let postKey = dataRef.key
         
         completion(true)
@@ -248,7 +248,7 @@ class UploadService {
                         "length": length
                         ] as [String : Any]
                     
-                    dataRef.child("meta").setValue(obj, withCompletionBlock: { error, _ in
+                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
                             let updateValues: [String : Any] = [
@@ -349,7 +349,7 @@ class UploadService {
         }
         
         let ref = FIRDatabase.database().reference()
-        let postRef = ref.child("uploads/data/\(key)")
+        let postRef = ref.child("uploads/meta/\(key)")
         
         postRef.observeSingleEvent(of: .value, with: { snapshot in
             
@@ -357,16 +357,15 @@ class UploadService {
             if snapshot.exists() {
                 
                 let dict = snapshot.value as! [String:AnyObject]
-                let meta = dict["meta"] as! [String:AnyObject]
                 
                 if dict["delete"] == nil {
                     let key = key
-                    guard let authorId       = meta["author"] as? String else { return completion(item) }
-                    guard let caption        = meta["caption"] as? String else { return completion(item) }
-                    guard let locationKey    = meta["placeID"] as? String else { return completion(item) }
-                    guard let downloadUrl    = meta["url"] as? String else { return completion(item) }
+                    guard let authorId       = dict["author"] as? String else { return completion(item) }
+                    guard let caption        = dict["caption"] as? String else { return completion(item) }
+                    guard let locationKey    = dict["placeID"] as? String else { return completion(item) }
+                    guard let downloadUrl    = dict["url"] as? String else { return completion(item) }
                     guard let url            = URL(string: downloadUrl) else { return completion(item) }
-                    guard let contentTypeStr = meta["contentType"] as? String else { return completion(item) }
+                    guard let contentTypeStr = dict["contentType"] as? String else { return completion(item) }
                     
                     var contentType = ContentType.invalid
                     var videoURL:URL?
@@ -374,13 +373,13 @@ class UploadService {
                         contentType = .image
                     } else if contentTypeStr == "video" {
                         contentType = .video
-                        if meta["videoURL"] != nil {
-                            videoURL = URL(string: meta["videoURL"] as! String)!
+                        if dict["videoURL"] != nil {
+                            videoURL = URL(string: dict["videoURL"] as! String)!
                         }
                     }
                     
-                    guard let dateCreated = meta["dateCreated"] as? Double else { return completion(item) }
-                    guard let length      = meta["length"] as? Double else { return completion(item) }
+                    guard let dateCreated = dict["dateCreated"] as? Double else { return completion(item) }
+                    guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     var viewers = [String:Double]()
                    
@@ -390,6 +389,7 @@ class UploadService {
                     }
                     
                     var comments = [Comment]()
+                    /*
                     if snapshot.hasChild("comments") {
                         let commentsDict = dict["comments"] as! [String:AnyObject]
                         for (key, object) in commentsDict {
@@ -403,7 +403,7 @@ class UploadService {
                                 comments.append(comment)
                             }
                         }
-                    }
+                    }*/
                     
                     comments.sort(by: { return $0 < $1 })
                     
@@ -425,7 +425,7 @@ class UploadService {
         
         let uid = mainStore.state.userState.uid
         
-        let uploadRef = ref.child("uploads/data/\(post.getKey())/comments").childByAutoId()
+        let uploadRef = ref.child("uploads/comments/\(post.getKey())").childByAutoId()
         uploadRef.setValue([
             "author": uid,
             "text":comment,
@@ -436,11 +436,13 @@ class UploadService {
         // add completion block
     }
     
-    static func addView(postKey:String) {
+    static func addView(post:StoryItem) {
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid
         
-        let postRef = ref.child("uploads/\(postKey)/views/\(uid)")
+        if uid == post.getAuthorId() { return }
+        
+        let postRef = ref.child("uploads/meta/\(post.getKey())/views/\(uid)")
         postRef.setValue([".sv":"timestamp"])
     }
     
@@ -467,15 +469,11 @@ class UploadService {
         postRef.removeValue()
     }
     
-    static func deleteItem(item:StoryItem, completion:@escaping ((_ success:Bool)->())){
+    static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
         let ref = FIRDatabase.database().reference()
-        let uid = mainStore.state.userState.uid
-        let postRef = ref.child("api/requests/delete").childByAutoId()
-        postRef.setValue([
-            "sender": uid,
-            "postKey": item.getKey()
-            ], withCompletionBlock: { error, ref in
-            completion(error == nil)
+        let postRef = ref.child("uploads/meta/\(item.getKey())")
+        postRef.removeValue(completionBlock: { error, ref in
+            return completion(error == nil)
         })
     }
     

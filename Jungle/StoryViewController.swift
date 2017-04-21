@@ -41,6 +41,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
        
     }
     
+    func showAuthor() {
+        guard let item = self.item else { return }
+        delegate?.showUser(item.getAuthorId())
+    }
+    
     func handleFooterAction(_ like: Bool?) {
         guard let item = self.item else { return }
         if let like = like {
@@ -199,6 +204,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                 size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8 + 20
                 
                 self.headerView.setup(withUser: user!, optionsHandler: self.delegate?.showOptions)
+                self.headerView.showAuthorHandler = self.showAuthor
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
                 self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
             }
@@ -210,12 +216,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             }
         })
         
-        if let _ = story as? UserStory {
-            //headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
-        }
-        
         let current_uid = mainStore.state.userState.uid
         footerView.setLikedStatus(item.likes[current_uid] != nil, animated: false)
+        UploadService.addView(post: item)
      
     }
 

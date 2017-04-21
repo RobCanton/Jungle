@@ -24,11 +24,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/CommentsViewController.swift"
-            timestampString = "513663272.135554"
+            timestampString = "514456762.046457"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "60"
-            endingLineNumber = "60"
+            startingLineNumber = "61"
+            endingLineNumber = "61"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -215,44 +215,74 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Jungle/PlacesViewController.swift"
-            timestampString = "514093901.100232"
+            filePath = "Jungle/PlacesTabHeader.swift"
+            timestampString = "514244365.763113"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "189"
-            endingLineNumber = "189"
-            landmarkName = "changeSort(control:)"
-            landmarkType = "7">
+            startingLineNumber = "17"
+            endingLineNumber = "17"
+            landmarkName = "PlacesTabHeader"
+            landmarkType = "3">
             <Locations>
                <Location
-                  shouldBeEnabled = "No"
+                  shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "Jungle.PlacesViewController.changeSort (control : __ObjC.UISegmentedControl) -&gt; ()"
+                  symbolName = "Jungle.PlacesTabHeader.sortHandler.getter : Swift.Optional&lt;() -&gt; ()&gt;"
                   moduleName = "Jungle"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesViewController.swift"
-                  timestampString = "514076464.585158"
+                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesTabHeader.swift"
+                  timestampString = "514233035.232807"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "228"
-                  endingLineNumber = "228"
-                  offsetFromSymbolStart = "528">
+                  startingLineNumber = "17"
+                  endingLineNumber = "17"
+                  offsetFromSymbolStart = "60">
                </Location>
                <Location
-                  shouldBeEnabled = "No"
+                  shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "Jungle.PlacesViewController.(changeSort (control : __ObjC.UISegmentedControl) -&gt; ()).(closure #1)"
+                  symbolName = "Jungle.PlacesTabHeader.sortHandler.setter : Swift.Optional&lt;() -&gt; ()&gt;"
                   moduleName = "Jungle"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesViewController.swift"
-                  timestampString = "514076464.744116"
+                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesTabHeader.swift"
+                  timestampString = "514233035.235089"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "228"
-                  endingLineNumber = "228"
-                  offsetFromSymbolStart = "332">
+                  startingLineNumber = "17"
+                  endingLineNumber = "17"
+                  offsetFromSymbolStart = "108">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Jungle.PlacesTabHeader.init (frame : __C.CGRect) -&gt; Jungle.PlacesTabHeader"
+                  moduleName = "Jungle"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesTabHeader.swift"
+                  timestampString = "514233035.237755"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17"
+                  offsetFromSymbolStart = "208">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Jungle.PlacesTabHeader.init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;Jungle.PlacesTabHeader&gt;"
+                  moduleName = "Jungle"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/robertcanton/Desktop/Jungle/Jungle/PlacesTabHeader.swift"
+                  timestampString = "514233035.240574"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "17"
+                  endingLineNumber = "17"
+                  offsetFromSymbolStart = "200">
                </Location>
             </Locations>
          </BreakpointContent>

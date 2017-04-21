@@ -15,6 +15,7 @@ protocol PopupProtocol {
     func showDeleteOptions()
     func showOptions()
     func showComments()
+    func showUser(_ uid:String)
     func dismissPopup(_ animated:Bool)
 }
 
@@ -43,6 +44,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     var location:Location?
 
     var firstCell = true
+    
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -151,6 +153,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         commentsViewController = CommentsViewController()
         commentsViewController.handleDismiss = handleDismiss
+        commentsViewController.popupDismiss = dismissPopup
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
         
         self.addChildViewController(commentsViewController)
@@ -203,8 +206,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         if cell.commentsActive { return false }
         
-        if let _ = gestureRecognizer as? UITapGestureRecognizer  {
-            return true
+        if let tap = gestureRecognizer as? UITapGestureRecognizer  {
+            let point = tap.location(in: self.view)
+            return point.y > 90.0
         }
         
         
@@ -329,10 +333,9 @@ extension StoriesViewController: PopupProtocol {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
-        let controller = UIViewController()
-        controller.title = title
-        controller.view.backgroundColor = UIColor.white
-        self.navigationController?.pushViewController(controller, animated: true)
+        let controller = UserProfileViewController()
+        controller.uid = uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func showUsersList(_ uids:[String], _ title:String) {
@@ -492,7 +495,6 @@ extension StoriesViewController: PopupProtocol {
     }
     
     
-    
     func sendComment(_ comment: String) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
@@ -591,11 +593,10 @@ extension StoriesViewController: UIScrollViewDelegate {
         if scrollView !== self.scrollView { return }
         let yOffset = scrollView.contentOffset.y
         let alpha = 1 - yOffset/view.frame.height
-        let multiple = alpha * alpha * alpha * alpha * alpha
+        let multiple = alpha * alpha
         
         let ra = yOffset/view.frame.height
         let ry = ra * ra
-        print("yOffset: \(yOffset)")
         var cFrame = collectionView.frame
         cFrame.origin.y = yOffset
         collectionView.frame = cFrame
@@ -607,9 +608,10 @@ extension StoriesViewController: UIScrollViewDelegate {
         if let cell = getCurrentCell() {
             if yOffset > 0 {
                 cell.pauseStory()
-                cell.progressBar?.resetActiveIndicator()
-            } else {
+                cell.progressBar?.pauseActiveIndicator()
                 //cell.progressBar?.resetActiveIndicator()
+            } else {
+                cell.progressBar?.resetActiveIndicator()
                 cell.setupItem()
                 cell.resumeStory()
             }

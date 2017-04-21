@@ -257,6 +257,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
             gps_service.startUpdatingLocation()
             
             places.gps_service = gps_service
+            LocationService.sharedInstance.gps_service = gps_service
+            
         }
     }
     
@@ -271,6 +273,12 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         self.activateNavbar(false)
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
             statusBar(hide: true, animated: true)
+        }
+        
+        if self.navigationController?.delegate === transitionController {
+            if mainTabBar.selectedIndex == 0 {
+                places.shouldDelayLoad = true
+            }
         }
         textView.resignFirstResponder()
         
@@ -776,22 +784,12 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         let i =  IndexPath(row: indexPath.item, section: 0)
         
-        if storyType == .PlaceStory {
+        if storyType == .PlaceStory || storyType == .UserStory {
             guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
             let image_frame = cell.imageView.frame
             let x = cell.frame.origin.x + 1
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-            return view.convert(rect, to: view)
-        } else if storyType == .UserStory {
-            guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
-            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else { return CGRect.zero }
-            let convertedFrame = cell.imageContainer.convert(cell.imageContainer.frame, to: self.view)
-            let image_frame = convertedFrame
-            let x = cell.frame.origin.x + 8 + 1 - headerCollectionView.contentOffset.x
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y + 6.0//+ navHeight
+            let y = cell.frame.origin.y + places.collectionView.frame.origin.y + 20.0 - places.collectionView!.contentOffset.y//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
@@ -816,19 +814,11 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        if storyType == .PlaceStory {
+        if storyType == .PlaceStory || storyType == .UserStory {
             guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
             return cell.imageView
-        } else if storyType == .UserStory {
-            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? UserStoryCollectionViewCell else {
-                return UIView()
-            }
-            cell.imageContainer.layer.cornerRadius = 0
-            cell.imageContainer.layer.borderColor = UIColor.clear.cgColor
-            cell.imageContainer.clipsToBounds = false
-            return cell.imageContainer
         } else if storyType == .ProfileStory{
             guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
@@ -846,34 +836,22 @@ extension MainViewController: View2ViewTransitionPresenting {
         print("PREP")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        
-        if isPresenting {
-            if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
-                    returningStoriesCell = cell
-                }
-            }
-        }
+
         
         if !isPresenting {
-            if storyType == .PlaceStory {
+            if storyType == .PlaceStory || storyType == .UserStory {
                 if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
                     returningPlacesCell?.fadeInInfo(animated: false)
                     returningPlacesCell = cell
                     returningPlacesCell!.fadeOutInfo()
                 }
             } else if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? UserStoryCollectionViewCell {
-                    
-                    returningStoriesCell?.activateCell(false)
-                    
-                    returningStoriesCell = cell
-                }
+                
             } else {
                 
             }
         }
-        if storyType == .PlaceStory {
+        if storyType == .PlaceStory || storyType == .UserStory {
             if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 places.collectionView!.reloadData()
                 places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)

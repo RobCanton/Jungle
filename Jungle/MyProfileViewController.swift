@@ -294,10 +294,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        let post = posts[indexPath.item]
-        cell.nameLabel.isHidden = true
-        cell.timeLabel.isHidden = true
-        cell.imageView.loadImageAsync(post.getDownloadUrl().absoluteString, completion: nil)
+        cell.setupUserCell(posts[indexPath.item])
         return cell
     }
     

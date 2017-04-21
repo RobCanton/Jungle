@@ -82,6 +82,8 @@ PODS:
   - JSQSystemSoundPlayer (2.0.1)
   - NVActivityIndicatorView (3.4)
   - ReSwift (3.0.0)
+  - TGPControls (2.0.0)
+  - TwicketSegmentedControl (0.1.2)
   - View2ViewTransition (1.0.0)
 
 DEPENDENCIES:
@@ -97,6 +99,8 @@ DEPENDENCIES:
   - JSQMessagesViewController
   - NVActivityIndicatorView
   - ReSwift (= 3.0.0)
+  - TGPControls
+  - TwicketSegmentedControl
   - View2ViewTransition
 
 SPEC CHECKSUMS:
@@ -120,8 +124,10 @@ SPEC CHECKSUMS:
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   NVActivityIndicatorView: 5754be63ceecd1df8af37d3c088d81872feeb8b8
   ReSwift: f0255f4b4f2dacd12c5d97d34d13fc5dad6d6371
+  TGPControls: feb3210f617691690994d0ddfe37884150b6de9a
+  TwicketSegmentedControl: 6d7a4cf243657e0ac3f00d06d873a25334c04042
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 1d3d8ca62d65aeb21b6225aef9d13282f8e2b12c
+PODFILE CHECKSUM: 190be19eef5544c8f5e43760fd0da13abb6a87d3
 
 COCOAPODS: 1.2.0

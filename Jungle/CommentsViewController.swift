@@ -36,6 +36,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var headerCell: CommentCell!
     
     var handleDismiss:(()->())!
+    var popupDismiss:((_ animated:Bool)->())!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,21 +88,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         self.item = item
         
         header.setUserInfo(uid: item.getAuthorId())
-        /*
-        if item.caption != "" {
-            captionComment = Comment(key: "\(item.getKey())-caption", author: item.authorId, text: item.caption, timestamp: item.dateCreated.timeIntervalSince1970 * 1000)
-        }
-
-        self.comments = item.comments
-        
-        if captionComment != nil {
-            if comments.count > 0 {
-                let first = self.comments[0]
-                if first.getKey() != captionComment!.getKey() {
-                    self.comments.insert(captionComment!, at: 0)
-                }
-            }
-        }*/
         
         self.comments = item.comments
         
@@ -111,7 +97,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.reloadData()
         
         commentsRef?.removeAllObservers()
-        commentsRef = UserService.ref.child("uploads/data/\(item.getKey())/comments")
+        commentsRef = UserService.ref.child("uploads/comments/\(item.getKey())")
         
         if let lastItem = item.comments.last {
             let lastKey = lastItem.getKey()
@@ -233,7 +219,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
             UploadService.deleteItem(item: item, completion: { success in
                 if success {
-                
+                    self.popupDismiss(true)
                 }
             })
         }))

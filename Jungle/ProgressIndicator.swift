@@ -56,6 +56,7 @@ class ProgressIndicator: UIView {
             let pausedTime = progress.layer.convertTime(CACurrentMediaTime(), to: nil)
             progress.layer.speed = 0.0
             progress.layer.timeOffset = pausedTime
+            print("PAUSED TIME: \(pausedTime)")
         }
     }
     
@@ -73,6 +74,10 @@ class ProgressIndicator: UIView {
     }
     
     func resetProgress() {
+        paused = false
+        progress.layer.speed = 1.0
+        progress.layer.timeOffset = 0.0
+        progress.layer.beginTime = 0.0
         progress.frame = CGRect(x: 0,y: 0,width: 0,height: bounds.height)
     }
 

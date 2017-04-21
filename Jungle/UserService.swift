@@ -26,15 +26,15 @@ class UserService {
     static var allowContent = false
 
 //    
-//    static func sendFCMToken() {
-//        if let token = FIRInstanceID.instanceID().token() {
-//            if let user = mainStore.state.userState.user {
-//                let fcmRef = ref.child("users/FCMToken/\(user.getUserId())")
-//                fcmRef.setValue(token)
-//            }
-//        }
-//    }
-//    
+    static func sendFCMToken() {
+        if let token = FIRInstanceID.instanceID().token() {
+            if let user = mainStore.state.userState.user {
+                let fcmRef = ref.child("users/FCMToken/\(user.getUserId())")
+                fcmRef.setValue(token)
+            }
+        }
+    }
+//
 
     static func getUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
