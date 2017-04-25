@@ -9,6 +9,7 @@
 import ReSwift
 
 struct AppState: StateType {
+    var myActivity:[(String,Double)] = []
     var nearbyPlacesActivity = [LocationStory]()
     var followingActivity = [UserStory]()
     var userState: UserState
@@ -31,6 +32,7 @@ struct AppReducer: Reducer {
     func handleAction(action: Action, state: AppState?) -> AppState {
         
         return AppState(
+            myActivity: MyActivityReducer(action, state: state?.myActivity),
             nearbyPlacesActivity: NearbyPlacesActivityReducer(action, state: state?.nearbyPlacesActivity),
             followingActivity: FollowingActivityReducer(action, state: state?.followingActivity),
             userState: UserStateReducer(action, state: state?.userState),
@@ -40,6 +42,20 @@ struct AppReducer: Reducer {
             notifications: NotificationsReducer(action, state: state?.notifications)
         )
     }
+}
+
+func MyActivityReducer(_ action:Action, state:[(String,Double)]?) -> [(String,Double)] {
+    var state = state ?? []
+    
+    switch action {
+    case _ as SetMyActivity:
+        let a = action as! SetMyActivity
+        state = a.posts
+        break
+    default:
+        break
+    }
+    return state
 }
 
 func NearbyPlacesActivityReducer(_ action: Action, state:[LocationStory]?) -> [LocationStory] {
@@ -140,6 +156,10 @@ struct ClearNearbyPlacesActivity: Action {}
 
 struct SetFollowingActivity: Action {
     let stories:[UserStory]
+}
+
+struct SetMyActivity: Action {
+    let posts: [(String, Double)]
 }
 
 struct ClearFollowingActivity: Action {}

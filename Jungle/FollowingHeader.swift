@@ -14,10 +14,13 @@ func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
 
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
-    
+    let cellIdentifier = "userPhotoCell"
     var collectionView:UICollectionView!
+    var itemSideLength:CGFloat!
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.75
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -26,12 +29,12 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         layout.minimumLineSpacing = 0.0
         layout.scrollDirection = .horizontal
         
-        collectionView = UICollectionView(frame: self.bounds, collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: self.bounds.width, height: self.bounds.height - 12), collectionViewLayout: layout)
         
-        let nib = UINib(nibName: "UserStoryCollectionViewCell", bundle: nil)
+        let nib = UINib(nibName: "FollowingPhotoCell", bundle: nil)
+        collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
-        collectionView.register(nib, forCellWithReuseIdentifier: "userStoryCell")
-        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
         collectionView.backgroundColor = UIColor.clear
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -40,17 +43,21 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         self.addSubview(collectionView)
-
+        
     }
     
     var userStories = [UserStory]()
     
-    func setupStories(_userStories:[UserStory]) {
+    var discoverLabel:UILabel?
+    func setupStories(_userStories:[UserStory], myStory:UserStory?) {
         
         userStories = _userStories
-        
-        collectionView.reloadData()
+        if myStory != nil {
+            userStories.insert(myStory!, at: 0)
+        }
 
+        collectionView.reloadData()
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -58,8 +65,8 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "userStoryCell", for: indexPath) as! UserStoryCollectionViewCell
-        cell.setupStoryInfo(story: userStories[indexPath.item])
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
+        cell.setupFollowingCell(userStories[indexPath.item])
         return cell
     }
     
@@ -69,14 +76,13 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         return getItemSize()
     }
     
-    func getItemSize() -> CGSize {
-        return CGSize(width: self.frame.height * 0.90, height: self.frame.height)
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath) as! UserStoryCollectionViewCell
         globalMainRef?.presentUserStory(stories: userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         collectionView.deselectItem(at: indexPath, animated: true)
+    }
+    
+    func getItemSize() -> CGSize {
+        return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
     }
     
     

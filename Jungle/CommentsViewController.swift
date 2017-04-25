@@ -86,14 +86,16 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     func setupItem(_ item: StoryItem) {
         self.item = item
+        self.header.setViewsLabel(count: self.item.viewers.count)
         
         header.setUserInfo(uid: item.getAuthorId())
         
         self.comments = item.comments
         
+        self.header.setCommentsLabel(count: self.comments.count)
+        
         tableView.delegate = self
         tableView.dataSource = self
-        
         tableView.reloadData()
         
         commentsRef?.removeAllObservers()
@@ -114,9 +116,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                     self.item.addComment(comment)
                     self.comments = self.item.comments
-                    if self.captionComment != nil {
-                        self.comments.insert(self.captionComment!, at: 0)
-                    }
+                    
+                    self.header.setCommentsLabel(count: self.comments.count)
                     self.tableView.reloadData()
                     self.scrollBottom(animated: true)
                 }
@@ -131,9 +132,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                 self.item.addComment(comment)
                 self.comments = self.item.comments
-                if self.captionComment != nil {
-                    self.comments.insert(self.captionComment!, at: 0)
-                }
+                self.header.setCommentsLabel(count: self.comments.count)
                 self.tableView.reloadData()
                 self.scrollBottom(animated: true)
             })
@@ -144,10 +143,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewWillDisappear(animated)
         commentsRef?.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
-        storyRef?.shouldPlay = true
-        storyRef?.setupItem()
+        /*storyRef?.shouldPlay = true
+        //storyRef?.setupItem()
         storyRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
         postRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
+        */
     }
     
     
@@ -214,19 +214,28 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     func actionHandler() {
         guard let item = self.item else { return }
         
-        let alert = UIAlertController(title: "Delete post?", message: "This is permanent.", preferredStyle: .alert)
+        if item.getAuthorId() == mainStore.state.userState.uid {
+            let alert = UIAlertController(title: "Delete post?", message: "This is permanent.", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+                UploadService.deleteItem(item: item, completion: { success in
+                    if success {
+                        self.popupDismiss(true)
+                    }
+                })
+            }))
+            
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in}))
+            self.present(sheet, animated: true, completion: nil)
+        }
         
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
-            UploadService.deleteItem(item: item, completion: { success in
-                if success {
-                    self.popupDismiss(true)
-                }
-            })
-        }))
-        
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
-        self.present(alert, animated: true, completion: nil)
     }
 
 }

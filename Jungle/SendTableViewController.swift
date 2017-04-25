@@ -58,7 +58,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.delegate = self
         tableView.dataSource = self
         
-        headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275 + navHeight))
+        headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275 + navHeight))
         
         tableView.tableHeaderView = headerView
         tableView.tableFooterView = UIView()

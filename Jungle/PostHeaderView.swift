@@ -13,12 +13,14 @@ class PostHeaderView: UIView {
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var locationTitle: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
     //@IBOutlet weak var locationTitle: UILabel!
 
    // @IBOutlet weak var timeLabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.userImageView.cropToCircle()
     }
     
     var location:Location!
@@ -26,17 +28,20 @@ class PostHeaderView: UIView {
     var showAuthorHandler:(()->())?
     
     
-    func setup(withUser user:User, optionsHandler:(()->())?) {
+    func setup(withUser user:User, date: Date?, optionsHandler:(()->())?) {
 
         moreHandler = optionsHandler
         self.userImageView.image = nil
         self.userImageView.loadImageAsync(user.getImageUrl(), completion: { _ in })
         self.usernameLabel.text = user.getUsername()
+        if date != nil {
+            self.timeLabel.text = date!.timeStringSinceNow()
+        }
         
-        self.userImageView.cropToCircle()
-        self.userImageView.superview!.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: false)
-        self.usernameLabel.applyShadow(radius: 1.5, opacity: 0.35, height: 0.75, shouldRasterize: false)
-        self.locationTitle.applyShadow(radius: 1.5, opacity: 0.35, height: 0.75, shouldRasterize: false)
+        self.userImageView.superview!.applyShadow(radius: 4.0, opacity: 0.3, height: 0, shouldRasterize: false)
+        self.usernameLabel.applyShadow(radius: 4.0, opacity: 0.3, height: 0, shouldRasterize: false)
+        self.locationTitle.applyShadow(radius: 4.0, opacity: 0.3, height: 0, shouldRasterize: false)
+        self.timeLabel.applyShadow(radius: 4.0, opacity: 0.3, height: 0, shouldRasterize: false)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(userTapped))
         self.userImageView.isUserInteractionEnabled = true

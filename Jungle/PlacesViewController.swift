@@ -30,6 +30,7 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     var locationStories = [LocationStory]()
     
     var sortMode:SortedBy = .Recent
+    var myStory:UserStory?
     var userStories = [UserStory]()
     var postKeys = [String]()
     
@@ -56,6 +57,7 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
             locationStories.sort(by: { return $0.getDistance() < $1.getDistance()})
         } else if segmentIndex == 2 {
             sortMode = .Following
+            locationStories.sort(by: { return $0.getPosts().count > $1.getPosts().count})
         }
         
         DispatchQueue.global(qos: .background).async {
@@ -87,7 +89,7 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         self.view.addSubview(tabHeader)
         self.view.addSubview(sortOptionsView)
         
-        let titles = ["Recent", "Nearby", "Following"]
+        let titles = ["Recent", "Nearby", "Popular"]
         let frame = CGRect(x: 0, y: 44.0, width: view.frame.width, height: 44)
         
         control = TwicketSegmentedControl(frame: frame)
@@ -112,6 +114,10 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
+        let headerNib = UINib(nibName: "FollowingHeader", bundle: nil)
+        
+        self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
+
         
         collectionView.contentInset = UIEdgeInsets(top: 1.0, left: 1.0, bottom: 1.0, right: 1.0)
         collectionView.dataSource = self
@@ -128,6 +134,23 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         locationStories = mainStore.state.nearbyPlacesActivity
         self.collectionView.reloadData()
         
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionElementKindSectionHeader {
+            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
+            view.setupStories(_userStories: userStories, myStory: myStory)
+            return view
+        }
+        
+        return UICollectionReusableView()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        if userStories.count == 0 && myStory == nil {
+            return CGSize.zero
+        }
+        return CGSize(width: collectionView.frame.size.width, height: getItemSize().height * 0.75 + 12)
     }
 
     func refreshData() {}
@@ -165,6 +188,10 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     }
     
     func newState(state: AppState) {
+        
+        let posts = state.myActivity
+        myStory = posts.count > 0 ? UserStory(postKeys: posts, uid: state.userState.uid) : nil
+        
         locationStories = state.nearbyPlacesActivity
         locationStories.sort(by: { return $0 > $1})
         
@@ -224,20 +251,13 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if sortMode == .Following {
-            return userStories.count
-        }
         return locationStories.count
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        if sortMode == .Following {
-            cell.setupFollowingCell(userStories[indexPath.row])
-        } else {
-            cell.setupLocationCell(locationStories[indexPath.row])
-        }
+        cell.setupLocationCell(locationStories[indexPath.row])
         return cell
     }
     
@@ -251,35 +271,23 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
-        if sortMode == .Following {
-            let story = userStories[indexPath.item]
-            if story.state == .contentLoaded {
-                self.selectedIndexPath = indexPath
-                globalMainRef?.presentUserStory(stories: self.userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadStory()
-            }
+        let story = locationStories[indexPath.item]
+        if story.state == .contentLoaded {
+            self.selectedIndexPath = indexPath
+            globalMainRef?.presentPlaceStory(locationStories: self.locationStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         } else {
-            let story = locationStories[indexPath.item]
-            if story.state == .contentLoaded {
-                self.selectedIndexPath = indexPath
-                globalMainRef?.presentPlaceStory(locationStories: self.locationStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadStory()
-            }
+            story.downloadStory()
         }
-        
-        
         collectionView.deselectItem(at: indexPath, animated: true)
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
     }
     
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
+    }
+    
+    func getHeader() -> FollowingHeader? {
+        return collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? FollowingHeader
     }
     
     

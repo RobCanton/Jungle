@@ -9,12 +9,22 @@
 import UIKit
 
 class CommentsHeaderView: UIView {
+    
+    @IBOutlet weak var downArrow: UIImageView!
+    @IBOutlet weak var viewsLabel: UILabel!
+    
+    @IBOutlet weak var commentsLabel: UILabel!
 
     @IBOutlet weak var rightButton: UIButton!
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var usernameLabel: UILabel!
+
     var closeHandler:(()->())?
     var moreHandler:(()->())?
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        downArrow.tintColor = UIColor.white
+    }
 
     @IBAction func handleClose(_ sender: Any) {
         closeHandler?()
@@ -25,38 +35,23 @@ class CommentsHeaderView: UIView {
     }
     
     func setUserInfo(uid:String) {
-        imageView.layer.cornerRadius = imageView.frame.width/2
-        imageView.clipsToBounds = true
+       
         
         if uid == mainStore.state.userState.uid {
             rightButton.setImage(UIImage(named:"trash"), for: .normal)
         } else {
             rightButton.setImage(UIImage(named:"more"), for: .normal)
         }
-        
-        
-        UserService.getUser(uid, completion: { user in
-            if user != nil {
-                self.imageView.loadImageAsync(user!.getImageUrl(), completion: { result in })
-                let username = "\(user!.getUsername())'s"
-                let str = "\(username) post"
-                let attributes: [String: AnyObject] = [
-                    NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightLight)
-                ]
-                
-                let title = NSMutableAttributedString(string: str, attributes: attributes) //1
-                
-                if let range = str.range(of: username) {// .rangeOfString(countStr) {
-                    let index = str.distance(from: str.startIndex, to: range.lowerBound)//str.startIndex.distance(fromt:range.lowerBound)
-                    let a: [String: AnyObject] = [
-                        NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightBold),
-                    ]
-                    title.addAttributes(a, range: NSRange(location: index, length: username.characters.count))
-                }
-                
-                self.usernameLabel.attributedText = title
-                
-            }
-        })
     }
+    
+    func setViewsLabel(count:Int) {
+        self.viewsLabel.text = "\(count)"
+    }
+    
+    
+    func setCommentsLabel(count:Int) {
+        self.commentsLabel.text = "\(count)"
+    }
+    
+    
 }

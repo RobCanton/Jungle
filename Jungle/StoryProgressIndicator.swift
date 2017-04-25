@@ -86,6 +86,10 @@ class StoryProgressIndicator: UIView {
         getActiveIndicator()?.pauseAnimation()
     }
     
+    func resumeActiveIndicator() {
+        getActiveIndicator()?.resumeAnimation()
+    }
+    
     private func getActiveIndicator() -> ProgressIndicator? {
         if activeBarIndex >= 0 && activeBarIndex < progressBars.count {
             return progressBars[activeBarIndex]

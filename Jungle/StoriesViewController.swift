@@ -45,7 +45,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
     var firstCell = true
     
-    
+    var pullUpIcon:UIImageView!
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -68,7 +68,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.navigationController?.delegate = transitionController
         
         if let cell = getCurrentCell() {
-            cell.setForPlay()
+            //cell.setForPlay()
+            cell.resume()
             if let item = cell.item {
                commentsViewController.setupItem(item)
             }
@@ -90,6 +91,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         super.viewWillDisappear(animated)
         
         NotificationCenter.default.removeObserver(self)
+
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -160,6 +162,13 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.scrollView.addSubview(commentsViewController.view)
         commentsViewController.didMove(toParentViewController: self)
         
+        pullUpIcon = UIImageView(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
+        pullUpIcon.image = UIImage(named: "up_arrow")
+        pullUpIcon.tintColor = UIColor.white
+        pullUpIcon.alpha = 0.5
+        pullUpIcon.center = CGPoint(x: view.frame.width/2, y: view.frame.height - 24.0)
+        //scrollView.addSubview(pullUpIcon)
+        
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
@@ -208,10 +217,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         if let tap = gestureRecognizer as? UITapGestureRecognizer  {
             let point = tap.location(in: self.view)
-            return point.y > 90.0
+            return point.y > 90.0 && scrollView.contentOffset.y == 0
         }
-        
-        
 
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
@@ -252,7 +259,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: StoryViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! StoryViewController
@@ -276,18 +282,22 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     func stopPreviousItem() {
         if let cell = getCurrentCell() {
-            cell.pauseVideo()
+            cell.pause()
         }
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let xOffset = scrollView.contentOffset.x
         
+        if scrollView != collectionView { return }
+        //SHOULD HANDLE COMMENTS VIEW AS WELL
+        
+        let xOffset = scrollView.contentOffset.x
         let newItem = Int(xOffset / self.collectionView.frame.width)
         currentIndex = IndexPath(item: newItem, section: 0)
         
         if let cell = getCurrentCell() {
-            cell.setForPlay()
+            //cell.setForPlay()
+            cell.resume()
             if let item = cell.item {
                 commentsViewController.setupItem(item)
             }
@@ -319,7 +329,7 @@ extension StoriesViewController: PopupProtocol {
     }
     
     func dismissPopup(_ animated:Bool) {
-        getCurrentCell()?.pauseVideo()
+        getCurrentCell()?.pause()
         getCurrentCell()?.destroyVideoPlayer()
         if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
             let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
@@ -343,154 +353,13 @@ extension StoriesViewController: PopupProtocol {
     }
     
     func showDeleteOptions() {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.item else {
-            cell.resumeStory()
-            return }
-        if item.getAuthorId() != mainStore.state.userState.uid { return }
-        cell.pauseStory()
-        
-        
-        let actionSheet = UIAlertController(title: "Delete post?", message: nil, preferredStyle: .alert)
-        
-        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-            cell.resumeStory()
-        }
-        actionSheet.addAction(cancelActionButton)
-        
-        let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
-            
-            UploadService.deleteItem(item: item, completion: { success in
-                if success {
-                    self.dismissPopup(true)
-                }
-            })
-        }
-        actionSheet.addAction(deleteActionButton)
-        
-        self.present(actionSheet, animated: true, completion: nil)
         
     }
     
     func showOptions() {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.item else {
-            cell.resumeStory()
-            return }
-        
-        if item.getAuthorId() == mainStore.state.userState.uid {
-            
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resumeStory()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let deleteActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
-                
-                /*UploadService.deleteItem(item: item, completion: { success in
-                 if success {
-                 self.dismissPopup(true)
-                 }
-                 })*/
-            }
-            actionSheet.addAction(deleteActionButton)
-            
-            self.present(actionSheet, animated: true, completion: nil)
-        } else {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resumeStory()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
-                let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-                
-                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
-                    cell.resumeStory()
-                }
-                alertController.addAction(cancelAction)
-                
-                let OKAction = UIAlertAction(title: "It's Inappropriate", style: .destructive) { (action) in
-                    UploadService.reportItem(item: item, type: ReportType.Inappropriate, showNotification: true, completion: { success in
-                        if success {
-                            let reportAlert = UIAlertController(title: "Report Sent.",
-                                                                message: "Thanks for lettings us know. We will act upon this report within 24 hours.", preferredStyle: .alert)
-                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
-                                cell.resumeStory()
-                            }))
-                            
-                            self.present(reportAlert, animated: true, completion: nil)
-                        } else {
-                            let reportAlert = UIAlertController(title: "Report Failed to Send.",
-                                                                message: "Please try again.", preferredStyle: .alert)
-                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
-                                cell.resumeStory()
-                            }))
-                            
-                            self.present(reportAlert, animated: true, completion: nil)
-                        }
-                        
-                        
-                    })
-                }
-                alertController.addAction(OKAction)
-                
-                let OKAction2 = UIAlertAction(title: "It's Spam", style: .destructive) { (action) in
-                    UploadService.reportItem(item: item, type: ReportType.Spam, showNotification: true, completion: { success in
-                        if success {
-                            let reportAlert = UIAlertController(title: "Report Sent",
-                                                                message: "Thanks for lettings us know. We will act upon this report within 24 hours.", preferredStyle: .alert)
-                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
-                                cell.resumeStory()
-                            }))
-                            
-                            self.present(reportAlert, animated: true, completion: nil)
-                        } else {
-                            let reportAlert = UIAlertController(title: "Report Failed to Send",
-                                                                message: "Please try again.", preferredStyle: .alert)
-                            reportAlert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: { action -> Void in
-                                cell.resumeStory()
-                            }))
-                            
-                            self.present(reportAlert, animated: true, completion: nil)
-                        }
-                        
-                        
-                    })
-                }
-                alertController.addAction(OKAction2)
-                
-                self.present(alertController, animated: true, completion: nil)
-            }
-            actionSheet.addAction(OKAction)
-            
-            self.present(actionSheet, animated: true, completion: nil)
-        }
     }
     
     func showComments() {
-        
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.item else { return }
-        let controller = CommentsViewController()
-        controller.title = "Comments"
-        controller.storyRef = cell
-        controller.item = item
-        if item.comments.count == 0 {
-            controller.shouldShowKeyboard = true
-        }
-        
-        let nav = UINavigationController(rootViewController: controller)
-        nav.navigationBar.isTranslucent = false
-        nav.navigationBar.tintColor = UIColor.black
-        
-        nav.modalPresentationStyle = .overCurrentContext
-        globalMainRef?.statusBar(hide: false, animated: true)
-        self.present(nav, animated: true, completion: nil)
         
     }
     
@@ -590,6 +459,10 @@ extension StoriesViewController: PopupProtocol {
 extension StoriesViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == collectionView {
+            getCurrentCell()?.pause()
+            return
+        }
         if scrollView !== self.scrollView { return }
         let yOffset = scrollView.contentOffset.y
         let alpha = 1 - yOffset/view.frame.height
@@ -605,18 +478,16 @@ extension StoriesViewController: UIScrollViewDelegate {
         barFrame.origin.y = view.frame.height - 50.0 * (ry)
         commentBar.frame = barFrame
         
+        pullUpIcon.alpha = multiple * 0.5
+        
         if let cell = getCurrentCell() {
             if yOffset > 0 {
-                cell.pauseStory()
-                cell.progressBar?.pauseActiveIndicator()
-                //cell.progressBar?.resetActiveIndicator()
+                cell.pause()
             } else {
-                cell.progressBar?.resetActiveIndicator()
-                cell.setupItem()
-                cell.resumeStory()
+                cell.resume()
             }
             
-            cell.setDetailFade(multiple)
+            cell.setDetailFade(alpha)
             collectionView.alpha = 0.5 + 0.5 * alpha
         }
     }

@@ -135,7 +135,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         
         UserService.getUser(item.authorId, completion: { user in
             if user != nil {
-                let caption = "\(user!.getUsername()) \(item.caption)"
+               /* let caption = "\(user!.getUsername()) \(item.caption)"
                 let width = self.frame.width - (42 + 50)
                 var size:CGFloat = 8.0 + 25 + 2
                 
@@ -143,6 +143,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                 
                 self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
                 self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
+                */
             }
         })
         

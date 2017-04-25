@@ -24,8 +24,9 @@ class StoryItem: NSObject, NSCoding {
     
     var key:String                    // Key in database
     var authorId:String
-    var caption:String
-    var locationKey:String
+    var caption:String?
+    var captionPos:CGFloat?
+    var locationKey:String?
     var downloadUrl:URL
     var videoURL:URL?
     var contentType:ContentType
@@ -45,13 +46,14 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoFilePath: URL?
     dynamic var videoData:Data?
     
-    init(key: String, authorId: String, caption:String, locationKey:String, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
+    init(key: String, authorId: String, caption:String?, captionPos:Double?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
           viewers:[String:Double], likes:[String:Double], comments: [Comment], flagged:Bool)
     {
         
         self.key          = key
         self.authorId     = authorId
         self.caption      = caption
+        self.captionPos   = captionPos != nil ? CGFloat(captionPos!) : nil
         self.locationKey  = locationKey
         self.downloadUrl  = downloadUrl
         self.videoURL     = videoURL
@@ -69,8 +71,9 @@ class StoryItem: NSObject, NSCoding {
         
         let key         = decoder.decodeObject(forKey: "key") as! String
         let authorId    = decoder.decodeObject(forKey: "authorId") as! String
-        let caption     = decoder.decodeObject(forKey: "caption") as! String
-        let locationKey = decoder.decodeObject(forKey: "imageUrl") as! String
+        let caption     = decoder.decodeObject(forKey: "caption") as? String
+        let captionPos  = decoder.decodeObject(forKey: "captionPos") as? Double
+        let locationKey = decoder.decodeObject(forKey: "locationKey") as? String
         let downloadUrl = decoder.decodeObject(forKey: "downloadUrl") as! URL
         let ctInt       = decoder.decodeObject(forKey: "contentType") as! Int
         let dateCreated = decoder.decodeObject(forKey: "dateCreated") as! Double
@@ -105,14 +108,22 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, flagged: flagged)
+        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, flagged: flagged)
     }
     
     
     func encode(with coder: NSCoder) {
         coder.encode(key, forKey: "key")
         coder.encode(authorId, forKey: "authorId")
-        coder.encode(caption, forKey: "caption")
+        if locationKey != nil {
+            coder.encode(locationKey!, forKey: "locationKey")
+        }
+        if caption != nil {
+            coder.encode(caption!, forKey: "caption")
+        }
+        if captionPos != nil {
+            coder.encode(Double(caption!), forKey: "captionPos")
+        }
         coder.encode(downloadUrl, forKey: "downloadUrl")
         coder.encode(contentType.rawValue, forKey: "contentType")
         coder.encode(dateCreated, forKey: "dateCreated")
@@ -134,7 +145,7 @@ class StoryItem: NSObject, NSCoding {
         return authorId
     }
     
-    func getLocationKey() -> String {
+    func getLocationKey() -> String? {
         return locationKey
     }
     
@@ -156,6 +167,14 @@ class StoryItem: NSObject, NSCoding {
     
     func getLength() -> Double {
         return length
+    }
+    
+    func getCaption() -> String? {
+        return caption
+    }
+    
+    func getCaptionPos() -> CGFloat? {
+        return captionPos
     }
     
     func needsDownload() -> Bool{

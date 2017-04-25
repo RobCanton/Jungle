@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "Views@1x.png",
+      "filename" : "Collapse Arrow Filled_32.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Views@2x.png",
+      "filename" : "Collapse Arrow Filled_50.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Views@3x.png",
+      "filename" : "Collapse Arrow Filled_100.png",
       "scale" : "3x"
     }
   ],

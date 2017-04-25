@@ -53,20 +53,40 @@ class ProgressIndicator: UIView {
     func pauseAnimation() {
         if !paused {
             paused = true
-            let pausedTime = progress.layer.convertTime(CACurrentMediaTime(), to: nil)
-            progress.layer.speed = 0.0
-            progress.layer.timeOffset = pausedTime
-            print("PAUSED TIME: \(pausedTime)")
+            print("layer paused: \(paused)")
+            let layer = progress.layer
+            let pausedTime = layer.convertTime(CACurrentMediaTime(), from: nil)
+            layer.speed = 0.0
+            layer.timeOffset = pausedTime
         }
     }
     
+    func resumeAnimation() {
+        if !paused { return }
+        
+        paused = false
+        print("layer paused: \(paused)")
+        
+        let layer = progress.layer
+        let pausedTime = layer.timeOffset
+        layer.speed = 1.0
+        layer.timeOffset = 0.0
+        layer.beginTime = 0.0
+        let timeSincePause = layer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        layer.beginTime = timeSincePause
+        print("layer beginTime \(layer.beginTime)")
+    }
+    
     func removeAnimation() {
+        print("layer removeAnimation")
         progress.layer.removeAnimation(forKey: "bounds")
     }
     
     func completeAnimation() {
+        
         removeAnimation()
         completeProgress()
+        print("layer completeAnimation")
     }
     
     func completeProgress() {
@@ -75,6 +95,7 @@ class ProgressIndicator: UIView {
     
     func resetProgress() {
         paused = false
+        print("layer resetProgress")
         progress.layer.speed = 1.0
         progress.layer.timeOffset = 0.0
         progress.layer.beginTime = 0.0

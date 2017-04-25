@@ -19,6 +19,7 @@ class Listeners {
     fileprivate static var listeningToFollowing = false
     fileprivate static var listeningToConversations = false
     fileprivate static var listeningToNotifications = false
+    fileprivate static var listeningToMyActivity = false
     fileprivate static var listeningToNearbyActivity = false
     fileprivate static var listeningToFollowingActivity = false
     
@@ -28,6 +29,7 @@ class Listeners {
         stopListeningToFollowing()
         stopListeningToConversatons()
         stopListeningToNotifications()
+        stopListeningToMyActivity()
         stopListeningToNearbyActivity()
         stopListeningToFollowingActivity()
     }
@@ -158,6 +160,25 @@ class Listeners {
         listeningToNotifications = false
     }
     
+    static func startListeningToMyActivity() {
+        if !listeningToMyActivity {
+            listeningToMyActivity = true
+            let current_uid = mainStore.state.userState.uid
+            
+            let myActivityRef = ref.child("users/story/\(current_uid)")
+            myActivityRef.observe(.value, with: { snapshot in
+                if snapshot.exists() {
+                    if let _postsKeys = snapshot.value as? [String:Double]  {
+                        let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                        mainStore.dispatch(SetMyActivity(posts: postKeys))
+                    }
+                }
+            })
+        }
+    }
+    
+    
+    
     static func startListeningToNearbyActivity() {
         if !listeningToNearbyActivity {
             listeningToNearbyActivity = true
@@ -167,35 +188,29 @@ class Listeners {
             nearbyActivityRef.observe(.value, with: { snapshot in
                 var stories = [LocationStory]()
                 if snapshot.exists() {
-                    
-                    
-                    
                     for place in snapshot.children {
                         let placeSnapshot = place as! FIRDataSnapshot
                         let placeId = placeSnapshot.key
                         if let object = placeSnapshot.value as? [String:AnyObject] {
-                            print("OBJECT: \(object)")
-                            let distance = object["distance"] as! Double
-                            if let _postsKeys = object["posts"]  as? [String:Double] {
+                            if let distance = object["distance"] as? Double, let _postsKeys = object["posts"]  as? [String:Double] {
                                 let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
                                 let story = LocationStory(postKeys: postKeys, locationKey: placeId, distance: distance)
                                 stories.append(story)
                             }
                         }
-                        
-                        /*let distance = placeSnapshot.value(forKey: "distance") as! Double
-
-                        if let _postsKeys = placeSnapshot.value(forKey: "posts")  as? [String:Double] {
-                            let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                            let story = LocationStory(postKeys: postKeys, locationKey: placeId, distance: distance)
-                            stories.append(story)
-                        }*/
                     }
                 }
                 print("New nearby place activity")
                 mainStore.dispatch(SetNearbyPlacesActivity(stories: stories))
             })
         }
+    }
+    
+    static func stopListeningToMyActivity() {
+        let uid = mainStore.state.userState.uid
+        let myActivityRef = ref.child("users/story/\(uid)")
+        myActivityRef.removeAllObservers()
+        listeningToMyActivity = false
     }
     
     static func stopListeningToNearbyActivity() {

@@ -44,7 +44,7 @@
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ift-dx-w2j">
                     <rect key="frame" x="174" y="13" width="223" height="21"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <color key="textColor" white="1" alpha="0.85333588957055218" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9h5-nk-yFJ">
@@ -81,6 +81,7 @@
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="locationTitle" destination="UG1-Az-r6Z" id="M7t-0p-Qq9"/>
+                <outlet property="timeLabel" destination="ift-dx-w2j" id="c9c-fx-ujC"/>
                 <outlet property="userImageView" destination="KFe-EG-hp3" id="zT3-qc-cY4"/>
                 <outlet property="usernameLabel" destination="YyZ-bC-fc4" id="W0L-Vp-veF"/>
             </connections>

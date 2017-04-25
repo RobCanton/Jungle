@@ -56,7 +56,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     
     fileprivate var returningPlacesCell:PhotoCell?
-    fileprivate var returningStoriesCell:UserStoryCollectionViewCell?
+    fileprivate var returningFollowingCell:FollowingPhotoCell?
     fileprivate var flashView:UIView!
     
     fileprivate var uploadLikelihoods:[GMSPlaceLikelihood]!
@@ -108,8 +108,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     fileprivate lazy var textView: UITextView = {
         let definiteBounds = UIScreen.main.bounds
-        let textView = UITextView(frame: CGRect(x: 0,y: definiteBounds.height - 90,width: definiteBounds.width,height: 44))
-        
+        let textView = UITextView(frame: CGRect(x: 0,y: 0,width: definiteBounds.width,height: 44))
         textView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
         textView.textColor = UIColor.white
         textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
@@ -119,8 +118,18 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
         textView.backgroundColor = UIColor.clear
         textView.isUserInteractionEnabled = false
+        textView.text = "funkymunky"
+        textView.fitHeightToContent()
+        textView.text = ""
         return textView
     }()
+    
+    fileprivate lazy var textViewCenter:CGPoint = {
+        let mainBounds = UIScreen.main.bounds
+        return CGPoint(x: mainBounds.width / 2, y: mainBounds.height / 2)
+    }()
+    
+    fileprivate var textViewPanGesture:UIPanGestureRecognizer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -301,8 +310,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         super.viewDidAppear(animated)
         returningPlacesCell?.fadeInInfo(animated: true)
         returningPlacesCell = nil
-        returningStoriesCell?.activateCell(true)
-        returningStoriesCell = nil
+        returningFollowingCell?.fadeInInfo(animated: true)
+        returningFollowingCell = nil
         if self.navigationController?.delegate === transitionController {
             self.navigationController?.delegate = nil
             recordBtn.isUserInteractionEnabled = true
@@ -469,7 +478,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
-        
+        transitionController.cornerRadius = 2.0
         storiesViewController.transitionController = transitionController
         
         nav.delegate = transitionController
@@ -488,6 +497,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 4.0
         
         storiesViewController.transitionController = transitionController
         recordBtn.isUserInteractionEnabled = false
@@ -504,6 +514,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 2.0
         recordBtn.isUserInteractionEnabled = false
         scrollView.isScrollEnabled = false
         nav.delegate = transitionController
@@ -519,6 +530,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         galleryViewController.posts = [post]
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 0.0
         recordBtn.isUserInteractionEnabled = false
         scrollView.isScrollEnabled = false
         nav.delegate = transitionController
@@ -571,13 +583,19 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         self.view.addSubview(cancelButton)
         self.view.addSubview(sendButton)
         self.view.addSubview(captionButton)
-        self.view.addSubview(textView)
         
         textView.resignFirstResponder()
         textView.isUserInteractionEnabled = false
         textView.text = ""
         textView.delegate = self
         textView.backgroundColor = UIColor.clear
+        textView.textAlignment = .center
+        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height/2)
+        textView.center = textViewCenter
+        self.view.addSubview(textView)
+        
+        textViewPanGesture = UIPanGestureRecognizer(target: self, action: #selector(dragTextView))
+        textView.addGestureRecognizer(textViewPanGesture!)
  
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
@@ -590,15 +608,29 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         uploadLikelihoods = gps_service.getLikelihoods()
     }
     
+    func dragTextView(pan: UIPanGestureRecognizer) {
+        if textView.text == "" { return }
+        if pan.state == .began || pan.state == .changed {
+            
+            let translation = pan.translation(in: self.view)
+            // note: 'view' is optional and need to be unwrapped
+            pan.view!.center = CGPoint(x: pan.view!.center.x, y: pan.view!.center.y + translation.y)
+            self.textViewCenter = pan.view!.center
+            pan.setTranslation(CGPoint.zero, in: self.view)
+        }
+    }
+    
     func hideEditOptions() {
+        if textViewPanGesture != nil {
+            textView.removeGestureRecognizer(textViewPanGesture!)
+        }
         cancelButton.removeFromSuperview()
         sendButton.removeFromSuperview()
         captionButton.removeFromSuperview()
         textView.removeFromSuperview()
-        
+    
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        
         
         cancelButton.removeTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
@@ -634,7 +666,10 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
             upload.videoURL = cameraView.videoUrl
         }
         
-        upload.caption = textView.text
+        if textView.text != "" {
+            upload.caption = textView.text
+            upload.captionPos = Double(textViewCenter.y / view.frame.height)
+        }
         
         //let nav = UIStoryboard(name: "Main", bundle: nil)
            // .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
@@ -676,9 +711,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
             let textViewFrame = self.textView.frame
-            let textViewY = height - keyboardFrame.height - textViewFrame.height
-            self.textView.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
-            self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.42)
+            self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
+            self.textView.center = CGPoint(x: self.textViewCenter.x, y: height - keyboardFrame.height - textViewFrame.height / 2)
         }, completion: { _ in
             self.textView.isUserInteractionEnabled = true
         })
@@ -686,16 +720,16 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     
     func keyboardWillDisappear(notification: NSNotification) {
        
-        textView.isUserInteractionEnabled = false
+        //textView.isUserInteractionEnabled = false
         captionButton.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
-            let height = self.view.frame.height
+            /*let height = self.view.frame.height
             let textViewFrame = self.textView.frame
             let textViewStart = height - textViewFrame.height - 90
-            self.textView.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
-            
+            self.textView.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)*/
+            self.textView.center = self.textViewCenter
             if self.textView.text != "" {
-                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.42)
+                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
             } else {
                 self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
             }
@@ -784,12 +818,22 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         let i =  IndexPath(row: indexPath.item, section: 0)
         
-        if storyType == .PlaceStory || storyType == .UserStory {
+        if storyType == .PlaceStory {
             guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
             let image_frame = cell.imageView.frame
             let x = cell.frame.origin.x + 1
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
             let y = cell.frame.origin.y + places.collectionView.frame.origin.y + 20.0 - places.collectionView!.contentOffset.y//+ navHeight
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            return view.convert(rect, to: view)
+        } else if storyType == .UserStory {
+            guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
+            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            let image_frame = convertedFrame
+            let x = cell.frame.origin.x - headerCollectionView.contentOffset.x + 3.0
+            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0 + 44.0 + 2.0
+            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
             let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
@@ -814,8 +858,13 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        if storyType == .PlaceStory || storyType == .UserStory {
+        if storyType == .PlaceStory {
             guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
+                return UIView()
+            }
+            return cell.imageView
+        } else if storyType == .UserStory {
+            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else {
                 return UIView()
             }
             return cell.imageView
@@ -833,25 +882,35 @@ extension MainViewController: View2ViewTransitionPresenting {
     
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
         
-        print("PREP")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
 
+        if isPresenting {
+            if storyType == .UserStory {
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? FollowingPhotoCell {
+                    returningFollowingCell = cell
+                }
+            }
+        }
         
         if !isPresenting {
-            if storyType == .PlaceStory || storyType == .UserStory {
+            if storyType == .PlaceStory {
                 if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
                     returningPlacesCell?.fadeInInfo(animated: false)
                     returningPlacesCell = cell
                     returningPlacesCell!.fadeOutInfo()
                 }
             } else if storyType == .UserStory {
-                
+                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? FollowingPhotoCell {
+                    returningFollowingCell?.fadeInInfo(animated: false)
+                    returningFollowingCell = cell
+                    returningFollowingCell!.fadeOutInfo()
+                }
             } else {
                 
             }
         }
-        if storyType == .PlaceStory || storyType == .UserStory {
+        if storyType == .PlaceStory {
             if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 places.collectionView!.reloadData()
                 places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)

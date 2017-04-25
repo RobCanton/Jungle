@@ -15,7 +15,8 @@ import GoogleMaps
 
 class Upload {
     var place:GMSPlace?
-    var caption:String = ""
+    var caption:String?
+    var captionPos:Double?
     var coordinates:CLLocation?
     var image:UIImage?
     var videoURL:URL?
@@ -135,7 +136,6 @@ class UploadService {
     static func sendImage(upload:Upload, completion:(()->())) {
         
         //If upload has no destination do not upload it
-        guard let place = upload.place else { return }
         if upload.image == nil { return }
         
         let ref = FIRDatabase.database().reference()
@@ -145,9 +145,6 @@ class UploadService {
         let uid = mainStore.state.userState.uid
         
         if let data = UIImageJPEGRepresentation(upload.image!, 0.5) {
-            for component in place.addressComponents! {
-                print("TYPE: \(component.type) : \(component.name)")
-            }
             // Create a reference to the file you want to upload
             // Create the file metadata
             let contentTypeStr = "image"
@@ -163,30 +160,42 @@ class UploadService {
                 } else {
                     // Metadata contains file metadata such as size, content-type, and download URL.
                     let downloadURL = metadata!.downloadURL()
-                    let obj = [
+                    var obj = [
                         "author": uid,
-                        "caption": upload.caption,
-                        "placeID": place.placeID,
                         "url": downloadURL!.absoluteString,
                         "contentType": contentTypeStr,
                         "dateCreated": [".sv": "timestamp"],
                         "length": 6.0
                     ] as [String : Any]
                     
+                    if let place = upload.place {
+                        obj["placeID"] = place.placeID
+                    }
+                    
+                    if let caption = upload.caption {
+                        obj["caption"] = caption
+                    }
+                    
+                    if let y = upload.captionPos {
+                        obj["captionPos"] = y
+                    }
+                    
                     dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
                             
-                            let updateValues: [String : Any] = [
-                                "places/\(place.placeID)/info/name": place.name,
-                                "places/\(place.placeID)/info/lat": place.coordinate.latitude,
-                                "places/\(place.placeID)/info/lon": place.coordinate.longitude,
-                                "places/\(place.placeID)/info/address": place.formattedAddress,
-                                "places/\(place.placeID)/posts/\(postKey)": [".sv": "timestamp"],
-                                "places/\(place.placeID)/contributers/\(uid)": true,
+                            var updateValues: [String : Any] = [
                                 "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
                                 "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
-
+                            
+                            if let place = upload.place {
+                                updateValues["places/\(place.placeID)/info/name"] = place.name
+                                updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
+                                updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
+                                updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
+                                updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
+                                updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                            }
 
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
@@ -203,9 +212,6 @@ class UploadService {
     }
     
     static func uploadVideo(upload:Upload, completion:(_ success:Bool)->()){
-        
-        //If upload has no destination do not upload it
-        guard let place = upload.place else { return }
         
         if upload.videoURL == nil { return }
         
@@ -237,10 +243,8 @@ class UploadService {
                     // Metadata contains file metadata such as size, content-type, and download URL.
                     
                     let downloadURL = metadata!.downloadURL()
-                    let obj = [
+                    var obj = [
                         "author": uid,
-                        "caption": upload.caption,
-                        "placeID": place.placeID,
                         "url": thumbURL,
                         "videoURL": downloadURL!.absoluteString,
                         "contentType": contentTypeStr,
@@ -248,19 +252,33 @@ class UploadService {
                         "length": length
                         ] as [String : Any]
                     
+                    if let place = upload.place {
+                        obj["placeID"] = place.placeID
+                    }
+                    
+                    if let caption = upload.caption {
+                        obj["caption"] = caption
+                    }
+                    
+                    if let y = upload.captionPos {
+                        obj["captionPos"] = y
+                    }
+                    
                     dataRef.setValue(obj, withCompletionBlock: { error, _ in
                         if error == nil {
-                            
-                            let updateValues: [String : Any] = [
-                                "places/\(place.placeID)/info/name": place.name,
-                                "places/\(place.placeID)/info/lat": place.coordinate.latitude,
-                                "places/\(place.placeID)/info/lon": place.coordinate.longitude,
-                                "places/\(place.placeID)/info/address": place.formattedAddress,
-                                "places/\(place.placeID)/posts/\(postKey)": [".sv": "timestamp"],
-                                "places/\(place.placeID)/contributers/\(uid)": true,
+                            var updateValues: [String : Any] = [
                                 "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
                                 "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
+                            
+                            if let place = upload.place {
+                                updateValues["places/\(place.placeID)/info/name"] = place.name
+                                updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
+                                updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
+                                updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
+                                updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
+                                updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                            }
                             
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
@@ -361,11 +379,14 @@ class UploadService {
                 if dict["delete"] == nil {
                     let key = key
                     guard let authorId       = dict["author"] as? String else { return completion(item) }
-                    guard let caption        = dict["caption"] as? String else { return completion(item) }
-                    guard let locationKey    = dict["placeID"] as? String else { return completion(item) }
+                    
+                    let locationKey    = dict["placeID"] as? String
                     guard let downloadUrl    = dict["url"] as? String else { return completion(item) }
                     guard let url            = URL(string: downloadUrl) else { return completion(item) }
                     guard let contentTypeStr = dict["contentType"] as? String else { return completion(item) }
+                    
+                    let caption        = dict["caption"] as? String
+                    let captionPos    = dict["captionPos"] as? Double
                     
                     var contentType = ContentType.invalid
                     var videoURL:URL?
@@ -382,6 +403,9 @@ class UploadService {
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     var viewers = [String:Double]()
+                    if snapshot.hasChild("views") {
+                        viewers = dict["views"] as! [String:Double]
+                    }
                    
                     var likes = [String:Double]()
                     if snapshot.hasChild("likes") {
@@ -389,27 +413,12 @@ class UploadService {
                     }
                     
                     var comments = [Comment]()
-                    /*
-                    if snapshot.hasChild("comments") {
-                        let commentsDict = dict["comments"] as! [String:AnyObject]
-                        for (key, object) in commentsDict {
-                            let key = key
-                            let author = object.value(forKey: "author") as? String
-                            let text = object.value(forKey: "text") as? String
-                            let timestamp = object.value(forKey: "timestamp") as? Double
-                            
-                            if author != nil && text != nil && timestamp != nil {
-                                let comment = Comment(key: key, author: author!, text: text!, timestamp: timestamp!)
-                                comments.append(comment)
-                            }
-                        }
-                    }*/
-                    
+
                     comments.sort(by: { return $0 < $1 })
                     
                     var flagged = false
 
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, flagged: flagged)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, flagged: flagged)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
