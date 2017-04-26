@@ -417,8 +417,13 @@ class UploadService {
                     comments.sort(by: { return $0 < $1 })
                     
                     var flagged = false
+                    
+                    var numComments = 0
+                    if let _numComments = dict["comments"] as? Int {
+                        numComments = _numComments
+                    }
 
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, flagged: flagged)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numComments: numComments, flagged: flagged)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }

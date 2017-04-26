@@ -15,7 +15,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var comments = [Comment]()
     var storyRef:StoryViewController?
     var postRef:PostViewController?
-    var item:StoryItem!
+    //var item:StoryItem!
     var scrollViewRef:UIScrollView!
     
     var tableView:UITableView!
@@ -85,18 +85,16 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func setupItem(_ item: StoryItem) {
-        self.item = item
-        self.header.setViewsLabel(count: self.item.viewers.count)
+        //self.item = item
+        self.header.setViewsLabel(count: item.viewers.count)
         
         header.setUserInfo(uid: item.getAuthorId())
         
-        self.comments = item.comments
-        
-        self.header.setCommentsLabel(count: self.comments.count)
-        
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.reloadData()
+        
+        self.comments = item.comments
+        self.updateComments()
         
         commentsRef?.removeAllObservers()
         commentsRef = UserService.ref.child("uploads/comments/\(item.getKey())")
@@ -114,11 +112,9 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     let timestamp = dict["timestamp"] as! Double
                     
                     let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                    self.item.addComment(comment)
-                    self.comments = self.item.comments
-                    
-                    self.header.setCommentsLabel(count: self.comments.count)
-                    self.tableView.reloadData()
+                    item.addComment(comment)
+                    self.comments = item.comments
+                    self.updateComments()
                     self.scrollBottom(animated: true)
                 }
             })
@@ -130,13 +126,17 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let text = dict["text"] as! String
                 let timestamp = dict["timestamp"] as! Double
                 let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                self.item.addComment(comment)
-                self.comments = self.item.comments
-                self.header.setCommentsLabel(count: self.comments.count)
-                self.tableView.reloadData()
+                item.addComment(comment)
+                self.comments = item.comments
+                self.updateComments()
                 self.scrollBottom(animated: true)
             })
         }
+    }
+    
+    fileprivate func updateComments() {
+        self.header.setCommentsLabel(count: self.comments.count)
+        self.tableView.reloadData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -152,7 +152,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     
     func authorTitleTapped(sender:UITapGestureRecognizer) {
-        showUser(uid: item.getAuthorId())
+        //showUser(uid: item.getAuthorId())
     }
     
     func showUser(uid:String) {
@@ -211,7 +211,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    func actionHandler() {
+    func actionHandler() {/*
         guard let item = self.item else { return }
         
         if item.getAuthorId() == mainStore.state.userState.uid {
@@ -235,7 +235,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in}))
             self.present(sheet, animated: true, completion: nil)
         }
-        
+            */
     }
 
 }

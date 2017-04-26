@@ -97,19 +97,24 @@
                         <constraint firstAttribute="height" constant="64" id="z49-SV-1ce"/>
                     </constraints>
                 </view>
-                <imageView userInteractionEnabled="NO" alpha="0.5" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="down_arrow" translatesAutoresizingMaskIntoConstraints="NO" id="TDc-jB-S3n">
-                    <rect key="frame" x="226" y="20" width="16" height="16"/>
-                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                <button opaque="NO" alpha="0.5" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eJ4-kA-s0m">
+                    <rect key="frame" x="228" y="23" width="25" height="25"/>
                     <constraints>
-                        <constraint firstAttribute="width" secondItem="TDc-jB-S3n" secondAttribute="height" multiplier="1:1" id="6ek-5e-MxJ"/>
-                        <constraint firstAttribute="height" constant="16" id="Uz0-Qa-uSK"/>
+                        <constraint firstAttribute="width" secondItem="eJ4-kA-s0m" secondAttribute="height" multiplier="1:1" id="FmC-H6-TRO"/>
+                        <constraint firstAttribute="height" constant="32" id="wm9-xe-9De"/>
                     </constraints>
-                </imageView>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <inset key="contentEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
+                    <state key="normal" image="down_arrow"/>
+                    <connections>
+                        <action selector="handleClose:" destination="iN0-l3-epB" eventType="touchUpInside" id="exO-SO-rka"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="Wc6-eQ-kGb" secondAttribute="trailing" id="4c9-Zz-4xZ"/>
-                <constraint firstItem="TDc-jB-S3n" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="E9J-Wj-QQd"/>
+                <constraint firstItem="eJ4-kA-s0m" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="GZY-AA-Buq"/>
                 <constraint firstAttribute="bottom" secondItem="P53-W6-4P1" secondAttribute="bottom" id="LYX-08-ntE"/>
                 <constraint firstItem="Wc6-eQ-kGb" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="M1s-4G-rZn"/>
                 <constraint firstItem="XPT-og-Lko" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="N5g-k5-hXL"/>
@@ -118,18 +123,17 @@
                 <constraint firstAttribute="bottom" secondItem="085-qj-2uf" secondAttribute="bottom" id="V0Y-68-IrP"/>
                 <constraint firstItem="085-qj-2uf" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="a7v-72-ywD"/>
                 <constraint firstItem="XPT-og-Lko" firstAttribute="width" secondItem="XPT-og-Lko" secondAttribute="height" multiplier="1:1" id="dYU-X3-VPb"/>
+                <constraint firstItem="eJ4-kA-s0m" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="e1R-kt-Y1o"/>
                 <constraint firstAttribute="trailing" secondItem="P53-W6-4P1" secondAttribute="trailing" id="ebs-43-L5T"/>
                 <constraint firstItem="P53-W6-4P1" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="efa-M7-8tA"/>
                 <constraint firstAttribute="bottom" secondItem="XPT-og-Lko" secondAttribute="bottom" id="gtU-gi-bRl"/>
                 <constraint firstItem="XPT-og-Lko" firstAttribute="leading" secondItem="085-qj-2uf" secondAttribute="trailing" constant="-16" id="jS8-as-rKn"/>
-                <constraint firstItem="TDc-jB-S3n" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="lUB-m1-rAN"/>
                 <constraint firstItem="085-qj-2uf" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="-8" id="qpF-vT-F2U"/>
                 <constraint firstItem="LGP-Cr-TU4" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="yMc-5w-DR3"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="commentsLabel" destination="nUM-Gg-ddK" id="DZL-Ts-Sgg"/>
-                <outlet property="downArrow" destination="TDc-jB-S3n" id="mzu-bZ-UtZ"/>
                 <outlet property="rightButton" destination="P53-W6-4P1" id="wp9-61-xs2"/>
                 <outlet property="viewsLabel" destination="ATE-e7-jTZ" id="eiw-Bd-hCQ"/>
             </connections>

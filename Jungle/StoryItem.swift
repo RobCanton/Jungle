@@ -32,12 +32,14 @@ class StoryItem: NSObject, NSCoding {
     var contentType:ContentType
     var dateCreated: Date
     var length: Double
+    fileprivate var numComments:Int
     
     var flagged:Bool
 
     
     var viewers:[String:Double]
     var likes:[String:Double]
+    
     var comments:[Comment]
     
     var delegate:ItemDelegate?
@@ -47,7 +49,7 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, captionPos:Double?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-          viewers:[String:Double], likes:[String:Double], comments: [Comment], flagged:Bool)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numComments:Int, flagged:Bool)
     {
         
         self.key          = key
@@ -64,6 +66,7 @@ class StoryItem: NSObject, NSCoding {
         self.likes        = likes
         self.comments     = comments
         self.flagged      = flagged
+        self.numComments = numComments
 
     }
     
@@ -80,6 +83,7 @@ class StoryItem: NSObject, NSCoding {
         let length      = decoder.decodeObject(forKey: "length") as! Double
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
         let flagged     = decoder.decodeObject(forKey: "flagged") as! Bool
+        let numComments = decoder.decodeObject(forKey: "numComments") as! Int
         
         var viewers = [String:Double]()
         if let _viewers = decoder.decodeObject(forKey: "viewers") as? [String:Double] {
@@ -108,7 +112,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, flagged: flagged)
+        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numComments: numComments, flagged: flagged)
     }
     
     
@@ -135,6 +139,7 @@ class StoryItem: NSObject, NSCoding {
             coder.encode(videoURL!, forKey: "videoURL")
         }
         coder.encode(flagged, forKey: "flagged")
+        coder.encode(numComments, forKey: "numComments")
     }
     
     func getKey() -> String {
@@ -175,6 +180,10 @@ class StoryItem: NSObject, NSCoding {
     
     func getCaptionPos() -> CGFloat? {
         return captionPos
+    }
+    
+    func getNumComments() -> Int {
+        return numComments
     }
     
     func needsDownload() -> Bool{
@@ -232,6 +241,11 @@ class StoryItem: NSObject, NSCoding {
         cache()
     }
 
+    
+    func updateNumComments(_ count:Int) {
+        self.numComments = count
+        cache()
+    }
     
     func cache() {
         dataCache.removeObject(forKey: "upload-\(key)" as NSString)

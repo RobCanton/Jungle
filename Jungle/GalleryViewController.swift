@@ -247,7 +247,7 @@ extension GalleryViewController: PopupProtocol {
         let controller = CommentsViewController()
         controller.title = "Comments"
         controller.postRef = cell
-        controller.item = item
+        //controller.item = item
         if item.comments.count == 0 {
             controller.shouldShowKeyboard = true
         }

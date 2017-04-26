@@ -52,6 +52,8 @@ func MyActivityReducer(_ action:Action, state:[(String,Double)]?) -> [(String,Do
         let a = action as! SetMyActivity
         state = a.posts
         break
+    case _ as ClearMyActivity:
+        state = []
     default:
         break
     }
@@ -160,6 +162,10 @@ struct SetFollowingActivity: Action {
 
 struct SetMyActivity: Action {
     let posts: [(String, Double)]
+}
+
+struct ClearMyActivity: Action {
+    
 }
 
 struct ClearFollowingActivity: Action {}

@@ -352,7 +352,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
             ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
                 
                 let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                recipientUserRef.child(current_uid).setValue(true)
+                recipientUserRef.child(current_uid).setValue(false)
                 
                 let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
                 currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in

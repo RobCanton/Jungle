@@ -71,7 +71,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             //cell.setForPlay()
             cell.resume()
             if let item = cell.item {
-               commentsViewController.setupItem(item)
+                commentsViewController.setupItem(item)
             }
         }
         
@@ -138,10 +138,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
         scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height * 2.0)
-        
-//        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-//        blurView.frame = v2.bounds
-//        v2.addSubview(blurView)
         
         self.scrollView.addSubview(collectionView)
         self.view.addSubview(scrollView)
@@ -320,11 +316,13 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var redbar:UIView?
     var greenBar:UIView?
+
 }
 
 extension StoriesViewController: PopupProtocol {
     
     func newItem(_ item:StoryItem) {
+        guard let cell = getCurrentCell() else { return }
         commentsViewController.setupItem(item)
     }
     

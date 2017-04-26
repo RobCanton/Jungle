@@ -22,4 +22,5 @@ pod 'JSQMessagesViewController'
 pod 'NVActivityIndicatorView'
 pod 'TGPControls'
 pod 'TwicketSegmentedControl'
+pod 'SnapTimer'
 end

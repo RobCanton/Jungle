@@ -10,7 +10,6 @@ import UIKit
 
 class CommentsHeaderView: UIView {
     
-    @IBOutlet weak var downArrow: UIImageView!
     @IBOutlet weak var viewsLabel: UILabel!
     
     @IBOutlet weak var commentsLabel: UILabel!
@@ -23,7 +22,6 @@ class CommentsHeaderView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        downArrow.tintColor = UIColor.white
     }
 
     @IBAction func handleClose(_ sender: Any) {

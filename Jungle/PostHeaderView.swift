@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SnapTimer
 
 class PostHeaderView: UIView {
 
@@ -14,6 +15,8 @@ class PostHeaderView: UIView {
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var locationTitle: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var snapTimer: SnapTimerView!
+    
     //@IBOutlet weak var locationTitle: UILabel!
 
    // @IBOutlet weak var timeLabel: UILabel!
@@ -24,13 +27,10 @@ class PostHeaderView: UIView {
     }
     
     var location:Location!
-    var moreHandler:(()->())?
     var showAuthorHandler:(()->())?
     
     
     func setup(withUser user:User, date: Date?, optionsHandler:(()->())?) {
-
-        moreHandler = optionsHandler
         self.userImageView.image = nil
         self.userImageView.loadImageAsync(user.getImageUrl(), completion: { _ in })
         self.usernameLabel.text = user.getUsername()
@@ -61,8 +61,42 @@ class PostHeaderView: UIView {
         locationTitle.text = location.getName()
     }
     
-    @IBAction func moreTapped(_ sender: UIButton) {
-        moreHandler?()
+    func startTimer(length:Double, index:Int, total:Int) {
+        let timeInterval = TimeInterval(length)
+
+        var innerStart = (CGFloat(index) / CGFloat(total)) * 100.0
+        print("innerStart: \(innerStart)")
+        if total == 1 {
+            innerStart = 100
+        }
+        //self.snapTimer.setInnerValueTo(innerStart)
+        
+        DispatchQueue.main.async {
+            
+            self.snapTimer.animateInnerToValue(innerStart, duration: 0.0, completion: { _ in
+                self.snapTimer.animateOuterToValue(0.0, duration: 0.0, completion: { _ in
+//                    DispatchQueue.main.async {
+//                        self.snapTimer.animateInnerToValue((CGFloat(index + 1) / CGFloat(total)) * 100.0, duration: timeInterval, completion: nil)
+//                    }
+                    //self.snapTimer.animateInnerToValue((CGFloat(index + 1) / CGFloat(total)) * 100.0, duration: timeInterval, completion: nil)
+                    self.snapTimer.animateOuterToValue(100, duration:timeInterval, completion: nil)
+                })
+            })
+
+        }
+        //snapTimer.animateOuterToValue(value: 100.0, duration: 30.0, completion: nil)
+        //snapTimer.animateInnerToValue(value: 100.0, duration: 30.0, completion: nil)
+    }
+    
+    func pauseTimer() {
+            self.snapTimer.pauseAnimation()
+        
+    }
+    
+    func resumeTimer() {
+        
+            self.snapTimer.resumeAnimation()
+        
     }
     
     

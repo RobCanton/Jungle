@@ -26,11 +26,13 @@ class AuthService: NSObject {
     }
     
     func logout() {
+        Listeners.stopListeningToAll()
         mainStore.dispatch(ClearAllNotifications())
         mainStore.dispatch(ClearConversations())
-        Listeners.stopListeningToAll()
+        mainStore.dispatch(ClearMyActivity())
         mainStore.dispatch(ClearSocialState())
         mainStore.dispatch(UserIsUnauthenticated())
+        
         try! FIRAuth.auth()!.signOut()
         globalMainRef?.dismiss(animated: false, completion: nil)
     }

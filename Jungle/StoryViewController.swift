@@ -139,10 +139,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         let screenWidth: CGFloat = (UIScreen.main.bounds.size.width)
         let screenHeight: CGFloat = (UIScreen.main.bounds.size.height)
         let margin:CGFloat = 12.0
-        progressBar?.removeFromSuperview()
-        progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
-        progressBar!.createProgressIndicator(_story: story)
-        contentView.addSubview(progressBar!)
+        //progressBar?.removeFromSuperview()
+        //progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
+        //progressBar!.createProgressIndicator(_story: story)
+        //contentView.addSubview(progressBar!)
         
         if returnIndex != nil {
             viewIndex = returnIndex!
@@ -217,7 +217,23 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         let current_uid = mainStore.state.userState.uid
         //footerView.setLikedStatus(item.likes[current_uid] != nil, animated: false)
         UploadService.addView(post: item)
-     
+        footerView.setCommentsLabelToCount(item.getNumComments())
+        
+        numCommentsRef?.removeAllObservers()
+        numCommentsRef = FIRDatabase.database().reference().child("uploads/meta/\(item.getKey())/comments")
+        print("LIKE WE HERE DOE?")
+        numCommentsRef!.observe(.value, with: { snapshot in
+            var numComments = 0
+            print("OBSERVIN")
+            if snapshot.exists() {
+                if let _numComments = snapshot.value as? Int {
+                    print("VALUE: \(_numComments)")
+                    numComments = _numComments
+                }
+            }
+            item.updateNumComments(numComments)
+            self.footerView.setCommentsLabelToCount(item.getNumComments())
+        })
     }
     
     func prepareImageContent(item:StoryItem) {
@@ -230,6 +246,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             story.downloadStory()
         }
     }
+    
+    var numCommentsRef: FIRDatabaseReference?
     
     func prepareVideoContent(item:StoryItem) {
         /* CURRENTLY ASSUMING THAT IMAGE IS LOAD */
@@ -278,7 +296,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             }
         }
 
-        progressBar?.activateIndicator(itemIndex: viewIndex)
+        //progressBar?.activateIndicator(itemIndex: viewIndex)
+        headerView.startTimer(length: itemLength, index: viewIndex, total:story!.getPosts().count)
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
         if shouldAutoPause {
@@ -336,8 +355,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         content.image = nil
         destroyVideoPlayer()
         killTimer()
-        progressBar?.resetAllProgressBars()
-        progressBar?.removeFromSuperview()
+        //progressBar?.resetAllProgressBars()
+        //progressBar?.removeFromSuperview()
         delegate = nil
         animateInitiated = false
         NotificationCenter.default.removeObserver(self)
@@ -346,7 +365,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     func reset() {
         killTimer()
-        progressBar?.resetActiveIndicator()
+        //progressBar?.resetActiveIndicator()
         pauseVideo()
     }
     
@@ -374,7 +393,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         if paused { return }
         paused = true
         pauseVideo()
-        progressBar?.pauseActiveIndicator()
+        //progressBar?.pauseActiveIndicator()
+        headerView.pauseTimer()
         guard let timer = self.timer else { return }
         remainingTime = timer.fireDate.timeIntervalSinceNow
         timer.invalidate()
@@ -396,18 +416,19 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             playVideo()
         }
         
-        progressBar?.resumeActiveIndicator()
+        headerView.resumeTimer()
+        //progressBar?.resumeActiveIndicator()
     }
     
     func focusItem() {
         UIView.animate(withDuration: 0.15, animations: {
-            self.progressBar?.alpha = 0.0
+            //self.progressBar?.alpha = 0.0
         })
     }
     
     func unfocusItem() {
         UIView.animate(withDuration: 0.2, animations: {
-            self.progressBar?.alpha = 1.0
+            //self.progressBar?.alpha = 1.0
         })
     }
     
@@ -506,7 +527,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     func fadeOutDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 0
-            self.progressBar?.alpha = 0
+            //self.progressBar?.alpha = 0
             self.headerView.alpha = 0
             self.captionView.textColor = UIColor(white: 1.0, alpha: 0)
             self.captionView.alpha = 0.65
@@ -516,7 +537,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     func fadeInDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 1
-            self.progressBar?.alpha = 1
+            //self.progressBar?.alpha = 1
             self.headerView.alpha = 1
             self.captionView.textColor = UIColor(white: 1.0, alpha: 1)
             self.captionView.alpha = 1
@@ -525,8 +546,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
-        self.footerView.alpha = multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
-        self.progressBar?.alpha = multiple
+        self.footerView.alpha = 0.75 * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
+        //self.progressBar?.alpha = multiple
         self.headerView.alpha = multiple
         self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
         self.captionView.alpha = 0.5 + 0.5 * alpha
@@ -581,17 +602,16 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }()
     
     lazy var headerView: PostHeaderView = {
-        let margin:CGFloat = 2.0
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: margin, y: margin + 12.0, width: width, height: view.frame.height)
+        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
         return view
     }()
     
-    lazy var footerView: UIView = {
+    lazy var footerView: PostFooterView = {
         let margin:CGFloat = 0.0
-        var view = UINib(nibName: "PostFooterView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+        var view = UINib(nibName: "PostFooterView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostFooterView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         view.frame = CGRect(x: margin, y: height - view.frame.height, width: width, height: view.frame.height)

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
+		B012177B1EB0407F00F13F64 /* PostFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012177A1EB0407F00F13F64 /* PostFooterView.swift */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
 		B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */; };
 		B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */; };
@@ -128,6 +129,7 @@
 /* Begin PBXFileReference section */
 		24440022F614359253D5F062 /* Pods_Jungle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Jungle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
+		B012177A1EB0407F00F13F64 /* PostFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFooterView.swift; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
 		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
@@ -424,6 +426,7 @@
 				B0AE229E1E7A526500141709 /* StoryInfoView.xib */,
 				B0F894641E7B33F500E490C4 /* StoryDetailsView.swift */,
 				B0F894621E7B33DE00E490C4 /* StoryDetailsView.xib */,
+				B012177A1EB0407F00F13F64 /* PostFooterView.swift */,
 				B0A053E51EAACC3000922AAC /* PostFooterView.xib */,
 				B093FFD31E79399C00011B43 /* StoryProgressIndicator.swift */,
 				B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */,
@@ -691,6 +694,7 @@
 				B093FFBF1E790D5E00011B43 /* PlacesViewController.swift in Sources */,
 				B093FFDD1E79BEB100011B43 /* CameraViewController.swift in Sources */,
 				B0550D7E1E8A1888007DAAAC /* NearbyLocationButton.swift in Sources */,
+				B012177B1EB0407F00F13F64 /* PostFooterView.swift in Sources */,
 				B0550DA11E8E21C4007DAAAC /* YoshikoTextField.swift in Sources */,
 				B0F8945D1E7B216500E490C4 /* UserService.swift in Sources */,
 				B0550D821E8E111F007DAAAC /* Notification.swift in Sources */,
