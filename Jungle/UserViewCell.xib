@@ -4,7 +4,6 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -23,8 +22,8 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fLb-U7-gsg">
                         <rect key="frame" x="8" y="8" width="43" height="43"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LVT-xh-M9P">
-                                <rect key="frame" x="4" y="2" width="39.5" height="39.5"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="LVT-xh-M9P">
+                                <rect key="frame" x="2" y="2" width="39.5" height="39.5"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -36,8 +35,8 @@
                             <constraint firstAttribute="width" secondItem="fLb-U7-gsg" secondAttribute="height" multiplier="1:1" id="yaR-KH-WNe"/>
                         </constraints>
                     </view>
-                    <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F86-Mh-lUL">
-                        <rect key="frame" x="299" y="16" width="100" height="32"/>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F86-Mh-lUL">
+                        <rect key="frame" x="309" y="16" width="90" height="29"/>
                         <color key="backgroundColor" red="0.0" green="0.50196078430000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="90" id="B8Z-Hh-dxz"/>
@@ -51,15 +50,15 @@
                             <action selector="handleFollowTapWithSender:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="zdJ-91-keP"/>
                         </connections>
                     </button>
-                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="verified" translatesAutoresizingMaskIntoConstraints="NO" id="CXZ-5C-cA8">
-                        <rect key="frame" x="207" y="23" width="22" height="22"/>
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="verified" translatesAutoresizingMaskIntoConstraints="NO" id="CXZ-5C-cA8">
+                        <rect key="frame" x="67" y="22" width="16" height="16"/>
                         <constraints>
                             <constraint firstAttribute="width" secondItem="CXZ-5C-cA8" secondAttribute="height" multiplier="1:1" id="CXX-lQ-VJr"/>
                             <constraint firstAttribute="width" constant="16" id="cn3-s6-Z4p"/>
                         </constraints>
                     </imageView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cj3-Qp-d3T">
-                        <rect key="frame" x="69" y="16" width="130" height="22"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cj3-Qp-d3T">
+                        <rect key="frame" x="61" y="30" width="0.0" height="0.0"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>

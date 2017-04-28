@@ -11,11 +11,22 @@ import UIKit
 
 class PostFooterView: UIView {
     
+    @IBOutlet weak var block: UIView!
+    
     @IBOutlet weak var commentsLabel: UILabel!
+    
+    var pullUpTapHandler:(()->())?
     override func awakeFromNib() {
         super.awakeFromNib()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(blockTapped))
+        block.isUserInteractionEnabled = true
+        block.addGestureRecognizer(tap)
     }
 
+    func blockTapped() {
+        print("YEA")
+        pullUpTapHandler?()
+    }
     
     func setCommentsLabelToCount(_ count:Int) {
         

@@ -13,7 +13,7 @@ func getNonEmptyConversations() -> [Conversation] {
     var activeConvos = [Conversation]()
     for conversation in mainStore.state.conversations {
         let isBlocked = mainStore.state.socialState.blockedBy.contains(conversation.getPartnerId())
-        if conversation.lastMessage != nil && conversation.isListening() && !isBlocked {
+        if conversation.isListening() && !isBlocked {
             activeConvos.append(conversation)
         }
     }
@@ -70,15 +70,15 @@ func ConversationsReducer(action: Action, state:[Conversation]?) -> [Conversatio
     case _ as NewMessageInConversation:
         let a = action as! NewMessageInConversation
         if let conversation = findConversation(key: a.conversationKey) {
-            conversation.lastMessage = a.message
-            conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
+            //conversation.lastMessage = a.message
+            //conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
         }
         break
     case _ as SeenConversation:
         let a = action as! SeenConversation
         if let conversation = findConversation(key: a.conversationKey) {
-            conversation.seenDate = a.seenDate
-            conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
+            //conversation.seenDate = a.seenDate
+            //conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
         }
         break
     case _ as MuteConversation:

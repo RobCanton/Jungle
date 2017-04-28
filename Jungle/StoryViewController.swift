@@ -47,23 +47,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         delegate?.showUser(item.getAuthorId())
     }
     
-    func handleFooterAction(_ like: Bool?) {
-        guard let item = self.item else { return }
-        if let like = like {
-            if like {
-                UploadService.addLike(post: item)
-                item.addLike(mainStore.state.userState.uid)
-            } else {
-                UploadService.removeLike(postKey: item.getKey())
-                item.removeLike(mainStore.state.userState.uid)
-            }
-        } else {
-            delegate?.showDeleteOptions()
-        }
-        
-        
-        
-        //headerView.setLikes(post: item)
+    func handleFooterAction() {
+        delegate?.showComments()
     }
     
     func prepareStory(withLocation location:LocationStory) {
@@ -176,8 +161,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
         let item = items[viewIndex]
         self.item = item
-        
-        delegate?.newItem(item)
 
         if item.contentType == .image {
             prepareImageContent(item: item)
@@ -213,27 +196,23 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             })
         }
         
-        
-        let current_uid = mainStore.state.userState.uid
-        //footerView.setLikedStatus(item.likes[current_uid] != nil, animated: false)
         UploadService.addView(post: item)
         footerView.setCommentsLabelToCount(item.getNumComments())
         
         numCommentsRef?.removeAllObservers()
         numCommentsRef = FIRDatabase.database().reference().child("uploads/meta/\(item.getKey())/comments")
-        print("LIKE WE HERE DOE?")
         numCommentsRef!.observe(.value, with: { snapshot in
             var numComments = 0
-            print("OBSERVIN")
             if snapshot.exists() {
                 if let _numComments = snapshot.value as? Int {
-                    print("VALUE: \(_numComments)")
                     numComments = _numComments
                 }
             }
             item.updateNumComments(numComments)
             self.footerView.setCommentsLabelToCount(item.getNumComments())
         })
+        
+        delegate?.newItem(item)
     }
     
     func prepareImageContent(item:StoryItem) {
@@ -520,6 +499,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 2.0)
         scrollView.isPagingEnabled = true
         scrollView.bounces = false
+        
+        footerView.pullUpTapHandler = handleFooterAction
+        
+        
     }
     
     var commentsActive = false

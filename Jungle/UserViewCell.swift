@@ -58,6 +58,26 @@ class UserViewCell: UITableViewCell {
         }
     }
     
+    func clearMode(_ enabled:Bool) {
+        if enabled {
+            self.backgroundColor = UIColor.clear
+            self.contentView.backgroundColor = UIColor.clear
+            self.usernameLabel.textColor = UIColor.white
+            followButtonColor = UIColor.white
+            
+            let backgroundView = UIView()
+            backgroundView.backgroundColor = UIColor.clear
+            self.selectedBackgroundView = backgroundView
+        } else {
+            self.backgroundColor = UIColor.white
+            self.contentView.backgroundColor = UIColor.white
+            self.usernameLabel.textColor = UIColor.black
+            followButtonColor = UIColor.black
+        }
+    }
+    
+    var followButtonColor = UIColor.black
+    
     func setUserStatus(status:FollowingStatus) {
         if self.status == status { return }
         self.status = status
@@ -76,15 +96,15 @@ class UserViewCell: UITableViewCell {
         case .Requested:
             followButton.isHidden = false
             followButton.backgroundColor = UIColor.clear
-            followButton.layer.borderColor = UIColor.black.cgColor
+            followButton.layer.borderColor = followButtonColor.cgColor
             followButton.setTitle("Requested", for: .normal)
-            followButton.setTitleColor(UIColor.black, for: .normal)
+            followButton.setTitleColor(followButtonColor, for: .normal)
             break
         case .Following:
             followButton.isHidden = false
             followButton.backgroundColor = UIColor.clear
-            followButton.layer.borderColor = UIColor.black.cgColor
-            followButton.setTitleColor(UIColor.black, for: .normal)
+            followButton.layer.borderColor = followButtonColor.cgColor
+            followButton.setTitleColor(followButtonColor, for: .normal)
             followButton.setTitle("Following", for: .normal)
             break
         }

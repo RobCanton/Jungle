@@ -219,7 +219,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
                     
                     let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
                     currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
-                        let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
+                        let conversation = Conversation(key: pairKey, partner_uid: partner_uid, seen: true, date: Date(), lastMessage: "", listening: true)
                         self.presentingEmptyConversation = true
                         self.prepareConversationForPresentation(conversation: conversation)
                     })

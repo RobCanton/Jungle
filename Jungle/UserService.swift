@@ -157,16 +157,18 @@ class UserService {
     }
     
     static func sendMessage(conversation:Conversation, message:String, uploadKey:String?, completion: ((_ success:Bool)->())?) {
-        let messageRef = ref.child("conversations/\(conversation.getKey())/messages").childByAutoId()
+        let convoRef = ref.child("conversations/\(conversation.getKey())")
+        
+        let messageRef = convoRef.child("messages").childByAutoId()
         let uid = mainStore.state.userState.uid
         
-        messageRef.setValue([
-            "senderId": uid as AnyObject,
-            "text": message as AnyObject,
-            "timestamp": [".sv":"timestamp"] as AnyObject
-            ])
+        let updateObject = [
+                "senderId": uid as AnyObject,
+                "text": message as AnyObject,
+                "timestamp": [".sv":"timestamp"] as AnyObject
+        ] as [String:AnyObject]
         
-        
+        messageRef.setValue(updateObject, withCompletionBlock: { error, ref in })
     }
 
 

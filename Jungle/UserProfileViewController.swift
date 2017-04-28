@@ -348,19 +348,32 @@ extension UserProfileViewController: ProfileHeaderProtocol {
         } else {
             
             let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
-            let ref = UserService.ref.child("conversations/\(pairKey)")
+            let conversation = Conversation(key: pairKey, partner_uid: partner_uid, seen: true, date: Date(), lastMessage: "", listening: true)
+            self.presentingEmptyConversation = true
+            self.prepareConversationForPresentation(conversation: conversation)
+            /*let ref = UserService.ref.child("conversations/\(pairKey)")
             ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
                 
+                let recipientObject = [
+                    "seen": [".sv":"timestamp"],
+                    "mute": false
+                ] as [String : Any]
                 let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                recipientUserRef.child(current_uid).setValue(false)
+                recipientUserRef.child(current_uid).setValue(recipientObject)
+                
+                let senderObject = [
+                    "seen": [".sv":"timestamp"],
+                    "mute": false
+                ] as [String : Any]
                 
                 let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
-                currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
+                currentUserRef.child(partner_uid).setValue(senderObject, withCompletionBlock: { error, ref in
                     let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
                     self.presentingEmptyConversation = true
                     self.prepareConversationForPresentation(conversation: conversation)
                 })
             })
+            */
         }
     }
     

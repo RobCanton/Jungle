@@ -451,16 +451,23 @@ class UploadService {
     }
     
     static func addView(post:StoryItem) {
+        
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid
         
+        
         if uid == post.getAuthorId() { return }
+        if post.viewers[uid] != nil { return }
+        
+        post.addView(uid)
         
         let postRef = ref.child("uploads/meta/\(post.getKey())/views/\(uid)")
         postRef.setValue([".sv":"timestamp"])
+    
     }
     
     static func addLike(post:StoryItem) {
+        
         
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid

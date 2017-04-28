@@ -118,9 +118,17 @@ class Listeners {
                     
                     let partner = snapshot.key
                     let pairKey = createUserIdPairKey(uid1: uid, uid2: partner)
-                    let listening = snapshot.value! as! Bool
-                    let conversation = Conversation(key: pairKey, partner_uid: partner, listening: listening)
-                    mainStore.dispatch(ConversationAdded(conversation: conversation))
+                    if let dict = snapshot.value as? [String:AnyObject] {
+                        let seen = dict["seen"] as! Bool
+                        let lastMessage = dict["text"] as! String
+                        let timestamp = dict["latest"] as! Double
+                        let date = Date(timeIntervalSince1970: timestamp/1000) as Date
+                        let listening = true
+                        
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                        mainStore.dispatch(ConversationAdded(conversation: conversation))
+                        
+                    }
                 }
             })
         }

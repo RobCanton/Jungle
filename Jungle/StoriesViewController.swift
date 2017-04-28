@@ -358,7 +358,7 @@ extension StoriesViewController: PopupProtocol {
     }
     
     func showComments() {
-        
+        scrollView.setContentOffset(CGPoint(x: 0, y:self.view.frame.height), animated: true)
     }
     
     
@@ -377,6 +377,8 @@ extension StoriesViewController: PopupProtocol {
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
         scrollView.isScrollEnabled = false
+        commentsViewController.setInfoMode(.Comments)
+        commentsViewController.header.setCurrentUserMode(false)
         
         self.commentBar.sendButton.isEnabled = true
         
@@ -412,7 +414,9 @@ extension StoriesViewController: PopupProtocol {
     func keyboardWillDisappear(notification: NSNotification){
         
         self.commentBar.sendButton.isEnabled = false
-        
+        if let item = getCurrentCell()?.item {
+            commentsViewController.header.setCurrentUserMode(item.getAuthorId() == mainStore.state.userState.uid)
+        }
         scrollView.isScrollEnabled = true
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in

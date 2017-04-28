@@ -63,6 +63,9 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
     func newState(state: AppState) {
         
         conversations = getNonEmptyConversations()
+        for conversation in conversations {
+            print("CONVERSATION:  \(conversation.getKey())")
+        }
         conversations.sort(by: { $0 > $1 })
         tableView.reloadData()
         

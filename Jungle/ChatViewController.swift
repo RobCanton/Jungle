@@ -217,9 +217,14 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     func reloadMessagesView() {
         self.collectionView?.reloadData()
         //set seen timestamp
-        let uid = mainStore.state.userState.uid
-        let ref = UserService.ref.child("conversations/\(conversation.getKey())/\(uid)")
-        ref.updateChildValues(["seen": [".sv":"timestamp"]])
+        if messages.count > 0 {
+            let lastMessage = messages[messages.count - 1]
+            let uid = mainStore.state.userState.uid
+            if lastMessage.senderId != uid {
+                let ref = UserService.ref.child("conversations/\(conversation.getKey())/meta/\(uid)")
+                ref.setValue([".sv":"timestamp"])
+            }
+        }
         
     }
     

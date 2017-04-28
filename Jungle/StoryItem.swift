@@ -186,6 +186,14 @@ class StoryItem: NSObject, NSCoding {
         return numComments
     }
     
+    func getViewsList() -> [String] {
+        var list = [String]()
+        for (uid, _) in viewers {
+            list.append(uid)
+        }
+        return list
+    }
+    
     func needsDownload() -> Bool{
         if contentType == .image {
             if image != nil {
@@ -220,6 +228,11 @@ class StoryItem: NSObject, NSCoding {
                 }
             }
         })
+    }
+    
+    func addView(_ uid:String) {
+        self.viewers[uid] = 0
+        cache()
     }
     
     func addComment(_ comment:Comment) {

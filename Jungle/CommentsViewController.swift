@@ -10,8 +10,15 @@ import Foundation
 import UIKit
 import Firebase
 
+enum PostInfoMode {
+    case Viewers, Comments
+}
+
 class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     
+    var mode:PostInfoMode = .Comments
+    
+    var viewers = [String]()
     var comments = [Comment]()
     var storyRef:StoryViewController?
     var postRef:PostViewController?
@@ -38,6 +45,13 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var handleDismiss:(()->())!
     var popupDismiss:((_ animated:Bool)->())!
     
+    func setInfoMode(_ mode:PostInfoMode) {
+        if self.mode == mode { return }
+        
+        self.mode = mode
+        self.tableView.reloadData()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.automaticallyAdjustsScrollViewInsets = false
@@ -52,6 +66,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         header.frame = CGRect(x: 0, y: 0 , width: view.frame.width, height: navHeight)
         header.closeHandler = handleDismiss
         header.moreHandler = actionHandler
+        header.setMode = setInfoMode
         view.addSubview(header)
         
         let containerView = UIView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
@@ -61,6 +76,9 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView = UITableView(frame: CGRect(x: 0, y:0, width: containerView.frame.width, height: containerView.frame.height))
         let nib = UINib(nibName: "CommentCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: "commentCell")
+        
+        let nib2 = UINib(nibName: "UserViewCell", bundle: nil)
+        tableView.register(nib2, forCellReuseIdentifier: "userViewCell")
         
         headerCell = nib.instantiate(withOwner: nil, options: nil)[0] as! CommentCell
         //header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
@@ -93,7 +111,20 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.delegate = self
         tableView.dataSource = self
         
+        self.viewers = item.getViewsList()
         self.comments = item.comments
+        
+        if item.getAuthorId() == mainStore.state.userState.uid {
+            header.setCurrentUserMode(true)
+            if self.comments.count > 0 {
+                mode = .Comments
+            } else {
+                mode = .Viewers
+            }
+        } else {
+            header.setCurrentUserMode(false)
+            mode = .Comments
+        }
         self.updateComments()
         
         commentsRef?.removeAllObservers()
@@ -143,11 +174,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewWillDisappear(animated)
         commentsRef?.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
-        /*storyRef?.shouldPlay = true
-        //storyRef?.setupItem()
-        storyRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
-        postRef?.footerView.setCommentsLabel(numLikes: item.likes.count, numComments: item.comments.count)
-        */
     }
     
     
@@ -170,36 +196,62 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return comments.count
+        
+        switch mode {
+        case .Viewers:
+            return viewers.count
+        case .Comments:
+            return comments.count
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        let comment = comments[indexPath.row]
-        let text = comment.getText()
-        let width = tableView.frame.width - (12 + 12 + 10 + 32)
-        let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 26 + 14 + 2 + 6  // +8 for some bio padding
-        return height2
+        switch mode {
+        case .Viewers:
+            return 60
+        case .Comments:
+            let comment = comments[indexPath.row]
+            let text = comment.getText()
+            let width = tableView.frame.width - (12 + 12 + 10 + 32)
+            let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
+            let height2 = size.height + 26 + 14 + 2 + 6  // +8 for some bio padding
+            return height2
+        }
     }
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
-        cell.setContent(comment: comments[indexPath.row])
-        cell.authorTapped = showUser
-        let labelX = cell.authorLabel.frame.origin.x
-        cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
-        return cell
+        switch mode {
+        case .Viewers:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "userViewCell", for: indexPath) as! UserViewCell
+            cell.clearMode(true)
+            cell.setupUser(uid: viewers[indexPath.row])
+            let labelX = cell.usernameLabel.frame.origin.x
+            cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            return cell
+        case .Comments:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
+            cell.setContent(comment: comments[indexPath.row])
+            cell.authorTapped = showUser
+            let labelX = cell.authorLabel.frame.origin.x
+            cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            return cell
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath) as! CommentCell
+        switch mode {
+        case .Viewers:
+            break
+        case .Comments:
+            break
+        }
         tableView.deselectRow(at: indexPath, animated: false)
     }
     
     func scrollBottom(animated:Bool) {
-            if self.comments.count > 0 {
+            if self.comments.count > 0 && mode == .Comments {
                 let lastIndex = IndexPath(row: self.comments.count-1, section: 0)
                 self.tableView.scrollToRow(at: lastIndex, at: UITableViewScrollPosition.bottom, animated: animated)
             }

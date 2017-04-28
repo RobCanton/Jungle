@@ -30,12 +30,12 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
                 }
             })
             
-            if let lastMessage = conversation!.lastMessage {
-                messageLabel.text = lastMessage.text
-                timeLabel.text = lastMessage.date.timeStringSinceNow()
-            }
+            let lastMessage = conversation!.getLastMessage()
+            messageLabel.text = lastMessage
+            timeLabel.text = conversation!.getDate().timeStringSinceNow()
             
-            if !conversation!.seen {
+            
+            if !conversation!.getSeen() {
                 usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
                 unread_dot.isHidden = false
             } else {
