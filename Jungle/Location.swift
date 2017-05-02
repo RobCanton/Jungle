@@ -15,13 +15,15 @@ class Location: NSObject {
     fileprivate var name:String
     fileprivate var address:String
     fileprivate var coordinates:CLLocation
+    fileprivate var types:[String]
     
-    init(key:String, name:String, address:String, coordinates:CLLocation)
+    init(key:String, name:String, address:String, coordinates:CLLocation, types:[String])
     {
         self.key          = key
         self.name        = name
         self.address     = address
         self.coordinates = coordinates
+        self.types       = types
 
     }
     
@@ -31,7 +33,8 @@ class Location: NSObject {
         let name = decoder.decodeObject(forKey: "name") as! String
         let address = decoder.decodeObject(forKey: "address") as! String
         let coordinates = decoder.decodeObject(forKey: "coordinates") as! CLLocation
-        self.init(key: key, name: name, address: address, coordinates: coordinates)
+        let types = decoder.decodeObject(forKey: "types") as! [String]
+        self.init(key: key, name: name, address: address, coordinates: coordinates, types: types)
         
     }
     
@@ -41,6 +44,7 @@ class Location: NSObject {
         coder.encode(name, forKey: "name")
         coder.encode(address, forKey: "address")
         coder.encode(coordinates, forKey: "coordinates")
+        coder.encode(types, forKey: "types")
     }
     
     /* Getters */
@@ -67,6 +71,10 @@ class Location: NSObject {
     func getCoordinates() -> CLLocation
     {
         return coordinates
+    }
+    
+    func getTypes() -> [String] {
+        return types
     }
     
     /*func getStory() -> Story {

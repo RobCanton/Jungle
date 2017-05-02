@@ -36,7 +36,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var collectionView:UICollectionView!
     var user:User?
     
-    var uid:String!
+    var username:String?
+    var uid:String?
     var statusBarShouldHide = false
     
     var presentingEmptyConversation = false
@@ -106,6 +107,19 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         collectionView.reloadData()
         
         
+        if uid != nil {
+            uidRetrieved(uid: uid!)
+        } else if username != nil {
+            UserService.getUserId(byUsername: username!, completion: { _uid in
+                if _uid != nil {
+                    self.uidRetrieved(uid: _uid!)
+                }
+            })
+        }
+    
+    }
+    
+    func uidRetrieved(uid: String) {
         self.status = checkFollowingStatus(uid: uid)
         UserService.getUser(uid, completion: { user in
             if user != nil && self.user == nil {
@@ -114,7 +128,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                 self.collectionView.reloadData()
             }
         })
-
+        
         
         if uid != mainStore.state.userState.uid {
             let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: nil)
@@ -129,7 +143,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                 self.following = following
             })
         }
-    
     }
 
     
@@ -172,17 +185,21 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         mainStore.unsubscribe(self)
         stopListeningToPosts()
         
-        UserService.stopListeningToFollowers(uid: uid)
-        UserService.stopListeningToFollowing(uid: uid)
+        if let uid = self.uid {
+            UserService.stopListeningToFollowers(uid: uid)
+            UserService.stopListeningToFollowing(uid: uid)
+        }
     }
     
     func newState(state: AppState) {
+        guard let uid = self.uid else { return }
         self.status = checkFollowingStatus(uid: uid)
         getHeaderView()?.setUserStatus(status: status)
         setFollowing()
     }
     
     func setFollowing() {
+        guard let uid = self.uid else { return }
         if uid != mainStore.state.userState.uid { return }
         let followers = mainStore.state.socialState.followers
         var tempFollowers = [String]()
@@ -378,6 +395,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
     }
     
     func prepareConversationForPresentation(conversation:Conversation) {
+        guard let uid = self.uid else { return }
         conversation.listen()
         UserService.getUser(uid, completion: { user in
             if user != nil {
@@ -392,6 +410,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
             controller.conversation = conversation
             controller.partnerImage = image
             controller.popUpMode = true
+            
             let nav = UINavigationController(rootViewController: controller)
             nav.navigationBar.isTranslucent = false
             nav.navigationBar.tintColor = UIColor.black
@@ -411,6 +430,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
     }
     
     func changeFollowStatus() {
+        guard let uid = self.uid else { return }
         switch status {
         case .CurrentUser:
             break
@@ -419,6 +439,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
             break
         case .None:
             getHeaderView()?.setUserStatus(status: .Requested)
+            
             UserService.followUser(uid: uid)
             break
         case .Requested:

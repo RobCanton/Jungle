@@ -64,6 +64,7 @@ class UserViewCell: UITableViewCell {
             self.contentView.backgroundColor = UIColor.clear
             self.usernameLabel.textColor = UIColor.white
             followButtonColor = UIColor.white
+            followButton?.removeFromSuperview()
             
             let backgroundView = UIView()
             backgroundView.backgroundColor = UIColor.clear

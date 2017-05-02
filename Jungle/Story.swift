@@ -155,6 +155,15 @@ class Story: ItemDelegate {
             }
         }
     }
+    
+    func hasViewed() -> Bool {
+        for key in posts {
+            if !mainStore.state.viewed.contains(key) {
+                return false
+            }
+        }
+        return true
+    }
 }
 
 func < (lhs: Story, rhs: Story) -> Bool {
@@ -174,39 +183,3 @@ func == (lhs: Story, rhs: Story) -> Bool {
     let t2 = rhs.getPostKeys().first!.1
     return t1 == t2
 }
-
-//func findStoryByUserID(uid:String, stories:[Story]) -> Int? {
-//    for i in 0 ..< stories.count {
-//        if stories[i].author_uid == uid {
-//            return i
-//        }
-//    }
-//    return nil
-//}
-//
-//func sortStoryItems(items:[StoryItem]) -> [Story] {
-//    var stories = [Story]()
-//    for item in items {
-//        if let index = findStoryByUserID(item.getAuthorId(), stories: stories) {
-//            stories[index].addItem(item)
-//        } else {
-//            let story = Story(author_uid: item.getAuthorId())
-//            story.addItem(item)
-//            stories.append(story)
-//        }
-//    }
-//    
-//    return stories
-//}
-
-//func < (lhs: Story, rhs: Story) -> Bool {
-//    let lhs_item = lhs.getMostRecentItem()!
-//    let rhs_item = rhs.getMostRecentItem()!
-//    return lhs_item.dateCreated.compare(rhs_item.dateCreated) == .OrderedAscending
-//}
-//
-//func == (lhs: Story, rhs: Story) -> Bool {
-//    let lhs_item = lhs.getMostRecentItem()!
-//    let rhs_item = rhs.getMostRecentItem()!
-//    return lhs_item.dateCreated.compare(rhs_item.dateCreated) == .OrderedSame
-//}

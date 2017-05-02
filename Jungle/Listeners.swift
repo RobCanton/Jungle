@@ -22,6 +22,7 @@ class Listeners {
     fileprivate static var listeningToMyActivity = false
     fileprivate static var listeningToNearbyActivity = false
     fileprivate static var listeningToFollowingActivity = false
+    fileprivate static var listeningToViewed = false
     
     static func stopListeningToAll() {
 
@@ -32,6 +33,7 @@ class Listeners {
         stopListeningToMyActivity()
         stopListeningToNearbyActivity()
         stopListeningToFollowingActivity()
+        stopListeningToViewed()
     }
     
    
@@ -130,6 +132,26 @@ class Listeners {
                         
                     }
                 }
+            })
+            
+            conversationsRef.observe(.childChanged, with: { snapshot in
+                if snapshot.exists() {
+                    
+                    let partner = snapshot.key
+                    let pairKey = createUserIdPairKey(uid1: uid, uid2: partner)
+                    if let dict = snapshot.value as? [String:AnyObject] {
+                        let seen = dict["seen"] as! Bool
+                        let lastMessage = dict["text"] as! String
+                        let timestamp = dict["latest"] as! Double
+                        let date = Date(timeIntervalSince1970: timestamp/1000) as Date
+                        let listening = true
+                        
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                        mainStore.dispatch(ConversationChanged(conversation: conversation))
+                        
+                    }
+                }
+                
             })
         }
     }
@@ -260,6 +282,33 @@ class Listeners {
         let followingActivityRef = ref.child("notifications/\(uid)")
         followingActivityRef.removeAllObservers()
         listeningToFollowingActivity = false
+    }
+    
+    static func startListeningToViewed() {
+        if !listeningToViewed {
+            listeningToViewed = true
+            let current_uid = mainStore.state.userState.uid
+            
+            let viewedRef = ref.child("users/viewed/\(current_uid)")
+            viewedRef.observe(.value, with: { snapshot in
+                var viewed = [String]()
+                if snapshot.exists() {
+                    
+                    for postKey in snapshot.children {
+                        let childSnap = postKey as! FIRDataSnapshot
+                        viewed.append(childSnap.key)
+                    }
+                }
+                mainStore.dispatch(SetViewed(postKeys: viewed))
+            })
+        }
+    }
+    
+    static func stopListeningToViewed() {
+        let uid = mainStore.state.userState.uid
+        let viewedRef = ref.child("users/viewed/\(uid)")
+        viewedRef.removeAllObservers()
+        listeningToViewed = false
     }
     
     

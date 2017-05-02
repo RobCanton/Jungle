@@ -7,11 +7,12 @@
 //
 
 import UIKit
+import ActiveLabel
 
 class CommentCell: UITableViewCell {
 
     @IBOutlet weak var authorLabel: UILabel!
-    @IBOutlet weak var commentLabel: UILabel!
+    @IBOutlet weak var commentLabel: ActiveLabel!
     
     var authorTapped:((_ userId:String)->())?
     
@@ -32,6 +33,18 @@ class CommentCell: UITableViewCell {
         
         //authorLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
         //commentLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
+        
+        commentLabel.enabledTypes = [.mention]
+        commentLabel.customColor[ActiveType.mention] = accentColor
+        commentLabel.handleMentionTap { mention in
+            print("MENTIONED: \(mention)")
+            
+            let controller = UserProfileViewController()
+            controller.username = mention
+            globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+        }
+    
+       
     }
     
     var tap:UITapGestureRecognizer!
@@ -48,6 +61,8 @@ class CommentCell: UITableViewCell {
     
     
     func setContent(comment:Comment) {
+        
+        
         self.comment = comment
         userImage.cropToCircle()
         

@@ -50,6 +50,7 @@ class FirstAuthViewController: FirstViewController {
                     Listeners.startListeningToMyActivity()
                     Listeners.startListeningToNearbyActivity()
                     Listeners.startListeningToFollowingActivity()
+                    Listeners.startListeningToViewed()
                     self.performSegue(withIdentifier: "login", sender: self)
                 } else {
                     self.performSegue(withIdentifier: "toLoginScreen", sender: self)
@@ -117,6 +118,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     Listeners.startListeningToMyActivity()
                     Listeners.startListeningToNearbyActivity()
                     Listeners.startListeningToFollowingActivity()
+                    Listeners.startListeningToViewed()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })

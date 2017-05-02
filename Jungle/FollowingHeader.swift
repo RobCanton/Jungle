@@ -77,7 +77,13 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        globalMainRef?.presentUserStory(stories: userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        
+        let story = userStories[indexPath.row]
+        if story.state == .contentLoaded {
+            globalMainRef?.presentUserStory(stories: userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        } else {
+            story.downloadStory()
+        }
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     

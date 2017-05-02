@@ -51,16 +51,24 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         delegate?.showComments()
     }
     
-    func prepareStory(withLocation location:LocationStory) {
+    func prepareStory(withLocation location:LocationStory, atIndex index:Int?) {
         shouldAutoPause = true
+        viewIndex = index ?? 0
+        print("Start index: \(viewIndex)")
         self.story = location
         self.story.delegate = self
         story.determineState()
         
     }
     
-    func prepareStory(withStory story:UserStory) {
+    func saveIndex() {
+        returnIndex = viewIndex
+    }
+    
+    func prepareStory(withStory story:UserStory, atIndex index:Int?) {
         shouldAutoPause = true
+        viewIndex = index ?? 0
+        print("Start index: \(viewIndex)")
         self.story = story
         self.story.delegate = self
         story.determineState()
@@ -121,14 +129,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     func contentLoaded() {
 
-        let screenWidth: CGFloat = (UIScreen.main.bounds.size.width)
-        let screenHeight: CGFloat = (UIScreen.main.bounds.size.height)
-        let margin:CGFloat = 12.0
-        //progressBar?.removeFromSuperview()
-        //progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
-        //progressBar!.createProgressIndicator(_story: story)
-        //contentView.addSubview(progressBar!)
-        
         if returnIndex != nil {
             viewIndex = returnIndex!
             returnIndex = nil
@@ -274,8 +274,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                 itemLength -= currentItem.seconds
             }
         }
-
-        //progressBar?.activateIndicator(itemIndex: viewIndex)
         headerView.startTimer(length: itemLength, index: viewIndex, total:story!.getPosts().count)
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
@@ -331,6 +329,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }
 
     func cleanUp() {
+        print("CLEAN UP CELL!")
+        pause()
         content.image = nil
         destroyVideoPlayer()
         killTimer()
@@ -343,8 +343,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }
     
     func reset() {
+        
         killTimer()
-        //progressBar?.resetActiveIndicator()
         pauseVideo()
     }
     
@@ -468,7 +468,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
-        contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
         contentView.addSubview(headerView)
         contentView.addSubview(footerView)
@@ -505,12 +504,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         
     }
     
-    var commentsActive = false
-    
     func fadeOutDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 0
-            //self.progressBar?.alpha = 0
             self.headerView.alpha = 0
             self.captionView.textColor = UIColor(white: 1.0, alpha: 0)
             self.captionView.alpha = 0.65
@@ -520,7 +516,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     func fadeInDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 1
-            //self.progressBar?.alpha = 1
             self.headerView.alpha = 1
             self.captionView.textColor = UIColor(white: 1.0, alpha: 1)
             self.captionView.alpha = 1
@@ -530,7 +525,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
         self.footerView.alpha = 0.75 * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
-        //self.progressBar?.alpha = multiple
         self.headerView.alpha = multiple
         self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
         self.captionView.alpha = 0.5 + 0.5 * alpha
@@ -557,18 +551,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         return view
     }()
     
-    public lazy var gradientView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.8, width: self.bounds.width, height: self.bounds.height * 0.20))
-        let gradient = CAGradientLayer()
-        gradient.frame = view.bounds
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
-        let dark = UIColor(white: 0.0, alpha: 0.7)
-        gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
-        view.layer.insertSublayer(gradient, at: 0)
-        view.isUserInteractionEnabled = false
-        return view
-    }()
     
     public lazy var prevView: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width * 0.4, height: self.bounds.height))

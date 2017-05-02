@@ -21,6 +21,8 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     
     @IBOutlet weak var unread_dot: UIImageView!
     
+    var user:User?
+    
     
     var conversation:Conversation? {
         didSet{
@@ -49,6 +51,7 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     
     
     func userLoaded(user: User) {
+        self.user = user
         userImageView.clipsToBounds = true
         userImageView.layer.cornerRadius = userImageView.frame.width/2
         userImageView.contentMode = .scaleAspectFill

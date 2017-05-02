@@ -31,8 +31,9 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
         self.layer.borderColor = UIColor.black.cgColor
         self.layer.borderWidth = 0.0
-        self.layer.cornerRadius = 2.0
+        self.layer.cornerRadius = 0.0
         self.clipsToBounds = true
+        
     }
     
     func stateChange(_ state:UserStoryState) {
@@ -59,18 +60,26 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     }
 
     func setupLocationCell (_ locationStory:LocationStory) {
+        
         self.story = locationStory
         story!.delegate = self
         story!.determineState()
         
         check += 1
         self.imageView.image = nil
-        self.colorView.alpha = 0.0
+        self.nameLabel.text = ""
+        self.timeLabel.text = ""
+        
+        colorView.isHidden = locationStory.hasViewed()
         
         LocationService.sharedInstance.getLocationInfo(locationStory.getLocationKey(), completion: { location in
             if location != nil {
                 self.location = location
                 self.nameLabel.text = location!.getName()
+                
+                for type in location!.getTypes() {
+                    print("TYPE: \(type)")
+                }
             }
         })
         
@@ -86,6 +95,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         getUploadImage(withCheck: check, key: key, completion: { check, image, fromFile in
             
             if self.check != check { return }
+            
             self.imageView.image = image
             if !fromFile {
                 self.imageView.alpha = 0.0
@@ -96,22 +106,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 self.imageView.alpha = 1.0
             }
             
-            if image != nil {
-                let avgColor = image!.areaAverage()
-                let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
-                self.gradient?.removeFromSuperlayer()
-                self.gradient = CAGradientLayer()
-                self.gradient!.frame = self.colorView.bounds
-                self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
-                self.gradient!.locations = [0.0, 1.0]
-                self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                self.colorView.alpha = photoCellColorAlpha
-            }
-            
-            self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
-            self.timeLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
+            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
         
         })
     }
@@ -124,7 +120,10 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
         check += 1
         self.imageView.image = nil
+        self.nameLabel.text = ""
+        self.timeLabel.text = ""
         self.colorView.alpha = 0.0
+        
         
         UserService.getUser(story.getUserId(), completion: { user in
             if user != nil {
@@ -152,20 +151,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 })
             } else {
                 self.imageView.alpha = 1.0
-            }
-            
-            if image != nil {
-                let avgColor = image!.areaAverage()
-                let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
-                self.gradient?.removeFromSuperlayer()
-                self.gradient = CAGradientLayer()
-                self.gradient!.frame = self.colorView.bounds
-                self.gradient!.colors = [UIColor.clear.cgColor, saturatedColor.cgColor]
-                self.gradient!.locations = [0.0, 1.0]
-                self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                self.colorView.alpha = photoCellColorAlpha
             }
             
             self.nameLabel.applyShadow(radius: 2.0, opacity: 0.5, height: 1.0, shouldRasterize: true)
@@ -200,7 +185,25 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
+                
+                self.gradient?.removeFromSuperlayer()
+                if let color = item!.getColor() {
+                    self.gradient = CAGradientLayer()
+                    self.gradient!.frame = self.colorView.bounds
+                    self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.75).cgColor]
+                    self.gradient!.locations = [0.0, 1.0]
+                    self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+                    self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+                    self.gradient!.shouldRasterize = true
+                    self.colorView.layer.shouldRasterize = true
+                    self.gradient!.drawsAsynchronously = true
+                    self.colorView.layer.drawsAsynchronously = true
+                    self.colorView.layer.insertSublayer(self.gradient!, at: 0)
+                    self.colorView.alpha = 0.0
+                }
+                
                 UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
+                    self.colorView.alpha = photoCellColorAlpha
                     completion(check, image, fromFile)
                 })
             }

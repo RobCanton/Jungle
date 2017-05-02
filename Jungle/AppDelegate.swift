@@ -18,7 +18,7 @@ import UserNotifications
 //let darkAccentColor = UIColor(red: 69/266, green: 182/255, blue: 73/255, alpha: 1.0)
 let lightAccentColor = UIColor(red: 140/266, green: 216/255, blue: 86/255, alpha: 1.0)
 let darkAccentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)
-let photoCellColorAlpha:CGFloat = 0.7
+let photoCellColorAlpha:CGFloat = 1.0
 
 let accentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
@@ -27,6 +27,8 @@ let mainStore = Store<AppState>(
     reducer: AppReducer(),
     state: nil
 )
+
+var remoteConfig: FIRRemoteConfig?
 
 
 @UIApplicationMain
@@ -39,6 +41,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GMSPlacesClient.provideAPIKey(GMSAPIKEY)
         GMSServices.provideAPIKey(GMSAPIKEY)
         FIRApp.configure()
+        
+        remoteConfig = FIRRemoteConfig.remoteConfig()
+        let remoteConfigSettings = FIRRemoteConfigSettings(developerModeEnabled: true)
+        remoteConfig?.configSettings = remoteConfigSettings!
+        remoteConfig?.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+        fetchConfig()
         
         if #available(iOS 10, *) {
             UITabBarItem.appearance().badgeColor = .orange
@@ -74,6 +82,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         return true
+    }
+    
+    func fetchConfig() {
+        guard let remoteConfig = remoteConfig else { return }
+        var expirationDuration = 3600
+        // If your app is using developer mode, expirationDuration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if remoteConfig.configSettings.isDeveloperModeEnabled {
+            expirationDuration = 0
+        }
+        
+        // [START fetch_config_with_callback]
+        // TimeInterval is set to expirationDuration here, indicating the next fetch request will use
+        // data fetched from the Remote Config service, rather than cached parameter values, if cached
+        // parameter values are more than expirationDuration seconds old. See Best Practices in the
+        // README for more information.
+        remoteConfig.fetch(withExpirationDuration: TimeInterval(expirationDuration)) { (status, error) -> Void in
+            if status == .success {
+                print("Config fetched!")
+                remoteConfig.activateFetched()
+            } else {
+                print("Config not fetched")
+                print("Error \(error!.localizedDescription)")
+            }
+            
+        }
+        // [END fetch_config_with_callback]
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

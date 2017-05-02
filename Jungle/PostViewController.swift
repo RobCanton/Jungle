@@ -20,7 +20,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     }
     
     var shouldPlay = false
-
+    var shouldAutoPause = true
     
     
     var storyItem:StoryItem! {
@@ -32,9 +32,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     }
 
     
-    func showViewers() {
-
-    }
+    func showViewers() {}
     
     func handleFooterAction(_ like: Bool?) {
         guard let item = self.storyItem else { return }
@@ -49,10 +47,6 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         } else {
             delegate?.showDeleteOptions()
         }
-        
-        
-        
-        //headerView.setLikes(post: item)
     }
     
     func more() {
@@ -85,15 +79,14 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         super.init(frame: frame)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
-        contentView.addSubview(gradientView)
         contentView.addSubview(headerView)
         contentView.addSubview(footerView)
+        contentView.addSubview(captionView)
+        
+        headerView.snapTimer.isHidden = true
+        headerView.snapTimer.removeFromSuperview()
 
         videoContent.isHidden = true
-        
-        footerTapped = UITapGestureRecognizer(target: self, action: #selector(handleFooterTap))
-        footerView.isUserInteractionEnabled = true
-        footerView.addGestureRecognizer(footerTapped)
     }
     
     func setItem() {
@@ -121,10 +114,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                     DispatchQueue.main.async {
                         let item = AVPlayerItem(asset: asset)
                         self.playerLayer?.player?.replaceCurrentItem(with: item)
-                        
-                        if self.shouldPlay {
-                            self.setForPlay()
-                        }
+                        self.setForPlay()
                     }
                 })
             } else {
@@ -135,21 +125,36 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         
         UserService.getUser(item.authorId, completion: { user in
             if user != nil {
-               /* let caption = "\(user!.getUsername()) \(item.caption)"
-                let width = self.frame.width - (42 + 50)
-                var size:CGFloat = 8.0 + 25 + 2
                 
-                size +=  UILabel.size(withUsername: user!.getUsername(), andCaption: item.caption, forWidth: width).height + 8
+                self.headerView.setup(withUser: user!, date: item.getDateCreated(), optionsHandler: self.delegate?.showOptions)
+                //self.headerView.showAuthorHandler = self.showAuthor
                 
-                self.footerView.frame = CGRect(x: 0, y: self.frame.height - size, width: self.frame.width, height: size)
-                self.footerView.setInfo( item: item, user: user!, actionHandler: self.handleFooterAction)
-                */
+                if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
+                    self.captionView.text = caption
+                    self.captionView.fitHeightToContent()
+                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
+                    self.captionView.isHidden = false
+                } else {
+                    self.captionView.isHidden = true
+                    self.captionView.text = ""
+                    self.captionView.fitHeightToContent()
+                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+                }
             }
         })
         
-        //headerView.setup(withPlaceId: item.getLocationKey(), optionsHandler: delegate?.showOptions)
+        if let locationKey = item.getLocationKey() {
+            LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
+                if location != nil {
+                    self.headerView.setupLocation(location: location!)
+                }
+            })
+        }
         
-    
+        UploadService.addView(post: item)
+        footerView.setCommentsLabelToCount(item.getNumComments())
+        
+        delegate?.newItem(item)
     }
     
     
@@ -159,15 +164,15 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     }
     
     
+    var paused = false
     
     func setForPlay(){
         
         if storyItem.needsDownload() {
-            shouldPlay = true
             return
         }
         
-        shouldPlay = false
+        paused = false
         
         if storyItem.contentType == .image {
             videoContent.isHidden = true
@@ -176,6 +181,11 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
             videoContent.isHidden = false
             playVideo()
             loopVideo()
+        }
+        
+        if shouldAutoPause {
+            shouldAutoPause = false
+            pause()
         }
         
     }
@@ -199,6 +209,19 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         }
     }
     
+    func pause() {
+        paused = true
+        pauseVideo()
+    }
+    
+    func resume() {
+        paused = false
+        guard let item = self.storyItem else { return }
+        if item.contentType == .video {
+            playVideo()
+        }
+    }
+    
     func playVideo() {
         guard let item = self.storyItem else { return }
         self.playerLayer?.player?.play()
@@ -211,11 +234,6 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     func resetVideo() {
         self.playerLayer?.player?.seek(to: CMTimeMake(0, 1))
         pauseVideo()
-    }
-    
-    func prepareForTransition(isPresenting:Bool) {
-        content.isHidden = false
-        videoContent.isHidden = true
     }
     
     func cleanUp() {
@@ -274,6 +292,24 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
             self.headerView.alpha = 1
         })
     }
+    
+    func setDetailFade(_ alpha:CGFloat) {
+        let multiple = alpha * alpha
+        self.footerView.alpha = 0.75 * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
+        self.headerView.alpha = multiple
+        self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
+        self.captionView.alpha = 0.5 + 0.5 * alpha
+    }
+
+    func prepareForTransition(isPresenting:Bool) {
+        
+        if isPresenting {
+            content.isHidden = false
+            videoContent.isHidden = true
+        } else {
+            pause()
+        }
+    }
 
 
     
@@ -305,35 +341,39 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         return view
     }()
     
-    public lazy var gradientView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.8, width: self.bounds.width, height: self.bounds.height * 0.20))
-        let gradient = CAGradientLayer()
-        gradient.frame = view.bounds
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
-        let dark = UIColor(white: 0.0, alpha: 0.7)
-        gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
-        view.layer.insertSublayer(gradient, at: 0)
-        view.isUserInteractionEnabled = false
-        return view
-    }()
-    
     lazy var headerView: PostHeaderView = {
-        let margin:CGFloat = 2.0
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: margin, y: margin + 4.0, width: width, height: view.frame.height)
+        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
         return view
     }()
     
-    lazy var footerView: StoryDetailsView = {
-        let margin:CGFloat = 2.0
-        var view = UINib(nibName: "StoryDetailsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! StoryDetailsView
+    lazy var footerView: PostFooterView = {
+        let margin:CGFloat = 0.0
+        var view = UINib(nibName: "PostFooterView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostFooterView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         view.frame = CGRect(x: margin, y: height - view.frame.height, width: width, height: view.frame.height)
         return view
+    }()
+    
+    fileprivate lazy var captionView: UITextView = {
+        let definiteBounds = UIScreen.main.bounds
+        let captionView = UITextView(frame: CGRect(x: 0,y: 0,width: definiteBounds.width,height: 44))
+        captionView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
+        captionView.textColor = UIColor.white
+        captionView.textAlignment = .center
+        captionView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
+        captionView.isScrollEnabled = false
+        captionView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
+        captionView.isUserInteractionEnabled = false
+        captionView.isHidden = true
+        captionView.text = "test"
+        captionView.fitHeightToContent()
+        captionView.text = ""
+        captionView.center = CGPoint(x: definiteBounds.width / 2, y: definiteBounds.height / 2)
+        return captionView
     }()
 
 }

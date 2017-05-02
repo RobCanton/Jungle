@@ -33,6 +33,7 @@ class StoryItem: NSObject, NSCoding {
     var dateCreated: Date
     var length: Double
     fileprivate var numComments:Int
+    fileprivate var numViews:Int
     
     var flagged:Bool
 
@@ -43,13 +44,15 @@ class StoryItem: NSObject, NSCoding {
     var comments:[Comment]
     
     var delegate:ItemDelegate?
+    
+    fileprivate var colorHexcode:String?
 
     dynamic var image: UIImage?
     dynamic var videoFilePath: URL?
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, captionPos:Double?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numComments:Int, flagged:Bool)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numComments:Int, numViews:Int, flagged:Bool, colorHexcode:String?)
     {
         
         self.key          = key
@@ -66,7 +69,9 @@ class StoryItem: NSObject, NSCoding {
         self.likes        = likes
         self.comments     = comments
         self.flagged      = flagged
-        self.numComments = numComments
+        self.numComments  = numComments
+        self.numViews     = numViews
+        self.colorHexcode = colorHexcode
 
     }
     
@@ -84,7 +89,8 @@ class StoryItem: NSObject, NSCoding {
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
         let flagged     = decoder.decodeObject(forKey: "flagged") as! Bool
         let numComments = decoder.decodeObject(forKey: "numComments") as! Int
-        
+        let numViews    = decoder.decodeObject(forKey: "numViews") as! Int
+        let colorHexcode    = decoder.decodeObject(forKey: "color") as? String
         var viewers = [String:Double]()
         if let _viewers = decoder.decodeObject(forKey: "viewers") as? [String:Double] {
             viewers = _viewers
@@ -112,7 +118,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numComments: numComments, flagged: flagged)
+        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numComments: numComments, numViews: numViews, flagged: flagged, colorHexcode: colorHexcode)
     }
     
     
@@ -140,6 +146,8 @@ class StoryItem: NSObject, NSCoding {
         }
         coder.encode(flagged, forKey: "flagged")
         coder.encode(numComments, forKey: "numComments")
+        coder.encode(numComments, forKey: "numViews")
+        coder.encode(colorHexcode, forKey: "colorHexcode")
     }
     
     func getKey() -> String {
@@ -184,6 +192,10 @@ class StoryItem: NSObject, NSCoding {
     
     func getNumComments() -> Int {
         return numComments
+    }
+    
+    func getNumViews() -> Int {
+        return numViews
     }
     
     func getViewsList() -> [String] {
@@ -244,6 +256,15 @@ class StoryItem: NSObject, NSCoding {
         cache()
     }
     
+    func removeComment(key:String) {
+        for i in 0..<comments.count {
+            if comments[i].getKey() == key {
+                comments.remove(at: i)
+            }
+        }
+        cache()
+    }
+    
     func addLike(_ uid:String) {
         self.likes[uid] = 0
         cache()
@@ -258,6 +279,13 @@ class StoryItem: NSObject, NSCoding {
     func updateNumComments(_ count:Int) {
         self.numComments = count
         cache()
+    }
+    
+    func getColor() -> UIColor? {
+        if colorHexcode != nil {
+           return hexStringToUIColor(hex: colorHexcode!)
+        }
+        return nil
     }
     
     func cache() {

@@ -1,4 +1,5 @@
 PODS:
+  - ActiveLabel (0.7.1)
   - Firebase (3.12.0):
     - Firebase/Core (= 3.12.0)
   - Firebase/Auth (3.12.0):
@@ -88,6 +89,7 @@ PODS:
   - View2ViewTransition (1.0.0)
 
 DEPENDENCIES:
+  - ActiveLabel
   - Firebase
   - Firebase/Auth
   - Firebase/Database
@@ -106,6 +108,7 @@ DEPENDENCIES:
   - View2ViewTransition
 
 SPEC CHECKSUMS:
+  ActiveLabel: 68625f22775f51c31bb691ca8de20f1e5a3bc825
   Firebase: 8e99eb1ff553ad5bcc6072cc3d925bb89c1244d6
   FirebaseAnalytics: 9c67af0ebeb8d2146c9b4ea2616439affa947b58
   FirebaseAuth: b436e4ecebe068bf8e8c6e4e29de5756ffe7ee24
@@ -131,6 +134,6 @@ SPEC CHECKSUMS:
   TwicketSegmentedControl: 6d7a4cf243657e0ac3f00d06d873a25334c04042
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 36fa19fb7abcbb10725482b419f97c3e54953f43
+PODFILE CHECKSUM: fac79a823da4546355ae5ca13971b9c160b1543a
 
 COCOAPODS: 1.2.0

@@ -52,11 +52,17 @@ class MainTabBarController: UITabBarController, StoreSubscriber{
             }
         }
         
-        if unseenNotifications > 0 {
-            tabBar.items?[3].badgeValue = "\(unseenNotifications)"
-        } else {
-            tabBar.items?[3].badgeValue = nil
+        tabBar.items?[3].badgeValue = unseenNotifications > 0 ? "\(unseenNotifications)" : nil
+        
+        var unseenMessages = 0
+        for conversation in state.conversations {
+            if !conversation.getSeen() {
+                unseenMessages += 1
+            }
         }
+
+        tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
+        
         
     }
     

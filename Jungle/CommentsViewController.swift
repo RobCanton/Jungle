@@ -22,7 +22,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var comments = [Comment]()
     var storyRef:StoryViewController?
     var postRef:PostViewController?
-    //var item:StoryItem!
+    var itemRef:StoryItem?
     var scrollViewRef:UIScrollView!
     
     var tableView:UITableView!
@@ -87,6 +87,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.backgroundColor = UIColor.clear//(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
         tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
+        tableView.keyboardDismissMode = .onDrag
         //tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
         tableView.tableFooterView = UIView()
         
@@ -103,7 +104,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func setupItem(_ item: StoryItem) {
-        //self.item = item
+        self.itemRef = item
         self.header.setViewsLabel(count: item.viewers.count)
         
         header.setUserInfo(uid: item.getAuthorId())
@@ -114,17 +115,9 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         self.viewers = item.getViewsList()
         self.comments = item.comments
         
-        if item.getAuthorId() == mainStore.state.userState.uid {
-            header.setCurrentUserMode(true)
-            if self.comments.count > 0 {
-                mode = .Comments
-            } else {
-                mode = .Viewers
-            }
-        } else {
-            header.setCurrentUserMode(false)
-            mode = .Comments
-        }
+        header.setCurrentUserMode(item.getAuthorId() == mainStore.state.userState.uid)
+        mode = .Comments
+        
         self.updateComments()
         
         commentsRef?.removeAllObservers()
@@ -149,6 +142,13 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     self.scrollBottom(animated: true)
                 }
             })
+            
+            commentsRef?.queryOrdered(byChild: "timestamp").queryStarting(atValue: ts).observe(.childRemoved, with: { snapshot in
+                item.removeComment(key: snapshot.key)
+                self.comments = item.comments
+                self.updateComments()
+                self.scrollBottom(animated: true)
+            })
         } else {
             commentsRef?.observe(.childAdded, with: { snapshot in
                 let dict = snapshot.value as! [String:Any]
@@ -158,6 +158,13 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let timestamp = dict["timestamp"] as! Double
                 let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                 item.addComment(comment)
+                self.comments = item.comments
+                self.updateComments()
+                self.scrollBottom(animated: true)
+            })
+            
+            commentsRef?.observe(.childRemoved, with: { snapshot in
+                item.removeComment(key: snapshot.key)
                 self.comments = item.comments
                 self.updateComments()
                 self.scrollBottom(animated: true)
@@ -172,7 +179,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        commentsRef?.removeAllObservers()
+        
+        if self.navigationController?.delegate != nil {
+            self.commentsRef?.removeAllObservers()
+        }
         NotificationCenter.default.removeObserver(self)
     }
     
@@ -243,6 +253,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch mode {
         case .Viewers:
+            showUser(uid: viewers[indexPath.row])
             break
         case .Comments:
             break
@@ -263,8 +274,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    func actionHandler() {/*
-        guard let item = self.item else { return }
+    func actionHandler() {
+        guard let item = self.itemRef else { return }
         
         if item.getAuthorId() == mainStore.state.userState.uid {
             let alert = UIAlertController(title: "Delete post?", message: "This is permanent.", preferredStyle: .alert)
@@ -287,7 +298,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in}))
             self.present(sheet, animated: true, completion: nil)
         }
-            */
+        
     }
 
 }

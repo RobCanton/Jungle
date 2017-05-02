@@ -35,6 +35,13 @@ class UserService {
         }
     }
 //
+    
+    static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
+        ref.child("users/lookup/username/\(username)").observeSingleEvent(of: .value, with: { snapshot in
+            let uid = snapshot.value as? String
+            completion(uid)
+        })
+    }
 
     static func getUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
@@ -56,6 +63,8 @@ class UserService {
             })
         }
     }
+    
+    
     
     static func getUser(_ uid:String,withCheck check:Int, completion: @escaping (_ user:User?,_ check:Int) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {

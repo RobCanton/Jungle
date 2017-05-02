@@ -23,4 +23,5 @@ pod 'NVActivityIndicatorView'
 pod 'TGPControls'
 pod 'TwicketSegmentedControl'
 pod 'SnapTimer'
+pod 'ActiveLabel'
 end

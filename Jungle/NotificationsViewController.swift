@@ -121,19 +121,21 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+        
         let notification = notifications[indexPath.row]
         let type = notification.getType()
         if type == .comment || type == .like {
             let cell = tableView.cellForRow(at: indexPath) as! NotificationTableViewCell
             
             if let item = cell.post {
-                let i = IndexPath(item: indexPath.row, section: 0)
-                globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                let i = IndexPath(item: 0, section: 0)
+                globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: i, initialIndexPath: indexPath)
             }
         } else if type == .follow {
             showUser(notification.getSender())
         }
+        
+        tableView.deselectRow(at: indexPath, animated: true)
         
     }
     

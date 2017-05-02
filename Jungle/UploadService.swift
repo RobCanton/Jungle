@@ -136,7 +136,7 @@ class UploadService {
     static func sendImage(upload:Upload, completion:(()->())) {
         
         //If upload has no destination do not upload it
-        if upload.image == nil { return }
+        guard let image = upload.image else { return }
         
         let ref = FIRDatabase.database().reference()
         let dataRef = ref.child("uploads/meta").childByAutoId()
@@ -144,7 +144,10 @@ class UploadService {
         
         let uid = mainStore.state.userState.uid
         
-        if let data = UIImageJPEGRepresentation(upload.image!, 0.5) {
+        let avgColor = image.areaAverage()
+        let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
+        let colorHex = saturatedColor.htmlRGBColor
+        if let data = UIImageJPEGRepresentation(image, 0.5) {
             // Create a reference to the file you want to upload
             // Create the file metadata
             let contentTypeStr = "image"
@@ -165,7 +168,8 @@ class UploadService {
                         "url": downloadURL!.absoluteString,
                         "contentType": contentTypeStr,
                         "dateCreated": [".sv": "timestamp"],
-                        "length": 6.0
+                        "length": 6.0,
+                        "color": colorHex
                     ] as [String : Any]
                     
                     if let place = upload.place {
@@ -195,6 +199,9 @@ class UploadService {
                                 updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
                                 updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
                                 updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                                for type in place.types {
+                                    updateValues["places/\(place.placeID)/info/types/\(type)"] = true
+                                }
                             }
 
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
@@ -224,7 +231,7 @@ class UploadService {
         
         completion(true)
         
-        uploadVideoStill(url: url, postKey: postKey, completion: { thumbURL in
+        uploadVideoStill(url: url, postKey: postKey, completion: { thumbURL, colorHex in
             
             let data = NSData(contentsOf: url)
             
@@ -249,7 +256,8 @@ class UploadService {
                         "videoURL": downloadURL!.absoluteString,
                         "contentType": contentTypeStr,
                         "dateCreated": [".sv": "timestamp"],
-                        "length": length
+                        "length": length,
+                        "color": colorHex
                         ] as [String : Any]
                     
                     if let place = upload.place {
@@ -278,6 +286,10 @@ class UploadService {
                                 updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
                                 updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
                                 updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                                for type in place.types {
+                                    updateValues["places/\(place.placeID)/info/types/\(type)"] = true
+                                }
+                                
                             }
                             
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
@@ -293,9 +305,12 @@ class UploadService {
         })
     }
     
-    private static func uploadVideoStill(url:URL, postKey:String, completion:@escaping (_ thumb_url:String)->()) {
+    private static func uploadVideoStill(url:URL, postKey:String, completion:@escaping (_ thumb_url:String, _ colorHex:String)->()) {
         let storageRef = FIRStorage.storage().reference()
         if let videoStill = generateVideoStill(url: url) {
+            let avgColor = videoStill.areaAverage()
+            let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
+            let colorHex = saturatedColor.htmlRGBColor
             if let data = UIImageJPEGRepresentation(videoStill, 0.5) {
                 let stillMetaData = FIRStorageMetadata()
                 stillMetaData.contentType = "image/jpg"
@@ -305,7 +320,7 @@ class UploadService {
                         
                     } else {
                         let thumbURL = metadata!.downloadURL()!
-                        completion(thumbURL.absoluteString)
+                        completion(thumbURL.absoluteString, colorHex)
                     }
                 }
             }
@@ -403,9 +418,11 @@ class UploadService {
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     var viewers = [String:Double]()
-                    if snapshot.hasChild("views") {
-                        viewers = dict["views"] as! [String:Double]
+                    var numViews = 0
+                    if let _views = dict["views"] as? Int {
+                        numViews = _views
                     }
+                    
                    
                     var likes = [String:Double]()
                     if snapshot.hasChild("likes") {
@@ -422,8 +439,12 @@ class UploadService {
                     if let _numComments = dict["comments"] as? Int {
                         numComments = _numComments
                     }
+                    var color:String?
+                    if let hex = dict["color"] as? String {
+                        color = hex
+                    }
 
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numComments: numComments, flagged: flagged)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numComments: numComments, numViews: numViews, flagged: flagged, colorHexcode: color)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -461,13 +482,17 @@ class UploadService {
         
         post.addView(uid)
         
-        let postRef = ref.child("uploads/meta/\(post.getKey())/views/\(uid)")
-        postRef.setValue([".sv":"timestamp"])
-    
+        let updateObject = [
+            "users/viewed/\(uid)/\(post.getKey())": true,
+            "uploads/views/\(post.getKey())/\(uid)": [".sv":"timestamp"]
+        ] as [String : Any]
+        
+        ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+        
+        })
     }
     
     static func addLike(post:StoryItem) {
-        
         
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid

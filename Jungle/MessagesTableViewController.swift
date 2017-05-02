@@ -102,29 +102,14 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        prepareConverstaionForPresentation(conversation: conversations[indexPath.row])
-    }
-    
-    func prepareConverstaionForPresentation(conversation:Conversation) {
-        if let user = conversation.getPartner() {
-            presentConversation(conversation: conversation, user: user)
-        } else {
-            UserService.getUser(conversation.getPartnerId(), completion: { user in
-                if user != nil {
-                    self.presentConversation(conversation: conversation, user: user!)
-                }
-            })
-        }
-    }
-    
-    func presentConversation(conversation:Conversation, user:User) {
-        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
+        let cell = tableView.cellForRow(at: indexPath) as! ConversationViewCell
+        if let user = cell.user, let image = cell.userImageView.image {
             let controller = ChatViewController()
-            controller.conversation = conversation
+            controller.conversation = conversations[indexPath.row]
             controller.partnerImage = image
             globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
-        })
+        }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
 //    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {

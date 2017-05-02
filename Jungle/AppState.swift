@@ -17,6 +17,7 @@ struct AppState: StateType {
     var socialState: SocialState
     var supportedVersion:Bool = false
     var notifications = [String:Bool]()
+    var viewed = [String]()
 }
 
 struct SocialState {
@@ -39,9 +40,26 @@ struct AppReducer: Reducer {
             conversations:ConversationsReducer(action: action, state: state?.conversations),
             socialState: SocialReducer(action: action, state: state?.socialState),
             supportedVersion: SupportedVersionReducer(action, state: state?.supportedVersion),
-            notifications: NotificationsReducer(action, state: state?.notifications)
+            notifications: NotificationsReducer(action, state: state?.notifications),
+            viewed: ViewedReducer(action, state: state?.viewed)
         )
     }
+}
+
+func ViewedReducer(_ action: Action, state:[String]?) -> [String] {
+    var state = state ?? [String]()
+    switch action {
+    case _ as SetViewed:
+        let a = action as! SetViewed
+        state = a.postKeys
+        break
+    case _ as ClearViewed:
+        state = [String]()
+        break
+    default:
+        break
+    }
+    return state
 }
 
 func MyActivityReducer(_ action:Action, state:[(String,Double)]?) -> [(String,Double)] {
@@ -169,3 +187,9 @@ struct ClearMyActivity: Action {
 }
 
 struct ClearFollowingActivity: Action {}
+
+struct SetViewed: Action {
+    let postKeys:[String]
+}
+
+struct ClearViewed: Action {}

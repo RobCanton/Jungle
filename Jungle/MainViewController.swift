@@ -19,6 +19,7 @@ var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
 protocol MainInterfaceProtocol {
     func navigationPush(withController controller: UIViewController, animated: Bool)
+    func presentPopover(withController controller: UIViewController, animated: Bool)
     func presentHomeScreen(animated: Bool)
 }
 
@@ -27,6 +28,10 @@ extension MainViewController: MainInterfaceProtocol {
         navigationController?.delegate = nil
         activateNavbar(true)
         navigationController?.pushViewController(controller, animated: animated)
+    }
+    
+    func presentPopover(withController controller: UIViewController, animated: Bool) {
+        self.present(controller, animated: animated, completion: nil)
     }
     
     func presentHomeScreen(animated: Bool) {
@@ -478,7 +483,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
-        transitionController.cornerRadius = 2.0
+        transitionController.cornerRadius = 0.0
         storiesViewController.transitionController = transitionController
         
         nav.delegate = transitionController
@@ -514,7 +519,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
-        transitionController.cornerRadius = 2.0
+        transitionController.cornerRadius = 0.0
         recordBtn.isUserInteractionEnabled = false
         scrollView.isScrollEnabled = false
         nav.delegate = transitionController
@@ -822,9 +827,8 @@ extension MainViewController: View2ViewTransitionPresenting {
             guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
             let image_frame = cell.imageView.frame
             let x = cell.frame.origin.x + 1
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + places.collectionView.frame.origin.y + 20.0 - places.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            let y = cell.frame.origin.y + places.collectionView.frame.origin.y + 20.0 - places.collectionView!.contentOffset.y
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)
             return view.convert(rect, to: view)
         } else if storyType == .UserStory {
             guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
@@ -832,9 +836,8 @@ extension MainViewController: View2ViewTransitionPresenting {
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             let image_frame = convertedFrame
             let x = cell.frame.origin.x - headerCollectionView.contentOffset.x + 3.0
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0 + 44.0 + 2.0
-            let y = cell.frame.origin.y + navHeight - places.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
+            let y = cell.frame.origin.y - places.collectionView!.contentOffset.y + places.collectionView.frame.origin.y + 20.0 + 2.0
+            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)
             return view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
             let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell

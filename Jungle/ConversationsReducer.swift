@@ -67,6 +67,15 @@ func ConversationsReducer(action: Action, state:[Conversation]?) -> [Conversatio
         let a = action as! ConversationAdded
         state.append(a.conversation)
         break
+    case _ as ConversationChanged:
+        let a = action as! ConversationChanged
+        for i in 0..<state.count {
+            let conversation = state[i]
+            if conversation.getKey() == a.conversation.getKey() {
+                state[i] = a.conversation
+            }
+        }
+        break
     case _ as NewMessageInConversation:
         let a = action as! NewMessageInConversation
         if let conversation = findConversation(key: a.conversationKey) {
@@ -111,6 +120,10 @@ struct ConversationOpened: Action {
 }
 
 struct ConversationAdded: Action {
+    let conversation:Conversation
+}
+
+struct ConversationChanged: Action {
     let conversation:Conversation
 }
 

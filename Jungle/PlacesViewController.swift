@@ -47,7 +47,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
     var isFollowingMode = false
     
     func didSelect(_ segmentIndex: Int) {
-        print("Selected index: \(segmentIndex)")
         
         if segmentIndex == 0 {
             sortMode = .Recent
@@ -83,8 +82,14 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         tabHeader.sortHandler = showSortingOptions
         
         sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
-        sortOptionsView.frame = CGRect(x: 0, y: 44, width: view.frame.width, height: 60)
+        sortOptionsView.frame = CGRect(x: 0, y: 44, width: view.frame.width, height: 160)
         sortOptionsView.alpha = 0.0
+        sortOptionsView.setNeedsLayout()
+        sortOptionsView.layoutIfNeeded()
+        sortOptionsView.layoutSubviews()
+        sortOptionsView.setNeedsUpdateConstraints()
+        sortOptionsView.updateConstraints()
+
         
         self.view.addSubview(tabHeader)
         self.view.addSubview(sortOptionsView)
@@ -117,7 +122,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         let headerNib = UINib(nibName: "FollowingHeader", bundle: nil)
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
-
         
         collectionView.contentInset = UIEdgeInsets(top: 1.0, left: 1.0, bottom: 1.0, right: 1.0)
         collectionView.dataSource = self
@@ -129,7 +133,6 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
         view.addSubview(collectionView)
         
         LocationService.sharedInstance.delegate = self
-        LocationService.sharedInstance.listenToResponses()
         
         locationStories = mainStore.state.nearbyPlacesActivity
         self.collectionView.reloadData()
@@ -201,8 +204,23 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
             locationStories.sort(by: { return $0.getDistance() < $1.getDistance()})
         }
         
-        userStories = state.followingActivity
-        userStories.sort(by: { return $0 > $1 })
+        let following = state.followingActivity
+        
+        var new = [UserStory]()
+        var viewed = [UserStory]()
+        for story in following {
+            if story.hasViewed() {
+                viewed.append(story)
+            } else {
+                new.append(story)
+            }
+        }
+        
+        new.sort(by: { return $0 > $1 })
+        viewed.sort(by: { return $0 > $1 })
+        
+        new.append(contentsOf: viewed)
+        userStories = new
         
         self.collectionView.reloadData()
     }
@@ -223,11 +241,11 @@ class PlacesViewController:RoundedViewController, UICollectionViewDelegate, UICo
             UIView.animate(withDuration: 0.3, delay: 0.0, options: .curveEaseInOut, animations: {
                 
                 var controlFrame = self.control.frame
-                controlFrame.origin.y = 44.0 + 60.0
+                controlFrame.origin.y = 44.0 + self.sortOptionsView.frame.height
                 self.control.frame = controlFrame
                 
                 var collectionFrame = self.collectionView.frame
-                collectionFrame.origin.y = 88.0 + 60.0
+                collectionFrame.origin.y = 88.0 + self.sortOptionsView.frame.height
                 self.collectionView.frame = collectionFrame
                 
                 self.sortOptionsView.alpha =  1.0
