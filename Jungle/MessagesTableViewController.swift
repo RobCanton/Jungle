@@ -23,13 +23,20 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         self.automaticallyAdjustsScrollViewInsets = false
         
-        var searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width - 108, height: 44 - 16))
-        searchBar.center = CGPoint(x: view.frame.width/2, y: 22)
-        searchBar.barStyle = .default
-        //searchBar.barTintColor = UIColor.red
-        searchBar.placeholder = "Search"
-        searchBar.searchBarStyle = .minimal
-        view.addSubview(searchBar)
+//        var searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width - 108, height: 44 - 16))
+//        searchBar.center = CGPoint(x: view.frame.width/2, y: 22)
+//        searchBar.barStyle = .default
+//        //searchBar.barTintColor = UIColor.red
+//        searchBar.placeholder = "Search"
+//        searchBar.searchBarStyle = .minimal
+//        view.addSubview(searchBar)
+        
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width - 96, height: 44))
+        label.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightMedium)
+        label.text = "Messages"
+        label.textAlignment = .center
+        label.center = CGPoint(x: view.frame.width/2, y: 22)
+        view.addSubview(label)
         
         
         tableView = UITableView(frame: CGRect(x: 0,y: 44,width: view.frame.width ,height: view.frame.height - 44))

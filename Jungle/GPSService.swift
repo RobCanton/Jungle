@@ -9,13 +9,13 @@ protocol ServiceProtocol {}
 
 let minimumAcceptedLikelihood = 0.0
 let excludedTypes:[String] = [
-    //"street_address",
-    "bus_station",
-    "transit_station",
-    "taxi_stand",
-    "cemetery",
-    "atm",
-    "general_contractor"
+//    //"street_address",
+//    "bus_station",
+//    "transit_station",
+//    "taxi_stand",
+//    "cemetery",
+//    "atm",
+//    "general_contractor"
 ]
 
 
@@ -55,8 +55,6 @@ class GPSService: Service, CLLocationManagerDelegate {
     fileprivate var lastSignificantLocation: CLLocation?
     fileprivate var placesClient: GMSPlacesClient!
     fileprivate var likelihoods = [GMSPlaceLikelihood]()
-    
-    
     
     override init(_ subscribers:[String:ServiceProtocol]) {
         super.init(subscribers)
@@ -190,10 +188,8 @@ class GPSService: Service, CLLocationManagerDelegate {
                 for likelihood in placeLikelihoodList.likelihoods {
                     if likelihood.likelihood >= minimumAcceptedLikelihood {
                         let place = likelihood.place
-                        let types = place.types
                         if !place.containsExcludedType() {
                             temp.append(likelihood)
-                            print(likelihood.description)
                         }
                     }
                 }

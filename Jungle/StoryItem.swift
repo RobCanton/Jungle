@@ -33,6 +33,7 @@ class StoryItem: NSObject, NSCoding {
     var dateCreated: Date
     var length: Double
     fileprivate var numComments:Int
+    fileprivate var numCommenters:Int
     fileprivate var numViews:Int
     
     var flagged:Bool
@@ -52,7 +53,7 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, captionPos:Double?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numComments:Int, numViews:Int, flagged:Bool, colorHexcode:String?)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numComments:Int, numCommenters:Int,  flagged:Bool, colorHexcode:String?)
     {
         
         self.key          = key
@@ -69,8 +70,9 @@ class StoryItem: NSObject, NSCoding {
         self.likes        = likes
         self.comments     = comments
         self.flagged      = flagged
-        self.numComments  = numComments
         self.numViews     = numViews
+        self.numComments  = numComments
+        self.numCommenters = numCommenters
         self.colorHexcode = colorHexcode
 
     }
@@ -88,8 +90,9 @@ class StoryItem: NSObject, NSCoding {
         let length      = decoder.decodeObject(forKey: "length") as! Double
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
         let flagged     = decoder.decodeObject(forKey: "flagged") as! Bool
-        let numComments = decoder.decodeObject(forKey: "numComments") as! Int
         let numViews    = decoder.decodeObject(forKey: "numViews") as! Int
+        let numComments = decoder.decodeObject(forKey: "numComments") as! Int
+        let numCommenters = decoder.decodeObject(forKey: "numCommenters") as! Int
         let colorHexcode    = decoder.decodeObject(forKey: "color") as? String
         var viewers = [String:Double]()
         if let _viewers = decoder.decodeObject(forKey: "viewers") as? [String:Double] {
@@ -118,7 +121,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numComments: numComments, numViews: numViews, flagged: flagged, colorHexcode: colorHexcode)
+        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: colorHexcode)
     }
     
     
@@ -190,12 +193,17 @@ class StoryItem: NSObject, NSCoding {
         return captionPos
     }
     
+    
+    func getNumViews() -> Int {
+        return numViews
+    }
+    
     func getNumComments() -> Int {
         return numComments
     }
     
-    func getNumViews() -> Int {
-        return numViews
+    func getNumCommenters() -> Int {
+        return numCommenters
     }
     
     func getViewsList() -> [String] {
@@ -257,11 +265,18 @@ class StoryItem: NSObject, NSCoding {
     }
     
     func removeComment(key:String) {
+        var removeIndex:Int?
         for i in 0..<comments.count {
             if comments[i].getKey() == key {
-                comments.remove(at: i)
+                removeIndex = i
+                break
             }
         }
+        
+        if removeIndex != nil {
+            comments.remove(at: removeIndex!)
+        }
+        
         cache()
     }
     

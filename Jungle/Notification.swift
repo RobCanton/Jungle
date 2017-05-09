@@ -11,8 +11,11 @@ import Foundation
 
 enum NotificationType:String {
     case comment = "COMMENT"
+    case comment_also = "COMMENT_ALSO"
+    case comment_to_sub = "COMMENT_TO_SUB"
     case follow  = "FOLLOW"
     case like    = "LIKE"
+    case mention = "MENTION"
     case none  = "NONE"
 }
 
@@ -23,19 +26,30 @@ class Notification: NSObject {
     fileprivate var date:Date
     fileprivate var sender:String
     fileprivate var postKey:String?
+    fileprivate var text:String?
+    fileprivate var numCommenters:Int?
     
-    init(key:String, type:String, date:Date, sender:String, postKey:String?)
+    init(key:String, type:String, date:Date, sender:String, postKey:String?, text:String?, numCommenters:Int?)
     {
         self.key          = key
         switch type {
         case NotificationType.comment.rawValue:
             self.type = .comment
             break
+        case NotificationType.comment_also.rawValue:
+            self.type = .comment_also
+            break
+        case NotificationType.comment_to_sub.rawValue:
+            self.type = .comment_to_sub
+            break
         case NotificationType.follow.rawValue:
             self.type = .follow
             break
         case NotificationType.like.rawValue:
             self.type = .like
+            break
+        case NotificationType.mention.rawValue:
+            self.type = .mention
             break
         default:
             self.type = .none
@@ -45,6 +59,8 @@ class Notification: NSObject {
         self.date = date
         self.sender = sender
         self.postKey = postKey
+        self.text = text
+        self.numCommenters = numCommenters
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -54,7 +70,9 @@ class Notification: NSObject {
         let date = decoder.decodeObject(forKey: "date") as! Date
         let sender = decoder.decodeObject(forKey: "sender") as! String
         let postKey = decoder.decodeObject(forKey: "postKey") as? String
-        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey)
+        let text = decoder.decodeObject(forKey: "text") as? String
+        let numCommenters = decoder.decodeObject(forKey: "numCommenters") as? Int
+        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, numCommenters: numCommenters)
     }
     
     
@@ -64,6 +82,8 @@ class Notification: NSObject {
         coder.encode(date, forKey: "date")
         coder.encode(sender, forKey: "sender")
         coder.encode(postKey, forKey: "postKey")
+        coder.encode(postKey, forKey: "text")
+        coder.encode(postKey, forKey: "numCommenters")
     }
     
     func getKey() -> String {
@@ -84,6 +104,14 @@ class Notification: NSObject {
     
     func getPostKey() -> String? {
         return postKey
+    }
+    
+    func getText() -> String? {
+        return text
+    }
+    
+    func getNumCommenters() -> Int? {
+        return numCommenters
     }
 }
 

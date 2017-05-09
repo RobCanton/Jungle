@@ -530,10 +530,12 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         guard let nav = self.navigationController else { return }
         storyType = .NotificationPost
         let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.showCommentsOnAppear = true
         galleryViewController.isSingleItem = true
         galleryViewController.uid = post.getAuthorId()
         galleryViewController.posts = [post]
         galleryViewController.transitionController = self.transitionController
+        
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
         transitionController.cornerRadius = 0.0
         recordBtn.isUserInteractionEnabled = false

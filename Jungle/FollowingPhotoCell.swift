@@ -61,9 +61,8 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                 
             })
             
-            guard let lastPost = story.getPostKeys().first else { return }
-            let time = lastPost.1
-            let date = Date(timeIntervalSince1970: time/1000)
+            let lastPost = story.getLastPostKey()
+            let date = story.getDate()
             self.timeLabel.text = date.timeStringSinceNow()
             break
         }
@@ -107,16 +106,14 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
-        let lastPost = story.getPostKeys().first!
-        let key = lastPost.0
-        let time = lastPost.1
+        let lastPost = story.getLastPostKey()
+        let date = story.getDate()
         
-        let date = Date(timeIntervalSince1970: time/1000)
         self.timeLabel.text = date.timeStringSinceNow()
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
-        getUploadImage(withCheck: check, key: key, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
             
             if self.check != check { return }
             self.imageView.image = image

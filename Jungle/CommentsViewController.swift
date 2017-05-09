@@ -34,11 +34,14 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     var header:CommentsHeaderView!
     
     var commentsRef:FIRDatabaseReference?
+    var viewsRef:FIRDatabaseReference?
     var captionComment:Comment?
     
     var tapGesture:UITapGestureRecognizer!
     
     var shouldShowKeyboard:Bool = false
+    
+    var replyToCommentHandler:((_ username:String)->())?
     
     var headerCell: CommentCell!
     
@@ -95,6 +98,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         containerView.addSubview(tableView)
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentSize.height > self.view.frame.size.height && scrollView.contentOffset.y == 0 {
+            scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: 0), animated: false)
+        }
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
     }
@@ -105,17 +114,19 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     func setupItem(_ item: StoryItem) {
         self.itemRef = item
-        self.header.setViewsLabel(count: item.viewers.count)
+        self.header.setViewsLabel(count: item.getNumViews())
         
         header.setUserInfo(uid: item.getAuthorId())
         
         tableView.delegate = self
         tableView.dataSource = self
-        
-        self.viewers = item.getViewsList()
+        observeViews()
         self.comments = item.comments
         
-        header.setCurrentUserMode(item.getAuthorId() == mainStore.state.userState.uid)
+        let uid = mainStore.state.userState.uid
+        
+        header.postKey = item.getKey()
+        header.setCurrentUserMode(item.getAuthorId() == uid)
         mode = .Comments
         
         self.updateComments()
@@ -170,7 +181,40 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 self.scrollBottom(animated: true)
             })
         }
+        header.subscribed = nil
+        subscribedRef?.removeAllObservers()
+        subscribedRef = UserService.ref.child("uploads/subscribers/\(item.getKey())/\(uid)")
+        subscribedRef?.observe(.value, with: { snapshot in
+            self.header.setupNotificationsButton(snapshot.exists())
+        })
     }
+    
+    
+    func observeViews() {
+        guard let item = self.itemRef else { return }
+        self.viewers = []
+        if self.mode == .Viewers {
+            self.tableView.reloadData()
+        }
+        viewsRef?.removeAllObservers()
+        if item.getAuthorId() == mainStore.state.userState.uid {
+            viewsRef = UserService.ref.child("uploads/views/\(item.getKey())")
+            viewsRef?.observe(.value, with: { snapshot in
+                var viewers = [String]()
+                for child in snapshot.children {
+                    let childSnapshot = child as! FIRDataSnapshot
+                    viewers.append(childSnapshot.key)
+                }
+                print("VIEWERS: \(viewers)")
+                self.viewers = viewers
+                if self.mode == .Viewers {
+                    self.tableView.reloadData()
+                }
+            })
+        }
+    }
+    
+    var subscribedRef:FIRDatabaseReference?
     
     fileprivate func updateComments() {
         self.header.setCommentsLabel(count: self.comments.count)
@@ -256,9 +300,70 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             showUser(uid: viewers[indexPath.row])
             break
         case .Comments:
+            if let cell = tableView.cellForRow(at: indexPath) as? CommentCell {
+                guard let username = cell.user?.getUsername() else { return }
+                replyToCommentHandler?(username)
+            }
             break
         }
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+
+        let comment = self.comments[indexPath.row]
+        
+        var action:UITableViewRowAction!
+        if comment.getAuthor() == mainStore.state.userState.uid {
+            action = UITableViewRowAction(style: .normal, title: "Delete") { (rowAction, indexPath) in
+                guard let item = self.itemRef else { return }
+                let actionComment = self.comments[indexPath.row]
+                
+                let alert = UIAlertController(title: "Delete comment?", message: nil, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+                    
+                    UploadService.removeComment(postKey: item.getKey(), commentKey: actionComment.getKey(), completion: { success, commentKey in
+                        if success {
+                            item.removeComment(key: commentKey)
+                            self.comments = item.comments
+                            self.updateComments()
+                            self.scrollBottom(animated: true)
+                        }
+                    })
+                }))
+                
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                
+                self.present(alert, animated: true, completion: nil)
+            }
+            action.backgroundColor = errorColor.withAlphaComponent(0.75)
+        } else {
+            action = UITableViewRowAction(style: .destructive, title: "Report") { (rowAction, indexPath) in
+                //TODO: Delete the row at indexPath here
+                guard let item = self.itemRef else { return }
+                let actionComment = self.comments[indexPath.row]
+                
+                let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this comment?", preferredStyle: .actionSheet)
+                reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                reportSheet.addAction(UIAlertAction(title: "Spam or Scam", style: .destructive, handler: { _ in
+                    UploadService.reportComment(itemKey: item.getKey(), commentKey: actionComment.getKey(), type: .SpamComment, completion: { success in })
+                }))
+                reportSheet.addAction(UIAlertAction(title: "Abusive Content", style: .destructive, handler: { _ in
+                    UploadService.reportComment(itemKey: item.getKey(), commentKey: actionComment.getKey(), type: .AbusiveComment, completion: { success in })
+                }))
+                self.present(reportSheet, animated: true, completion: nil)
+            }
+            action.backgroundColor = UIColor(white: 0.5, alpha: 0.75)
+        }
+        
+        return [action]
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     }
     
     func scrollBottom(animated:Bool) {
@@ -292,11 +397,19 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             
             self.present(alert, animated: true, completion: nil)
         } else {
-            let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in}))
-            self.present(sheet, animated: true, completion: nil)
+            let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this post?", preferredStyle: .actionSheet)
+            reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            reportSheet.addAction(UIAlertAction(title: "It's Spam", style: .destructive, handler: { _ in
+                UploadService.reportItem(item: item, type: .Spam, completion: { success in
+                    
+                })
+            }))
+            reportSheet.addAction(UIAlertAction(title: "It's inappropriate", style: .destructive, handler: { _ in
+                UploadService.reportItem(item: item, type: .Inappropriate, completion: { success in
+                    
+                })
+            }))
+            self.present(reportSheet, animated: true, completion: nil)
         }
         
     }

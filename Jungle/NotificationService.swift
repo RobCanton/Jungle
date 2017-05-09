@@ -15,8 +15,11 @@ class NotificationService {
     
     static func getNotification(_ key:String, completion: @escaping((_ notification:Notification?, _ fromCache: Bool)->())) {
         
+        
         if let cachedNotification = dataCache.object(forKey: "notification-\(key)" as NSString) as? Notification {
-            return completion(cachedNotification, true)
+            if cachedNotification.getType() != .comment || cachedNotification.getType() != .comment_also || cachedNotification.getType() != .comment_to_sub  {
+               return completion(cachedNotification, true)
+            }
         }
         
         let ref = FIRDatabase.database().reference()
@@ -31,7 +34,9 @@ class NotificationService {
                 guard let type      = dict["type"] as? String else { return completion(notification, false)}
                 let postKey         = dict["postKey"] as? String
                 let date            = Date(timeIntervalSince1970: timestamp/1000)
-                notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey)
+                let text            = dict["text"] as? String
+                let numCommenters   = dict["commenters"] as? Int
+                notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, numCommenters: numCommenters)
                 dataCache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             }
             return completion(notification, false)

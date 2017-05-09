@@ -35,8 +35,8 @@ class NotificationTableViewCell: UITableViewCell {
     var userTap:UITapGestureRecognizer!
     
     func setup(withNotification notification: Notification) {
-        
-        if notification.getType() != .comment && notification.getType() != .like { return }
+        let type = notification.getType()
+        if type != .comment && type != .comment_also && type != .comment_to_sub &&  type != .like && type != .mention { return }
         self.notification = notification
         
         userTap = UITapGestureRecognizer(target: self, action: #selector(userTapped))
@@ -91,15 +91,58 @@ class NotificationTableViewCell: UITableViewCell {
             self.postImageView.image = image
         })
         
-        if notification.getType() == .comment {
-            setMessageLabel(username: user.getUsername(), message: " commented on your post.", date: notification.getDate())
-        } else if notification.getType() == .like {
+        let type = notification.getType()
+        if type == .comment {
+            var prefix = ""
+            if let numCommenters = notification.getNumCommenters() {
+                if numCommenters == 2 {
+                    prefix = "and 1 other "
+                } else if numCommenters > 2 {
+                    prefix = "and \(numCommenters - 1) others "
+                }
+            }
+            var suffix = "."
+            if let text = notification.getText() {
+                suffix = ": \"\(text)\""
+            }
+            setMessageLabel(username: user.getUsername(), message: " \(prefix)commented on your post\(suffix)", date: notification.getDate())
+        } else if type == .comment_also {
+            var prefix = ""
+            if let numCommenters = notification.getNumCommenters() {
+                if numCommenters == 2 {
+                    prefix = "and 1 other "
+                } else if numCommenters > 2 {
+                    prefix = "and \(numCommenters - 1) others "
+                }
+            }
+            var suffix = "."
+            if let text = notification.getText() {
+                suffix = ": \"\(text)\""
+            }
+            setMessageLabel(username: user.getUsername(), message: " \(prefix)also commented\(suffix)", date: notification.getDate())
+        } else if type == .comment_to_sub {
+            var prefix = ""
+            if let numCommenters = notification.getNumCommenters() {
+                if numCommenters == 2 {
+                    prefix = "and 1 other "
+                } else if numCommenters > 2 {
+                    prefix = "and \(numCommenters - 1) others "
+                }
+            }
+            var suffix = "."
+            if let text = notification.getText() {
+                suffix = ": \"\(text)\""
+            }
+            setMessageLabel(username: user.getUsername(), message: " \(prefix)commented on a post you are following\(suffix)", date: notification.getDate())
+        } else if type == .like {
             setMessageLabel(username: user.getUsername(), message: " liked your post.", date: notification.getDate())
+        } else if type == .mention {
+            setMessageLabel(username: user.getUsername(), message: " mentioned you in a comment.", date: notification.getDate())
         }
     }
     
     func setMessageLabel(username:String, message:String, date: Date) {
-        let timeStr = " \(date.timeStringSinceNow())"
+        let timeStr = " \(date.timeStringSinceNowWithAgo())"
         let str = "\(username)\(message)\(timeStr)"
         let attributes: [String: AnyObject] = [
             NSFontAttributeName : UIFont.systemFont(ofSize: 14, weight: UIFontWeightRegular)

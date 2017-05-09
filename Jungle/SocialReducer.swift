@@ -45,32 +45,26 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
     case _ as AddFollowing:
         let a = action as! AddFollowing
         state.following.insert(a.uid)
-        print("FOLLOWING ADDED: \(a.uid)")
         break
     case _ as RemoveFollowing:
         let a = action as! RemoveFollowing
         state.following.remove(a.uid)
-        print("FOLLOWING REMOVED: \(a.uid)")
         break
     case _ as AddBlocked:
         let a = action as! AddBlocked
         state.blocked.insert(a.uid)
-        print("Blocked User Added: \(a.uid)")
         break
     case _ as RemoveBlocked:
         let a = action as! RemoveBlocked
         state.blocked.remove(a.uid)
-        print("Blocked User Removed: \(a.uid)")
         break
     case _ as AddBlockedBy:
         let a = action as! AddBlockedBy
         state.blockedBy.insert(a.uid)
-        print("BlockedBy User Added: \(a.uid)")
         break
     case _ as RemoveBlockedBy:
         let a = action as! RemoveBlockedBy
         state.blockedBy.remove(a.uid)
-        print("BlockedBy User Removed: \(a.uid)")
         break
     case _ as ClearSocialState:
         

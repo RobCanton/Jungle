@@ -42,12 +42,13 @@ class LocationService: NSObject {
         apiRef.setValue([
             "lat": lastLocation.coordinate.latitude,
             "lon": lastLocation.coordinate.longitude,
-            "rad": radius
+            "rad": radius,
+            "ts": [".sv": "timestamp"]
             ])
     }
     
     func getLocationInfo(_ locationKey:String, completion: @escaping (_ location:Location?)->()) {
-        
+        /*
         if let cachedLocation = dataCache.object(forKey: "place-\(locationKey)" as NSString) as? Location {
             completion(cachedLocation)
         } else {
@@ -77,11 +78,11 @@ class LocationService: NSObject {
                 
                 completion(location)
             })
-        }
+        }*/
     }
     
     func getLocationStory(_ locationKey:String, completon: @escaping (_ story: LocationStory?)->()) {
-        
+        /*
         let locRef = ref.child("places/\(locationKey)/posts")
         
         locRef.observeSingleEvent(of: .value, with: { snapshot in
@@ -92,7 +93,7 @@ class LocationService: NSObject {
                 story = LocationStory(postKeys: postKeys, locationKey: locationKey, distance: 0)
             }
             completon(story)
-        })
+        })*/
     }
 }
 

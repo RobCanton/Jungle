@@ -16,14 +16,27 @@
 
 import Foundation
 import Firebase
-
+import SwiftMessages
 
 
 class UserService {
     
+    fileprivate static let sm = SwiftMessages()
     static let ref = FIRDatabase.database().reference()
     
     static var allowContent = false
+    
+    static func logout() {
+        Listeners.stopListeningToAll()
+        mainStore.dispatch(ClearAllNotifications())
+        mainStore.dispatch(ClearConversations())
+        mainStore.dispatch(ClearMyActivity())
+        mainStore.dispatch(ClearSocialState())
+        mainStore.dispatch(UserIsUnauthenticated())
+        
+        try! FIRAuth.auth()!.signOut()
+        globalMainRef?.dismiss(animated: false, completion: nil)
+    }
 
 //    
     static func sendFCMToken() {
@@ -37,7 +50,7 @@ class UserService {
 //
     
     static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
-        ref.child("users/lookup/username/\(username)").observeSingleEvent(of: .value, with: { snapshot in
+        ref.child("users/lookup/username/uid/\(username)").observeSingleEvent(of: .value, with: { snapshot in
             let uid = snapshot.value as? String
             completion(uid)
         })
@@ -64,6 +77,12 @@ class UserService {
         }
     }
     
+    static func getUser(withCheck check: Int, uid:String, completion: @escaping ((_ check:Int, _ user:User?)->())) {
+        getUser(uid, completion: { user in
+            completion(check, user)
+        })
+    }
+    
     
     
     static func getUser(_ uid:String,withCheck check:Int, completion: @escaping (_ user:User?,_ check:Int) -> Void) {
@@ -86,11 +105,32 @@ class UserService {
             })
         }
     }
+    
+    static func getUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
+        let storyRef = ref.child("stories/users/\(uid)")
+        storyRef.observe(.value, with: { snapshot in
+            var story:UserStory?
+            if let dict = snapshot.value as? [String:AnyObject] {
+                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
+                    let lastPost = meta["k"] as! String
+                    let timestamp = meta["t"] as! Double
+                    let popularity = meta["p"] as! Int
+                    var posts = [String]()
+                    for (key,_) in postObject {
+                        posts.append(key)
+                    }
+                    story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
+                }
+            }
+            completion(story)
+
+        })
+    }
 //
     
 
     
-//    
+//
 //    static func uploadProfilePicture(largeImage:UIImage, smallImage:UIImage , completionHandler:@escaping (_ success:Bool, _ largeImageURL:String?, _ smallImageURL:String?)->()) {
 //        let storageRef = FIRStorage.storage().reference()
 //        if let largeImageTask = uploadLargeProfilePicture(image: largeImage) {
@@ -180,7 +220,6 @@ class UserService {
         messageRef.setValue(updateObject, withCompletionBlock: { error, ref in })
     }
 
-
     static func listenToFollowers(uid:String, completion:@escaping (_ followers:[String])->()) {
         let followersRef = ref.child("users/social/followers/\(uid)")
         followersRef.observe(.value, with: { snapshot in
@@ -195,8 +234,6 @@ class UserService {
             completion(_users)
         })
     }
-    
-    
     
     static func listenToFollowing(uid:String, completion:@escaping (_ following:[String])->()) {
         let followingRef = ref.child("users/social/following/\(uid)")
@@ -223,6 +260,46 @@ class UserService {
         if uid != mainStore.state.userState.uid {
             ref.child("users/social/following/\(uid)").removeAllObservers()
         }
+    }
+    
+    static func reportUser(user:User, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        let reportRef = ref.child("reports/\(uid):\(user.getUserId())")
+        let value: [String: Any] = [
+            "sender": uid,
+            "userId": user.getUserId(),
+            "type": type.rawValue,
+            "timestamp": [".sv": "timestamp"]
+        ]
+        reportRef.setValue(value, withCompletionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Report sent!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to send report.")
+                return completion(false)
+            }
+        })
+    }
+    
+    static func blockUser(uid:String, completion:@escaping (_ success:Bool)->()) {
+        let current_uid = mainStore.state.userState.uid
+        
+        let socialRef = ref.child("users/social")
+        let updateData = [
+            "blocked/\(current_uid)/\(uid)":true,
+            "blocked_by/\(uid)/\(current_uid)":true
+        ]
+        socialRef.updateChildValues(updateData, withCompletionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User blocked!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to block user.")
+                return completion(false)
+            }
+        })
     }
     
 }

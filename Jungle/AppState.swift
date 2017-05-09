@@ -134,6 +134,10 @@ func NotificationsReducer(_ action: Action, state:[String:Bool]?) -> [String:Boo
         let a = action as! AddNotification
         state[a.notificationKey] = a.seen
         break
+    case _ as ChangeNotification:
+        let a = action as! ChangeNotification
+        state[a.notificationKey] = a.seen
+        break
     case _ as RemoveNotification:
         let a = action as! RemoveNotification
         state[a.notificationKey] = nil
@@ -156,6 +160,11 @@ func NotificationsReducer(_ action: Action, state:[String:Bool]?) -> [String:Boo
 }
 
 struct AddNotification: Action {
+    let notificationKey: String
+    let seen: Bool
+}
+
+struct ChangeNotification: Action {
     let notificationKey: String
     let seen: Bool
 }

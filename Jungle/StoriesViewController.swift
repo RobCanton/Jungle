@@ -138,7 +138,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         collectionView.register(StoryViewController.self, forCellWithReuseIdentifier: "presented_cell")
         collectionView.backgroundColor = UIColor.black
-        collectionView.bounces = false
+        collectionView.bounces = true
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.isPagingEnabled = true
@@ -164,6 +164,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentsViewController.handleDismiss = handleDismiss
         commentsViewController.popupDismiss = dismissPopup
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
+        commentsViewController.replyToCommentHandler = replyToComment
         
         self.addChildViewController(commentsViewController)
         self.scrollView.addSubview(commentsViewController.view)
@@ -173,6 +174,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
         commentBar.sendHandler = sendComment
+        
         
         self.view.addSubview(commentBar)
         
@@ -191,6 +193,13 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         tapGR.delegate = self
         self.view.addGestureRecognizer(tapGR)
         
+    }
+    
+    func replyToComment(_ username:String) {
+        if username == mainStore.state.userState.user?.getUsername() { return }
+        
+        self.commentBar.textField.text = "@\(username) "
+        self.commentBar.textField.becomeFirstResponder()
     }
     
     func appMovedToBackground() {

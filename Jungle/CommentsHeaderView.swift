@@ -16,10 +16,14 @@ class CommentsHeaderView: UIView {
 
     @IBOutlet weak var rightButton: UIButton!
 
+    @IBOutlet weak var subscribeButton: UIButton!
     var closeHandler:(()->())?
     var moreHandler:(()->())?
     
     var setMode:((_ mode:PostInfoMode)->())?
+    
+    var subscribed:Bool?
+    var postKey:String?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -33,31 +37,41 @@ class CommentsHeaderView: UIView {
         commentsLabel.superview?.addGestureRecognizer(commentsTap)
     }
     
+    func setupNotificationsButton(_ _subscribed:Bool) {
+        subscribed = _subscribed
+        if subscribed! {
+            self.subscribeButton.setImage(UIImage(named:"notifications"), for: .normal)
+        } else {
+            self.subscribeButton.setImage(UIImage(named:"notifications_muted"), for: .normal)
+        }
+        subscribeButton.isEnabled = true
+    }
+    @IBAction func subscribeTapped(_ sender: Any) {
+        if subscribed == nil || postKey == nil { return }
+        
+        UploadService.subscribeToPost(withKey: postKey!, subscribe: !subscribed!)
+    }
+    
     func viewsTapped() {
         setMode?(.Viewers)
         
+        self.viewsLabel.alpha = 0.5
         UIView.animate(withDuration: 0.2, animations: {
-            self.viewsLabel.alpha = 0.5
+            self.viewsLabel.alpha = 1.0
         }, completion: { _ in
-            UIView.animate(withDuration: 0.2, animations: {
-                self.viewsLabel.alpha = 1.0
-            }, completion: { _ in
-                
-            })
+            
         })
     }
     
     func commentsTapped() {
         setMode?(.Comments)
-        
-        UIView.animate(withDuration: 0.025, animations: {
-            self.commentsLabel.alpha = 0.5
+
+        self.commentsLabel.alpha = 0.5
+
+        UIView.animate(withDuration: 0.25, animations: {
+            self.commentsLabel.alpha = 1.0
         }, completion: { _ in
-            UIView.animate(withDuration: 0.25, animations: {
-                self.commentsLabel.alpha = 1.0
-            }, completion: { _ in
-                
-            })
+            
         })
     }
     
@@ -83,9 +97,9 @@ class CommentsHeaderView: UIView {
        
         
         if uid == mainStore.state.userState.uid {
-            rightButton.setImage(UIImage(named:"trash"), for: .normal)
+            rightButton.setImage(UIImage(named:"trash_2"), for: .normal)
         } else {
-            rightButton.setImage(UIImage(named:"more"), for: .normal)
+            rightButton.setImage(UIImage(named:"flag"), for: .normal)
         }
     }
     

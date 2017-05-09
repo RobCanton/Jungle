@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -22,13 +22,14 @@
                         <constraint firstAttribute="height" constant="0.5" id="poA-6J-RbR"/>
                     </constraints>
                 </view>
-                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P53-W6-4P1">
-                    <rect key="frame" x="427" y="0.0" width="49" height="47"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P53-W6-4P1">
+                    <rect key="frame" x="420" y="0.0" width="64" height="64"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="P53-W6-4P1" secondAttribute="height" multiplier="1:1" id="Bx8-yp-Ka4"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <state key="normal" image="more">
+                    <inset key="imageEdgeInsets" minX="22" minY="22" maxX="22" maxY="22"/>
+                    <state key="normal">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
@@ -52,8 +53,8 @@
                                 <constraint firstAttribute="width" secondItem="RFG-wf-ByW" secondAttribute="height" multiplier="1:1" id="H5B-vO-fnt"/>
                             </constraints>
                         </imageView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="32" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATE-e7-jTZ">
-                            <rect key="frame" x="11" y="39" width="42" height="21"/>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="32" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATE-e7-jTZ">
+                            <rect key="frame" x="24.5" y="39.5" width="15.5" height="14.5"/>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
@@ -80,8 +81,8 @@
                                 <constraint firstAttribute="height" constant="18" id="4yW-OF-zIa"/>
                             </constraints>
                         </imageView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="32" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nUM-Gg-ddK">
-                            <rect key="frame" x="11" y="39" width="42" height="21"/>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="32" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nUM-Gg-ddK">
+                            <rect key="frame" x="24.5" y="39.5" width="15.5" height="14.5"/>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
@@ -97,8 +98,8 @@
                         <constraint firstAttribute="height" constant="64" id="z49-SV-1ce"/>
                     </constraints>
                 </view>
-                <button opaque="NO" alpha="0.5" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eJ4-kA-s0m">
-                    <rect key="frame" x="228" y="23" width="25" height="25"/>
+                <button opaque="NO" alpha="0.5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eJ4-kA-s0m">
+                    <rect key="frame" x="222" y="16" width="32" height="32"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="eJ4-kA-s0m" secondAttribute="height" multiplier="1:1" id="FmC-H6-TRO"/>
                         <constraint firstAttribute="height" constant="32" id="wm9-xe-9De"/>
@@ -110,9 +111,24 @@
                         <action selector="handleClose:" destination="iN0-l3-epB" eventType="touchUpInside" id="exO-SO-rka"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OQj-9T-cXm">
+                    <rect key="frame" x="372" y="0.0" width="64" height="64"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="OQj-9T-cXm" secondAttribute="height" multiplier="1:1" id="v9l-qh-DQz"/>
+                    </constraints>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <inset key="imageEdgeInsets" minX="21" minY="21" maxX="21" maxY="21"/>
+                    <state key="normal" image="notifications_muted">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="subscribeTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="S8L-Vc-8Gn"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
+                <constraint firstAttribute="bottom" secondItem="OQj-9T-cXm" secondAttribute="bottom" id="1QW-x2-OdQ"/>
                 <constraint firstAttribute="trailing" secondItem="Wc6-eQ-kGb" secondAttribute="trailing" id="4c9-Zz-4xZ"/>
                 <constraint firstItem="eJ4-kA-s0m" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="GZY-AA-Buq"/>
                 <constraint firstAttribute="bottom" secondItem="P53-W6-4P1" secondAttribute="bottom" id="LYX-08-ntE"/>
@@ -124,17 +140,20 @@
                 <constraint firstItem="085-qj-2uf" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="a7v-72-ywD"/>
                 <constraint firstItem="XPT-og-Lko" firstAttribute="width" secondItem="XPT-og-Lko" secondAttribute="height" multiplier="1:1" id="dYU-X3-VPb"/>
                 <constraint firstItem="eJ4-kA-s0m" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="e1R-kt-Y1o"/>
-                <constraint firstAttribute="trailing" secondItem="P53-W6-4P1" secondAttribute="trailing" id="ebs-43-L5T"/>
+                <constraint firstAttribute="trailing" secondItem="P53-W6-4P1" secondAttribute="trailing" constant="-8" id="ebs-43-L5T"/>
                 <constraint firstItem="P53-W6-4P1" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="efa-M7-8tA"/>
                 <constraint firstAttribute="bottom" secondItem="XPT-og-Lko" secondAttribute="bottom" id="gtU-gi-bRl"/>
                 <constraint firstItem="XPT-og-Lko" firstAttribute="leading" secondItem="085-qj-2uf" secondAttribute="trailing" constant="-16" id="jS8-as-rKn"/>
+                <constraint firstItem="P53-W6-4P1" firstAttribute="leading" secondItem="OQj-9T-cXm" secondAttribute="trailing" constant="-16" id="npg-bo-bfg"/>
                 <constraint firstItem="085-qj-2uf" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="-8" id="qpF-vT-F2U"/>
+                <constraint firstItem="OQj-9T-cXm" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="vjd-RZ-zCG"/>
                 <constraint firstItem="LGP-Cr-TU4" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="yMc-5w-DR3"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="commentsLabel" destination="nUM-Gg-ddK" id="DZL-Ts-Sgg"/>
                 <outlet property="rightButton" destination="P53-W6-4P1" id="wp9-61-xs2"/>
+                <outlet property="subscribeButton" destination="OQj-9T-cXm" id="1BF-sx-oaq"/>
                 <outlet property="viewsLabel" destination="ATE-e7-jTZ" id="eiw-Bd-hCQ"/>
             </connections>
             <point key="canvasLocation" x="77" y="-276"/>
@@ -144,6 +163,6 @@
         <image name="comments" width="25" height="25"/>
         <image name="down_arrow" width="25" height="25"/>
         <image name="eye" width="32" height="32"/>
-        <image name="more" width="16" height="16"/>
+        <image name="notifications_muted" width="32" height="32"/>
     </resources>
 </document>

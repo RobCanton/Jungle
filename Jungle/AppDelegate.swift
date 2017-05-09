@@ -12,6 +12,7 @@ import Firebase
 import ReSwift
 import AVFoundation
 import UserNotifications
+import SwiftMessages
 
 //UIColor(red: 15/255, green: 226/255, blue: 117/255, alpha: 1.0) //#0fe275
 //let lightAccentColor = UIColor(red: 220/266, green: 227/255, blue: 91/255, alpha: 1.0)
@@ -21,6 +22,7 @@ let darkAccentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1
 let photoCellColorAlpha:CGFloat = 1.0
 
 let accentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
+let errorColor = UIColor(red: 1, green: 110/255, blue: 110/255, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
 let mainStore = Store<AppState>(
@@ -35,9 +37,21 @@ var remoteConfig: FIRRemoteConfig?
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
+    var connection_timer:Timer?
+    var alertWrapper = SwiftMessages()
+    var no_connection_alerted = false
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        
+        //checkInternetConnection()
+        
+        connection_timer?.invalidate() // just in case this button is tapped multiple times
+        // start the timer
+        connection_timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(checkInternetConnection), userInfo: nil, repeats: true)
+        
+        
         GMSPlacesClient.provideAPIKey(GMSAPIKEY)
         GMSServices.provideAPIKey(GMSAPIKEY)
         FIRApp.configure()
@@ -82,6 +96,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         return true
+    }
+    
+    func checkInternetConnection() {
+        if Reachability.isConnectedToNetwork(){
+            if no_connection_alerted {
+                print("Internet Connection Available!")
+                no_connection_alerted = false
+            }
+            alertWrapper.hideAll()
+        }else{
+            if !no_connection_alerted {
+                print("Internet Connection not Available!")
+                no_connection_alerted = true
+                //Alerts.showNoInternetConnectionAlert(inWrapper: alertWrapper)
+            }
+        }
     }
     
     func fetchConfig() {
@@ -139,6 +169,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
+
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
     }
     

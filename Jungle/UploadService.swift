@@ -12,6 +12,7 @@ import CoreLocation
 import AVFoundation
 import GooglePlaces
 import GoogleMaps
+import SwiftMessages
 
 class Upload {
     var place:GMSPlace?
@@ -25,6 +26,8 @@ class Upload {
 let dataCache = NSCache<NSString, AnyObject>()
 
 class UploadService {
+    
+    fileprivate static let sm = SwiftMessages()
     
     static func writeImageToFile(withKey key:String, image:UIImage) {
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_image-\(key).jpg"))
@@ -144,6 +147,8 @@ class UploadService {
         
         let uid = mainStore.state.userState.uid
         
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
+        
         let avgColor = image.areaAverage()
         let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
         let colorHex = saturatedColor.htmlRGBColor
@@ -159,7 +164,7 @@ class UploadService {
             let uploadTask = storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: metadata) { metadata, error in
                 
                 if (error != nil) {
-                    // HANDLE ERROR
+                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                 } else {
                     // Metadata contains file metadata such as size, content-type, and download URL.
                     let downloadURL = metadata!.downloadURL()
@@ -169,7 +174,8 @@ class UploadService {
                         "contentType": contentTypeStr,
                         "dateCreated": [".sv": "timestamp"],
                         "length": 6.0,
-                        "color": colorHex
+                        "color": colorHex,
+                        "live": true
                     ] as [String : Any]
                     
                     if let place = upload.place {
@@ -184,34 +190,37 @@ class UploadService {
                         obj["captionPos"] = y
                     }
                     
-                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
+                    var updateValues: [String : Any] = [
+                        "uploads/meta/\(postKey)": obj,
+                        "uploads/subscribers/\(postKey)/\(uid)":true,
+                        "stories/users/\(uid)/meta/k": postKey,
+                        "stories/users/\(uid)/meta/t": [".sv": "timestamp"],
+                        "stories/users/\(uid)/posts/\(postKey)":true,
+                        "stories/sorted/recent/userStories/\(uid)": [".sv": "timestamp"],
+                        "users/story/\(uid)/posts/\(postKey)/t": [".sv": "timestamp"],
+                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
+                    ]
+                    
+                    if let place = upload.place {
+                        updateValues["places/\(place.placeID)/info/name"] = place.name
+                        updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
+                        updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
+                        updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
+                        updateValues["places/\(place.placeID)/posts/\(postKey)/a"] = uid
+                        updateValues["places/\(place.placeID)/posts/\(postKey)/t"] = [".sv": "timestamp"]
+                        updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                        for type in place.types {
+                            updateValues["places/\(place.placeID)/info/types/\(type)"] = true
+                        }
+                    }
+                    
+                    ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
-                            
-                            var updateValues: [String : Any] = [
-                                "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
-                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
-                            ]
-                            
-                            if let place = upload.place {
-                                updateValues["places/\(place.placeID)/info/name"] = place.name
-                                updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
-                                updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
-                                updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
-                                updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
-                                updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
-                                for type in place.types {
-                                    updateValues["places/\(place.placeID)/info/types/\(type)"] = true
-                                }
-                            }
-
-                            ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
-                                
-                            })
+                            return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
                         } else {
-                            
+                            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                         }
                     })
-                    
                 }
             }
             completion()
@@ -222,60 +231,82 @@ class UploadService {
         
         if upload.videoURL == nil { return }
         
-        let uid = mainStore.state.userState.uid
         let url = upload.videoURL!
         
         let ref = FIRDatabase.database().reference()
         let dataRef = ref.child("uploads/meta").childByAutoId()
         let postKey = dataRef.key
         
-        completion(true)
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
         
-        uploadVideoStill(url: url, postKey: postKey, completion: { thumbURL, colorHex in
-            
-            let data = NSData(contentsOf: url)
-            
-            let metadata = FIRStorageMetadata()
-            let contentTypeStr = "video"
-            let playerItem = AVAsset(url: url)
-            let length = CMTimeGetSeconds(playerItem.duration)
-            metadata.contentType = contentTypeStr
-            
-            let storageRef = FIRStorage.storage().reference()
-            let uploadTask = storageRef.child("user_uploads/videos/\(uid)/\(postKey)").put(data as! Data, metadata: metadata) { metadata, error in
-                if (error != nil) {
-                    // HANDLE ERROR
-
-                } else {
-                    // Metadata contains file metadata such as size, content-type, and download URL.
-                    
-                    let downloadURL = metadata!.downloadURL()
-                    var obj = [
-                        "author": uid,
-                        "url": thumbURL,
-                        "videoURL": downloadURL!.absoluteString,
-                        "contentType": contentTypeStr,
-                        "dateCreated": [".sv": "timestamp"],
-                        "length": length,
-                        "color": colorHex
-                        ] as [String : Any]
-                    
-                    if let place = upload.place {
-                        obj["placeID"] = place.placeID
+        let storageRef = FIRStorage.storage().reference()
+        if let videoStill = generateVideoStill(url: url) {
+            let avgColor = videoStill.areaAverage()
+            let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
+            let colorHex = saturatedColor.htmlRGBColor
+            if let data = UIImageJPEGRepresentation(videoStill, 0.5) {
+                
+                completion(true)
+                
+                let stillMetaData = FIRStorageMetadata()
+                stillMetaData.contentType = "image/jpg"
+                let uid = mainStore.state.userState.uid
+                storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: stillMetaData) { metadata, error in
+                  
+                    let thumbURL = metadata?.downloadURL()?.absoluteString
+                    if (thumbURL == nil || error != nil) {
+                        return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                     }
                     
-                    if let caption = upload.caption {
-                        obj["caption"] = caption
-                    }
+                    let data = NSData(contentsOf: url)
                     
-                    if let y = upload.captionPos {
-                        obj["captionPos"] = y
-                    }
+                    let metadata = FIRStorageMetadata()
+                    let contentTypeStr = "video"
+                    let playerItem = AVAsset(url: url)
+                    let length = CMTimeGetSeconds(playerItem.duration)
+                    metadata.contentType = contentTypeStr
                     
-                    dataRef.setValue(obj, withCompletionBlock: { error, _ in
-                        if error == nil {
+                    let storageRef = FIRStorage.storage().reference()
+                    storageRef.child("user_uploads/videos/\(uid)/\(postKey)").put(data as! Data, metadata: metadata) { metadata, error in
+                        
+                        if (error != nil) {
+                            // HANDLE ERROR
+                            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+                        } else {
+                            // Metadata contains file metadata such as size, content-type, and download URL.
+                            
+                            let downloadURL = metadata!.downloadURL()
+                            var obj = [
+                                "author": uid,
+                                "url": thumbURL!,
+                                "videoURL": downloadURL!.absoluteString,
+                                "contentType": contentTypeStr,
+                                "dateCreated": [".sv": "timestamp"],
+                                "length": length,
+                                "color": colorHex,
+                                "live":true,
+                                ] as [String : Any]
+                            
+                            if let place = upload.place {
+                                obj["placeID"] = place.placeID
+                            }
+                            
+                            if let caption = upload.caption {
+                                obj["caption"] = caption
+                            }
+                            
+                            if let y = upload.captionPos {
+                                obj["captionPos"] = y
+                            }
+                            
                             var updateValues: [String : Any] = [
-                                "users/story/\(uid)/\(postKey)": [".sv": "timestamp"],
+                                "uploads/meta/\(postKey)" : obj,
+                                "uploads/subscribers/\(postKey)/\(uid)":true,
+                                "stories/users/\(uid)/meta/k": postKey,
+                                "stories/users/\(uid)/meta/t": [".sv": "timestamp"],
+                                "stories/users/\(uid)/posts/\(postKey)":true,
+                                "stories/sorted/recent/userStories/\(uid)": [".sv": "timestamp"],
+                                "users/story/\(uid)/posts/\(postKey)/t": [".sv": "timestamp"],
                                 "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
                             
@@ -284,47 +315,32 @@ class UploadService {
                                 updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
                                 updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
                                 updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
-                                updateValues["places/\(place.placeID)/posts/\(postKey)"] = [".sv": "timestamp"]
+                                updateValues["places/\(place.placeID)/posts/\(postKey)/a"] = uid
+                                updateValues["places/\(place.placeID)/posts/\(postKey)/t"] = [".sv": "timestamp"]
                                 updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
                                 for type in place.types {
                                     updateValues["places/\(place.placeID)/info/types/\(type)"] = true
                                 }
-                                
                             }
                             
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
+                                if error == nil {
+                                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                                } else {
+                                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+                                }
                             })
-                        } else {
-                            
                         }
-                    })
-                }
-            }
-            
-        })
-    }
-    
-    private static func uploadVideoStill(url:URL, postKey:String, completion:@escaping (_ thumb_url:String, _ colorHex:String)->()) {
-        let storageRef = FIRStorage.storage().reference()
-        if let videoStill = generateVideoStill(url: url) {
-            let avgColor = videoStill.areaAverage()
-            let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
-            let colorHex = saturatedColor.htmlRGBColor
-            if let data = UIImageJPEGRepresentation(videoStill, 0.5) {
-                let stillMetaData = FIRStorageMetadata()
-                stillMetaData.contentType = "image/jpg"
-                let uid = mainStore.state.userState.uid
-                _ = storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: stillMetaData) { metadata, error in
-                    if (error != nil) {
-                        
-                    } else {
-                        let thumbURL = metadata!.downloadURL()!
-                        completion(thumbURL.absoluteString, colorHex)
                     }
+                    
+                    
                 }
             }
+        } else {
+            completion(false)
         }
+
     }
     
     private static func generateVideoStill(url:URL) -> UIImage?{
@@ -439,12 +455,17 @@ class UploadService {
                     if let _numComments = dict["comments"] as? Int {
                         numComments = _numComments
                     }
+                    
+                    var numCommenters = 0
+                    if let _numCommenters = dict["commenters"] as? Int {
+                        numCommenters = _numCommenters
+                    }
                     var color:String?
                     if let hex = dict["color"] as? String {
                         color = hex
                     }
 
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numComments: numComments, numViews: numViews, flagged: flagged, colorHexcode: color)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numViews: numViews, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: color)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -461,14 +482,39 @@ class UploadService {
         let uid = mainStore.state.userState.uid
         
         let uploadRef = ref.child("uploads/comments/\(post.getKey())").childByAutoId()
-        uploadRef.setValue([
-            "author": uid,
-            "text":comment,
-            "timestamp":[".sv":"timestamp"]
-        ])
+        let path = "uploads/comments/\(post.getKey())/\(uploadRef.key)"
         
-        // TODO
-        // add completion block
+        let updateObject = [
+            "\(path)/author" : uid,
+            "\(path)/text" : comment,
+            "\(path)/timestamp" : [".sv":"timestamp"],
+            "uploads/subscribers/\(post.getKey())/\(uid)": true
+        ] as [String:Any]
+        
+        ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+            
+            if error != nil {
+                print("ERROR: \(error)")
+                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+            }
+        })
+        
+    }
+    
+    static func removeComment(postKey:String, commentKey:String, completion: @escaping ((_ success: Bool, _ commentKey:String)->())) {
+        let ref = FIRDatabase.database().reference()
+        let uploadRef = ref.child("uploads/comments/\(postKey)/\(commentKey)")
+        uploadRef.removeValue(completionBlock: { error, ref in
+        
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment deleted!")
+                return completion(true, commentKey)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete comment.")
+                return completion(false, commentKey)
+            }
+        
+        })
     }
     
     static func addView(post:StoryItem) {
@@ -519,11 +565,17 @@ class UploadService {
         let ref = FIRDatabase.database().reference()
         let postRef = ref.child("uploads/meta/\(item.getKey())")
         postRef.removeValue(completionBlock: { error, ref in
-            return completion(error == nil)
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete.")
+                return completion(false)
+            }
         })
     }
     
-    static func reportItem(item:StoryItem, type:ReportType, showNotification:Bool, completion:@escaping ((_ success:Bool)->())) {
+    static func reportItem(item:StoryItem, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid
         let reportRef = ref.child("reports/\(uid):\(item.getKey())")
@@ -534,18 +586,72 @@ class UploadService {
             "timestamp": [".sv": "timestamp"]
         ]
         reportRef.setValue(value, withCompletionBlock: { error, ref in
-            completion(error == nil )
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Report Sent!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to send report.")
+                return completion(false)
+            }
         })
         
+        /*
         if type == .Inappropriate {
             let uploadRef = ref.child("uploads/\(item.getKey())/flagged")
             uploadRef.setValue(true)
+        }*/
+    }
+    
+    static func reportComment(itemKey: String, commentKey:String, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        let reportRef = ref.child("reports/\(uid):\(itemKey):\(commentKey)")
+        let value: [String: Any] = [
+            "sender": uid,
+            "itemKey": itemKey,
+            "commentKey": commentKey,
+            "type": type.rawValue,
+            "timestamp": [".sv": "timestamp"]
+        ]
+        reportRef.setValue(value, withCompletionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Report Sent!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to send report.")
+                return completion(false)
+            }
+        })
+    }
+    
+    static func subscribeToPost(withKey postKey:String, subscribe:Bool) {
+        let ref = FIRDatabase.database().reference()
+        let uid = mainStore.state.userState.uid
+        let subscribeRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
+        if subscribe {
+            subscribeRef.setValue(true, withCompletionBlock: { error, ref in
+                if error == nil {
+                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Subscribed!")
+                } else {
+                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to subscribe.")
+                }
+            })
+        } else {
+            subscribeRef.removeValue(completionBlock: { error, ref in
+                if error == nil {
+                    return Alerts.showStatusDefaultAlert(inWrapper: sm, withMessage: "Unsubscribed.")
+                } else {
+                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to unsubscribe.")
+                }
+            })
         }
     }
 
 }
 
 enum ReportType:String {
+    case SpamComment = "SpamComment"
+    case AbusiveComment = "AbusiveComment"
     case Inappropriate = "InappropriateContent"
     case Spam          = "SpamContent"
     case InappropriateProfile = "InappropriateProfile"

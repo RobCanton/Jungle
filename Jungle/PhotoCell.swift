@@ -51,28 +51,27 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             timeLabel.text = "Loading..."
             break
         case .contentLoaded:
-            guard let lastPost = story.getPostKeys().first else { return }
-            let time = lastPost.1
-            let date = Date(timeIntervalSince1970: time/1000)
+            let lastPost = story.getLastPostKey()
+            let date = story.getDate()
             self.timeLabel.text = date.timeStringSinceNow()
             break
         }
     }
 
-    func setupLocationCell (_ locationStory:LocationStory) {
+    func setupLocationCell (_ story:LocationStory) {
         
-        self.story = locationStory
-        story!.delegate = self
-        story!.determineState()
+        self.story = story
+        self.story!.delegate = self
+        self.story!.determineState()
         
         check += 1
         self.imageView.image = nil
         self.nameLabel.text = ""
         self.timeLabel.text = ""
         
-        colorView.isHidden = locationStory.hasViewed()
+        colorView.isHidden = story.hasViewed()
         
-        LocationService.sharedInstance.getLocationInfo(locationStory.getLocationKey(), completion: { location in
+        LocationService.sharedInstance.getLocationInfo(story.getLocationKey(), completion: { location in
             if location != nil {
                 self.location = location
                 self.nameLabel.text = location!.getName()
@@ -83,16 +82,13 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
-        let lastPost = locationStory.getPostKeys().first!
-        let key = lastPost.0
-        let time = lastPost.1
-        
-        let date = Date(timeIntervalSince1970: time/1000)
+        let lastPost = story.getLastPostKey()
+        let date = story.getDate()
         self.timeLabel.text = date.timeStringSinceNow()
  
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
-        getUploadImage(withCheck: check, key: key, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
             
             if self.check != check { return }
             
@@ -131,16 +127,13 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
-        let lastPost = story.getPostKeys().first!
-        let key = lastPost.0
-        let time = lastPost.1
-        
-        let date = Date(timeIntervalSince1970: time/1000)
+        let lastPost = story.getLastPostKey()
+        let date = story.getDate()
         self.timeLabel.text = date.timeStringSinceNow()
         
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
-        getUploadImage(withCheck: check, key: key, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
             
             if self.check != check { return }
             self.imageView.image = image

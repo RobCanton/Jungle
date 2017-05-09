@@ -32,8 +32,7 @@ class SettingsContainerViewController: UIViewController {
 }
 
 class SettingsViewController: UITableViewController {
-    
-    @IBOutlet weak var radiusSlider: UISlider!
+
     @IBOutlet weak var pushNotificationsSwitch: UISwitch!
     
     @IBOutlet weak var flaggedContentSwitch: UISwitch!
@@ -64,18 +63,13 @@ class SettingsViewController: UITableViewController {
         case termsCell:
             break
         case logoutCell:
-            AuthService.sharedInstance.logout()
+            UserService.logout()
             break
         default:
             break
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-
-    @IBAction func radiusSliderChanged(_ sender: UISlider) {
-        
     }
     
     @IBAction func pushNotificationsSwitched(_ sender: UISwitch) {

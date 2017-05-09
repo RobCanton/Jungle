@@ -54,6 +54,7 @@ class PostHeaderView: UIView {
         locationTitle.text = location.getName()
     }
     
+    
     func startTimer(length:Double, index:Int, total:Int) {
         let timeInterval = TimeInterval(length)
 

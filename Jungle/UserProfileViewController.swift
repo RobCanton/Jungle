@@ -131,7 +131,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         
         if uid != mainStore.state.userState.uid {
-            let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: nil)
+            let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: #selector(showOptions))
             moreButton.tintColor = UIColor.black
             self.navigationItem.rightBarButtonItem = moreButton
             
@@ -143,6 +143,44 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                 self.following = following
             })
         }
+    }
+    
+    
+    func showOptions() {
+        guard let user = self.user else { return }
+        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        sheet.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { _ in
+            let alert = UIAlertController(title: "Block \(user.getUsername())?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Block", style: .default, handler: { (action) -> Void in
+                UserService.blockUser(uid: user.getUserId(), completion: { success in })
+            }))
+            
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
+            
+            self.present(alert, animated: true, completion: nil)
+            
+        }))
+        sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
+            
+            let reportSheet = UIAlertController(title: nil, message: "Why are you reporting \(user.getUsername())?", preferredStyle: .actionSheet)
+            reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            reportSheet.addAction(UIAlertAction(title: "Inappropriate Profile", style: .destructive, handler: { _ in
+                UserService.reportUser(user: user, type: .InappropriateProfile, completion: { success in })
+            }))
+            reportSheet.addAction(UIAlertAction(title: "Harassment", style: .destructive, handler: { _ in
+               UserService.reportUser(user: user, type: .Harassment, completion: { success in })
+            }))
+            reportSheet.addAction(UIAlertAction(title: "Bot", style: .destructive, handler: { _ in
+                UserService.reportUser(user: user, type: .Bot, completion: { success in })
+            }))
+            self.present(reportSheet, animated: true, completion: nil)
+            
+        }))
+        
+        self.present(sheet, animated: true, completion: nil)
     }
 
     

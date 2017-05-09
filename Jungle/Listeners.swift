@@ -176,6 +176,13 @@ class Listeners {
                 }
             })
             
+            notificationsRef.observe(.childChanged, with: { snapshot in
+                if snapshot.exists() {
+                    guard let seen = snapshot.value as? Bool else { return }
+                    mainStore.dispatch(ChangeNotification(notificationKey: snapshot.key, seen: seen))
+                }
+            })
+            
             notificationsRef.observe(.childRemoved, with: { snapshot in
                 mainStore.dispatch(RemoveNotification(notificationKey: snapshot.key))
             })
@@ -195,15 +202,19 @@ class Listeners {
             listeningToMyActivity = true
             let current_uid = mainStore.state.userState.uid
             
-            let myActivityRef = ref.child("users/story/\(current_uid)")
+            /*
+            let myActivityRef = ref.child("users/story/\(current_uid)/posts")
             myActivityRef.observe(.value, with: { snapshot in
+                var postKeys = [(String, Double)]()
                 if snapshot.exists() {
-                    if let _postsKeys = snapshot.value as? [String:Double]  {
-                        let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                        mainStore.dispatch(SetMyActivity(posts: postKeys))
+                    if let _postsKeys = snapshot.value as? [String:Any]  {
+                        //postKeys = _postsKeys.valueKeySorted
+                        print("OBJECT: \(_postsKeys)")
                     }
                 }
+                mainStore.dispatch(SetMyActivity(posts: postKeys))
             })
+            */
         }
     }
     
@@ -214,6 +225,7 @@ class Listeners {
             listeningToNearbyActivity = true
             let current_uid = mainStore.state.userState.uid
             
+            /*
             let nearbyActivityRef = ref.child("users/feed/nearby/\(current_uid)")
             nearbyActivityRef.observe(.value, with: { snapshot in
                 var stories = [LocationStory]()
@@ -233,6 +245,7 @@ class Listeners {
                 print("New nearby place activity")
                 mainStore.dispatch(SetNearbyPlacesActivity(stories: stories))
             })
+            */
         }
     }
     
@@ -254,7 +267,7 @@ class Listeners {
         if !listeningToFollowingActivity {
             listeningToFollowingActivity = true
             let current_uid = mainStore.state.userState.uid
-            
+            /*
             let followingActivityRef = ref.child("users/feed/following/\(current_uid)")
             followingActivityRef.observe(.value, with: { snapshot in
                 var stories = [UserStory]()
@@ -274,6 +287,7 @@ class Listeners {
                 print("New nearby place activity")
                 mainStore.dispatch(SetFollowingActivity(stories: stories))
             })
+            */
         }
     }
     

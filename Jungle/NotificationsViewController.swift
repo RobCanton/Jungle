@@ -103,7 +103,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let notification = notifications[indexPath.row]
         let type = notification.getType()
-        if type == .comment || type == .like {
+        if type == .comment || type == .comment_also || type == .comment_to_sub || type == .like || type == .mention {
             let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! NotificationTableViewCell
             cell.setup(withNotification: notifications[indexPath.row])
             let labelX = cell.messageLabel.frame.origin.x
@@ -124,7 +124,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         let notification = notifications[indexPath.row]
         let type = notification.getType()
-        if type == .comment || type == .like {
+        if type == .comment || type == .comment_also || type == .comment_to_sub || type == .like || type == .mention {
             let cell = tableView.cellForRow(at: indexPath) as! NotificationTableViewCell
             
             if let item = cell.post {

@@ -52,11 +52,11 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XsV-iO-uuX" customClass="SnapTimerView" customModule="SnapTimer">
-                    <rect key="frame" x="485" y="17" width="22" height="22"/>
+                    <rect key="frame" x="487" y="18" width="20" height="20"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="XsV-iO-uuX" secondAttribute="height" multiplier="1:1" id="4Ms-Hb-3jL"/>
-                        <constraint firstAttribute="height" constant="22" id="e1j-kL-YNO"/>
+                        <constraint firstAttribute="height" constant="20" id="e1j-kL-YNO"/>
                     </constraints>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="number" keyPath="outerValue">

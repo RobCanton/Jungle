@@ -28,8 +28,11 @@ class CommentCell: UITableViewCell {
 
         tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         userImage.addGestureRecognizer(tap)
-        
         userImage.isUserInteractionEnabled = true
+        
+        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        authorLabel.addGestureRecognizer(usernameTap)
+        authorLabel.isUserInteractionEnabled = true
         
         //authorLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
         //commentLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
@@ -60,8 +63,12 @@ class CommentCell: UITableViewCell {
     }
     
     
+    fileprivate var check:Int = 0
+    var user:User?
+    
     func setContent(comment:Comment) {
         
+        check += 1
         
         self.comment = comment
         userImage.cropToCircle()
@@ -69,16 +76,20 @@ class CommentCell: UITableViewCell {
         backgroundColor = UIColor.clear
         backgroundView = nil
         
-        UserService.getUser(comment.getAuthor(), completion: { user in
-            if user != nil {
+        UserService.getUser(comment.getAuthor(), withCheck: check, completion: { user, check in
+            if user != nil && check == self.check{
+                self.user = user!
                 self.authorLabel.text = user!.getUsername()
                 self.commentLabel.text = comment.getText()
                 self.commentLabel.sizeToFit()
                 self.userImage.loadImageAsync(user!.getImageUrl(), completion: nil)
                 self.timeLabel.text = comment.getDate().timeStringSinceNow()
             }
+            
         })
+        
     }
+    
     
     
     

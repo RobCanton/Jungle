@@ -20,13 +20,17 @@ protocol StoryProtocol {
 class UserStory:Story {
     fileprivate var uid:String
     
-    init(postKeys:[(String,Double)], uid:String) {
+    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, uid:String) {
         self.uid = uid
-        super.init(postKeys: postKeys)
+        super.init(posts:posts, lastPostKey:lastPostKey, timestamp:timestamp, popularity:popularity)
     }
     
     func getUserId() -> String {
         return uid
+    }
+    override func printDescription() {
+        print("USER STORY: \(uid)")
+        super.printDescription()
     }
     
     
@@ -36,10 +40,10 @@ class LocationStory:Story {
     fileprivate var locationKey:String
     fileprivate var distance:Double
     
-    init(postKeys:[(String,Double)], locationKey:String, distance:Double) {
+    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, locationKey:String, distance:Double) {
         self.locationKey = locationKey
         self.distance = distance
-        super.init(postKeys: postKeys)
+        super.init(posts:posts, lastPostKey:lastPostKey, timestamp:timestamp, popularity:popularity)
     }
     
     func getLocationKey() -> String {
@@ -54,8 +58,10 @@ class LocationStory:Story {
 }
 
 class Story: ItemDelegate {
-    fileprivate var postKeys:[(String,Double)]
     fileprivate var posts:[String]
+    fileprivate var lastPostKey:String
+    fileprivate var date:Date
+    fileprivate var popularity:Int
     var delegate:StoryProtocol?
     
 
@@ -67,23 +73,31 @@ class Story: ItemDelegate {
         }
     }
     
-    init(postKeys:[(String,Double)]) {
-        self.postKeys = postKeys
+    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int) {
         
-        self.posts = [String]()
-        for (key, _) in postKeys {
-            self.posts.append(key)
-        }
-        
+        self.posts = posts
+        self.lastPostKey = lastPostKey
+        self.date = Date(timeIntervalSince1970: timestamp/1000) as Date
+        self.popularity = popularity
+
         downloadItems()
     }
     
-    func getPostKeys() -> [(String,Double)] {
-        return postKeys
-    }
     
     func getPosts() -> [String] {
         return posts
+    }
+    
+    func getLastPostKey() -> String {
+        return lastPostKey
+    }
+    
+    func getDate() -> Date {
+        return date
+    }
+    
+    func getPopularity() -> Int {
+        return popularity
     }
     
     func determineState() {
@@ -164,22 +178,25 @@ class Story: ItemDelegate {
         }
         return true
     }
+    
+    func printDescription() {
+
+        for key in posts {
+            print(" * \(key)")
+        }
+        
+        print("\n")
+    }
 }
 
 func < (lhs: Story, rhs: Story) -> Bool {
-    let t1 = lhs.getPostKeys().first!.1
-    let t2 = rhs.getPostKeys().first!.1
-    return t1 < t2
+    return lhs.getDate().compare(rhs.getDate()) == .orderedAscending
 }
 
 func > (lhs: Story, rhs: Story) -> Bool {
-    let t1 = lhs.getPostKeys().first!.1
-    let t2 = rhs.getPostKeys().first!.1
-    return t1 > t2
+    return lhs.getDate().compare(rhs.getDate()) == .orderedDescending
 }
 
 func == (lhs: Story, rhs: Story) -> Bool {
-    let t1 = lhs.getPostKeys().first!.1
-    let t2 = rhs.getPostKeys().first!.1
-    return t1 == t2
+    return lhs.getDate().compare(rhs.getDate()) == .orderedSame
 }

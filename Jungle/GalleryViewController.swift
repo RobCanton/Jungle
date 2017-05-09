@@ -21,6 +21,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     var collectionView:UICollectionView!
     
     var isSingleItem = false
+    var showCommentsOnAppear = false
     
     var statusBarShouldHide = false
     var shouldScrollToBottom = false
@@ -39,6 +40,11 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         globalMainRef?.statusBar(hide: true, animated: false)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        if showCommentsOnAppear {
+            showCommentsOnAppear = false
+            scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height), animated: false)
+        }
     }
     
     
