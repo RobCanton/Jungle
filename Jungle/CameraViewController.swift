@@ -369,7 +369,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     
     var animateActivity: Bool!
     func autoFocusGesture(_ gestureRecognizer: UITapGestureRecognizer){
-        print("YAH")
         let touchPoint: CGPoint = gestureRecognizer.location(in: self.cameraOutputView)
         //GET PREVIEW LAYER POINT
         let convertedPoint = self.previewLayer!.captureDevicePointOfInterest(for: touchPoint)

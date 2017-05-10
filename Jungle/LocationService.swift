@@ -48,7 +48,7 @@ class LocationService: NSObject {
     }
     
     func getLocationInfo(_ locationKey:String, completion: @escaping (_ location:Location?)->()) {
-        /*
+        
         if let cachedLocation = dataCache.object(forKey: "place-\(locationKey)" as NSString) as? Location {
             completion(cachedLocation)
         } else {
@@ -78,22 +78,7 @@ class LocationService: NSObject {
                 
                 completion(location)
             })
-        }*/
-    }
-    
-    func getLocationStory(_ locationKey:String, completon: @escaping (_ story: LocationStory?)->()) {
-        /*
-        let locRef = ref.child("places/\(locationKey)/posts")
-        
-        locRef.observeSingleEvent(of: .value, with: { snapshot in
-            var story:LocationStory?
-
-            if let _postsKeys = snapshot.value as? [String:Double] {
-                let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                story = LocationStory(postKeys: postKeys, locationKey: locationKey, distance: 0)
-            }
-            completon(story)
-        })*/
+        }
     }
 }
 

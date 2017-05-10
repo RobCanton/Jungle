@@ -114,7 +114,10 @@ class UserService {
                 if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
                     let lastPost = meta["k"] as! String
                     let timestamp = meta["t"] as! Double
-                    let popularity = meta["p"] as! Int
+                    var popularity = 0
+                    if let p = meta["p"] as? Int {
+                        popularity = p
+                    }
                     var posts = [String]()
                     for (key,_) in postObject {
                         posts.append(key)
@@ -124,6 +127,31 @@ class UserService {
             }
             completion(story)
 
+        })
+    }
+    
+    static func getPlaceStory(_ placeId:String, completion: @escaping ((_ story:LocationStory?)->())) {
+        let storyRef = ref.child("stories/places/\(placeId)")
+        storyRef.observe(.value, with: { snapshot in
+            var story:LocationStory?
+            if let dict = snapshot.value as? [String:AnyObject] {
+                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
+                    let lastPost = meta["k"] as! String
+                    let timestamp = meta["t"] as! Double
+                    var popularity = 0
+                    if let p = meta["p"] as? Int {
+                        popularity = p
+                    }
+                    var posts = [String]()
+                    for (key,_) in postObject {
+                        posts.append(key)
+                    }
+                    story = LocationStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity: popularity, locationKey: snapshot.key, distance: 0)
+                    //story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
+                }
+            }
+            completion(story)
+            
         })
     }
 //

@@ -8,9 +8,13 @@
 
 import UIKit
 
+import TGPControls
 func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
     
 }
+
+let distances = [1, 5, 10, 25, 50, 100, 200]
+
 
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
@@ -22,10 +26,37 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     var collectionView:UICollectionView!
     var collectionView2:UICollectionView!
     var itemSideLength:CGFloat!
+    
+    @IBOutlet weak var stackView: UIStackView!
+    @IBOutlet weak var settingsView: UIView!
+
+    @IBOutlet weak var sliderLabels: TGPCamelLabels!
+    @IBOutlet weak var slider: TGPDiscreteSlider!
+    
+    @IBOutlet weak var followingBanner: UIView!
+    @IBOutlet weak var storiesBanner: UIView!
+    @IBOutlet weak var placesBanner: UIView!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.75
+        var distanceLabels = [String]()
+        for distance in distances {
+            distanceLabels.append("\(distance) km")
+        }
+        sliderLabels.names = distanceLabels
+        
+        slider.ticksListener = sliderLabels
+        
+        slider.addTarget(self,
+                         action: #selector(valueChanged(_:event:)),
+                         for: .valueChanged)
+        
+        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
+        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
+        
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.677
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -64,38 +95,70 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         collectionViewPeople.reloadData()
         collectionViewPeople.showsHorizontalScrollIndicator = false
         //collectionViewPeople.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        print("LOADED YO")
         
-        //self.addSubview(collectionView)
-        /*
-        collectionView2 = UICollectionView(frame: CGRect(x: 0, y: self.bounds.height/2, width: self.bounds.width, height: self.bounds.height/2), collectionViewLayout: layout)
-        
-        let nib2 = UINib(nibName: "FollowingPhotoCell", bundle: nil)
-        collectionView2.register(nib2, forCellWithReuseIdentifier: cellIdentifier)
-        
-        collectionView2.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
-        collectionView2.backgroundColor = UIColor.clear
-        collectionView2.dataSource = self
-        collectionView2.delegate = self
-        collectionView2.reloadData()
-        collectionView2.showsHorizontalScrollIndicator = false
-        collectionView2.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
-        //self.addSubview(collectionView2)
-        
-    */
-        
+        resetStack()
     }
     
-    var userStories = [UserStory]()
-    var popularStories = [UserStory]()
+    var topStories = [UserStory]()
+    var bottomStories = [UserStory]()
     
     var discoverLabel:UILabel?
-    func setupStories(_userStories:[UserStory], myStory:UserStory?, _popularStories:[UserStory]) {
+    
+    func resetStack() {
+        for view in stackView.arrangedSubviews {
+            stackView.removeArrangedSubview(view)
+        }
         
-        userStories = _userStories
-        popularStories = _popularStories
-        if myStory != nil {
-            userStories.insert(myStory!, at: 0)
+        stackView.addArrangedSubview(settingsView)
+        stackView.addArrangedSubview(followingBanner)
+        stackView.addArrangedSubview(collectionViewFollowing)
+        stackView.addArrangedSubview(storiesBanner)
+        stackView.addArrangedSubview(collectionViewPeople)
+        stackView.addArrangedSubview(placesBanner)
+        
+        settingsView.isHidden = false
+        followingBanner.isHidden = false
+        collectionViewFollowing.isHidden = false
+        storiesBanner.isHidden = false
+        collectionViewPeople.isHidden = false
+        placesBanner.isHidden = false
+    }
+    
+    func removeStackView(view:UIView) {
+        if stackView.arrangedSubviews.contains(view) {
+            stackView.removeArrangedSubview(view)
+        }
+        view.isHidden = true
+    }
+    
+    func setupStories(mode:SortedBy, state: HomeStateController) {
+        resetStack()
+        topStories = state.followingStories
+
+        
+        switch mode {
+        case .Popular:
+            bottomStories = state.popularUserStories
+            removeStackView(view: settingsView)
+            break
+        case .Nearby:
+            bottomStories = []
+            break
+        case .Recent:
+            removeStackView(view: settingsView)
+            bottomStories = state.recentUserStories
+            break
+        }
+        
+        if topStories.count == 0 && state.myStory == nil {
+            removeStackView(view: followingBanner)
+            removeStackView(view: collectionViewFollowing)
+        }
+        
+        if bottomStories.count == 0 {
+            removeStackView(view: storiesBanner)
+            removeStackView(view: collectionViewPeople)
         }
 
         collectionViewFollowing.reloadData()
@@ -107,10 +170,10 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         var count = 0
         switch collectionView {
         case collectionViewFollowing:
-            count = userStories.count
+            count = topStories.count
             break
         case collectionViewPeople:
-            count = popularStories.count
+            count = bottomStories.count
             break
         default:
             break
@@ -123,10 +186,10 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         
         switch collectionView {
         case collectionViewFollowing:
-            cell.setupFollowingCell(userStories[indexPath.row])
+            cell.setupFollowingCell(topStories[indexPath.row])
             break
         case collectionViewPeople:
-            cell.setupFollowingCell(popularStories[indexPath.row])
+            cell.setupFollowingCell(bottomStories[indexPath.row])
             break
         default:
             break
@@ -143,19 +206,45 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        /*
-        let story = userStories[indexPath.row]
-        if story.state == .contentLoaded {
-            globalMainRef?.presentUserStory(stories: userStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-        } else {
-            story.downloadStory()
+        switch collectionView {
+        case collectionViewFollowing:
+            let story = topStories[indexPath.row]
+            if story.state == .contentLoaded {
+                globalMainRef?.presentUserStory(stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            } else {
+                story.downloadStory()
+            }
+            break
+        case collectionViewPeople:
+            let story = bottomStories[indexPath.row]
+            if story.state == .contentLoaded {
+                globalMainRef?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            } else {
+                story.downloadStory()
+            }
+            break
+        default:
+            break
         }
         collectionView.deselectItem(at: indexPath, animated: true)
-        */
+
     }
     
     func getItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
+    }
+    
+    func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
+        let value = Int(sender.value)
+        sliderLabels.value = UInt(value)
+        let distance = distances[value]
+        print("DISTANCE SELECTED: \(distance)")
+        LocationService.sharedInstance.radius = distance
+        LocationService.sharedInstance.requestNearbyLocations()
+    }
+    
+    func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
+        sliderLabels.value = UInt(sender.value)
     }
     
     

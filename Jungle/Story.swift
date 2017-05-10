@@ -58,10 +58,10 @@ class LocationStory:Story {
 }
 
 class Story: ItemDelegate {
-    fileprivate var posts:[String]
-    fileprivate var lastPostKey:String
-    fileprivate var date:Date
-    fileprivate var popularity:Int
+    private(set) var posts:[String]
+    private(set) var lastPostKey:String
+    private(set) var date:Date
+    private(set) var popularity:Int
     var delegate:StoryProtocol?
     
 
@@ -88,17 +88,6 @@ class Story: ItemDelegate {
         return posts
     }
     
-    func getLastPostKey() -> String {
-        return lastPostKey
-    }
-    
-    func getDate() -> Date {
-        return date
-    }
-    
-    func getPopularity() -> Int {
-        return popularity
-    }
     
     func determineState() {
         if needsDownload() {
@@ -190,13 +179,13 @@ class Story: ItemDelegate {
 }
 
 func < (lhs: Story, rhs: Story) -> Bool {
-    return lhs.getDate().compare(rhs.getDate()) == .orderedAscending
+    return lhs.date.compare(rhs.date) == .orderedAscending
 }
 
 func > (lhs: Story, rhs: Story) -> Bool {
-    return lhs.getDate().compare(rhs.getDate()) == .orderedDescending
+    return lhs.date.compare(rhs.date) == .orderedDescending
 }
 
 func == (lhs: Story, rhs: Story) -> Bool {
-    return lhs.getDate().compare(rhs.getDate()) == .orderedSame
+    return lhs.date.compare(rhs.date) == .orderedSame
 }

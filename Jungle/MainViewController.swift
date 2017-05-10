@@ -55,13 +55,13 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     fileprivate var mainTabBar:MainTabBarController!
     
-    fileprivate var places:PlacesViewController!
+    fileprivate var places:HomeViewController!
     fileprivate var notifications:NotificationsViewController!
     fileprivate var profile:MyProfileViewController!
     
     
+    fileprivate var returningFollowingIndex:IndexPath?
     fileprivate var returningPlacesCell:PhotoCell?
-    fileprivate var returningFollowingCell:FollowingPhotoCell?
     fileprivate var flashView:UIView!
     
     fileprivate var uploadLikelihoods:[GMSPlaceLikelihood]!
@@ -206,7 +206,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         
         
         let nav1 = mainTabBar.viewControllers![0] as! UINavigationController
-        places = nav1.viewControllers[0] as! PlacesViewController
+        places = nav1.viewControllers[0] as! HomeViewController
         
         let nav4 = mainTabBar.viewControllers![3] as! UINavigationController
         notifications = nav4.viewControllers[0] as! NotificationsViewController
@@ -260,7 +260,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         //setToCameraMode()
         
         flashView.isUserInteractionEnabled = true
-        let autoFocusTap = UITapGestureRecognizer(target: self, action: #selector(yuh))
+        let autoFocusTap = UITapGestureRecognizer(target: self, action: #selector(focus))
         autoFocusTap.numberOfTapsRequired = 1
         autoFocusTap.numberOfTouchesRequired = 1
         autoFocusTap.delegate = self
@@ -272,8 +272,12 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
             
             places.gps_service = gps_service
             LocationService.sharedInstance.gps_service = gps_service
-            
         }
+        
+        let zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoom))
+        scrollView.addGestureRecognizer(zoomGesture)
+        zoomGesture.delegate = self
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -306,17 +310,24 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     }
     
     
-    func yuh (_ gestureRecognizer: UITapGestureRecognizer) {
-        print("yuh")
+    func focus (_ gestureRecognizer: UITapGestureRecognizer) {
         cameraView.autoFocusGesture(gestureRecognizer)
+    }
+    
+    func zoom(_ gestureRecognizer: UIPinchGestureRecognizer) {
+        cameraView.handlePinchGesture(gesture: gestureRecognizer)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if let ri = returningFollowingIndex {
+            if let cell = places.topCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
+                cell.fadeInInfo(animated: true)
+            }
+            returningFollowingIndex = nil
+        }
         returningPlacesCell?.fadeInInfo(animated: true)
         returningPlacesCell = nil
-        returningFollowingCell?.fadeInInfo(animated: true)
-        returningFollowingCell = nil
         if self.navigationController?.delegate === transitionController {
             self.navigationController?.delegate = nil
             recordBtn.isUserInteractionEnabled = true
@@ -511,6 +522,24 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
     }
     
+    func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .PublicUserStory
+        let storiesViewController: StoriesViewController = StoriesViewController()
+        storiesViewController.storyType = .UserStory
+        storiesViewController.userStories = stories
+        
+        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
+                                         "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 4.0
+        
+        storiesViewController.transitionController = transitionController
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
+        nav.delegate = transitionController
+        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
+    }
+    
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
         storyType = .ProfileStory
@@ -660,6 +689,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
             scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
             break
         case .Transitioning:
+            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
             break
         }
     }
@@ -827,20 +857,18 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         if storyType == .PlaceStory {
             guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
-            let image_frame = cell.imageView.frame
-            let x = cell.frame.origin.x + 1
-            let y = cell.frame.origin.y + places.collectionView.frame.origin.y + 20.0 - places.collectionView!.contentOffset.y
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)
-            return view.convert(rect, to: view)
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return convertedFrame
         } else if storyType == .UserStory {
-            guard let headerCollectionView = places.getHeader()?.collectionView else { return CGRect.zero }
+            guard let headerCollectionView = places.topCollectionViewRef else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
-            let image_frame = convertedFrame
-            let x = cell.frame.origin.x - headerCollectionView.contentOffset.x + 3.0
-            let y = cell.frame.origin.y - places.collectionView!.contentOffset.y + places.collectionView.frame.origin.y + 20.0 + 2.0
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)
-            return view.convert(rect, to: view)
+            return convertedFrame//view.convert(rect, to: view)
+        } else if storyType == .PublicUserStory {
+            guard let headerCollectionView = places.midCollectionViewRef else { return CGRect.zero }
+            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return convertedFrame//view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
             let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
             let image_frame = cell.imageView.frame
@@ -869,11 +897,16 @@ extension MainViewController: View2ViewTransitionPresenting {
             }
             return cell.imageView
         } else if storyType == .UserStory {
-            guard let cell = places.getHeader()?.collectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else {
+            guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
                 return UIView()
             }
             return cell.imageView
-        } else if storyType == .ProfileStory{
+        } else if storyType == .PublicUserStory {
+            guard let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
+                return UIView()
+            }
+            return cell.imageView
+        }else if storyType == .ProfileStory{
             guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
@@ -892,27 +925,33 @@ extension MainViewController: View2ViewTransitionPresenting {
 
         if isPresenting {
             if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? FollowingPhotoCell {
-                    returningFollowingCell = cell
-                }
+                returningFollowingIndex = i
             }
-        }
-        
-        if !isPresenting {
+            if storyType == .PublicUserStory {
+                //returningFollowingIndex = i
+            }
+        } else if !isPresenting {
             if storyType == .PlaceStory {
                 if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
+                    
                     returningPlacesCell?.fadeInInfo(animated: false)
                     returningPlacesCell = cell
                     returningPlacesCell!.fadeOutInfo()
                 }
             } else if storyType == .UserStory {
-                if let cell = places.getHeader()?.collectionView.cellForItem(at: i) as? FollowingPhotoCell {
-                    returningFollowingCell?.fadeInInfo(animated: false)
-                    returningFollowingCell = cell
-                    returningFollowingCell!.fadeOutInfo()
+                if let ri = returningFollowingIndex {
+                    if let oldCell = places.topCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
+                        oldCell.fadeInInfo(animated: false)
+                    }
                 }
-            } else {
-                
+                if let cell = places.topCollectionViewRef?.cellForItem(at: i) as? FollowingPhotoCell {
+                    returningFollowingIndex = i
+                    cell.fadeOutInfo()
+                }
+            } else if storyType == .PublicUserStory {
+                if let cell = places.midCollectionViewRef?.cellForItem(at: i) as? FollowingPhotoCell {
+                    
+                }
             }
         }
         if storyType == .PlaceStory {
@@ -920,6 +959,26 @@ extension MainViewController: View2ViewTransitionPresenting {
                 places.collectionView!.reloadData()
                 places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
                 places.collectionView!.layoutIfNeeded()
+            }
+        }
+        
+        if storyType == .UserStory {
+            if !isPresenting, let c = places.topCollectionViewRef {
+                if !c.indexPathsForVisibleItems.contains(indexPath) {
+                    c.reloadData()
+                    c.scrollToItem(at: i, at: .centeredHorizontally, animated: false)
+                    c.layoutIfNeeded()
+                }
+            }
+        }
+        
+        if storyType == .PublicUserStory {
+            if !isPresenting, let c = places.midCollectionViewRef {
+                if !c.indexPathsForVisibleItems.contains(indexPath) {
+                    c.reloadData()
+                    c.scrollToItem(at: i, at: .centeredHorizontally, animated: false)
+                    c.layoutIfNeeded()
+                }
             }
         }
         
@@ -961,5 +1020,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case PlaceStory, UserStory, ProfileStory, NotificationPost
+    case PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost
 }

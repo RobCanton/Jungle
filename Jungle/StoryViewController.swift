@@ -153,8 +153,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     func setupItem() {
         
+        
         killTimer()
         pauseVideo()
+        self.content.image = nil
+        destroyVideoPlayer()
 
         guard let items = story.items else { return }
         if viewIndex >= items.count { return }

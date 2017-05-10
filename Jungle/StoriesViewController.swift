@@ -341,7 +341,7 @@ extension StoriesViewController: PopupProtocol {
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pause()
         getCurrentCell()?.destroyVideoPlayer()
-        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
+        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first {
             let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
             self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?

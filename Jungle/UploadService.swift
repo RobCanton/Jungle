@@ -202,13 +202,19 @@ class UploadService {
                     ]
                     
                     if let place = upload.place {
-                        updateValues["places/\(place.placeID)/info/name"] = place.name
-                        updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
-                        updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
-                        updateValues["places/\(place.placeID)/info/address"] = place.formattedAddress
-                        updateValues["places/\(place.placeID)/posts/\(postKey)/a"] = uid
-                        updateValues["places/\(place.placeID)/posts/\(postKey)/t"] = [".sv": "timestamp"]
-                        updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                        let placeId = place.placeID
+                        updateValues["places/\(placeId)/info/name"] = place.name
+                        updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
+                        updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
+                        updateValues["places/\(placeId)/info/address"] = place.formattedAddress
+                        updateValues["places/\(placeId)/posts/\(postKey)/a"] = uid
+                        updateValues["places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
+                        updateValues["places/\(placeId)/contributers/\(uid)"] = true
+                        updateValues["stories/places/\(placeId)/meta/k"] = postKey
+                        updateValues["stories/places/\(placeId)/meta/t"] = [".sv": "timestamp"]
+                        updateValues["stories/places/\(placeId)/posts/\(postKey)"] = true
+                        updateValues["stories/sorted/recent/places/\(placeId)"] = [".sv": "timestamp"]
+                        
                         for type in place.types {
                             updateValues["places/\(place.placeID)/info/types/\(type)"] = true
                         }
@@ -311,6 +317,7 @@ class UploadService {
                             ]
                             
                             if let place = upload.place {
+                                let placeId = place.placeID
                                 updateValues["places/\(place.placeID)/info/name"] = place.name
                                 updateValues["places/\(place.placeID)/info/lat"] = place.coordinate.latitude
                                 updateValues["places/\(place.placeID)/info/lon"] = place.coordinate.longitude
@@ -318,6 +325,11 @@ class UploadService {
                                 updateValues["places/\(place.placeID)/posts/\(postKey)/a"] = uid
                                 updateValues["places/\(place.placeID)/posts/\(postKey)/t"] = [".sv": "timestamp"]
                                 updateValues["places/\(place.placeID)/contributers/\(uid)"] = true
+                                updateValues["stories/places/\(placeId)/meta/k"] = postKey
+                                updateValues["stories/places/\(placeId)/meta/t"] = [".sv": "timestamp"]
+                                updateValues["stories/places/\(placeId)/posts/\(postKey)"] = true
+                                updateValues["stories/sorted/recent/places/\(placeId)"] = [".sv": "timestamp"]
+                                
                                 for type in place.types {
                                     updateValues["places/\(place.placeID)/info/types/\(type)"] = true
                                 }

@@ -25,7 +25,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         super.awakeFromNib()
         // Initialization code
         
-        self.imageView.superview!.layer.cornerRadius = 4.0
+        self.imageView.superview!.layer.cornerRadius = 4.5
         self.imageView.superview!.clipsToBounds = true
         
         dotBorder.cropToCircle()
@@ -61,9 +61,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                 
             })
             
-            let lastPost = story.getLastPostKey()
-            let date = story.getDate()
-            self.timeLabel.text = date.timeStringSinceNow()
+            self.timeLabel.text = story.date.timeStringSinceNow()
             break
         }
     }
@@ -106,14 +104,12 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
-        let lastPost = story.getLastPostKey()
-        let date = story.getDate()
-        
-        self.timeLabel.text = date.timeStringSinceNow()
+
+        self.timeLabel.text = story.date.timeStringSinceNow()
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
-        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, image, fromFile in
             
             if self.check != check { return }
             self.imageView.image = image

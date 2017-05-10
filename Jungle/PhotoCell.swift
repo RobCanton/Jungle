@@ -51,9 +51,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             timeLabel.text = "Loading..."
             break
         case .contentLoaded:
-            let lastPost = story.getLastPostKey()
-            let date = story.getDate()
-            self.timeLabel.text = date.timeStringSinceNow()
+            self.timeLabel.text = story.date.timeStringSinceNow()
             break
         }
     }
@@ -75,20 +73,14 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             if location != nil {
                 self.location = location
                 self.nameLabel.text = location!.getName()
-                
-                for type in location!.getTypes() {
-                    print("TYPE: \(type)")
-                }
             }
         })
         
-        let lastPost = story.getLastPostKey()
-        let date = story.getDate()
-        self.timeLabel.text = date.timeStringSinceNow()
+        self.timeLabel.text = story.date.timeStringSinceNow()
  
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
-        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, image, fromFile in
             
             if self.check != check { return }
             
@@ -102,8 +94,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 self.imageView.alpha = 1.0
             }
             
-            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
-            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
+            self.nameLabel.applyShadow(radius: 3, opacity: 0.85, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 3, opacity: 0.85, height: 1.0, shouldRasterize: true)
         
         })
     }
@@ -127,13 +119,11 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
-        let lastPost = story.getLastPostKey()
-        let date = story.getDate()
-        self.timeLabel.text = date.timeStringSinceNow()
+        self.timeLabel.text = story.date.timeStringSinceNow()
         
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
-        getUploadImage(withCheck: check, key: lastPost, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, image, fromFile in
             
             if self.check != check { return }
             self.imageView.image = image
