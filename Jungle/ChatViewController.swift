@@ -112,7 +112,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     }
     
     func showUserOptions() {
-        guard let user = conversation.getPartner() else { return }
+        guard conversation.getPartner() != nil else { return }
     }
     
     
@@ -149,7 +149,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         downloadRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).queryEnding(atValue: endTimestamp).observeSingleEvent(of: .value, with: { snapshot in
             if snapshot.exists() {
                 var messageBatch = [JSQMessage]()
-                let dict = snapshot.value as! [String:AnyObject]
+                _ = snapshot.value as! [String:AnyObject]
                 
                 for message in snapshot.children {
                     let messageSnap = message as! FIRDataSnapshot
@@ -309,7 +309,6 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellTopLabelAt indexPath: IndexPath!) -> CGFloat {
-        let currentItem = self.messages[indexPath.item]
         
         if indexPath.item == 0 && messages.count > 8 {
             return kJSQMessagesCollectionViewCellLabelHeightDefault

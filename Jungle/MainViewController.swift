@@ -63,6 +63,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     fileprivate var returningFollowingIndex:IndexPath?
     fileprivate var returningPlacesCell:PhotoCell?
     fileprivate var flashView:UIView!
+    fileprivate var uploadCoordinate:CLLocation?
     
     fileprivate var uploadLikelihoods:[GMSPlaceLikelihood]!
     
@@ -640,7 +641,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
-        //uploadCoordinate = GPSService.sharedInstance.lastLocation!
+        uploadCoordinate = gps_service.getLastLocation()
         uploadLikelihoods = gps_service.getLikelihoods()
     }
     
@@ -708,6 +709,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
             upload.captionPos = Double(textViewCenter.y / view.frame.height)
         }
         
+        upload.coordinates = uploadCoordinate
         //let nav = UIStoryboard(name: "Main", bundle: nil)
            // .instantiateViewController(withIdentifier: "SendNavigationController") as! UINavigationController
         let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SendViewController") as! SendViewController
@@ -715,6 +717,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         controller.upload = upload
         controller.likelihoods = uploadLikelihoods
         controller.cameraViewRef = self.cameraView
+        
         
         navigationPush(withController: controller, animated: false)
         

@@ -38,7 +38,7 @@ class MapViewController: UIViewController {
         
         if let labelSuperview = locationLabel.superview {
             
-            labelSuperview.layer.cornerRadius = labelSuperview.frame.height / 4
+            labelSuperview.layer.cornerRadius = labelSuperview.frame.height / 2
             labelSuperview.clipsToBounds = true
             
 

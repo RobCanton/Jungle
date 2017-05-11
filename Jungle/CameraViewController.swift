@@ -45,8 +45,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let definiteBounds = UIScreen.main.bounds
+
         view.backgroundColor = UIColor.black
         
         cameraOutputView = UIView(frame: view.bounds)
@@ -201,7 +200,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
                 
                 if sampleBuffer != nil {
                     let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer)
-                    let dataProvider = CGDataProvider(data: imageData as! CFData)
+                    let dataProvider = CGDataProvider(data: imageData! as CFData)
                     let cgImageRef = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
                     var image:UIImage!
                     image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation.leftMirrored)
@@ -266,7 +265,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         do {
             
             let audioInput: AVCaptureDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-            let canAddAudioInput = self.captureSession!.canAddInput(audioInput)
+            _ = self.captureSession!.canAddInput(audioInput)
             if self.captureSession!.canAddInput(audioInput) {
                self.captureSession!.addInput(audioInput)
             }

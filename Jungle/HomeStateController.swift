@@ -17,17 +17,26 @@ class HomeStateController {
     var delegate:HomeProtocol?
     
     private(set) var myStory:UserStory?
+    
     private(set) var followingStories = [UserStory]()
+    private(set) var nearbyFollowingStories = [UserStory]()
     private(set) var popularUserStories = [UserStory]()
+    private(set) var nearbyUserStories = [UserStory]()
     private(set) var recentUserStories = [UserStory]()
+    
     private(set) var popularPlaceStories = [LocationStory]()
     private(set) var recentPlaceStories = [LocationStory]()
+    private(set) var nearbyPlaceStories = [LocationStory]()
     
     
     fileprivate var followingRef:FIRDatabaseReference?
+    fileprivate var nearbyFollowingRef:FIRDatabaseReference?
     fileprivate var popularUsersRef:FIRDatabaseReference?
+    fileprivate var nearbyUsersRef:FIRDatabaseReference?
     fileprivate var recentUsersRef:FIRDatabaseReference?
+    
     fileprivate var popularPlacesRef:FIRDatabaseReference?
+    fileprivate var nearbyPlacesRef:FIRDatabaseReference?
     fileprivate var recentPlacesRef:FIRDatabaseReference?
     
     init(delegate:HomeProtocol)
@@ -35,10 +44,13 @@ class HomeStateController {
         self.delegate = delegate
         
         observeFollowing()
+        observeNearbyFollowing()
         observePopularUsers()
         observeRecentUsers()
         observePopularPlaces()
         observeRecentPlaces()
+        observeNearbyUsers()
+        observeNearbyPlaces()
         
     }
     
@@ -123,6 +135,130 @@ class HomeStateController {
         }
     }
     
+    fileprivate func observeNearbyFollowing() {
+        let uid = mainStore.state.userState.uid
+        nearbyFollowingRef?.removeAllObservers()
+        nearbyFollowingRef = UserService.ref.child("users/location/nearby/\(uid)/following")
+        nearbyFollowingRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+            var stories = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! FIRDataSnapshot
+                let key = childSnap.key
+                if let distance = childSnap.value as? Double {
+                    stories.append((key,distance))
+                }
+            }
+            self.downloadNearbyFollowingStories(stories)
+        })
+    }
+    
+    fileprivate func downloadNearbyFollowingStories(_ nearby:[(String,Double)]) {
+        var stories = [UserStory]()
+        
+        var count = 0
+        for (key, distance) in nearby {
+            UserService.getUserStory(key, completion: { story in
+                if story != nil {
+                    story!.distance = distance
+                    stories.append(story!)
+                }
+                count += 1
+                if count >= nearby.count {
+                    count = -1
+                    
+                    self.nearbyFollowingStories = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    DispatchQueue.main.async {
+                        self.delegate?.update(.Nearby)
+                    }
+                }
+            })
+        }
+    }
+    
+    fileprivate func observeNearbyUsers() {
+        let uid = mainStore.state.userState.uid
+        nearbyUsersRef?.removeAllObservers()
+        nearbyUsersRef = UserService.ref.child("users/location/nearby/\(uid)/users")
+        nearbyUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+            var stories = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! FIRDataSnapshot
+                let key = childSnap.key
+                if let distance = childSnap.value as? Double {
+                    stories.append((key,distance))
+                }
+            }
+            self.downloadNearbyUserStories(stories)
+        })
+    }
+    
+    fileprivate func downloadNearbyUserStories(_ nearby:[(String,Double)]) {
+        var stories = [UserStory]()
+        
+        var count = 0
+        for (key, distance) in nearby {
+            print("LOOP -> \(key) : \(distance)")
+            UserService.getUserStory(key, completion: { story in
+                if story != nil {
+                    print("DOWN -> \(key) : \(distance)")
+                    story!.distance = distance
+                    stories.append(story!)
+                }
+                count += 1
+                if count >= nearby.count {
+                    count = -1
+                    
+                    self.nearbyUserStories = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    DispatchQueue.main.async {
+                        self.delegate?.update(.Nearby)
+                    }
+                }
+            })
+        }
+    }
+    
+    
+    fileprivate func observeNearbyPlaces() {
+        let uid = mainStore.state.userState.uid
+        nearbyPlacesRef?.removeAllObservers()
+        nearbyPlacesRef = UserService.ref.child("users/location/nearby/\(uid)/places")
+        nearbyPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+            var stories = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! FIRDataSnapshot
+                let key = childSnap.key
+                if let distance = childSnap.value as? Double {
+                    stories.append((key,distance))
+                }
+            }
+            self.downloadNearbyPlacesStories(stories)
+        })
+    }
+    
+    fileprivate func downloadNearbyPlacesStories(_ nearby:[(String,Double)]) {
+        var stories = [LocationStory]()
+        
+        var count = 0
+        for (key,distance) in nearby {
+            UserService.getPlaceStory(key, completion: { story in
+                if story != nil {
+                    
+                    story!.distance = distance
+                    stories.append(story!)
+                }
+                count += 1
+                if count >= nearby.count {
+                    count = -1
+                    
+                    self.nearbyPlaceStories = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    DispatchQueue.main.async {
+                        self.delegate?.update(.Nearby)
+                    }
+                }
+            })
+        }
+    }
+    
     fileprivate func observeRecentUsers() {
         recentUsersRef?.removeAllObservers()
         recentUsersRef = UserService.ref.child("stories/sorted/recent/userStories")
@@ -175,8 +311,6 @@ class HomeStateController {
         })
     }
     
-    
-    
     fileprivate func downloadPlacesStories(_ popular:[(String,Int)]) {
         var stories = [LocationStory]()
         
@@ -212,8 +346,6 @@ class HomeStateController {
             self.downloadRecentPlacesStories(stories)
         })
     }
-    
-    
     
     fileprivate func downloadRecentPlacesStories(_ recent:[String]) {
         var stories = [LocationStory]()

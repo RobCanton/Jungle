@@ -38,22 +38,15 @@ class UserStory:Story {
 
 class LocationStory:Story {
     fileprivate var locationKey:String
-    fileprivate var distance:Double
     
-    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, locationKey:String, distance:Double) {
+    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, locationKey:String) {
         self.locationKey = locationKey
-        self.distance = distance
         super.init(posts:posts, lastPostKey:lastPostKey, timestamp:timestamp, popularity:popularity)
     }
     
     func getLocationKey() -> String {
         return locationKey
     }
-    
-    func getDistance() -> Double {
-        return distance
-    }
-    
     
 }
 
@@ -62,6 +55,7 @@ class Story: ItemDelegate {
     private(set) var lastPostKey:String
     private(set) var date:Date
     private(set) var popularity:Int
+    var distance:Double?
     var delegate:StoryProtocol?
     
 

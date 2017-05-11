@@ -85,7 +85,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 if granted{
                     application.registerForRemoteNotifications()
                 } else {
-                    print("User Notification permission denied: \(error?.localizedDescription)")
+                    print("User Notification permission denied: \(String(describing: error?.localizedDescription))")
                 }
                 
             }

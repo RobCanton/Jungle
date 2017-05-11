@@ -130,6 +130,7 @@ class UserService {
         })
     }
     
+    
     static func getPlaceStory(_ placeId:String, completion: @escaping ((_ story:LocationStory?)->())) {
         let storyRef = ref.child("stories/places/\(placeId)")
         storyRef.observe(.value, with: { snapshot in
@@ -146,14 +147,15 @@ class UserService {
                     for (key,_) in postObject {
                         posts.append(key)
                     }
-                    story = LocationStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity: popularity, locationKey: snapshot.key, distance: 0)
-                    //story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
+                    story = LocationStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity: popularity, locationKey: snapshot.key)
                 }
             }
             completion(story)
             
         })
     }
+    
+    
 //
     
 

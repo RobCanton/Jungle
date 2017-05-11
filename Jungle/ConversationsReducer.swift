@@ -76,20 +76,6 @@ func ConversationsReducer(action: Action, state:[Conversation]?) -> [Conversatio
             }
         }
         break
-    case _ as NewMessageInConversation:
-        let a = action as! NewMessageInConversation
-        if let conversation = findConversation(key: a.conversationKey) {
-            //conversation.lastMessage = a.message
-            //conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
-        }
-        break
-    case _ as SeenConversation:
-        let a = action as! SeenConversation
-        if let conversation = findConversation(key: a.conversationKey) {
-            //conversation.seenDate = a.seenDate
-            //conversation.seen = userHasSeenMessage(seen: conversation.seenDate, message: conversation.lastMessage)
-        }
-        break
     case _ as MuteConversation:
         let a = action as! MuteConversation
         if let conversation = findConversation(key: a.conversationKey) {

@@ -137,7 +137,7 @@ class CreateAccountViewController: UIViewController, UINavigationControllerDeleg
                     }
                 })
             } else {
-                print("ERROR: \(error?.localizedDescription)")
+                print("ERROR: \(error)")
             }
         }
     }

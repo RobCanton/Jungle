@@ -134,18 +134,19 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func setupStories(mode:SortedBy, state: HomeStateController) {
         resetStack()
-        topStories = state.followingStories
-
         
         switch mode {
         case .Popular:
+            topStories = state.followingStories
             bottomStories = state.popularUserStories
             removeStackView(view: settingsView)
             break
         case .Nearby:
-            bottomStories = []
+            topStories = state.nearbyFollowingStories
+            bottomStories = state.nearbyUserStories
             break
         case .Recent:
+            topStories = state.followingStories
             removeStackView(view: settingsView)
             bottomStories = state.recentUserStories
             break

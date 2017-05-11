@@ -40,21 +40,36 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var midCollectionViewRef:UICollectionView?
     
     func didSelect(_ segmentIndex: Int) {
+        var selectedMode:SortedBy = .Popular
+        switch segmentIndex {
+        case 1:
+            selectedMode = .Nearby
+            break
+        case 2:
+            selectedMode = .Recent
+            break
+        default:
+            break
+        }
         
-        UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseOut, animations: {
+        if selectedMode == sortMode { return }
+        
+        UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
             self.collectionView.alpha = 0.0
         }, completion: { _ in
             
             DispatchQueue.global(qos: .background).async {
                 // Go back to the main thread to update the UI
-                if segmentIndex == 0 {
-                    self.sortMode = .Popular
+                self.sortMode = selectedMode
+                switch self.sortMode {
+                case .Popular:
                     self.state.sortFollowingByPopularity()
-                } else if segmentIndex == 1 {
-                    self.sortMode = .Nearby
-                } else if segmentIndex == 2 {
-                    self.sortMode = .Recent
+                    break
+                case .Nearby:
+                    break
+                case .Recent:
                     self.state.sortFollowingByDate()
+                    break
                 }
                 DispatchQueue.main.async {
                     self.collectionView.reloadData()
@@ -174,7 +189,9 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             }
             break
         case .Nearby:
-            
+            if state.nearbyUserStories.count > 0 {
+                verticalHeight += collectionViewHeight + bannerHeight
+            }
             verticalHeight += 60
             break
         case .Recent:
@@ -234,7 +251,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         case .Popular:
             return state.popularPlaceStories.count
         case .Nearby:
-            return state.popularPlaceStories.count
+            return state.nearbyPlaceStories.count
         case .Recent:
             return state.recentPlaceStories.count
         }
@@ -248,7 +265,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             cell.setupLocationCell(state.popularPlaceStories[indexPath.row])
             break
         case .Nearby:
-            cell.setupLocationCell(state.popularPlaceStories[indexPath.row])
+            cell.setupLocationCell(state.nearbyPlaceStories[indexPath.row])
             break
         case .Recent:
             cell.setupLocationCell(state.recentPlaceStories[indexPath.row])
@@ -280,10 +297,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             }
             break
         case .Nearby:
-            let story = state.popularPlaceStories[indexPath.row]
+            let story = state.nearbyPlaceStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainRef?.presentPlaceStory(locationStories: state.popularPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainRef?.presentPlaceStory(locationStories: state.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }
