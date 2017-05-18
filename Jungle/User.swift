@@ -64,13 +64,17 @@ class User:NSObject, NSCoding {
     fileprivate var username: String
     fileprivate var imageURL: String
     fileprivate var bio: String
+    private(set) var followers:Int
+    private(set) var following:Int
     
-    init(uid:String, username:String, imageURL:String, bio:String)
+    init(uid:String, username:String, imageURL:String, bio:String, followers:Int, following:Int)
     {
         self.uid       = uid
         self.username  = username
         self.imageURL  = imageURL
         self.bio       = bio
+        self.followers = followers
+        self.following = following
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -79,7 +83,9 @@ class User:NSObject, NSCoding {
         let username = decoder.decodeObject(forKey: "username") as! String
         let imageURL = decoder.decodeObject(forKey: "imageURL") as! String
         let bio = decoder.decodeObject(forKey: "bio") as! String
-        self.init(uid: uid, username: username, imageURL: imageURL, bio: bio)
+        let followers = decoder.decodeObject(forKey: "followers") as! Int
+        let following = decoder.decodeObject(forKey: "following") as! Int
+        self.init(uid: uid, username: username, imageURL: imageURL, bio: bio, followers: followers, following: following)
 
     }
 
@@ -88,7 +94,8 @@ class User:NSObject, NSCoding {
         coder.encode(uid, forKey: "uid")
         coder.encode(username, forKey: "username")
         coder.encode(imageURL, forKey: "imageURL")
-        coder.encode(bio, forKey: "bio")
+        coder.encode(followers, forKey: "followers")
+        coder.encode(following, forKey: "following")
     }
     
 

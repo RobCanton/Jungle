@@ -75,6 +75,8 @@ class ProfileHeaderView: UICollectionReusableView {
         self.user = _user
         setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
         
+        setFollowersCount(user.followers)
+        setFollowingCount(user.following)
         usernameLabel.text = "@\(user.getUsername())"
         
         bioLabel.text = user.getBio()
@@ -90,6 +92,7 @@ class ProfileHeaderView: UICollectionReusableView {
         followingTapped = UITapGestureRecognizer(target: self, action: #selector(followingTappedHandler))
         followingLabel.isUserInteractionEnabled = true
         followingLabel.addGestureRecognizer(followingTapped)
+    
     }
     
     func followersTappedHandler() {

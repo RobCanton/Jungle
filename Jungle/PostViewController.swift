@@ -123,25 +123,7 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
             }
         }
         
-        UserService.getUser(item.authorId, completion: { user in
-            if user != nil {
-                
-                self.headerView.setup(withUser: user!, date: item.getDateCreated(), optionsHandler: self.delegate?.showOptions)
-                //self.headerView.showAuthorHandler = self.showAuthor
-                
-                if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
-                    self.captionView.text = caption
-                    self.captionView.fitHeightToContent()
-                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
-                    self.captionView.isHidden = false
-                } else {
-                    self.captionView.isHidden = true
-                    self.captionView.text = ""
-                    self.captionView.fitHeightToContent()
-                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
-                }
-            }
-        })
+
         
         if let locationKey = item.getLocationKey() {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in

@@ -115,6 +115,7 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
             let controller = ChatViewController()
             controller.conversation = conversations[indexPath.row]
             controller.partnerImage = image
+            controller.partner = user
             globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
         }
         tableView.deselectRow(at: indexPath, animated: true)

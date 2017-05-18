@@ -13,12 +13,12 @@ import Firebase
 import NVActivityIndicatorView
 
 
-public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollViewDelegate {
+public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate {
 
-    var viewIndex = 0
+    private(set) var viewIndex = 0
     var returnIndex:Int?
-    var item:StoryItem?
-    var delegate:PopupProtocol?
+    weak var item:StoryItem?
+    weak var delegate:PopupProtocol?
     var activityView:NVActivityIndicatorView!
     
     var footerTapped:UITapGestureRecognizer!
@@ -30,7 +30,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     var totalTime:Double = 0.0
     
     var progressBar:StoryProgressIndicator?
-    var story:Story!
+    weak var story:Story!
     
     var shouldAutoPause = true
     
@@ -40,6 +40,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
        
         
     
+    }
+    deinit {
+        print("Deinit >> StoryViewController")
     }
     
     func showAuthor() {
@@ -129,11 +132,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
     func contentLoaded() {
 
-        if returnIndex != nil {
-            viewIndex = returnIndex!
-            returnIndex = nil
-        } else {
-            viewIndex = 0
+//        if returnIndex != nil {
+//            viewIndex = returnIndex!
+//            returnIndex = nil
+//        } else {
+//            viewIndex = 0
     
             for item in story.items! {
 
@@ -143,11 +146,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             if viewIndex >= story.items!.count{
                 viewIndex = 0
             }
-            
-            if viewIndex > 0 {
-                viewIndex -= 1
-            }
-        }
+        //}
         self.setupItem()
     }
     
@@ -171,25 +170,19 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
             prepareVideoContent(item: item)
         }
         
-        UserService.getUser(item.authorId, completion: { user in
-            if user != nil {
-                
-                self.headerView.setup(withUser: user!, date: item.getDateCreated(), optionsHandler: self.delegate?.showOptions)
-                self.headerView.showAuthorHandler = self.showAuthor
-                
-                if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
-                    self.captionView.text = caption
-                    self.captionView.fitHeightToContent()
-                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
-                    self.captionView.isHidden = false
-                } else {
-                    self.captionView.isHidden = true
-                    self.captionView.text = ""
-                    self.captionView.fitHeightToContent()
-                    self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
-                }
-            }
-        })
+        self.headerView.setup(withUid: item.authorId, date: item.getDateCreated(), _delegate: self)
+        
+        if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
+            self.captionView.text = caption
+            self.captionView.fitHeightToContent()
+            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
+            self.captionView.isHidden = false
+        } else {
+            self.captionView.isHidden = true
+            self.captionView.text = ""
+            self.captionView.fitHeightToContent()
+            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+        }
         
         if let locationKey = item.getLocationKey() {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
@@ -200,8 +193,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         }
         
         UploadService.addView(post: item)
-        footerView.setCommentsLabelToCount(item.getNumComments())
-        
+        footerView.setup(item)
+        /*
         numCommentsRef?.removeAllObservers()
         numCommentsRef = FIRDatabase.database().reference().child("uploads/meta/\(item.getKey())/comments")
         numCommentsRef!.observe(.value, with: { snapshot in
@@ -211,11 +204,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
                     numComments = _numComments
                 }
             }
-            item.updateNumComments(numComments)
-            self.footerView.setCommentsLabelToCount(item.getNumComments())
+            self.whatsup()
+            //item.updateNumComments(numComments)
+            //self.footerView.setCommentsLabelToCount(item.getNumComments())
         })
-        
+        */
         delegate?.newItem(item)
+ 
+    }
+    
+    func whatsup() {
+        
     }
     
     func prepareImageContent(item:StoryItem) {
@@ -332,15 +331,15 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     }
 
     func cleanUp() {
-        print("CLEAN UP CELL!")
         pause()
         content.image = nil
         destroyVideoPlayer()
         killTimer()
-        //progressBar?.resetAllProgressBars()
-        //progressBar?.removeFromSuperview()
         delegate = nil
         animateInitiated = false
+        item = nil
+        returnIndex = nil
+        progressBar = nil
         NotificationCenter.default.removeObserver(self)
         
     }
@@ -462,9 +461,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
     
 
     var keyboardUp = false
-    
-    var scrollView:UIScrollView!
-
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -481,30 +477,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, UIScrollV
         activityView.center = contentView.center
         contentView.addSubview(activityView)
         
-        let screenBounds = UIScreen.main.bounds
-        scrollView = UIScrollView(frame: screenBounds)
-        
-        //contentView.addSubview(scrollView)
-        
-        let v1 = UIView(frame: screenBounds)
-        v1.backgroundColor = UIColor.clear
-        
-        let v2 = UIView(frame: screenBounds)
-        v2.backgroundColor = UIColor.blue
-        
-        var v2Frame = v2.frame
-        v2Frame.origin.y = screenBounds.height
-        v2.frame = v2Frame
-        
-        scrollView.addSubview(v1)
-        scrollView.addSubview(v2)
-        scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 2.0)
-        scrollView.isPagingEnabled = true
-        scrollView.bounces = false
-        
-        footerView.pullUpTapHandler = handleFooterAction
-        
-        
+        //footerView.pullUpTapHandler = handleFooterAction
     }
     
     func fadeOutDetails() {

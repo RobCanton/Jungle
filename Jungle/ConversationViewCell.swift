@@ -19,13 +19,15 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     
     @IBOutlet weak var timeLabel: UILabel!
     
-    @IBOutlet weak var unread_dot: UIImageView!
+    
+    @IBOutlet weak var unreadDot: UIView!
     
     var user:User?
     
     
     var conversation:Conversation? {
         didSet{
+            unreadDot.cropToCircle()
             UserService.getUser(conversation!.getPartnerId(), completion: { _user in
                 if let user = _user {
                     self.userLoaded(user: user)
@@ -39,11 +41,11 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
             
             if !conversation!.getSeen() {
                 usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
-                unread_dot.isHidden = false
+                unreadDot.isHidden = false
             } else {
 
                 usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
-                unread_dot.isHidden = true
+                unreadDot.isHidden = true
             }
             
         }

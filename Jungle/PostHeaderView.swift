@@ -9,6 +9,10 @@
 import UIKit
 import SnapTimer
 
+protocol PostHeaderProtocol: class {
+    func showAuthor()
+}
+
 class PostHeaderView: UIView {
 
     @IBOutlet weak var userImageView: UIImageView!
@@ -24,30 +28,35 @@ class PostHeaderView: UIView {
         
     }
     
-    var location:Location!
-    var showAuthorHandler:(()->())?
+    weak var delegate:PostHeaderProtocol?
     
-    
-    func setup(withUser user:User, date: Date?, optionsHandler:(()->())?) {
+    func setup(withUid uid:String, date: Date?, _delegate:PostHeaderProtocol?) {
+        delegate = _delegate
         
-        self.userImageView.image = nil
-        self.userImageView.loadImageAsync(user.getImageUrl(), completion: { _ in })
-        self.usernameLabel.text = user.getUsername()
-        if date != nil {
-            self.timeLabel.text = date!.timeStringSinceNow()
-        }
+        UserService.getUser(uid, completion: { _user in
+            guard let user = _user else { return }
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(userTapped))
+            self.userImageView.image = nil
+            self.userImageView.loadImageAsync(user.getImageUrl(), completion: { _ in })
+            self.usernameLabel.text = user.getUsername()
+            if date != nil {
+                self.timeLabel.text = date!.timeStringSinceNow()
+            }
+            
+        })
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.userImageView.isUserInteractionEnabled = true
         self.userImageView.addGestureRecognizer(tap)
-        let tap2 = UITapGestureRecognizer(target: self, action: #selector(userTapped))
+        let tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2)
+        
         
     }
     
     func userTapped(tap:UITapGestureRecognizer) {
-        showAuthorHandler?()
+        delegate?.showAuthor()
     }
     
     func setupLocation(location:Location) {
@@ -78,8 +87,7 @@ class PostHeaderView: UIView {
     
     func resumeTimer() {
         self.snapTimer.resumeAnimation()
-        
     }
     
     
-   }
+}

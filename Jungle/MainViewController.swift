@@ -21,6 +21,8 @@ protocol MainInterfaceProtocol {
     func navigationPush(withController controller: UIViewController, animated: Bool)
     func presentPopover(withController controller: UIViewController, animated: Bool)
     func presentHomeScreen(animated: Bool)
+    func presentCamera()
+    func fetchAllStories()
 }
 
 extension MainViewController: MainInterfaceProtocol {
@@ -39,6 +41,14 @@ extension MainViewController: MainInterfaceProtocol {
         scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 2.0), animated: animated)
         mainTabBar.selectedIndex = 0
         
+    }
+    
+    func presentCamera() {
+        scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+    }
+    
+    func fetchAllStories() {
+        places.state.fetchAll()
     }
 }
 
@@ -61,6 +71,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     
     fileprivate var returningFollowingIndex:IndexPath?
+    fileprivate var returningPeopleIndex:IndexPath?
     fileprivate var returningPlacesCell:PhotoCell?
     fileprivate var flashView:UIView!
     fileprivate var uploadCoordinate:CLLocation?
@@ -325,8 +336,16 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
             if let cell = places.topCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
                 cell.fadeInInfo(animated: true)
             }
-            returningFollowingIndex = nil
         }
+        returningFollowingIndex = nil
+        
+        if let ri = returningPeopleIndex {
+            if let cell = places.midCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
+                cell.fadeInInfo(animated: true)
+            }
+        }
+        returningPeopleIndex = nil
+        
         returningPlacesCell?.fadeInInfo(animated: true)
         returningPlacesCell = nil
         if self.navigationController?.delegate === transitionController {
@@ -410,6 +429,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         let y = scrollView.contentOffset.y
         if y >= height && y < 10.0 + height {
             print("SET TO CAMERA MODE")
+            globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
         } else if y >= height * 2.0 {
             print("SET TO CAMERA HIDDEN")
@@ -505,7 +525,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
 
     }
     
-    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath, hasMyStory:Bool) {
         guard let nav = self.navigationController else { return }
         storyType = .UserStory
         let storiesViewController: StoriesViewController = StoriesViewController()
@@ -928,10 +948,10 @@ extension MainViewController: View2ViewTransitionPresenting {
 
         if isPresenting {
             if storyType == .UserStory {
-                returningFollowingIndex = i
+                returningFollowingIndex = indexPath
             }
             if storyType == .PublicUserStory {
-                //returningFollowingIndex = i
+                returningPeopleIndex = indexPath
             }
         } else if !isPresenting {
             if storyType == .PlaceStory {
@@ -947,13 +967,19 @@ extension MainViewController: View2ViewTransitionPresenting {
                         oldCell.fadeInInfo(animated: false)
                     }
                 }
-                if let cell = places.topCollectionViewRef?.cellForItem(at: i) as? FollowingPhotoCell {
-                    returningFollowingIndex = i
+                if let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell {
+                    returningFollowingIndex = indexPath
                     cell.fadeOutInfo()
                 }
             } else if storyType == .PublicUserStory {
-                if let cell = places.midCollectionViewRef?.cellForItem(at: i) as? FollowingPhotoCell {
-                    
+                if let ri = returningPeopleIndex {
+                    if let oldCell = places.midCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
+                        oldCell.fadeInInfo(animated: false)
+                    }
+                }
+                if let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell {
+                    returningPeopleIndex = indexPath
+                    cell.fadeOutInfo()
                 }
             }
         }
@@ -969,7 +995,7 @@ extension MainViewController: View2ViewTransitionPresenting {
             if !isPresenting, let c = places.topCollectionViewRef {
                 if !c.indexPathsForVisibleItems.contains(indexPath) {
                     c.reloadData()
-                    c.scrollToItem(at: i, at: .centeredHorizontally, animated: false)
+                    c.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
                     c.layoutIfNeeded()
                 }
             }
@@ -979,7 +1005,7 @@ extension MainViewController: View2ViewTransitionPresenting {
             if !isPresenting, let c = places.midCollectionViewRef {
                 if !c.indexPathsForVisibleItems.contains(indexPath) {
                     c.reloadData()
-                    c.scrollToItem(at: i, at: .centeredHorizontally, animated: false)
+                    c.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
                     c.layoutIfNeeded()
                 }
             }

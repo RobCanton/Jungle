@@ -16,8 +16,7 @@ enum AlertType:String {
 
 struct Alerts {
 
-    static func showStatusSuccessAlert(inWrapper wrapper: SwiftMessages, withMessage message: String){
-        wrapper.hideAll()
+    static func showStatusSuccessAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
         
         let alert = MessageView.viewFromNib(layout: .StatusLine)
         alert.backgroundView.backgroundColor = UIColor.white
@@ -28,11 +27,16 @@ struct Alerts {
         config.duration = SwiftMessages.Duration.seconds(seconds: 2.0)
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
         
-        wrapper.show(config: config, view: alert)
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
     }
     
-    static func showStatusFailAlert(inWrapper wrapper: SwiftMessages, withMessage message: String){
-        wrapper.hideAll()
+    static func showStatusFailAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
         
         let alert = MessageView.viewFromNib(layout: .StatusLine)
         alert.backgroundView.backgroundColor = errorColor
@@ -43,12 +47,18 @@ struct Alerts {
         config.duration = SwiftMessages.Duration.seconds(seconds: 3.0)
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
         
-        wrapper.show(config: config, view: alert)
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+        
     }
     
-    static func showStatusProgressAlert(inWrapper wrapper: SwiftMessages, withMessage message: String){
-        wrapper.hideAll()
-        
+    static func showStatusProgressAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
+
         let alert = MessageView.viewFromNib(layout: .StatusLine)
         alert.backgroundView.backgroundColor = UIColor.black
         alert.bodyLabel?.textColor = UIColor.white
@@ -58,11 +68,16 @@ struct Alerts {
         config.duration = .forever
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
         
-        wrapper.show(config: config, view: alert)
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
     }
     
-    static func showStatusDefaultAlert(inWrapper wrapper: SwiftMessages, withMessage message: String){
-        wrapper.hideAll()
+    static func showStatusDefaultAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
         
         let alert = MessageView.viewFromNib(layout: .StatusLine)
         alert.backgroundView.backgroundColor = UIColor.white
@@ -73,7 +88,13 @@ struct Alerts {
         config.duration = SwiftMessages.Duration.seconds(seconds: 2.0)
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
         
-        wrapper.show(config: config, view: alert)
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
     }
     
     

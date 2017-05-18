@@ -12,6 +12,10 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
 
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var commentsLabel: UILabel!
+    
+    @IBOutlet weak var commentsIcon: UIImageView!
+    
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var colorView: UIView!
     
@@ -67,7 +71,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
     }
 
     
-    func setupFollowingCell (_ story:UserStory) {
+    func setupFollowingCell (_ story:UserStory, showDot: Bool) {
         
 
         self.story = story
@@ -81,14 +85,14 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.colorView.alpha = 0.0
         
         if story.getUserId() == mainStore.state.userState.uid {
-            colorView.isHidden = true
+            //colorView.isHidden = true
             newDot.isHidden = true
             dotBorder.isHidden = true
         } else {
             let viewed = story.hasViewed()
-            colorView.isHidden = viewed
-            newDot.isHidden = viewed
-            dotBorder.isHidden = viewed
+            //colorView.isHidden = viewed
+            newDot.isHidden = showDot ? viewed : true
+            dotBorder.isHidden = showDot ? viewed : true
         }
         
         getUser(withCheck: check, uid: story.getUserId(), completion: { check, user in
@@ -109,7 +113,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
-        getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, image, fromFile in
+        getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, item, image, fromFile in
             
             if self.check != check { return }
             self.imageView.image = image
@@ -122,8 +126,26 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                 self.imageView.alpha = 1.0
             }
             
-            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
-            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.75, height: 1.0, shouldRasterize: true)
+            self.gradient?.removeFromSuperlayer()
+            if let color = item.getColor() {
+                self.gradient = CAGradientLayer()
+                self.gradient!.frame = self.colorView.bounds
+                self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.75).cgColor]
+                self.gradient!.locations = [0.0, 1.0]
+                self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+                self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+                self.gradient!.shouldRasterize = false
+                self.colorView.layer.shouldRasterize = false
+                self.gradient!.drawsAsynchronously = true
+                self.colorView.layer.drawsAsynchronously = true
+                self.colorView.layer.insertSublayer(self.gradient!, at: 0)
+                self.colorView.alpha = photoCellColorAlpha
+            }
+            
+            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            //self.commentsLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            //self.commentsIcon.applyShadow(radius: 2.5, opacity: 0.50, height: 1.0, shouldRasterize: true)
             
         })
     }
@@ -134,28 +156,12 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         })
     }
     
-    func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ image:UIImage?, _ fromFile:Bool)->())) {
+    func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ item:StoryItem, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
-                self.gradient?.removeFromSuperlayer()
-                if let color = item!.getColor() {
-                    self.gradient = CAGradientLayer()
-                    self.gradient!.frame = self.colorView.bounds
-                    self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.75).cgColor]
-                    self.gradient!.locations = [0.0, 1.0]
-                    self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                    self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                    self.gradient!.shouldRasterize = true
-                    self.colorView.layer.shouldRasterize = true
-                    self.gradient!.drawsAsynchronously = true
-                    self.colorView.layer.drawsAsynchronously = true
-                    self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                    self.colorView.alpha = 0.0
-                }
                 
                 UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
-                    self.colorView.alpha = photoCellColorAlpha
-                    completion(check, image, fromFile)
+                    completion(check, item!, image, fromFile)
                 })
             }
         })

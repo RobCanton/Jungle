@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Firebase
 
 class SettingsContainerViewController: UIViewController {
     
@@ -46,10 +47,28 @@ class SettingsViewController: UITableViewController {
     @IBOutlet weak var logoutCell: UITableViewCell!
     
     
+    deinit {
+        print("Deinit >> SettingsViewController")
+    }
+    
+    var notificationsRef:FIRDatabaseReference?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Settings"
         self.navigationController?.navigationBar.tintColor = UIColor.black
+        
+        let uid = mainStore.state.userState.uid
+        notificationsRef = UserService.ref.child("users/settings/\(uid)/push_notifications")
+        notificationsRef?.observeSingleEvent(of: .value, with: { snapshot in
+            if snapshot.exists() {
+                if let val = snapshot.value as? Bool {
+                    self.pushNotificationsSwitch.setOn(val, animated: false)
+                }
+            } else {
+                self.pushNotificationsSwitch.setOn(true, animated: false)
+            }
+        })
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -63,7 +82,7 @@ class SettingsViewController: UITableViewController {
         case termsCell:
             break
         case logoutCell:
-            UserService.logout()
+            showLogoutView()
             break
         default:
             break
@@ -73,11 +92,32 @@ class SettingsViewController: UITableViewController {
     }
     
     @IBAction func pushNotificationsSwitched(_ sender: UISwitch) {
-        
+        if sender.isOn {
+            notificationsRef?.setValue(true)
+        } else {
+            notificationsRef?.setValue(false)
+        }
     }
     
     @IBAction func flaggedContentSwitched(_ sender: UISwitch) {
         
+    }
+    
+    func showLogoutView() {
+        
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Log Out", style: .destructive)
+        { action -> Void in
+            UserService.logout()
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
     }
 
 }

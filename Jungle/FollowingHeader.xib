@@ -59,6 +59,9 @@
                                         <userDefinedRuntimeAttribute type="number" keyPath="incrementValue">
                                             <integer key="value" value="1"/>
                                         </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="size" keyPath="tickSize">
+                                            <size key="value" width="2" height="6"/>
+                                        </userDefinedRuntimeAttribute>
                                     </userDefinedRuntimeAttributes>
                                 </view>
                             </subviews>
@@ -135,21 +138,21 @@
                             <rect key="frame" x="0.0" y="226" width="545" height="32"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2kL-Av-7lu">
-                                    <rect key="frame" x="310" y="16" width="223" height="1"/>
+                                    <rect key="frame" x="308" y="16" width="225" height="1"/>
                                     <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="1" id="9PE-qo-Eic"/>
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3D2-gu-ED6">
-                                    <rect key="frame" x="12" y="16" width="222.5" height="1"/>
+                                    <rect key="frame" x="12" y="16" width="225.5" height="1"/>
                                     <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="1" id="7vn-vx-Uk3"/>
                                     </constraints>
                                 </view>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="STORIES" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SNN-Rf-sUI">
-                                    <rect key="frame" x="246.5" y="9" width="51.5" height="14.5"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PEOPLE" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SNN-Rf-sUI">
+                                    <rect key="frame" x="249.5" y="9" width="46.5" height="14.5"/>
                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                                     <color key="textColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>

@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import View2ViewTransition
 
-protocol PopupProtocol {
+protocol PopupProtocol: class {
     func newItem(_ item:StoryItem)
     func showDeleteOptions()
     func showOptions()
@@ -31,7 +31,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var label:UILabel!
     var locationStories = [LocationStory]()
-    var stories = [Story]()
+    var stories:[Story]!
     
     var userStories = [UserStory]()
     
@@ -45,6 +45,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
     var firstCell = true
     var startIndex:Int?
+    
+    
+    deinit {
+        print("Deinit >> StoriesViewController")
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -60,7 +65,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardDidDisappear), name: NSNotification.Name.UIKeyboardDidHide, object: nil)
         //NotificationCenter.default.addObserver(self, selector:#selector(keyboardDidChangeFrame), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
-    }
+ 
+ }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -84,7 +90,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
                 if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
                     panGestureRecognizer.delegate = self
                     scrollView.panGestureRecognizer.require(toFail: panGestureRecognizer)
-                    scrollView.isScrollEnabled = true
+                    
+                    scrollView.isScrollEnabled = !commentBar.textField.isFirstResponder
                 }
             }
         }
@@ -93,8 +100,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-         getCurrentCell()?.saveIndex()
+        for cell in collectionView.visibleCells as! [StoryViewController] {
+            cell.pause()
+        }
         
+        startIndex = getCurrentCell()?.viewIndex
         NotificationCenter.default.removeObserver(self)
 
     }
@@ -106,11 +116,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             cell.cleanUp()
         }
         
-        for i in 0..<stories.count {
-            let indexPath = IndexPath(item: i, section: 0)
-            let cell = collectionView.cellForItem(at: indexPath) as? StoryViewController
-            cell?.cleanUp()
-        }
     }
     
     fileprivate var commentBar:CommentBar!
@@ -161,10 +166,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView.delegate = self
         
         commentsViewController = CommentsViewController()
-        commentsViewController.handleDismiss = handleDismiss
-        commentsViewController.popupDismiss = dismissPopup
+        commentsViewController.delegate = self
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
-        commentsViewController.replyToCommentHandler = replyToComment
+        
         
         self.addChildViewController(commentsViewController)
         self.scrollView.addSubview(commentsViewController.view)
@@ -173,15 +177,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
-        commentBar.sendHandler = sendComment
+        commentBar.delegate = self
+        //commentBar.sendHandler = sendComment
         
         
         self.view.addSubview(commentBar)
-        
-        label = UILabel(frame: CGRect(x:0,y:0,width:self.view.frame.width,height:100))
-        label.textColor = UIColor.white
-        label.center = view.center
-        label.textAlignment = .center
         
         longPressGR = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
         longPressGR.minimumPressDuration = 0.33
@@ -193,13 +193,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         tapGR.delegate = self
         self.view.addGestureRecognizer(tapGR)
         
-    }
-    
-    func replyToComment(_ username:String) {
-        if username == mainStore.state.userState.user?.getUsername() { return }
-        
-        self.commentBar.textField.text = "@\(username) "
-        self.commentBar.textField.becomeFirstResponder()
     }
     
     func appMovedToBackground() {
@@ -271,7 +264,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         let cell: StoryViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! StoryViewController
         cell.contentView.backgroundColor = UIColor.black
         cell.delegate = self
+        print("START INDEX: \(startIndex)")
         if storyType == .UserStory {
+            
             cell.prepareStory(withStory: userStories[indexPath.item], atIndex: startIndex)
         } else {
             cell.prepareStory(withLocation: locationStories[indexPath.item], atIndex: startIndex)
@@ -331,6 +326,36 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
 }
 
+extension StoriesViewController: StoryCommentsProtocol {
+    func dismissComments() {
+        if scrollView.isScrollEnabled {
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        } else {
+            commentBar.textField.resignFirstResponder()
+        }
+    }
+    
+    func dismissStory() {
+        dismissPopup(true)
+    }
+    
+    func replyToUser(_ username:String) {
+        if username == mainStore.state.userState.user?.getUsername() { return }
+        
+        self.commentBar.textField.text = "@\(username) "
+        self.commentBar.textField.becomeFirstResponder()
+    }
+}
+
+extension StoriesViewController: CommentBarProtocol {
+    func sendComment(_ text:String) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        UploadService.addComment(post: item, comment: text)
+        commentBar.textField.resignFirstResponder()
+    }
+}
+
 extension StoriesViewController: PopupProtocol {
     
     func newItem(_ item:StoryItem) {
@@ -366,14 +391,6 @@ extension StoriesViewController: PopupProtocol {
     
     func showComments() {
         scrollView.setContentOffset(CGPoint(x: 0, y:self.view.frame.height), animated: true)
-    }
-    
-    
-    func sendComment(_ comment: String) {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.item else { return }
-        UploadService.addComment(post: item, comment: comment)
-        commentBar.textField.resignFirstResponder()
     }
     
     func keyboardWillAppear(notification: NSNotification){
@@ -451,14 +468,6 @@ extension StoriesViewController: PopupProtocol {
         
     }
     
-    func handleDismiss() {
-        if scrollView.isScrollEnabled {
-            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        } else {
-            commentBar.textField.resignFirstResponder()
-        }
-    }
-    
     
     func getCurrentCell() -> StoryViewController? {
         if let cell = collectionView.visibleCells.first as? StoryViewController {
@@ -533,10 +542,10 @@ extension StoriesViewController: View2ViewTransitionPresented {
     func destinationView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
         
         let indexPath: IndexPath = userInfo!["destinationIndexPath"] as! IndexPath
-        let cell: StoryViewController = self.collectionView.cellForItem(at: indexPath) as! StoryViewController
-        
-        cell.prepareForTransition(isPresenting: isPresenting)
-        
+        if let cell: StoryViewController = self.collectionView.cellForItem(at: indexPath) as? StoryViewController
+        {
+            //cell.prepareForTransition(isPresenting: isPresenting)
+        }
         return view
         
     }
@@ -544,12 +553,13 @@ extension StoriesViewController: View2ViewTransitionPresented {
     func prepareDestinationView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) {
         
         if isPresenting {
-            let indexPath: IndexPath = userInfo!["destinationIndexPath"] as! IndexPath
-            currentIndex = indexPath
-            let contentOffset: CGPoint = CGPoint(x: self.collectionView.frame.size.width*CGFloat(indexPath.item), y: 0.0)
-            self.collectionView.contentOffset = contentOffset
-            self.collectionView.reloadData()
-            self.collectionView.layoutIfNeeded()
+            if let indexPath: IndexPath = userInfo!["destinationIndexPath"] as? IndexPath {
+                currentIndex = indexPath
+                let contentOffset: CGPoint = CGPoint(x: self.collectionView.frame.size.width*CGFloat(indexPath.item), y: 0.0)
+                self.collectionView.contentOffset = contentOffset
+                self.collectionView.reloadData()
+                self.collectionView.layoutIfNeeded()
+            }
         }
     }
 }

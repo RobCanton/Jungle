@@ -24,7 +24,6 @@ class PostFooterView: UIView {
     }
 
     func blockTapped() {
-        print("YEA")
         pullUpTapHandler?()
     }
     
@@ -38,5 +37,23 @@ class PostFooterView: UIView {
             commentsLabel.text = "\(count) COMMENTS"
         }
     
+    }
+    
+    func setup(_ item:StoryItem) {
+
+        setCommentsLabelToCount(item.getNumComments())
+        let numCommentsRef = UserService.ref.child("uploads/meta/\(item.getKey())/comments")
+        numCommentsRef.removeAllObservers()
+        numCommentsRef.observe(.value, with: { snapshot in
+            var numComments = 0
+            if snapshot.exists() {
+                if let _numComments = snapshot.value as? Int {
+                    numComments = _numComments
+                }
+            }
+            
+            item.updateNumComments(numComments)
+            self.setCommentsLabelToCount(item.getNumComments())
+        })
     }
 }

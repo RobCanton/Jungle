@@ -13,11 +13,14 @@ class CommentCell: UITableViewCell {
 
     @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var commentLabel: ActiveLabel!
-    
-    var authorTapped:((_ userId:String)->())?
-    
-    var comment:Comment!
     @IBOutlet weak var userImage: UIImageView!
+    @IBOutlet weak var timeLabel: UILabel!
+    
+    var tap:UITapGestureRecognizer!
+    
+    weak var comment:Comment?
+    weak var delegate:CommentCellProtocol?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -49,11 +52,10 @@ class CommentCell: UITableViewCell {
     
        
     }
-    
-    var tap:UITapGestureRecognizer!
 
     func handleTap(sender:UITapGestureRecognizer) {
-        authorTapped?(comment.getAuthor())
+        if comment == nil { return }
+        delegate?.showAuthor(comment!.getAuthor())
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -64,7 +66,6 @@ class CommentCell: UITableViewCell {
     
     
     fileprivate var check:Int = 0
-    var user:User?
     
     func setContent(comment:Comment) {
         
@@ -78,7 +79,6 @@ class CommentCell: UITableViewCell {
         
         UserService.getUser(comment.getAuthor(), withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
-                self.user = user!
                 self.authorLabel.text = user!.getUsername()
                 self.commentLabel.text = comment.getText()
                 self.commentLabel.sizeToFit()
@@ -87,14 +87,6 @@ class CommentCell: UITableViewCell {
             }
             
         })
-        
-    }
-    
-    
-    
-    
-    @IBOutlet weak var timeLabel: UILabel!
-    func toggleTimeStamp() {
         
     }
     

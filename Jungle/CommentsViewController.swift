@@ -14,16 +14,31 @@ enum PostInfoMode {
     case Viewers, Comments
 }
 
+protocol StoryCommentsProtocol: class {
+    func dismissComments()
+    func dismissStory()
+    func replyToUser(_ username:String)
+}
+
+protocol CommentCellProtocol: class {
+    func showAuthor(_ uid:String)
+}
+
+protocol CommentsHeaderProtocol: class {
+    func dismissFromHeader()
+    func actionHandler()
+    func setInfoMode(_ mode:PostInfoMode)
+}
+
+
 class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     
     var mode:PostInfoMode = .Comments
     
     var viewers = [String]()
     var comments = [Comment]()
-    var storyRef:StoryViewController?
-    var postRef:PostViewController?
-    var itemRef:StoryItem?
-    var scrollViewRef:UIScrollView!
+    weak var itemRef:StoryItem?
+    weak var delegate:StoryCommentsProtocol?
     
     var tableView:UITableView!
     
@@ -35,24 +50,24 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var commentsRef:FIRDatabaseReference?
     var viewsRef:FIRDatabaseReference?
-    var captionComment:Comment?
     
     var tapGesture:UITapGestureRecognizer!
     
     var shouldShowKeyboard:Bool = false
     
-    var replyToCommentHandler:((_ username:String)->())?
+    func cleanup() {
+        tableView = nil
+        commentsRef = nil
+        viewsRef = nil
+        header = nil
+        tapGesture = nil
+        closeButton = nil
+        viewers = []
+        comments = []
+    }
     
-    var headerCell: CommentCell!
-    
-    var handleDismiss:(()->())!
-    var popupDismiss:((_ animated:Bool)->())!
-    
-    func setInfoMode(_ mode:PostInfoMode) {
-        if self.mode == mode { return }
-        
-        self.mode = mode
-        self.tableView.reloadData()
+    deinit {
+        print("Deinit >> CommentsViewController")
     }
     
     override func viewDidLoad() {
@@ -67,9 +82,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
 
         header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
         header.frame = CGRect(x: 0, y: 0 , width: view.frame.width, height: navHeight)
-        header.closeHandler = handleDismiss
-        header.moreHandler = actionHandler
-        header.setMode = setInfoMode
+        header.delegate = self
         view.addSubview(header)
         
         let containerView = UIView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
@@ -83,7 +96,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         let nib2 = UINib(nibName: "UserViewCell", bundle: nil)
         tableView.register(nib2, forCellReuseIdentifier: "userViewCell")
         
-        headerCell = nib.instantiate(withOwner: nil, options: nil)[0] as! CommentCell
         //header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
         tableView.separatorColor = UIColor(white: 1.0, alpha: 0.20)
         tableView.separatorInset = UIEdgeInsets.zero
@@ -96,6 +108,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         
         containerView.addSubview(tableView)
+    }
+    
+    func handleDismiss() {
+        delegate?.dismissComments()
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -127,7 +143,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         header.postKey = item.getKey()
         header.setCurrentUserMode(item.getAuthorId() == uid)
-        mode = .Comments
         
         self.updateComments()
         
@@ -230,11 +245,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         NotificationCenter.default.removeObserver(self)
     }
     
-    
-    func authorTitleTapped(sender:UITapGestureRecognizer) {
-        //showUser(uid: item.getAuthorId())
-    }
-    
     func showUser(uid:String) {
         if let nav = self.navigationController {
             nav.delegate = nil
@@ -287,7 +297,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         case .Comments:
             let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
             cell.setContent(comment: comments[indexPath.row])
-            cell.authorTapped = showUser
+            cell.delegate = self
             let labelX = cell.authorLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
             return cell
@@ -301,8 +311,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             break
         case .Comments:
             if let cell = tableView.cellForRow(at: indexPath) as? CommentCell {
-                guard let username = cell.user?.getUsername() else { return }
-                replyToCommentHandler?(username)
+                guard let username = cell.authorLabel.text else { return }
+                delegate?.replyToUser(username)
             }
             break
         }
@@ -379,6 +389,28 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
+    
+
+}
+
+extension CommentsViewController: CommentCellProtocol {
+    func showAuthor(_ uid: String) {
+        showUser(uid: uid)
+    }
+}
+
+extension CommentsViewController: CommentsHeaderProtocol {
+    func dismissFromHeader() {
+        handleDismiss()
+    }
+
+    func setInfoMode(_ mode:PostInfoMode) {
+        if self.mode == mode { return }
+        
+        self.mode = mode
+        self.tableView.reloadData()
+    }
+    
     func actionHandler() {
         guard let item = self.itemRef else { return }
         
@@ -388,7 +420,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
                 UploadService.deleteItem(item: item, completion: { success in
                     if success {
-                        self.popupDismiss(true)
+                        self.delegate?.dismissStory()
                     }
                 })
             }))
@@ -413,9 +445,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
         
     }
-
 }
-
 
 class tempViewController: UIViewController {
 

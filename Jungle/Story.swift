@@ -13,7 +13,7 @@ enum UserStoryState {
     case notLoaded, loadingItemInfo, itemInfoLoaded, loadingContent, contentLoaded
 }
 
-protocol StoryProtocol {
+protocol StoryProtocol: class {
     func stateChange(_ state: UserStoryState)
 }
 
@@ -56,8 +56,13 @@ class Story: ItemDelegate {
     private(set) var date:Date
     private(set) var popularity:Int
     var distance:Double?
-    var delegate:StoryProtocol?
+    weak var delegate:StoryProtocol?
     
+    var count:Int {
+        get {
+            return posts.count
+        }
+    }
 
     var items:[StoryItem]?
     var state:UserStoryState = .notLoaded

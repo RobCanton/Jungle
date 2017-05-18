@@ -44,6 +44,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         if showCommentsOnAppear {
             showCommentsOnAppear = false
             scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height), animated: false)
+            getCurrentCell()?.setDetailFade(0.0)
         }
     }
     
@@ -139,8 +140,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView.delegate = self
         
         commentsViewController = CommentsViewController()
-        commentsViewController.handleDismiss = handleDismiss
-        commentsViewController.popupDismiss = dismissPopup
         commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
         
         self.addChildViewController(commentsViewController)
@@ -148,9 +147,10 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentsViewController.didMove(toParentViewController: self)
         
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
+        commentBar.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
+        
         commentBar.textField.delegate = self
-        commentBar.sendHandler = sendComment
         
         self.view.addSubview(commentBar)
         

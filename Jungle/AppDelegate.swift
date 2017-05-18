@@ -63,7 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         fetchConfig()
         
         if #available(iOS 10, *) {
-            UITabBarItem.appearance().badgeColor = .orange
+            UITabBarItem.appearance().badgeColor = UIColor(red: 1.0, green: 117/255, blue: 125/255, alpha: 1.0)
         }
         
         do {

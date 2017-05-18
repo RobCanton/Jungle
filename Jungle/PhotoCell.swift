@@ -67,7 +67,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.nameLabel.text = ""
         self.timeLabel.text = ""
         
-        colorView.isHidden = story.hasViewed()
+        //colorView.isHidden = story.hasViewed()
         
         LocationService.sharedInstance.getLocationInfo(story.getLocationKey(), completion: { location in
             if location != nil {
@@ -94,8 +94,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 self.imageView.alpha = 1.0
             }
             
-            self.nameLabel.applyShadow(radius: 3, opacity: 0.85, height: 1.0, shouldRasterize: true)
-            self.timeLabel.applyShadow(radius: 3, opacity: 0.85, height: 1.0, shouldRasterize: true)
+            self.nameLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
         
         })
     }
@@ -177,8 +177,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                     self.gradient!.locations = [0.0, 1.0]
                     self.gradient!.startPoint = CGPoint(x: 0, y: 0)
                     self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                    self.gradient!.shouldRasterize = true
-                    self.colorView.layer.shouldRasterize = true
+                    self.gradient!.shouldRasterize = false
+                    self.colorView.layer.shouldRasterize = false
                     self.gradient!.drawsAsynchronously = true
                     self.colorView.layer.drawsAsynchronously = true
                     self.colorView.layer.insertSublayer(self.gradient!, at: 0)

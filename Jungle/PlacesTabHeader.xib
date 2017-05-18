@@ -24,7 +24,7 @@
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jba-qC-sOO">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jba-qC-sOO">
                             <rect key="frame" x="446" y="0.0" width="57" height="57"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="jba-qC-sOO" secondAttribute="height" multiplier="1:1" id="JHg-iR-uQ1"/>
@@ -46,11 +46,16 @@
                                 <action selector="handleSort:" destination="h0S-sf-A6F" eventType="touchUpInside" id="3M4-3q-ysd"/>
                             </connections>
                         </button>
+                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="vD9-gc-btB">
+                            <rect key="frame" x="464" y="18" width="20" height="20"/>
+                        </activityIndicatorView>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstAttribute="bottom" secondItem="Ril-iC-qzp" secondAttribute="bottom" id="6aB-au-DP5"/>
+                        <constraint firstItem="vD9-gc-btB" firstAttribute="centerY" secondItem="jba-qC-sOO" secondAttribute="centerY" id="UdT-R8-5pw"/>
                         <constraint firstAttribute="bottom" secondItem="jba-qC-sOO" secondAttribute="bottom" id="UeB-59-sBH"/>
+                        <constraint firstItem="vD9-gc-btB" firstAttribute="centerX" secondItem="jba-qC-sOO" secondAttribute="centerX" id="Xcz-Cq-zl8"/>
                         <constraint firstItem="Ril-iC-qzp" firstAttribute="top" secondItem="tdH-g6-ZQ8" secondAttribute="top" id="brc-xH-F1d"/>
                         <constraint firstItem="Ril-iC-qzp" firstAttribute="leading" secondItem="tdH-g6-ZQ8" secondAttribute="leading" constant="2" id="cO9-SN-BY1"/>
                         <constraint firstAttribute="trailing" secondItem="jba-qC-sOO" secondAttribute="trailing" constant="2" id="cZR-Mo-Jj8"/>
@@ -69,6 +74,7 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="activityIndicator" destination="vD9-gc-btB" id="wyX-A0-ysZ"/>
                 <outlet property="refreshButton" destination="jba-qC-sOO" id="dEA-fI-icU"/>
                 <outlet property="sortinButton" destination="Ril-iC-qzp" id="C6i-zt-LsB"/>
             </connections>

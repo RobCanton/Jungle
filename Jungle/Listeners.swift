@@ -24,6 +24,8 @@ class Listeners {
     fileprivate static var listeningToFollowingActivity = false
     fileprivate static var listeningToViewed = false
     
+    fileprivate static var listenForForcedRefersh = false
+    
     static func stopListeningToAll() {
 
         stopListeningToFollowers()
@@ -34,13 +36,34 @@ class Listeners {
         stopListeningToNearbyActivity()
         stopListeningToFollowingActivity()
         stopListeningToViewed()
+        stopListeningForForcedRefresh()
+    }
+    
+    static func startListeningForForcedRefresh() {
+        let uid = mainStore.state.userState.uid
+        let refreshRef = ref.child("operational/refresh/\(uid)")
+        refreshRef.observe(.value, with: { snapshot in
+            if snapshot.exists() {
+                print("Force refresh")
+                globalMainInterfaceProtocol?.fetchAllStories()
+                refreshRef.removeValue()
+            }
+        })
+    }
+    
+    static func stopListeningForForcedRefresh() {
+        let uid = mainStore.state.userState.uid
+        let refreshRef = ref.child("operational/refresh/\(uid)")
+        refreshRef.removeAllObservers()
     }
     
    
     static func startListeningToFollowers() {
+        print("START LISTENING TO FOLLOWERS")
         if !listeningToFollowers {
             listeningToFollowers = true
             let current_uid = mainStore.state.userState.uid
+            print("wacko: \(current_uid)")
             let followersRef = ref.child("users/social/followers/\(current_uid)")
             
             /** Listen for a Follower Added */
@@ -65,6 +88,7 @@ class Listeners {
     }
     
     static func startListeningToFollowing() {
+        print("START LISTENING TO FOLLOWING")
         if !listeningToFollowing {
             listeningToFollowing = true
             let current_uid = mainStore.state.userState.uid
@@ -101,12 +125,14 @@ class Listeners {
         let current_uid = mainStore.state.userState.uid
         ref.child("users/social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowers = false
+        print("STOP LISTENING TO FOLLOWERS")
     }
     
     static func stopListeningToFollowing() {
         let current_uid = mainStore.state.userState.uid
         ref.child("users/social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowing = false
+        print("STOP LISTENING TO FOLLOWERING")
     }
     
     static func startListeningToConversations() {

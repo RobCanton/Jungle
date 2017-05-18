@@ -13,15 +13,29 @@ class PlacesTabHeader: UIView {
     @IBOutlet weak var refreshButton: UIButton!
     @IBOutlet weak var sortinButton: UIButton!
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var refreshHandler:(()->())?
     var sortHandler:(()->())?
+    
+    
 
     @IBAction func handleRefresh(_ sender: Any) {
-        refreshHandler?()
+        startRefreshing()
+        globalMainInterfaceProtocol?.fetchAllStories()
     }
 
     @IBAction func handleSort(_ sender: Any) {
         sortHandler?()
+    }
+    
+    func startRefreshing() {
+        refreshButton.isHidden = true
+        activityIndicator.startAnimating()
+    }
+    
+    func stopRefreshing() {
+        refreshButton.isHidden = false
+        activityIndicator.stopAnimating()
     }
 
 }

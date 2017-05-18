@@ -9,14 +9,14 @@
 import Foundation
 import Firebase
 
-protocol HomeProtocol {
+protocol HomeProtocol: class {
     func update(_ mode: SortedBy?)
 }
 
 class HomeStateController {
-    var delegate:HomeProtocol?
+    weak var delegate:HomeProtocol?
     
-    private(set) var myStory:UserStory?
+    private(set) var myStory = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
     
     private(set) var followingStories = [UserStory]()
     private(set) var nearbyFollowingStories = [UserStory]()
@@ -29,6 +29,7 @@ class HomeStateController {
     private(set) var nearbyPlaceStories = [LocationStory]()
     
     
+    fileprivate var myStoryRef:FIRDatabaseReference?
     fileprivate var followingRef:FIRDatabaseReference?
     fileprivate var nearbyFollowingRef:FIRDatabaseReference?
     fileprivate var popularUsersRef:FIRDatabaseReference?
@@ -43,31 +44,102 @@ class HomeStateController {
     {
         self.delegate = delegate
         
-        observeFollowing()
+        fetchAll()
+    }
+    
+    func fetchAll() {
+        observeMyStory()
+        
+        fetchFollowing()
+        
+        fetchPopularUsers()
+        fetchPopularPlaces()
+        
+        fetchRecentUsers()
+        fetchRecentPlaces()
+        
         observeNearbyFollowing()
-        observePopularUsers()
-        observeRecentUsers()
-        observePopularPlaces()
-        observeRecentPlaces()
         observeNearbyUsers()
         observeNearbyPlaces()
-        
     }
     
     func sortFollowingByDate() {
         followingStories.sort(by: { $0 > $1})
+        let uid = mainStore.state.userState.uid
+        var swapIndex:Int?
+        for i in 0..<followingStories.count {
+            let story = followingStories[i]
+            if story.getUserId() == uid {
+                swapIndex = i
+                break
+            }
+        }
+        if swapIndex != nil {
+            let swapStory = followingStories[swapIndex!]
+            followingStories.remove(at: swapIndex!)
+            followingStories.insert(swapStory, at: 0)
+        }
     }
     
     func sortFollowingByPopularity() {
         followingStories.sort(by: { $0.popularity > $1.popularity })
+        let uid = mainStore.state.userState.uid
+        var swapIndex:Int?
+        for i in 0..<followingStories.count {
+            let story = followingStories[i]
+            if story.getUserId() == uid {
+                swapIndex = i
+                break
+            }
+        }
+        if swapIndex != nil {
+            let swapStory = followingStories[swapIndex!]
+            followingStories.remove(at: swapIndex!)
+            followingStories.insert(swapStory, at: 0)
+        }
+        
     }
 
-    fileprivate func observeFollowing() {
+    fileprivate func observeMyStory() {
         let uid = mainStore.state.userState.uid
-        followingRef?.removeAllObservers()
+        myStoryRef?.removeAllObservers()
+        myStoryRef = UserService.ref.child("stories/users/\(uid)")
+        myStoryRef?.observe(.value, with: { snapshot in
+            var story:UserStory?
+            print("MY STORY UPDATED")
+            if let dict = snapshot.value as? [String:AnyObject] {
+                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
+                    let lastPost = meta["k"] as! String
+                    let timestamp = meta["t"] as! Double
+                    var popularity = 0
+                    if let p = meta["p"] as? Int {
+                        popularity = p
+                    }
+                    var posts = [String]()
+                    for (key,_) in postObject {
+                        posts.append(key)
+                    }
+                    story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
+                }
+            }
+            if story == nil {
+                story = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
+            }
+            
+            self.myStory = story!
+            self.myStory.printDescription()
+            DispatchQueue.main.async {
+                print("LIKE WHATS GOOD")
+                self.delegate?.update(nil)
+            }
+        })
+    }
+    
+    fileprivate func fetchFollowing() {
+        let uid = mainStore.state.userState.uid
         followingRef = UserService.ref.child("users/social/following/\(uid)")
-        followingRef?.observe(.value, with: { snapshot in
-            var following = [String]()
+        followingRef?.observeSingleEvent(of: .value, with: { snapshot in
+            var following:[String] = [] // Include current user id to pull my story
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 following.append(childSnap.key)
@@ -88,8 +160,23 @@ class HomeStateController {
                 count += 1
                 if count >= following.count {
                     count = -1
-                    
-                    self.followingStories = stories.sorted(by: { return $0.popularity > $1.popularity})
+                    let uid = mainStore.state.userState.uid
+                    var temp = stories.sorted(by: { return $0.popularity > $1.popularity})
+                    var swapIndex:Int?
+                    for i in 0..<temp.count {
+                        let story = temp[i]
+                        if story.getUserId() == uid {
+                        
+                            swapIndex = i
+                            break
+                        }
+                    }
+                    if swapIndex != nil {
+                        let swapStory = temp[swapIndex!]
+                        temp.remove(at: swapIndex!)
+                        temp.insert(swapStory, at: 0)
+                    }
+                    self.followingStories = temp
                     DispatchQueue.main.async {
                         self.delegate?.update(nil)
                     }
@@ -98,7 +185,7 @@ class HomeStateController {
         }
     }
     
-    fileprivate func observePopularUsers() {
+    fileprivate func fetchPopularUsers() {
         popularUsersRef?.removeAllObservers()
         popularUsersRef = UserService.ref.child("stories/sorted/popular/userStories")
         popularUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
@@ -106,8 +193,9 @@ class HomeStateController {
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
-                let score = childSnap.value as! Int
-                stories.append((key,score))
+                if let score = childSnap.value as? Int, !mainStore.state.socialState.following.contains(key) {
+                    stories.append((key,score))
+                }
             }
             self.downloadPopularStories(stories)
         })
@@ -140,7 +228,7 @@ class HomeStateController {
         nearbyFollowingRef?.removeAllObservers()
         nearbyFollowingRef = UserService.ref.child("users/location/nearby/\(uid)/following")
         nearbyFollowingRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
-            var stories = [(String,Double)]()
+            var stories: [(String,Double)] = []
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
@@ -165,8 +253,24 @@ class HomeStateController {
                 count += 1
                 if count >= nearby.count {
                     count = -1
+                    let uid = mainStore.state.userState.uid
+                    var temp = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    var swapIndex:Int?
+                    for i in 0..<temp.count {
+                        let story = temp[i]
+                        if story.getUserId() == uid {
+                            
+                            swapIndex = i
+                            break
+                        }
+                    }
+                    if swapIndex != nil {
+                        let swapStory = temp[swapIndex!]
+                        temp.remove(at: swapIndex!)
+                        temp.insert(swapStory, at: 0)
+                    }
                     
-                    self.nearbyFollowingStories = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    self.nearbyFollowingStories = temp
                     DispatchQueue.main.async {
                         self.delegate?.update(.Nearby)
                     }
@@ -184,7 +288,8 @@ class HomeStateController {
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
-                if let distance = childSnap.value as? Double {
+                
+                if let distance = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key), key != uid {
                     stories.append((key,distance))
                 }
             }
@@ -227,7 +332,7 @@ class HomeStateController {
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
-                if let distance = childSnap.value as? Double {
+                if let distance = childSnap.value as? Double, key != mainStore.state.userState.uid {
                     stories.append((key,distance))
                 }
             }
@@ -259,22 +364,23 @@ class HomeStateController {
         }
     }
     
-    fileprivate func observeRecentUsers() {
-        recentUsersRef?.removeAllObservers()
+    fileprivate func fetchRecentUsers() {
+        
         recentUsersRef = UserService.ref.child("stories/sorted/recent/userStories")
         recentUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [(String,Int)]()
+            var stories = [(String,Double)]()
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
-                let score = childSnap.value as! Int
-                stories.append((key,score))
+                if let score = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key), key != mainStore.state.userState.uid {
+                    stories.append((key,score))
+                }
             }
             self.downloadRecentStories(stories)
         })
     }
     
-    fileprivate func downloadRecentStories(_ recent:[(String,Int)]) {
+    fileprivate func downloadRecentStories(_ recent:[(String,Double)]) {
         var stories = [UserStory]()
         
         var count = 0
@@ -296,22 +402,23 @@ class HomeStateController {
         }
     }
     
-    fileprivate func observePopularPlaces() {
+    fileprivate func fetchPopularPlaces() {
         popularPlacesRef?.removeAllObservers()
         popularPlacesRef = UserService.ref.child("stories/sorted/popular/places")
         popularPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [(String,Int)]()
+            var stories = [(String,Double)]()
             for child in snapshot.children {
                 let childSnap = child as! FIRDataSnapshot
                 let key = childSnap.key
-                let score = childSnap.value as! Int
-                stories.append((key,score))
+                if let score = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key) {
+                    stories.append((key,score))
+                }
             }
             self.downloadPlacesStories(stories)
         })
     }
     
-    fileprivate func downloadPlacesStories(_ popular:[(String,Int)]) {
+    fileprivate func downloadPlacesStories(_ popular:[(String,Double)]) {
         var stories = [LocationStory]()
         
         var count = 0
@@ -333,7 +440,7 @@ class HomeStateController {
         }
     }
     
-    fileprivate func observeRecentPlaces() {
+    fileprivate func fetchRecentPlaces() {
         recentPlacesRef?.removeAllObservers()
         recentPlacesRef = UserService.ref.child("stories/sorted/recent/places")
         recentPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
@@ -362,7 +469,7 @@ class HomeStateController {
                     
                     self.recentPlaceStories = stories.sorted(by: { return $0 > $1})
                     DispatchQueue.main.async {
-                        self.delegate?.update(.Popular)
+                        self.delegate?.update(.Recent)
                     }
                 }
             })

@@ -17,13 +17,10 @@ class CommentsHeaderView: UIView {
     @IBOutlet weak var rightButton: UIButton!
 
     @IBOutlet weak var subscribeButton: UIButton!
-    var closeHandler:(()->())?
-    var moreHandler:(()->())?
-    
-    var setMode:((_ mode:PostInfoMode)->())?
-    
     var subscribed:Bool?
     var postKey:String?
+    
+    weak var delegate: CommentsHeaderProtocol?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -53,23 +50,21 @@ class CommentsHeaderView: UIView {
     }
     
     func viewsTapped() {
-        setMode?(.Viewers)
-        
-        self.viewsLabel.alpha = 0.5
+        delegate?.setInfoMode(.Viewers)
+        self.viewsLabel.superview!.alpha = 0.5
         UIView.animate(withDuration: 0.2, animations: {
-            self.viewsLabel.alpha = 1.0
+            self.viewsLabel.superview!.alpha = 1.0
         }, completion: { _ in
             
         })
     }
     
     func commentsTapped() {
-        setMode?(.Comments)
-
-        self.commentsLabel.alpha = 0.5
+        delegate?.setInfoMode(.Comments)
+        self.commentsLabel.superview!.alpha = 0.5
 
         UIView.animate(withDuration: 0.25, animations: {
-            self.commentsLabel.alpha = 1.0
+            self.commentsLabel.superview!.alpha = 1.0
         }, completion: { _ in
             
         })
@@ -86,11 +81,11 @@ class CommentsHeaderView: UIView {
     }
 
     @IBAction func handleClose(_ sender: Any) {
-        closeHandler?()
+        delegate?.dismissFromHeader()
     }
     
     @IBAction func handleMore(_ sender: Any) {
-        moreHandler?()
+        delegate?.actionHandler()
     }
     
     func setUserInfo(uid:String) {

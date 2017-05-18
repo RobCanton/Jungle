@@ -60,7 +60,7 @@ class UserService {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
             completion(cachedUser)
         } else {
-            ref.child("users/profile/\(uid)").observe(.value, with: { snapshot in
+            ref.child("users/profile/\(uid)").observeSingleEvent(of: .value, with: { snapshot in
                 var user:User?
                 if snapshot.exists() {
                     let dict = snapshot.value as! [String:AnyObject]
@@ -68,7 +68,17 @@ class UserService {
                     guard let imageURL = dict["imageURL"] as? String else { return completion(user) }
                     guard let bio      = dict["bio"] as? String else { return completion(user) }
                     
-                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio)
+                    var followers:Int = 0
+                    if let _followers = dict["followers"] as? Int {
+                        followers = _followers
+                    }
+                    
+                    var following:Int = 0
+                    if let _following = dict["following"] as? Int {
+                        following = _following
+                    }
+                    
+                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, followers: followers, following: following)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 
@@ -85,6 +95,34 @@ class UserService {
     
     
     
+    static func observeUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
+        ref.child("users/profile/\(uid)").observe(.value, with: { snapshot in
+            var user:User?
+            print("PROFILE CHANGED TINGS!")
+            if snapshot.exists() {
+                let dict = snapshot.value as! [String:AnyObject]
+                guard let username = dict["username"] as? String else { return completion(user) }
+                guard let imageURL = dict["imageURL"] as? String else { return completion(user) }
+                guard let bio      = dict["bio"] as? String else { return completion(user) }
+                
+                var followers:Int = 0
+                if let _followers = dict["followers"] as? Int {
+                    followers = _followers
+                }
+                
+                var following:Int = 0
+                if let _following = dict["following"] as? Int {
+                    following = _following
+                }
+                
+                user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, followers: followers, following: following)
+                dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
+            }
+            
+            completion(user)
+        })
+    }
+    
     static func getUser(_ uid:String,withCheck check:Int, completion: @escaping (_ user:User?,_ check:Int) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
             completion(cachedUser, check)
@@ -97,7 +135,17 @@ class UserService {
                     guard let imageURL = dict["imageURL"] as? String else { return completion(user, check) }
                     guard let bio      = dict["bio"] as? String else { return completion(user, check) }
                     
-                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio)
+                    var followers:Int = 0
+                    if let _followers = dict["followers"] as? Int {
+                        followers = _followers
+                    }
+                    
+                    var following:Int = 0
+                    if let _following = dict["following"] as? Int {
+                        following = _following
+                    }
+                    
+                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, followers: followers, following: following)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 
@@ -108,7 +156,7 @@ class UserService {
     
     static func getUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
         let storyRef = ref.child("stories/users/\(uid)")
-        storyRef.observe(.value, with: { snapshot in
+        storyRef.observeSingleEvent(of: .value, with: { snapshot in
             var story:UserStory?
             if let dict = snapshot.value as? [String:AnyObject] {
                 if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {

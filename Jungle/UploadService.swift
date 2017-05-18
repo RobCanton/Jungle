@@ -193,18 +193,13 @@ class UploadService {
                     
                     var updateValues: [String : Any] = [
                         "uploads/meta/\(postKey)": obj,
-                        "uploads/subscribers/\(postKey)/\(uid)":true,
-                        "stories/users/\(uid)/meta/k": postKey,
-                        "stories/users/\(uid)/meta/t": [".sv": "timestamp"],
-                        "stories/users/\(uid)/posts/\(postKey)":true,
-                        "stories/sorted/recent/userStories/\(uid)": [".sv": "timestamp"],
                         "stories/stats/users/\(uid)/posts/\(postKey)/t": [".sv": "timestamp"],
                         "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                     ]
                     
                     if let coordinates = upload.coordinates {
-                        updateValues["stories/stats/coordinates/\(uid)/lat"] = coordinates.coordinate.latitude
-                        updateValues["stories/stats/coordinates/\(uid)/lon"] = coordinates.coordinate.longitude
+                        updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lat"] = coordinates.coordinate.latitude
+                        updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lon"] = coordinates.coordinate.longitude
                     }
                     
                     if let place = upload.place {
@@ -213,23 +208,21 @@ class UploadService {
                         updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
                         updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
                         updateValues["places/\(placeId)/info/address"] = place.formattedAddress
-                        updateValues["places/\(placeId)/posts/\(postKey)/a"] = uid
-                        updateValues["places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
-                        updateValues["places/\(placeId)/contributers/\(uid)"] = true
-                        updateValues["stories/places/\(placeId)/meta/k"] = postKey
-                        updateValues["stories/places/\(placeId)/meta/t"] = [".sv": "timestamp"]
-                        updateValues["stories/places/\(placeId)/posts/\(postKey)"] = true
-                        updateValues["stories/sorted/recent/places/\(placeId)"] = [".sv": "timestamp"]
-                        
+                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/a"] = uid
+                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
                         for type in place.types {
                             updateValues["places/\(place.placeID)/info/types/\(type)"] = true
                         }
                     }
                     
                     
-                    
                     ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
+                            globalMainInterfaceProtocol?.fetchAllStories()
+                            
+                            let subscriberRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
+                            subscriberRef.setValue(true)
+                            
                             return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
                         } else {
                             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -313,22 +306,15 @@ class UploadService {
                                 obj["captionPos"] = y
                             }
                             
-                            
-                            
                             var updateValues: [String : Any] = [
                                 "uploads/meta/\(postKey)": obj,
-                                "uploads/subscribers/\(postKey)/\(uid)":true,
-                                "stories/users/\(uid)/meta/k": postKey,
-                                "stories/users/\(uid)/meta/t": [".sv": "timestamp"],
-                                "stories/users/\(uid)/posts/\(postKey)":true,
-                                "stories/sorted/recent/userStories/\(uid)": [".sv": "timestamp"],
                                 "stories/stats/users/\(uid)/posts/\(postKey)/t": [".sv": "timestamp"],
                                 "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                             ]
                             
                             if let coordinates = upload.coordinates {
-                                updateValues["stories/stats/coordinates/\(uid)/lat"] = coordinates.coordinate.latitude
-                                updateValues["stories/stats/coordinates/\(uid)/lon"] = coordinates.coordinate.longitude
+                                updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lat"] = coordinates.coordinate.latitude
+                                updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lon"] = coordinates.coordinate.longitude
                             }
                             
                             if let place = upload.place {
@@ -337,14 +323,8 @@ class UploadService {
                                 updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
                                 updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
                                 updateValues["places/\(placeId)/info/address"] = place.formattedAddress
-                                updateValues["places/\(placeId)/posts/\(postKey)/a"] = uid
-                                updateValues["places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
-                                updateValues["places/\(placeId)/contributers/\(uid)"] = true
-                                updateValues["stories/places/\(placeId)/meta/k"] = postKey
-                                updateValues["stories/places/\(placeId)/meta/t"] = [".sv": "timestamp"]
-                                updateValues["stories/places/\(placeId)/posts/\(postKey)"] = true
-                                updateValues["stories/sorted/recent/places/\(placeId)"] = [".sv": "timestamp"]
-                                
+                                updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/a"] = uid
+                                updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
                                 for type in place.types {
                                     updateValues["places/\(place.placeID)/info/types/\(type)"] = true
                                 }
@@ -353,6 +333,11 @@ class UploadService {
                             ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                                 
                                 if error == nil {
+                                    globalMainInterfaceProtocol?.fetchAllStories()
+                                    
+                                    let subscriberRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
+                                    subscriberRef.setValue(true)
+                                    
                                     return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
                                 } else {
                                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -593,6 +578,7 @@ class UploadService {
         let postRef = ref.child("uploads/meta/\(item.getKey())")
         postRef.removeValue(completionBlock: { error, ref in
             if error == nil {
+                globalMainInterfaceProtocol?.fetchAllStories()
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
                 return completion(true)
             } else {

@@ -47,10 +47,8 @@ class FirstAuthViewController: FirstViewController {
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
                     Listeners.startListeningToNotifications()
-                    Listeners.startListeningToMyActivity()
-                    Listeners.startListeningToNearbyActivity()
-                    Listeners.startListeningToFollowingActivity()
                     Listeners.startListeningToViewed()
+                    //Listeners.startListeningForForcedRefresh()
                     self.performSegue(withIdentifier: "login", sender: self)
                 } else {
                     self.performSegue(withIdentifier: "toLoginScreen", sender: self)
@@ -115,10 +113,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToConversations()
                     Listeners.startListeningToNotifications()
-                    Listeners.startListeningToMyActivity()
-                    Listeners.startListeningToNearbyActivity()
-                    Listeners.startListeningToFollowingActivity()
                     Listeners.startListeningToViewed()
+                    //Listeners.startListeningForForcedRefresh()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })
@@ -137,6 +133,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         {
         get {
             return true
+        }
+    }
+    
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        get {
+            return .lightContent
         }
     }
 }
@@ -187,8 +190,12 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
         guard let pass = passwordTextField.text else { return }
         
         FIRAuth.auth()?.signIn(withEmail: email, password: pass, completion: { (user, error) in
-            if error == nil && user != nil {
+            if error != nil && user == nil {
+                print("Error signing in to accoutn")
+                return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to sign in.")
+            } else {
                 self.dismiss(animated: true, completion: nil)
+                return
             }
         })
     }
@@ -208,6 +215,14 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
             return true
         }
     }
+    
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        get {
+            return .lightContent
+        }
+    }
+
     
 }
 

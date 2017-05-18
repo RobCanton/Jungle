@@ -27,6 +27,7 @@ struct SocialState {
     var blockedBy = Tree<String>()
 }
 
+
 struct AppReducer: Reducer {
     typealias ReducerStateType = AppState
     
@@ -45,6 +46,8 @@ struct AppReducer: Reducer {
         )
     }
 }
+
+
 
 func ViewedReducer(_ action: Action, state:[String]?) -> [String] {
     var state = state ?? [String]()

@@ -37,6 +37,7 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
     case _ as AddFollower:
         let a = action as! AddFollower
         state.followers.insert(a.uid)
+        print("New follower")
         break
     case _ as RemoveFollower:
         let a = action as! RemoveFollower
@@ -45,10 +46,12 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
     case _ as AddFollowing:
         let a = action as! AddFollowing
         state.following.insert(a.uid)
+        print("New following")
         break
     case _ as RemoveFollowing:
         let a = action as! RemoveFollowing
         state.following.remove(a.uid)
+        print("Removed following")
         break
     case _ as AddBlocked:
         let a = action as! AddBlocked

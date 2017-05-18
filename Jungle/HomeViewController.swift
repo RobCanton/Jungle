@@ -27,7 +27,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var collectionView:UICollectionView!
     
     var masterNav:UINavigationController?
-    var sortMode:SortedBy = .Popular
+    var sortMode:SortedBy = .Recent
     var gps_service:GPSService!
     
     var tabHeader:PlacesTabHeader!
@@ -40,13 +40,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var midCollectionViewRef:UICollectionView?
     
     func didSelect(_ segmentIndex: Int) {
-        var selectedMode:SortedBy = .Popular
+        var selectedMode:SortedBy = .Recent
         switch segmentIndex {
         case 1:
             selectedMode = .Nearby
             break
         case 2:
-            selectedMode = .Recent
+            selectedMode = .Popular
             break
         default:
             break
@@ -54,7 +54,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         if selectedMode == sortMode { return }
         
-        UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
+        UIView.animate(withDuration: 0.12, delay: 0.0, options: .curveEaseOut, animations: {
             self.collectionView.alpha = 0.0
         }, completion: { _ in
             
@@ -89,7 +89,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        itemSideLength = (UIScreen.main.bounds.width/3.0) - 1.0
+        itemSideLength = (UIScreen.main.bounds.width - 3.0) / 3.0
         self.automaticallyAdjustsScrollViewInsets = true
         //navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -101,7 +101,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         self.view.addSubview(tabHeader)
         
-        let titles = ["Popular", "Nearby", "Recent"]
+        let titles = ["Recent", "Nearby", "Popular"]
         let frame = CGRect(x: 0, y: 44.0, width: view.frame.width, height: 44)
         
         control = TwicketSegmentedControl(frame: frame)
@@ -118,8 +118,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
         layout.itemSize = getItemSize()
-        layout.minimumInteritemSpacing = 1.0
-        layout.minimumLineSpacing = 1.0
+        layout.minimumInteritemSpacing = 1.5
+        layout.minimumLineSpacing = 1.5
         
         collectionView = UICollectionView(frame: CGRect(x: 0,y: 88.0 ,width: view.frame.width ,height: view.frame.height - 44), collectionViewLayout: layout)
         
@@ -144,13 +144,17 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         self.collectionView.reloadData()
         
         state = HomeStateController(delegate:self)
+        tabHeader.startRefreshing()
 
     }
     
     
     
     func update(_ mode:SortedBy?) {
+        print("UPDATE !")
+        tabHeader.stopRefreshing()
         if mode == nil || mode! == self.sortMode{
+            print("RELOAD TABLE")
             return self.collectionView.reloadData()
         }
     }
@@ -171,33 +175,26 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
         let bannerHeight:CGFloat = 32
-        let collectionViewHeight:CGFloat = getItemSize().height * 0.677
+        let collectionViewHeight:CGFloat = getItemSize().height * 0.72
         
         var verticalHeight:CGFloat = 0
         
-        verticalHeight += bannerHeight
-        
-        
-        if state.followingStories.count > 0 || state.myStory != nil {
-            verticalHeight += collectionViewHeight + bannerHeight
-        }
-        
         switch sortMode {
         case .Popular:
-            if state.popularUserStories.count > 0 {
-                verticalHeight += collectionViewHeight + bannerHeight
-            }
+            verticalHeight += state.followingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
+            verticalHeight += state.popularUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
+            verticalHeight += state.popularPlaceStories.count > 0 ? bannerHeight : 0
             break
         case .Nearby:
-            if state.nearbyUserStories.count > 0 {
-                verticalHeight += collectionViewHeight + bannerHeight
-            }
+            verticalHeight += state.nearbyFollowingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
+            verticalHeight += state.nearbyUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
             verticalHeight += 60
+            verticalHeight += state.nearbyPlaceStories.count > 0 ? bannerHeight : 0
             break
         case .Recent:
-            if state.recentUserStories.count > 0 {
-                verticalHeight += collectionViewHeight + bannerHeight
-            }
+            verticalHeight += state.followingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
+            verticalHeight += state.recentUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
+            verticalHeight += state.recentPlaceStories.count > 0 ? bannerHeight : 0
             break
         }
         return CGSize(width: collectionView.frame.size.width, height: verticalHeight)
@@ -207,38 +204,26 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("Home: viewWillAppear")
+        //print("Home: viewWillAppear")
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     var shouldDelayLoad = false
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("Home: viewDidAppear")
-        
-        if shouldDelayLoad {
-            shouldDelayLoad = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.state.delegate = self
-                self.collectionView.reloadData()
-            }
-        } else {
-            mainStore.subscribe(self)
-            state.delegate = self
-        }
+        globalMainInterfaceProtocol?.fetchAllStories()
         
         
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        print("Home: viewDidDisappear")
-        state.delegate = nil
+        //print("Home: viewDidDisappear")
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        print("Home: viewWillDisappear")
+        //print("Home: viewWillDisappear")
         
     }
     

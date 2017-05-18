@@ -9,17 +9,16 @@
 import Foundation
 import UIKit
 
+protocol CommentBarProtocol: class {
+    func sendComment(_ text:String)
+}
 
 class CommentBar: UIView {
     @IBOutlet weak var textField: UITextField!
-
     @IBOutlet weak var commentPlaceHolder: UILabel!
-    
-    
     @IBOutlet weak var sendButton: UIButton!
     
-    var sendHandler:((_ text:String)->())?
-
+    weak var delegate:CommentBarProtocol?
 
     override func awakeFromNib() {
         
@@ -31,7 +30,7 @@ class CommentBar: UIView {
     @IBAction func sendButton(_ sender: Any) {
         if let text = textField.text {
             textField.text = ""
-            sendHandler?(text)
+            delegate?.sendComment(text)
         }
 
     }

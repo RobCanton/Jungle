@@ -53,19 +53,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         }
     }
     
-    var followers:[String]?
-        {
-        didSet {
-            getHeaderView()?.setFollowersCount(followers!.count)
-        }
-    }
-    var following:[String]?
-        {
-        didSet {
-            getHeaderView()?.setFollowingCount(following!.count)
-        }
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
@@ -121,10 +108,9 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     func uidRetrieved(uid: String) {
         self.status = checkFollowingStatus(uid: uid)
-        UserService.getUser(uid, completion: { user in
-            if user != nil && self.user == nil {
+        UserService.observeUser(uid, completion: { user in
+            if user != nil {
                 self.user = user
-                //self.title = self.user!.getUsername()
                 self.collectionView.reloadData()
             }
         })
@@ -134,14 +120,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: #selector(showOptions))
             moreButton.tintColor = UIColor.black
             self.navigationItem.rightBarButtonItem = moreButton
-            
-            UserService.listenToFollowers(uid: uid, completion: { followers in
-                self.followers = followers
-            })
-            
-            UserService.listenToFollowing(uid: uid, completion: { following in
-                self.following = following
-            })
         }
     }
     
@@ -190,7 +168,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.navigationController?.navigationBar.barStyle = .default
         navigationController?.setNavigationBarHidden(false, animated: true)
         
-        setFollowing()
         if navigationController?.delegate === transitionController {
             statusBarShouldHide = false
             self.setNeedsStatusBarAppearanceUpdate()
@@ -209,9 +186,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             self.navigationController?.delegate = nil
             listenToPosts()
         }
-        
-        setFollowing()
-
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -222,37 +196,12 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         super.viewDidDisappear(animated)
         mainStore.unsubscribe(self)
         stopListeningToPosts()
-        
-        if let uid = self.uid {
-            UserService.stopListeningToFollowers(uid: uid)
-            UserService.stopListeningToFollowing(uid: uid)
-        }
     }
     
     func newState(state: AppState) {
         guard let uid = self.uid else { return }
         self.status = checkFollowingStatus(uid: uid)
         getHeaderView()?.setUserStatus(status: status)
-        setFollowing()
-    }
-    
-    func setFollowing() {
-        guard let uid = self.uid else { return }
-        if uid != mainStore.state.userState.uid { return }
-        let followers = mainStore.state.socialState.followers
-        var tempFollowers = [String]()
-        for follower in followers {
-            tempFollowers.append(follower)
-        }
-        
-        self.followers = tempFollowers
-        
-        let following = mainStore.state.socialState.following
-        var tempFollowing = [String]()
-        for follower in following {
-            tempFollowing.append(follower)
-        }
-        self.following = tempFollowing
     }
     
     func listenToPosts() {
@@ -379,18 +328,14 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
 extension UserProfileViewController: ProfileHeaderProtocol {
     
     func showFollowers() {
-        guard let followers = followers else { return }
         let controller = UsersListViewController()
         controller.title = "Followers"
-        controller.tempIds = followers
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
     func showFollowing() {
-        guard let following = following else { return }
         let controller = UsersListViewController()
         controller.title = "Following"
-        controller.tempIds = following
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -406,29 +351,6 @@ extension UserProfileViewController: ProfileHeaderProtocol {
             let conversation = Conversation(key: pairKey, partner_uid: partner_uid, seen: true, date: Date(), lastMessage: "", listening: true)
             self.presentingEmptyConversation = true
             self.prepareConversationForPresentation(conversation: conversation)
-            /*let ref = UserService.ref.child("conversations/\(pairKey)")
-            ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
-                
-                let recipientObject = [
-                    "seen": [".sv":"timestamp"],
-                    "mute": false
-                ] as [String : Any]
-                let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                recipientUserRef.child(current_uid).setValue(recipientObject)
-                
-                let senderObject = [
-                    "seen": [".sv":"timestamp"],
-                    "mute": false
-                ] as [String : Any]
-                
-                let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
-                currentUserRef.child(partner_uid).setValue(senderObject, withCompletionBlock: { error, ref in
-                    let conversation = Conversation(key: pairKey, partner_uid: partner_uid, listening: true)
-                    self.presentingEmptyConversation = true
-                    self.prepareConversationForPresentation(conversation: conversation)
-                })
-            })
-            */
         }
     }
     
@@ -447,12 +369,8 @@ extension UserProfileViewController: ProfileHeaderProtocol {
             let controller = ChatViewController()
             controller.conversation = conversation
             controller.partnerImage = image
-            controller.popUpMode = true
-            
-            let nav = UINavigationController(rootViewController: controller)
-            nav.navigationBar.isTranslucent = false
-            nav.navigationBar.tintColor = UIColor.black
-            self.present(nav, animated: true, completion: nil)
+            controller.partner = user
+            self.navigationController?.pushViewController(controller, animated: true)
         })
     }
     

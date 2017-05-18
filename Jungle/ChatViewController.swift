@@ -31,17 +31,6 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
     var conversation:Conversation!
     var partner:User!
-    {
-        didSet {
-            
-            self.title = partner.getUsername()
-//            if containerDelegate != nil {
-//                containerDelegate?.title = partner.getDisplayName()
-//            }
-
-        }
-    }
-    
     var partnerImage:UIImage?
     
 
@@ -77,9 +66,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
 
 
         conversation.delegate = self
-        if let user = conversation.getPartner() {
-            partner = user
-        }
+        title = partner.getUsername()
         
         downloadRef = UserService.ref.child("conversations/\(conversation.getKey())/messages")
         
