@@ -63,8 +63,7 @@ class Listeners {
         if !listeningToFollowers {
             listeningToFollowers = true
             let current_uid = mainStore.state.userState.uid
-            print("wacko: \(current_uid)")
-            let followersRef = ref.child("users/social/followers/\(current_uid)")
+            let followersRef = ref.child("social/followers/\(current_uid)")
             
             /** Listen for a Follower Added */
             followersRef.observe(.childAdded, with: { snapshot in
@@ -92,12 +91,13 @@ class Listeners {
         if !listeningToFollowing {
             listeningToFollowing = true
             let current_uid = mainStore.state.userState.uid
-            let followingRef = ref.child("users/social/following/\(current_uid)")
+            let followingRef = ref.child("/social/following/\(current_uid)")
             
             /**
              Listen for a Following Added
              */
             followingRef.observe(.childAdded, with: { snapshot in
+                print("\n\nFAMMM!!\n\n")
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(AddFollowing(uid: snapshot.key))
@@ -123,14 +123,14 @@ class Listeners {
     
     static func stopListeningToFollowers() {
         let current_uid = mainStore.state.userState.uid
-        ref.child("users/social/followers/\(current_uid)").removeAllObservers()
+        ref.child("social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowers = false
         print("STOP LISTENING TO FOLLOWERS")
     }
     
     static func stopListeningToFollowing() {
         let current_uid = mainStore.state.userState.uid
-        ref.child("users/social/followers/\(current_uid)").removeAllObservers()
+        ref.child("social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowing = false
         print("STOP LISTENING TO FOLLOWERING")
     }
@@ -146,16 +146,20 @@ class Listeners {
                     
                     let partner = snapshot.key
                     let pairKey = createUserIdPairKey(uid1: uid, uid2: partner)
-                    if let dict = snapshot.value as? [String:AnyObject] {
-                        let seen = dict["seen"] as! Bool
-                        let lastMessage = dict["text"] as! String
-                        let timestamp = dict["latest"] as! Double
-                        let date = Date(timeIntervalSince1970: timestamp/1000) as Date
-                        let listening = true
+                    if let dict = snapshot.value as? [String:AnyObject]{
                         
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
-                        mainStore.dispatch(ConversationAdded(conversation: conversation))
-                        
+                        if dict["blocked"] != nil {
+                            mainStore.dispatch(ConversationRemoved(conversationKey: pairKey))
+                        } else {
+                            let seen = dict["seen"] as! Bool
+                            let lastMessage = dict["text"] as! String
+                            let timestamp = dict["latest"] as! Double
+                            let date = Date(timeIntervalSince1970: timestamp/1000) as Date
+                            let listening = true
+                            
+                            let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                            mainStore.dispatch(ConversationAdded(conversation: conversation))
+                        }
                     }
                 }
             })
@@ -166,14 +170,18 @@ class Listeners {
                     let partner = snapshot.key
                     let pairKey = createUserIdPairKey(uid1: uid, uid2: partner)
                     if let dict = snapshot.value as? [String:AnyObject] {
-                        let seen = dict["seen"] as! Bool
-                        let lastMessage = dict["text"] as! String
-                        let timestamp = dict["latest"] as! Double
-                        let date = Date(timeIntervalSince1970: timestamp/1000) as Date
-                        let listening = true
-                        
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
-                        mainStore.dispatch(ConversationChanged(conversation: conversation))
+                        if dict["blocked"] != nil {
+                            mainStore.dispatch(ConversationRemoved(conversationKey: pairKey))
+                        } else {
+                            let seen = dict["seen"] as! Bool
+                            let lastMessage = dict["text"] as! String
+                            let timestamp = dict["latest"] as! Double
+                            let date = Date(timeIntervalSince1970: timestamp/1000) as Date
+                            let listening = true
+                            
+                            let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                            mainStore.dispatch(ConversationChanged(conversation: conversation))
+                        }
                         
                     }
                 }

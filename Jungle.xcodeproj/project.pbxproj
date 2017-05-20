@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
 		B012177B1EB0407F00F13F64 /* PostFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012177A1EB0407F00F13F64 /* PostFooterView.swift */; };
+		B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
 		B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */; };
 		B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */; };
@@ -134,6 +135,7 @@
 		24440022F614359253D5F062 /* Pods_Jungle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Jungle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
 		B012177A1EB0407F00F13F64 /* PostFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFooterView.swift; sourceTree = "<group>"; };
+		B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordRecoveryViewController.swift; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
 		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
@@ -478,6 +480,7 @@
 			children = (
 				B093FFAE1E790D5E00011B43 /* LoginViewController.swift */,
 				B0F894831E7BD41400E490C4 /* CreateAccountViewController.swift */,
+				B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */,
 				B0550D8A1E8E21C4007DAAAC /* TextFieldEffects */,
 			);
 			name = Login;
@@ -735,6 +738,7 @@
 				B0A6FCCF1EC2E066009933F8 /* HorizontalCollectionView.swift in Sources */,
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0550DA01E8E21C4007DAAAC /* YokoTextField.swift in Sources */,
+				B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */,
 				B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */,
 				B0B0E3BE1EC24EC7005DC0C1 /* HomeStateController.swift in Sources */,
 				B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */,

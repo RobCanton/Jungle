@@ -32,7 +32,12 @@ class UploadService {
     static func writeImageToFile(withKey key:String, image:UIImage) {
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_image-\(key).jpg"))
         if let jpgData = UIImageJPEGRepresentation(image, 1.0) {
-            try! jpgData.write(to: fileURL, options: [.atomic])
+            do {
+                try jpgData.write(to: fileURL, options: [.atomic])
+            } catch {
+                print("Error writing to disk")
+            }
+            
         }
     }
     
@@ -102,7 +107,7 @@ class UploadService {
             
             return fileURL
         } catch let error as Error{
-            print("ERROR: \(error.localizedDescription)")
+            //print("ERROR: \(error.localizedDescription)")
             return nil
         }
     }
@@ -413,7 +418,6 @@ class UploadService {
         let postRef = ref.child("uploads/meta/\(key)")
         
         postRef.observeSingleEvent(of: .value, with: { snapshot in
-            
             var item:StoryItem?
             if snapshot.exists() {
                 
@@ -451,14 +455,14 @@ class UploadService {
                         numViews = _views
                     }
                     
-                   
+                    
                     var likes = [String:Double]()
                     if snapshot.hasChild("likes") {
                         likes = dict["likes"] as! [String:Double]
                     }
                     
                     var comments = [Comment]()
-
+                    
                     comments.sort(by: { return $0 < $1 })
                     
                     var flagged = false
@@ -476,13 +480,17 @@ class UploadService {
                     if let hex = dict["color"] as? String {
                         color = hex
                     }
-
+                    
                     item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numViews: numViews, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: color)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
             return completion(item)
+        }, withCancel: { error in
+            print("Error reading Upload")
+            return completion(nil)
         })
+
     }
     
     

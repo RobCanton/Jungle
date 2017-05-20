@@ -944,7 +944,6 @@ extension MainViewController: View2ViewTransitionPresenting {
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
         
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
 
         if isPresenting {
             if storyType == .UserStory {
@@ -986,7 +985,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         if storyType == .PlaceStory {
             if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 places.collectionView!.reloadData()
-                places.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
                 places.collectionView!.layoutIfNeeded()
             }
         }
@@ -1014,7 +1013,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         if storyType == .ProfileStory {
             if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 profile.collectionView!.reloadData()
-                profile.collectionView!.scrollToItem(at: i, at: .centeredVertically, animated: false)
+                profile.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
                 profile.collectionView!.layoutIfNeeded()
             }
         }

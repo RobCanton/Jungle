@@ -137,7 +137,7 @@ class HomeStateController {
     
     fileprivate func fetchFollowing() {
         let uid = mainStore.state.userState.uid
-        followingRef = UserService.ref.child("users/social/following/\(uid)")
+        followingRef = UserService.ref.child("social/following/\(uid)")
         followingRef?.observeSingleEvent(of: .value, with: { snapshot in
             var following:[String] = [] // Include current user id to pull my story
             for child in snapshot.children {
@@ -302,10 +302,8 @@ class HomeStateController {
         
         var count = 0
         for (key, distance) in nearby {
-            print("LOOP -> \(key) : \(distance)")
             UserService.getUserStory(key, completion: { story in
                 if story != nil {
-                    print("DOWN -> \(key) : \(distance)")
                     story!.distance = distance
                     stories.append(story!)
                 }

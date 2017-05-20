@@ -175,7 +175,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
         let bannerHeight:CGFloat = 32
-        let collectionViewHeight:CGFloat = getItemSize().height * 0.72
+        let collectionViewHeight:CGFloat = getItemSize().height * 0.75
         
         var verticalHeight:CGFloat = 0
         

@@ -21,7 +21,6 @@ class PostHeaderView: UIView {
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var snapTimer: SnapTimerView!
     
-    
     override func awakeFromNib() {
         super.awakeFromNib()
         self.userImageView.cropToCircle()
@@ -59,8 +58,12 @@ class PostHeaderView: UIView {
         delegate?.showAuthor()
     }
     
-    func setupLocation(location:Location) {
-        locationTitle.text = location.getName()
+    func setupLocation(location:Location?) {
+        if location != nil {
+            locationTitle.text = location!.getName()
+        } else {
+            locationTitle.text = ""
+        }
     }
     
     

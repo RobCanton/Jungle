@@ -34,7 +34,7 @@ class PostFooterView: UIView {
         } else if count == 1 {
             commentsLabel.text = "\(count) COMMENT"
         } else {
-            commentsLabel.text = "\(count) COMMENTS"
+            commentsLabel.text = "\(getNumericShorthandString(count)) COMMENTS"
         }
     
     }

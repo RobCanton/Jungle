@@ -24,7 +24,7 @@ class NotificationService {
         
         let ref = FIRDatabase.database().reference()
         let notificationsRef = ref.child("notifications/\(key)")
-        notificationsRef.observe(.value, with: { snapshot in
+        notificationsRef.observeSingleEvent(of: .value, with: { snapshot in
             var notification:Notification?
             if snapshot.exists() {
                 let key             = snapshot.key
@@ -40,7 +40,11 @@ class NotificationService {
                 dataCache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             }
             return completion(notification, false)
+        }, withCancel: { error in
+            return completion(nil, false)
         })
+        
+        
     }
     
     static func markNotificationAsSeen(key:String) {

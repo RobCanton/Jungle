@@ -43,6 +43,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var presentingEmptyConversation = false
     var presentConversation:Conversation?
     var partnerImage:UIImage?
+    private(set) var isBlocked = false
+    private(set) var blockedRef:FIRDatabaseReference?
     
     var status:FollowingStatus = .None
     
@@ -121,26 +123,49 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             moreButton.tintColor = UIColor.black
             self.navigationItem.rightBarButtonItem = moreButton
         }
+        
+        let current_uid = mainStore.state.userState.uid
+        blockedRef?.removeAllObservers()
+        blockedRef = UserService.ref.child("social/blocked/\(current_uid)/\(uid)")
+        blockedRef?.observe(.value, with: { snapshot in
+            self.isBlocked = snapshot.exists()
+        })
     }
     
     
     func showOptions() {
         guard let user = self.user else { return }
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        sheet.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { _ in
-            let alert = UIAlertController(title: "Block \(user.getUsername())?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
-            
-            alert.addAction(UIAlertAction(title: "Block", style: .default, handler: { (action) -> Void in
-                UserService.blockUser(uid: user.getUserId(), completion: { success in })
+        
+        if isBlocked {
+            sheet.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { _ in
+                let alert = UIAlertController(title: "Unblock \(user.getUsername())?", message: "They will be able to view your profile and posts, and send you direct messages.", preferredStyle: .alert)
+                
+                alert.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { (action) -> Void in
+                    UserService.unblockUser(uid: user.getUserId(), completion: { success in })
+                }))
+                
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
+                
+                self.present(alert, animated: true, completion: nil)
+                
             }))
-            
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
-            
-            self.present(alert, animated: true, completion: nil)
-            
-        }))
+        } else {
+            sheet.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { _ in
+                let alert = UIAlertController(title: "Block \(user.getUsername())?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
+                
+                alert.addAction(UIAlertAction(title: "Block", style: .default, handler: { (action) -> Void in
+                    UserService.blockUser(uid: user.getUserId(), completion: { success in })
+                }))
+                
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
+                
+                self.present(alert, animated: true, completion: nil)
+                
+            }))
+        }
+        
         sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
             
             let reportSheet = UIAlertController(title: nil, message: "Why are you reporting \(user.getUsername())?", preferredStyle: .actionSheet)
@@ -196,6 +221,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         super.viewDidDisappear(animated)
         mainStore.unsubscribe(self)
         stopListeningToPosts()
+        blockedRef?.removeAllObservers()
     }
     
     func newState(state: AppState) {

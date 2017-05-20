@@ -205,15 +205,22 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let place = likelihoods[indexPath.row].place
-        upload.place = place
-        if let oldPath = selectedIndex {
-            let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
-            oldCell.toggleSelection(false)
-        }
+        
         
         let currentCell = tableView.cellForRow(at: indexPath) as! SendProfileViewCell
-        currentCell.toggleSelection(true)
-        selectedIndex =  indexPath
+        if currentCell.isActive {
+            currentCell.toggleSelection(false)
+            selectedIndex =  nil
+            upload.place = nil
+        } else {
+            if let oldPath = selectedIndex {
+                let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
+                oldCell.toggleSelection(false)
+            }
+            currentCell.toggleSelection(true)
+            selectedIndex =  indexPath
+            upload.place = place
+        }
     }
 
 }

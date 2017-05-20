@@ -61,7 +61,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
-        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.72
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.75
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)

@@ -31,9 +31,9 @@ class SendProfileViewCell: UITableViewCell {
     }
     
     var key = ""
-    var isActive = false
+    private(set) var isActive = false
     func toggleSelection(_ selected: Bool) {
-        
+        isActive = selected
         if selected {
             bgView.backgroundColor = UIColor.white
             circleButton.setImage(UIImage(named: "check"), for: .normal)
@@ -42,6 +42,7 @@ class SendProfileViewCell: UITableViewCell {
             circleButton.clipsToBounds = true
             circleButton.layer.borderColor = UIColor.clear.cgColor
         } else {
+            
             bgView.backgroundColor = UIColor.white
             circleButton.setImage(UIImage(), for: .normal)
             circleButton.layer.cornerRadius = circleButton.frame.width / 2

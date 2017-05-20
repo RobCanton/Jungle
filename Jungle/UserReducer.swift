@@ -8,7 +8,6 @@
 
 import ReSwift
 
-
 struct UserState {
     var isAuth: Bool = false
     var uid: String = ""

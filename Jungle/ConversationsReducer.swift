@@ -38,6 +38,16 @@ func findConversation(key:String) -> Conversation? {
     return nil
 }
 
+func findConversationIndex(key:String) -> Int? {
+    for i in 0..<mainStore.state.conversations.count {
+        let conversation = mainStore.state.conversations[i]
+        if conversation.getKey() == key {
+            return i
+        }
+    }
+    return nil
+}
+
 func userHasSeenMessage(seen:NSDate?, message:JSQMessage?) -> Bool{
     if seen != nil && message != nil {
         if message!.senderId == mainStore.state.userState.uid {
@@ -65,15 +75,29 @@ func ConversationsReducer(action: Action, state:[Conversation]?) -> [Conversatio
     switch action {
     case _ as ConversationAdded:
         let a = action as! ConversationAdded
-        state.append(a.conversation)
+        if findConversation(key: a.conversation.getKey()) == nil {
+            state.append(a.conversation)
+        }
         break
     case _ as ConversationChanged:
         let a = action as! ConversationChanged
+        var index:Int?
         for i in 0..<state.count {
             let conversation = state[i]
             if conversation.getKey() == a.conversation.getKey() {
-                state[i] = a.conversation
+                index = i
             }
+        }
+        if index != nil {
+            state[index!] = a.conversation
+        } else {
+            state.append(a.conversation)
+        }
+        break
+    case _ as ConversationRemoved:
+        let a = action as! ConversationRemoved
+        if let i = findConversationIndex(key: a.conversationKey) {
+            state.remove(at: i)
         }
         break
     case _ as MuteConversation:
@@ -107,6 +131,10 @@ struct ConversationOpened: Action {
 
 struct ConversationAdded: Action {
     let conversation:Conversation
+}
+
+struct ConversationRemoved: Action {
+    let conversationKey:String
 }
 
 struct ConversationChanged: Action {

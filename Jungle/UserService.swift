@@ -155,7 +155,9 @@ class UserService {
     }
     
     static func getUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
+        
         let storyRef = ref.child("stories/users/\(uid)")
+        
         storyRef.observeSingleEvent(of: .value, with: { snapshot in
             var story:UserStory?
             if let dict = snapshot.value as? [String:AnyObject] {
@@ -174,7 +176,9 @@ class UserService {
                 }
             }
             completion(story)
-
+        
+        }, withCancel: { error in
+            completion(nil)
         })
     }
     
@@ -257,13 +261,9 @@ class UserService {
     static func followUser(uid:String) {
         let current_uid = mainStore.state.userState.uid
         
-        let socialRef = ref.child("users/social")
-        let userRef = socialRef.child("followers/\(uid)/\(current_uid)")
-        userRef.setValue(false)
+        let socialRef = ref.child("social/following/\(current_uid)/\(uid)")
         
-        
-        let currentUserRef = socialRef.child("following/\(current_uid)/\(uid)")
-        currentUserRef.setValue(false, withCompletionBlock: {
+        socialRef.setValue(false, withCompletionBlock: {
             error, ref in
         })
         
@@ -275,10 +275,7 @@ class UserService {
     static func unfollowUser(uid:String) {
         let current_uid = mainStore.state.userState.uid
         
-        let userRef = ref.child("users/social/followers/\(uid)/\(current_uid)")
-        userRef.removeValue()
-        
-        let currentUserRef = ref.child("users/social/following/\(current_uid)/\(uid)")
+        let currentUserRef = ref.child("social/following/\(current_uid)/\(uid)")
         currentUserRef.removeValue()
         
     }
@@ -290,6 +287,7 @@ class UserService {
         let uid = mainStore.state.userState.uid
         
         let updateObject = [
+                "recipientId": conversation.getPartnerId(),
                 "senderId": uid as AnyObject,
                 "text": message as AnyObject,
                 "timestamp": [".sv":"timestamp"] as AnyObject
@@ -299,7 +297,7 @@ class UserService {
     }
 
     static func listenToFollowers(uid:String, completion:@escaping (_ followers:[String])->()) {
-        let followersRef = ref.child("users/social/followers/\(uid)")
+        let followersRef = ref.child("social/followers/\(uid)")
         followersRef.observe(.value, with: { snapshot in
             var _users = [String]()
             if snapshot.exists() {
@@ -314,7 +312,7 @@ class UserService {
     }
     
     static func listenToFollowing(uid:String, completion:@escaping (_ following:[String])->()) {
-        let followingRef = ref.child("users/social/following/\(uid)")
+        let followingRef = ref.child("social/following/\(uid)")
         followingRef.observe(.value, with: { snapshot in
             var _users = [String]()
             if snapshot.exists() {
@@ -330,13 +328,13 @@ class UserService {
     
     static func stopListeningToFollowers(uid:String) {
         if uid != mainStore.state.userState.uid {
-            ref.child("users/social/followers/\(uid)").removeAllObservers()
+            ref.child("social/followers/\(uid)").removeAllObservers()
         }
     }
     
     static func stopListeningToFollowing(uid:String) {
         if uid != mainStore.state.userState.uid {
-            ref.child("users/social/following/\(uid)").removeAllObservers()
+            ref.child("social/following/\(uid)").removeAllObservers()
         }
     }
     
@@ -364,12 +362,8 @@ class UserService {
     static func blockUser(uid:String, completion:@escaping (_ success:Bool)->()) {
         let current_uid = mainStore.state.userState.uid
         
-        let socialRef = ref.child("users/social")
-        let updateData = [
-            "blocked/\(current_uid)/\(uid)":true,
-            "blocked_by/\(uid)/\(current_uid)":true
-        ]
-        socialRef.updateChildValues(updateData, withCompletionBlock: { error, ref in
+        let socialRef = ref.child("social/blocked/\(current_uid)/\(uid)")
+        socialRef.setValue(true, withCompletionBlock: { error, ref in
             if error == nil {
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User blocked!")
                 return completion(true)
@@ -378,6 +372,22 @@ class UserService {
                 return completion(false)
             }
         })
+    }
+    
+    static func unblockUser(uid:String, completion:@escaping (_ success:Bool)->()) {
+        let current_uid = mainStore.state.userState.uid
+        
+        let socialRef = ref.child("social/blocked/\(current_uid)/\(uid)")
+        socialRef.removeValue(completionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User unblocked!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to unblock user.")
+                return completion(false)
+            }
+        })
+        
     }
     
 }

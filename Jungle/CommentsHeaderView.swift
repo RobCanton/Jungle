@@ -99,12 +99,13 @@ class CommentsHeaderView: UIView {
     }
     
     func setViewsLabel(count:Int) {
-        self.viewsLabel.text = "\(count)"
+        self.viewsLabel.text = getNumericShorthandString(count)
     }
     
     
     func setCommentsLabel(count:Int) {
-        self.commentsLabel.text = "\(count)"
+        
+        self.commentsLabel.text = getNumericShorthandString(count)
     }
     
     

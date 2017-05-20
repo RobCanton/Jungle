@@ -186,10 +186,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         if let locationKey = item.getLocationKey() {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
-                if location != nil {
-                    self.headerView.setupLocation(location: location!)
-                }
+                self.headerView.setupLocation(location: location)
             })
+        } else {
+            self.headerView.setupLocation(location: nil)
         }
         
         UploadService.addView(post: item)

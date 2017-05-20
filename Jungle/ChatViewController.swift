@@ -74,10 +74,13 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
             if !snapshot.exists() {
                 self.stopActivityIndicator()
             }
+            self.downloadMessages()
+        }, withCancel: { error in
+            self.stopActivityIndicator()
+            self.downloadMessages()
         })
-
         self.setup()
-        self.downloadMessages()
+        
         
         NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name:NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name:NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
@@ -99,7 +102,41 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     }
     
     func showUserOptions() {
-        guard conversation.getPartner() != nil else { return }
+
+        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        if !popUpMode {
+            sheet.addAction(UIAlertAction(title: "View User Profile", style: .default, handler: { _ in
+                let controller = UserProfileViewController()
+                controller.uid = self.conversation.getPartnerId()
+                self.navigationController?.pushViewController(controller, animated: true)
+            }))
+        }
+        
+        sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
+            let reportSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            reportSheet.addAction(UIAlertAction(title: "Inappropriate Message(s)", style: .destructive, handler: { success in
+                UserService.reportUser(user: self.partner, type: .InappropriateMessages, completion: { success in
+                    
+                })
+            }))
+            
+            reportSheet.addAction(UIAlertAction(title: "Spam", style: .destructive, handler: { _ in
+                UserService.reportUser(user: self.partner, type: .SpamMessages, completion: { success in
+                    
+                })
+            }))
+            
+            reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            self.present(reportSheet, animated: true, completion: nil)
+            
+            
+        }))
+        
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        self.present(sheet, animated: true, completion: nil)
     }
     
     
@@ -116,7 +153,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     func stopActivityIndicator() {
         if settingUp {
             settingUp = false
-            print("Swtich activity indicator")
+            print("Switch activity indicator")
             DispatchQueue.main.async {
                 self.activityIndicator.stopAnimating()
                 self.refreshControl = UIRefreshControl()
@@ -236,7 +273,18 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     }
     
     
-    
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapAvatarImageView avatarImageView: UIImageView!, at indexPath: IndexPath!) {
+        let data = messages[indexPath.row]
+        switch(data.senderId) {
+        case self.senderId:
+            break
+        default:
+            let controller = UserProfileViewController()
+            controller.uid = partner.getUserId()
+            self.navigationController?.pushViewController(controller, animated: true)
+            break
+        }
+    }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
         let data = messages[indexPath.row]

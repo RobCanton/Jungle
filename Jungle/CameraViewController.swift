@@ -280,6 +280,13 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let filePath = documentsURL.appendingPathComponent("temp.mp4")//documentsURL.URLByAppendingPathComponent("temp.mp4")
         
+//        do {
+//            try FileManager.default.removeItem(at: filePath)
+//        }
+//        catch {
+//            
+//        }
+        
         // Do recording and save the output to the `filePath`
         videoFileOutput!.startRecording(toOutputFileURL: filePath, recordingDelegate: recordingDelegate)
     }
