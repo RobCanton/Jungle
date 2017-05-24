@@ -28,30 +28,39 @@ class PostHeaderView: UIView {
     }
     
     weak var delegate:PostHeaderProtocol?
-    
+    var tap:UITapGestureRecognizer?
+    var tap2:UITapGestureRecognizer?
     func setup(withUid uid:String, date: Date?, _delegate:PostHeaderProtocol?) {
         delegate = _delegate
-        
+        clean()
         UserService.getUser(uid, completion: { _user in
             guard let user = _user else { return }
-        
-            self.userImageView.image = nil
-            self.userImageView.loadImageAsync(user.getImageUrl(), completion: { _ in })
-            self.usernameLabel.text = user.getUsername()
+            self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
+            self.usernameLabel.text = user.username
             if date != nil {
                 self.timeLabel.text = date!.timeStringSinceNow()
             }
             
         })
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
+        tap = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.userImageView.isUserInteractionEnabled = true
-        self.userImageView.addGestureRecognizer(tap)
-        let tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
+        self.userImageView.addGestureRecognizer(tap!)
+        tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.usernameLabel.isUserInteractionEnabled = true
-        self.usernameLabel.addGestureRecognizer(tap2)
-        
-        
+        self.usernameLabel.addGestureRecognizer(tap2!)
+    }
+    
+    func clean() {
+        self.userImageView.image = nil
+        self.usernameLabel.text = ""
+        self.timeLabel.text = ""
+        if tap != nil {
+            self.userImageView.removeGestureRecognizer(tap!)
+        }
+        if tap2 != nil {
+            self.usernameLabel.removeGestureRecognizer(tap2!)
+        }
     }
     
     func userTapped(tap:UITapGestureRecognizer) {
@@ -60,7 +69,7 @@ class PostHeaderView: UIView {
     
     func setupLocation(location:Location?) {
         if location != nil {
-            locationTitle.text = location!.getName()
+            locationTitle.text = location!.name
         } else {
             locationTitle.text = ""
         }

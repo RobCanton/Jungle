@@ -6,8 +6,13 @@
 //  Copyright © 2016 Robert Canton. All rights reserved.
 //
 
+import Firebase
 import ReSwift
 import UIKit
+
+enum UsersListType {
+    case Followers, Following, None
+}
 
 class UsersListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
     
@@ -20,6 +25,7 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     
     let cellIdentifier = "userCell"
     var user:User?
+    var type = UsersListType.None
     
     var userIds = [String]()
     {
@@ -76,13 +82,42 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
         
         if tempIds.count > 0 {
             userIds = tempIds
+        } else if type == .Followers && uid != nil {
+            title = "Followers"
+            let ref = FIRDatabase.database().reference().child("social/followers/\(uid!)")
+            ref.observeSingleEvent(of: .value, with: { snapshot in
+                var tempIds = [String]()
+                for child in snapshot.children {
+                    let childSnap = child as! FIRDataSnapshot
+                    tempIds.append(childSnap.key)
+                }
+                self.userIds = tempIds
+                self.tableView.reloadData()
+                
+            }, withCancel: { error in
+                print("Unable to retrieve followers")
+            })
+        } else if type == .Following && uid != nil {
+            title = "Following"
+            let ref = FIRDatabase.database().reference().child("social/following/\(uid!)")
+            ref.observeSingleEvent(of: .value, with: { snapshot in
+                var tempIds = [String]()
+                for child in snapshot.children {
+                    let childSnap = child as! FIRDataSnapshot
+                    tempIds.append(childSnap.key)
+                }
+                self.userIds = tempIds
+                self.tableView.reloadData()
+                
+            }, withCancel: { error in
+                print("Unable to retrieve followers")
+            })
         }
         
-        print("ids: \(userIds)")
     }
     
     func unfollowHandler(user:User) {
-        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
         
         let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
         }
@@ -91,7 +126,7 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
         let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
         { action -> Void in
             
-            UserService.unfollowUser(uid: user.getUserId())
+            UserService.unfollowUser(uid: user.uid)
         }
         actionSheet.addAction(saveActionButton)
         

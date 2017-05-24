@@ -8,8 +8,12 @@
 
 import Foundation
 import UIKit
-import ReSwift
-class MainTabBarController: UITabBarController, StoreSubscriber{
+
+class MainTabBarController: UITabBarController, MessageServiceProtocol, NotificationServiceProtocol{
+    
+    let identifier = "MainTabBarController"
+    weak var message_service:MessageService?
+    weak var notification_service:NotificationService?
     
     
     override func viewDidLoad() {
@@ -35,36 +39,38 @@ class MainTabBarController: UITabBarController, StoreSubscriber{
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        mainStore.subscribe(self)
+        message_service?.subscribe(identifier, subscriber: self)
+        notification_service?.subscribe(identifier, subscriber: self)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        mainStore.unsubscribe(self)
+        message_service?.unsubscribe(identifier)
+        notification_service?.unsubscribe(identifier)
     }
     
-    func newState(state: AppState) {
+    func conversationsUpdated(_ conversations: [Conversation]) {
+        var unseenMessages = 0
+        for conversation in conversations {
+            if !conversation.getSeen() {
+                unseenMessages += 1
+            }
+        }
         
+        tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
+    }
+    
+    func notificationsUpdated(_ notificationsDict: [String : Bool]) {
         var unseenNotifications = 0
-        for (_, seen) in state.notifications {
+        for (_, seen) in notificationsDict {
             if !seen {
                 unseenNotifications += 1
             }
         }
         
         tabBar.items?[3].badgeValue = unseenNotifications > 0 ? "\(unseenNotifications)" : nil
-        
-        var unseenMessages = 0
-        for conversation in state.conversations {
-            if !conversation.getSeen() {
-                unseenMessages += 1
-            }
-        }
-
-        tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
-        
-        
     }
+    
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         if let _ = viewController as? DummyViewController {

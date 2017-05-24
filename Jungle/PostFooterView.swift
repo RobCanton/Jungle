@@ -56,4 +56,8 @@ class PostFooterView: UIView {
             self.setCommentsLabelToCount(item.getNumComments())
         })
     }
+    
+    func clean() {
+        commentsLabel.text = "COMMENT"
+    }
 }

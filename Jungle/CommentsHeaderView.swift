@@ -80,9 +80,6 @@ class CommentsHeaderView: UIView {
         }
     }
 
-    @IBAction func handleClose(_ sender: Any) {
-        delegate?.dismissFromHeader()
-    }
     
     @IBAction func handleMore(_ sender: Any) {
         delegate?.actionHandler()
@@ -93,8 +90,10 @@ class CommentsHeaderView: UIView {
         
         if uid == mainStore.state.userState.uid {
             rightButton.setImage(UIImage(named:"trash_2"), for: .normal)
+            //rightButton.imageEdgeInsets = UIEdgeInsets(top: 12.0, left: 12.0, bottom: 12.0, right: 12.0)
         } else {
-            rightButton.setImage(UIImage(named:"flag"), for: .normal)
+            rightButton.setImage(UIImage(named:"report"), for: .normal)
+            //rightButton.imageEdgeInsets = UIEdgeInsets(top: 14.0, left: 14.0, bottom: 14.0, right: 14.0)
         }
     }
     

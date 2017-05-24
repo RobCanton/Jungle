@@ -37,13 +37,9 @@ class CommentCell: UITableViewCell {
         authorLabel.addGestureRecognizer(usernameTap)
         authorLabel.isUserInteractionEnabled = true
         
-        //authorLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
-        //commentLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
-        
         commentLabel.enabledTypes = [.mention]
         commentLabel.customColor[ActiveType.mention] = accentColor
         commentLabel.handleMentionTap { mention in
-            print("MENTIONED: \(mention)")
             
             let controller = UserProfileViewController()
             controller.username = mention
@@ -69,6 +65,12 @@ class CommentCell: UITableViewCell {
     
     func setContent(comment:Comment) {
         
+        self.authorLabel.text = ""
+        self.commentLabel.text = ""
+        self.commentLabel.sizeToFit()
+        self.userImage.image = nil
+        self.timeLabel.text = ""
+        
         check += 1
         
         self.comment = comment
@@ -79,10 +81,10 @@ class CommentCell: UITableViewCell {
         
         UserService.getUser(comment.getAuthor(), withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
-                self.authorLabel.text = user!.getUsername()
+                self.authorLabel.text = user!.username
                 self.commentLabel.text = comment.getText()
                 self.commentLabel.sizeToFit()
-                self.userImage.loadImageAsync(user!.getImageUrl(), completion: nil)
+                self.userImage.loadImageAsync(user!.imageURL, completion: nil)
                 self.timeLabel.text = comment.getDate().timeStringSinceNow()
             }
             

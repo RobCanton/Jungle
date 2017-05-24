@@ -72,7 +72,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         LocationService.sharedInstance.getLocationInfo(story.getLocationKey(), completion: { location in
             if location != nil {
                 self.location = location
-                self.nameLabel.text = location!.getName()
+                self.nameLabel.text = location!.name
             }
         })
         

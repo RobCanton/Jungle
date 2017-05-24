@@ -66,17 +66,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UITabBarItem.appearance().badgeColor = UIColor(red: 1.0, green: 117/255, blue: 125/255, alpha: 1.0)
         }
         
+//        do {
+//            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: .mixWithOthers)
+//            //print("AVAudioSession Category Playback OK")
+//            do {
+//                try AVAudioSession.sharedInstance().setActive(true)
+//                //print("AVAudioSession is Active")
+//            } catch _ as NSError {
+//                //print(error.localizedDescription)
+//            }
+//        } catch _ as NSError {
+//            //print(error.localizedDescription)
+//        }
+        
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: .mixWithOthers)
-            //print("AVAudioSession Category Playback OK")
-            do {
-                try AVAudioSession.sharedInstance().setActive(true)
-                //print("AVAudioSession is Active")
-            } catch _ as NSError {
-                //print(error.localizedDescription)
-            }
-        } catch _ as NSError {
-            //print(error.localizedDescription)
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord,with:
+                [AVAudioSessionCategoryOptions.mixWithOthers,
+                 AVAudioSessionCategoryOptions.defaultToSpeaker])
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+        } catch {
+            print("error")
         }
         
         if #available(iOS 10.0, *) {

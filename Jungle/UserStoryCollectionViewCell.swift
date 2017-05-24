@@ -50,7 +50,7 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
                 self.usernameLabel.text = "Me"
                 self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightBold)
             } else {
-                self.usernameLabel.text = user.getUsername()
+                self.usernameLabel.text = user.username
                 self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightRegular)
             }
             
@@ -64,7 +64,7 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
         UserService.getUser(uid, completion: { user in
             
             if user != nil  {
-                loadImageUsingCacheWithURL(user!.getImageUrl(), completion: { image, fromCache in
+                loadImageUsingCacheWithURL(user!.imageURL, completion: { image, fromCache in
                     completion(check, user!, image, fromCache)
                 })
             }

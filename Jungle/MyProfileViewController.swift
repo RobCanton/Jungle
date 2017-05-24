@@ -204,28 +204,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
             let c = controller.viewControllers[0] as! EditProfileViewController
             c.delegate = self
             self.present(controller, animated: true, completion: nil)
-        } else {
-            guard let partner_uid = uid else { return }
-            if current_uid == partner_uid { return }
-            if let conversation = checkForExistingConversation(partner_uid: current_uid) {
-                prepareConversationForPresentation(conversation: conversation)
-            } else {
-                
-                let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
-                let ref = UserService.ref.child("conversations/\(pairKey)")
-                ref.child(uid).setValue(["seen": [".sv":"timestamp"]], withCompletionBlock: { error, ref in
-                    
-                    let recipientUserRef = UserService.ref.child("users/conversations/\(partner_uid)")
-                    recipientUserRef.child(current_uid).setValue(true)
-                    
-                    let currentUserRef = UserService.ref.child("users/conversations/\(current_uid)")
-                    currentUserRef.child(partner_uid).setValue(true, withCompletionBlock: { error, ref in
-                        let conversation = Conversation(key: pairKey, partner_uid: partner_uid, seen: true, date: Date(), lastMessage: "", listening: true)
-                        self.presentingEmptyConversation = true
-                        self.prepareConversationForPresentation(conversation: conversation)
-                    })
-                })
-            }
         }
     }
     
@@ -235,30 +213,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         self.collectionView.reloadData()
     }
     
-    var presentConversation:Conversation?
-    var partnerImage:UIImage?
-    
-    func prepareConversationForPresentation(conversation:Conversation) {
-        conversation.listen()
-        UserService.getUser(uid, completion: { user in
-            if user != nil {
-                self.presentConversation(conversation: conversation, user: user!)
-            }
-        })
-    }
-    
-    func presentConversation(conversation:Conversation, user:User) {
-        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
-            let controller = ChatViewController()
-            controller.conversation = conversation
-            controller.partnerImage = image
-            controller.popUpMode = true
-            let nav = UINavigationController(rootViewController: controller)
-            nav.navigationBar.isTranslucent = false
-            nav.navigationBar.tintColor = UIColor.black
-            self.present(nav, animated: true, completion: nil)
-        })
-    }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
@@ -274,7 +228,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
         
         if user != nil {
-            let bio = user!.getBio()
+            let bio = user!.bio
             if bio != "" {
                 var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightRegular))
                 let height2 = size.height + staticHeight + 8  // +8 for some bio padding
@@ -304,7 +258,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         
         self.selectedIndexPath = indexPath
         
-        globalMainRef?.presentProfileStory(posts: posts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        globalMainInterfaceProtocol?.presentProfileStory(posts: posts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         
         collectionView.deselectItem(at: indexPath, animated: true)
     }

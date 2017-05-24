@@ -28,7 +28,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var masterNav:UINavigationController?
     var sortMode:SortedBy = .Recent
-    var gps_service:GPSService!
+    weak var gps_service:GPSService!
     
     var tabHeader:PlacesTabHeader!
     
@@ -211,7 +211,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var shouldDelayLoad = false
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        globalMainInterfaceProtocol?.fetchAllStories()
+        //globalMainInterfaceProtocol?.fetchAllStories()
         
         
     }
@@ -276,7 +276,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             let story = state.popularPlaceStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainRef?.presentPlaceStory(locationStories: state.popularPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.popularPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }
@@ -285,7 +285,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             let story = state.nearbyPlaceStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainRef?.presentPlaceStory(locationStories: state.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }
@@ -294,7 +294,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             let story = state.recentPlaceStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainRef?.presentPlaceStory(locationStories: state.recentPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.recentPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }

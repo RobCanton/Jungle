@@ -21,13 +21,13 @@ enum NotificationType:String {
 
 class Notification: NSObject {
     
-    fileprivate var key:String                    // Key in database
-    fileprivate var type:NotificationType
-    fileprivate var date:Date
-    fileprivate var sender:String
-    fileprivate var postKey:String?
-    fileprivate var text:String?
-    fileprivate var numCommenters:Int?
+    private(set) var key:String                    // Key in database
+    private(set) var type:NotificationType
+    private(set) var date:Date
+    private(set) var sender:String
+    private(set) var postKey:String?
+    private(set) var text:String?
+    private(set) var numCommenters:Int?
     
     init(key:String, type:String, date:Date, sender:String, postKey:String?, text:String?, numCommenters:Int?)
     {
@@ -85,35 +85,7 @@ class Notification: NSObject {
         coder.encode(postKey, forKey: "text")
         coder.encode(postKey, forKey: "numCommenters")
     }
-    
-    func getKey() -> String {
-        return key
     }
-    
-    func getType() -> NotificationType {
-        return type
-    }
-    
-    func getDate() -> Date {
-        return date
-    }
-    
-    func getSender() -> String {
-        return sender
-    }
-    
-    func getPostKey() -> String? {
-        return postKey
-    }
-    
-    func getText() -> String? {
-        return text
-    }
-    
-    func getNumCommenters() -> Int? {
-        return numCommenters
-    }
-}
 
 func < (lhs: Notification, rhs: Notification) -> Bool {
     return lhs.date.compare(rhs.date) == .orderedAscending

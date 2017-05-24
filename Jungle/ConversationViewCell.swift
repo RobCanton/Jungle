@@ -33,21 +33,6 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
                     self.userLoaded(user: user)
                 }
             })
-            
-            let lastMessage = conversation!.getLastMessage()
-            messageLabel.text = lastMessage
-            timeLabel.text = conversation!.getDate().timeStringSinceNow()
-            
-            
-            if !conversation!.getSeen() {
-                usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
-                unreadDot.isHidden = false
-            } else {
-
-                usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
-                unreadDot.isHidden = true
-            }
-            
         }
     }
     
@@ -58,8 +43,22 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
         userImageView.layer.cornerRadius = userImageView.frame.width/2
         userImageView.contentMode = .scaleAspectFill
             
-        userImageView.loadImageAsync(user.getImageUrl(), completion: nil)
-        usernameLabel.text = user.getUsername()
+        userImageView.loadImageAsync(user.imageURL, completion: nil)
+        usernameLabel.text = user.username
+        
+        let lastMessage = conversation!.getLastMessage()
+        messageLabel.text = lastMessage
+        timeLabel.text = conversation!.getDate().timeStringSinceNow()
+        
+        
+        if !conversation!.getSeen() {
+            usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
+            unreadDot.isHidden = false
+        } else {
+            
+            usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+            unreadDot.isHidden = true
+        }
     }
     
     

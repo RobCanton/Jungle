@@ -10,7 +10,7 @@ import Foundation
 import AVFoundation
 import UIKit
 
-protocol CameraDelegate {
+protocol CameraDelegate:class {
     func showCameraOptions()
     func hideCameraOptions()
     func showEditOptions()
@@ -36,9 +36,9 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     var flashMode:FlashMode = .Off
     var cameraMode:CameraMode = .Back
     
-    var delegate: CameraDelegate?
+    weak var delegate: CameraDelegate?
     
-    var recordBtnRef: CameraButton!
+    weak var recordBtnRef: CameraButton!
     
     var progressTimer : Timer!
     var progress : CGFloat! = 0
@@ -260,18 +260,27 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         }
     }
     
+    var audioInput: AVCaptureDeviceInput?
+    
+    
     func recordVideo() {
-        let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
-        do {
-            
-            let audioInput: AVCaptureDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-            _ = self.captureSession!.canAddInput(audioInput)
-            if self.captureSession!.canAddInput(audioInput) {
-               self.captureSession!.addInput(audioInput)
-            }
-        } catch {
-            print("Unable to add audio device to the recording.")
-        }
+        
+//        // Add audio device
+//        let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
+//        do {
+//            
+//            audioInput = try AVCaptureDeviceInput(device: audioDevice)
+//            if self.captureSession!.canAddInput(audioInput!) {
+//                print("Added audio tings")
+//                self.captureSession!.beginConfiguration()
+//                self.captureSession!.addInput(audioInput!)
+//                self.captureSession!.commitConfiguration()
+//            } else {
+//                print("Dont need to add audio tings")
+//            }
+//        } catch {
+//            print("Unable to add audio device to the recording.")
+//        }
         cameraState = .Recording
         progressTimer = Timer.scheduledTimer(timeInterval: 0.025, target: self, selector: #selector(updateProgress), userInfo: nil, repeats: true)
         
@@ -279,13 +288,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let filePath = documentsURL.appendingPathComponent("temp.mp4")//documentsURL.URLByAppendingPathComponent("temp.mp4")
-        
-//        do {
-//            try FileManager.default.removeItem(at: filePath)
-//        }
-//        catch {
-//            
-//        }
         
         // Do recording and save the output to the `filePath`
         videoFileOutput!.startRecording(toOutputFileURL: filePath, recordingDelegate: recordingDelegate)
@@ -301,13 +303,24 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         videoPlayer.replaceCurrentItem(with: item)
         playerLayer = AVPlayerLayer(player: videoPlayer)
         
-        playerLayer!.frame = self.view.bounds
-        self.videoCaptureView.layer.addSublayer(playerLayer!)
+        playerLayer!.frame = view.bounds
+        videoCaptureView.layer.addSublayer(playerLayer!)
         
         playerLayer!.player?.play()
         playerLayer!.player?.actionAtItemEnd = .none
+        
+        // Remove audio device
+        captureSession!.beginConfiguration()
+        if audioInput != nil {
+            captureSession!.removeInput(audioInput!)
+        }
+        captureSession!.commitConfiguration()
+        print("Audio input removed")
+        
         cameraState = .VideoTaken
         loopVideo()
+        
+        
         return
     }
     
@@ -326,6 +339,14 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     func endLoopVideo() {
         NotificationCenter.default.removeObserver(NSNotification.Name.AVPlayerItemDidPlayToEndTime, name: nil, object: nil)
     }
+    
+    func pauseVideo() {
+        self.playerLayer?.player?.pause()
+    }
+    
+    func playVideo() {
+        self.playerLayer?.player?.play()
+    }
    
     
     func switchCamera(sender:UIButton!) {
@@ -341,16 +362,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     }
     
     var pivotPinchScale:CGFloat!
-    
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        //        if gestureRecognizer === pinchGesture {
-        //            let loc = touch.location(in: view)
-        //            if loc.y > recordBtn.frame.origin.y - 8 {
-        //                return false
-        //            }
-        //        }
-        return true
-    }
     
     func handlePinchGesture(gesture:UIPinchGestureRecognizer) {
         

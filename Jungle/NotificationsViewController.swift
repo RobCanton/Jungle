@@ -10,11 +10,16 @@ import Foundation
 import ReSwift
 import UIKit
 
-class NotificationsViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
+class NotificationsViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber, NotificationServiceProtocol {
     
-    let cellIdentifier = "notificationCell"
-    let followCellIdentifier = "followCell"
-    var notifications = [Notification]()
+    private let identifier = "NotificationsViewController"
+    
+    private let cellIdentifier = "notificationCell"
+    private let followCellIdentifier = "followCell"
+    private var notifications = [Notification]()
+    
+    
+    weak var notification_service:NotificationService?
     
     var tableView:UITableView!
     
@@ -41,12 +46,12 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.tableFooterView = UIView()
+        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 68))
         tableView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
-        getAllNotifications()
+        //getAllNotifications()
         tableView.reloadData()
     }
     
@@ -54,39 +59,41 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         mainStore.subscribe(self)
-        mainStore.dispatch(MarkAllNotifcationsAsSeen())
+        notification_service?.subscribe(identifier, subscriber: self)
+        notification_service?.markAllNotificationsAsSeen()
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         mainStore.unsubscribe(self)
+        notification_service?.unsubscribe(identifier)
     }
     
-    func newState(state: AppState) {
-        getAllNotifications()
+    func notificationsUpdated(_ notificationsDict: [String : Bool]) {
+        guard let service = notification_service else { return }
         
-    }
-    
-    func getAllNotifications() {
-        let notificationsDict = mainStore.state.notifications
-        print("GET ALL NOTIFICATIONS: \(notificationsDict.count)")
         var tempNotifications = [Notification]()
         var count = 0
         for (key, _) in notificationsDict {
-            NotificationService.getNotification(key, completion: { notification, seen in
+            service.getNotification(key, completion: { notification, seen in
                 if notification != nil {
                     tempNotifications.append(notification!)
-                    print("Got notification")
                 }
                 count += 1
                 if count >= notificationsDict.count {
-                    print("Got all notification")
                     count = -1
                     self.notifications = tempNotifications.sorted(by: { $0 > $1 })
                     self.tableView.reloadData()
                 }
             })
         }
+
+    }
+    
+    
+    func newState(state: AppState) {
+        self.tableView.reloadData()
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -103,7 +110,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let notification = notifications[indexPath.row]
-        let type = notification.getType()
+        let type = notification.type
         if type == .comment || type == .comment_also || type == .comment_to_sub || type == .like || type == .mention {
             let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! NotificationTableViewCell
             cell.setup(withNotification: notifications[indexPath.row])
@@ -124,16 +131,16 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let notification = notifications[indexPath.row]
-        let type = notification.getType()
+        let type = notification.type
         if type == .comment || type == .comment_also || type == .comment_to_sub || type == .like || type == .mention {
             let cell = tableView.cellForRow(at: indexPath) as! NotificationTableViewCell
             
             if let item = cell.post {
                 let i = IndexPath(item: 0, section: 0)
-                globalMainRef?.presentNotificationPost(post: item, destinationIndexPath: i, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentNotificationPost(post: item, destinationIndexPath: i, initialIndexPath: indexPath)
             }
         } else if type == .follow {
-            showUser(notification.getSender())
+            showUser(notification.sender)
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -150,7 +157,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     }
     
     func unfollowHandler(user:User) {
-        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
         
         let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
         }
@@ -159,7 +166,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
         { action -> Void in
             
-            UserService.unfollowUser(uid: user.getUserId())
+            UserService.unfollowUser(uid: user.uid)
         }
         actionSheet.addAction(saveActionButton)
         

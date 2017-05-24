@@ -21,7 +21,7 @@ let excludedTypes:[String] = [
 
 class Service: NSObject {
     
-    fileprivate var subscribers: [String:ServiceProtocol]
+    var subscribers: [String:ServiceProtocol]
     
     init(_ subscribers:[String:ServiceProtocol]) {
         self.subscribers = subscribers
@@ -33,6 +33,10 @@ class Service: NSObject {
     
     func unsubscribe(_ name:String) {
         self.subscribers[name] = nil
+    }
+    
+    func clearSubscribers() {
+        subscribers = [:]
     }
 
 }

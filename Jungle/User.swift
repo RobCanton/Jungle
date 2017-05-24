@@ -60,10 +60,10 @@ func == (lhs: Comment, rhs: Comment) -> Bool {
 }
 
 class User:NSObject, NSCoding {
-    fileprivate var uid: String
-    fileprivate var username: String
-    fileprivate var imageURL: String
-    fileprivate var bio: String
+    private(set) var uid: String
+    private(set) var username: String
+    private(set) var imageURL: String
+    private(set) var bio: String
     private(set) var followers:Int
     private(set) var following:Int
     
@@ -97,25 +97,5 @@ class User:NSObject, NSCoding {
         coder.encode(followers, forKey: "followers")
         coder.encode(following, forKey: "following")
     }
-    
 
-    
-    func getUserId() -> String {
-        return uid
-    }
-    
-    func getUsername() -> String {
-        return username
-    }
-    
-
-    func getImageUrl() -> String {
-        return imageURL
-    }
-    
-    func getBio() -> String {
-        return bio
-    }
-    
-    
 }

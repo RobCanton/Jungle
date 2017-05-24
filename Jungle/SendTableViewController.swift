@@ -32,6 +32,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var cameraViewRef:CameraViewController?
     var navHeight:CGFloat!
     
+    deinit {
+        print("Deinit >> SendTableViewController")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

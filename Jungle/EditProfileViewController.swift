@@ -58,12 +58,12 @@ class EditProfileViewController: UITableViewController {
         
 
         if let user = mainStore.state.userState.user {
-            profileImageView.loadImageAsync(user.getImageUrl(), completion: { _ in
+            profileImageView.loadImageAsync(user.imageURL, completion: { _ in
                 self.imageTap = UITapGestureRecognizer(target: self, action: #selector(self.showProfilePhotoMessagesView))
                 self.headerView.isUserInteractionEnabled = true
                 self.headerView.addGestureRecognizer(self.imageTap)
             })
-            bioTextView.text = user.getBio()
+            bioTextView.text = user.bio
         }
         
         bioTextView.delegate = self

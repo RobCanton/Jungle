@@ -46,8 +46,8 @@ class UserViewCell: UITableViewCell {
         UserService.getUser(uid, completion: { user in
             if user != nil {
                 self.user = user!
-                self.contentImageView.loadImageAsync(user!.getImageUrl(), completion: nil)
-                self.usernameLabel.text = user!.getUsername()      
+                self.contentImageView.loadImageAsync(user!.imageURL, completion: nil)
+                self.usernameLabel.text = user!.username
             }
         })
         
@@ -127,9 +127,9 @@ class UserViewCell: UITableViewCell {
             unfollowHandler?(user)
             break
         case .None:
-            if mainStore.state.socialState.blockedBy.contains(user.getUserId()) { return }
+            if mainStore.state.socialState.blockedBy.contains(user.uid) { return }
             setUserStatus(status: .Requested)
-            UserService.followUser(uid: user.getUserId())
+            UserService.followUser(uid: user.uid)
             followHandler?()
             break
         case .Requested:

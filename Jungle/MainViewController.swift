@@ -12,8 +12,7 @@ import CoreLocation
 import View2ViewTransition
 import GoogleMaps
 import GooglePlaces
-
-var globalMainRef:MainViewController?
+import ReSwift
 
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
@@ -23,6 +22,12 @@ protocol MainInterfaceProtocol {
     func presentHomeScreen(animated: Bool)
     func presentCamera()
     func fetchAllStories()
+    func statusBar(hide: Bool, animated:Bool)
+    func presentPlaceStory(locationStories:[LocationStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath, hasMyStory:Bool)
+    func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
 }
 
 extension MainViewController: MainInterfaceProtocol {
@@ -52,9 +57,11 @@ extension MainViewController: MainInterfaceProtocol {
     }
 }
 
-class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecognizerDelegate {
+class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegate, UIGestureRecognizerDelegate {
 
     fileprivate var gps_service:GPSService!
+    fileprivate var message_service:MessageService!
+    fileprivate var notification_service:NotificationService!
     
     fileprivate var scrollView:UIScrollView!
     
@@ -66,6 +73,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     fileprivate var mainTabBar:MainTabBarController!
     
     fileprivate var places:HomeViewController!
+    fileprivate var messages:MessagesViewController!
     fileprivate var notifications:NotificationsViewController!
     fileprivate var profile:MyProfileViewController!
     
@@ -148,10 +156,14 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
     
     fileprivate var textViewPanGesture:UIPanGestureRecognizer?
     
+    deinit {
+        print("Deinit >> MainViewController")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         globalMainInterfaceProtocol = self
-        globalMainRef = self
+        
         let screenBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
         
@@ -169,14 +181,12 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         cameraView.recordBtnRef = recordBtn
         cameraView.delegate = self
         cameraView.view.frame = self.view.bounds
-        self.addChildViewController(cameraView)
+        addChildViewController(cameraView)
         view.addSubview(cameraView.view)
         cameraView.didMove(toParentViewController: self)
         
         recordBtn.tappedHandler = recordButtonTapped
         recordBtn.pressedHandler = cameraView.pressed
-        
-        let buttonSize:CGFloat = 44.0
         
         flashButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
         flashButton.setImage(UIImage(named: "flashoff"), for: .normal)
@@ -220,6 +230,10 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         let nav1 = mainTabBar.viewControllers![0] as! UINavigationController
         places = nav1.viewControllers[0] as! HomeViewController
         
+        let nav2 = mainTabBar.viewControllers![1] as! UINavigationController
+        messages = nav2.viewControllers[0] as! MessagesViewController
+        
+        
         let nav4 = mainTabBar.viewControllers![3] as! UINavigationController
         notifications = nav4.viewControllers[0] as! NotificationsViewController
         
@@ -234,28 +248,26 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         v2Frame.origin.y = screenBounds.height * 2 + 20.0
         mainTabBar.view.frame = v2Frame
         
-        
         scrollView = UIScrollView(frame: view.bounds)
         
-        self.addChildViewController(mapViewController)
-        self.scrollView.addSubview(mapViewController.view)
+        addChildViewController(mapViewController)
+        scrollView.addSubview(mapViewController.view)
         mapViewController.didMove(toParentViewController: self)
         
-        self.addChildViewController(v1)
-        self.scrollView.addSubview(v1.view)
+        addChildViewController(v1)
+        scrollView.addSubview(v1.view)
         v1.didMove(toParentViewController: self)
         
-        self.addChildViewController(mainTabBar)
-        self.scrollView.addSubview(mainTabBar.view)
+        addChildViewController(mainTabBar)
+        scrollView.addSubview(mainTabBar.view)
         mainTabBar.didMove(toParentViewController: self)
         
-        self.scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 3)
-        self.scrollView.isPagingEnabled = true
-        self.scrollView.bounces = false
-        self.scrollView.delegate = self
-        self.scrollView.showsVerticalScrollIndicator = false
+        scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 3)
+        scrollView.isPagingEnabled = true
+        scrollView.bounces = false
+        scrollView.delegate = self
+        scrollView.showsVerticalScrollIndicator = false
         
-
         flashView = UIView(frame: view.bounds)
         flashView.backgroundColor = UIColor.black
         flashView.alpha = 0.0
@@ -267,9 +279,8 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         view.addSubview(locationHeader)
         view.addSubview(recordBtn)
         
-        self.scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 2.0), animated: false)
-        self.screenMode = .Main
-        //setToCameraMode()
+        scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 2.0), animated: false)
+        screenMode = .Main
         
         flashView.isUserInteractionEnabled = true
         let autoFocusTap = UITapGestureRecognizer(target: self, action: #selector(focus))
@@ -278,6 +289,11 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         autoFocusTap.delegate = self
         scrollView.addGestureRecognizer(autoFocusTap)
         scrollView.isUserInteractionEnabled = true
+        
+        let zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoom))
+        scrollView.addGestureRecognizer(zoomGesture)
+        zoomGesture.delegate = self
+        
         if gps_service == nil {
             gps_service = GPSService(["MapViewController":mapViewController])
             gps_service.startUpdatingLocation()
@@ -286,14 +302,29 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
             LocationService.sharedInstance.gps_service = gps_service
         }
         
-        let zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoom))
-        scrollView.addGestureRecognizer(zoomGesture)
-        zoomGesture.delegate = self
+        if message_service == nil {
+            message_service = MessageService([:])
+            messages.message_service = message_service
+            mainTabBar.message_service = message_service
+
+            message_service.startListeningToConversations()
+        }
+        
+        if notification_service == nil {
+            notification_service = NotificationService([:])
+            notifications.notification_service = notification_service
+            mainTabBar.notification_service = notification_service
+            
+            notification_service.startListeningToNotifications()
+
+        }
+        mainStore.subscribe(self)
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
@@ -303,6 +334,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         self.activateNavbar(false)
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
             statusBar(hide: true, animated: true)
+            cameraView.playVideo()
         }
         
         if self.navigationController?.delegate === transitionController {
@@ -312,6 +344,21 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         }
         textView.resignFirstResponder()
         
+    }
+    
+    func newState(state: AppState) {
+        print("MainViewController: newState")
+        if !state.userState.isAuth {
+            places.state.clear()
+            message_service.clear()
+            notification_service.clear()
+            mainStore.unsubscribe(self)
+            globalMainInterfaceProtocol = nil
+            gps_service = nil
+            message_service = nil
+            notification_service = nil
+            dismiss(animated: false, completion: nil)
+        }
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -531,6 +578,7 @@ class MainViewController: UIViewController, UIScrollViewDelegate, UIGestureRecog
         let storiesViewController: StoriesViewController = StoriesViewController()
         storiesViewController.storyType = storyType
         storiesViewController.userStories = stories
+        storiesViewController.currentIndexPath = destinationIndexPath
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
@@ -716,6 +764,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     }
     
     func sendButtonTapped(sender: UIButton) {
+        
+        cameraView.pauseVideo()
         
         let upload = Upload()
         if cameraView.cameraState == .PhotoTaken {

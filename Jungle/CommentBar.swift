@@ -15,16 +15,15 @@ protocol CommentBarProtocol: class {
 
 class CommentBar: UIView {
     @IBOutlet weak var textField: UITextField!
-    @IBOutlet weak var commentPlaceHolder: UILabel!
     @IBOutlet weak var sendButton: UIButton!
     
     weak var delegate:CommentBarProtocol?
 
     override func awakeFromNib() {
-        
+        //commentPlaceHolder.textColor = UIColor(white: 0.5, alpha: 1.0)
         textField.autocapitalizationType = .sentences
-        textField.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
-        sendButton.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
+        //textField.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
+        //sendButton.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
     }
     
     @IBAction func sendButton(_ sender: Any) {

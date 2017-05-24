@@ -20,7 +20,7 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
     case _ as UserIsAuthenticated:
         let a = action as! UserIsAuthenticated
         state.isAuth = true
-        state.uid = a.user.getUserId()
+        state.uid = a.user.uid
         state.user = a.user
         break
         

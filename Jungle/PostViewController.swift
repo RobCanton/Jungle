@@ -2,68 +2,43 @@ import UIKit
 import AVFoundation
 import Firebase
 
-public class PostViewController: UICollectionViewCell, ItemDelegate {
+public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemDelegate {
     
-    
-    var tap:UITapGestureRecognizer!
     var playerLayer:AVPlayerLayer?
-    
-    var commentsRef:FIRDatabaseReference?
-    
-    var keyboardUp = false
-    
-    var delegate:PopupProtocol?
-    
-    func showOptions() {
-        pauseVideo()
-        delegate?.showOptions()
-    }
-    
-    var shouldPlay = false
+    weak var delegate:PopupProtocol?
     var shouldAutoPause = true
-    
-    
-    var storyItem:StoryItem! {
-        didSet {
-            storyItem.delegate = self
-            shouldPlay = false
-            setItem()
-        }
-    }
-
-    
-    func showViewers() {}
-    
-    func handleFooterAction(_ like: Bool?) {
-        guard let item = self.storyItem else { return }
-        if let like = like {
-            if like {
-                UploadService.addLike(post: item)
-                item.addLike(mainStore.state.userState.uid)
-            } else {
-                UploadService.removeLike(postKey: item.getKey())
-                item.removeLike(mainStore.state.userState.uid)
-            }
-        } else {
-            delegate?.showDeleteOptions()
-        }
-    }
-    
-    func more() {
-        delegate?.showOptions()
-    }
-    
-    func sendComment(_ comment: String) {
-        guard let item = self.storyItem else { return }
-        UploadService.addComment(post: item, comment: comment)
-    }
-    
-    func toggleLike(_ like: Bool) {
-
-    }
     var animateInitiated = false
-    
     var shouldAnimate = false
+    var paused = false
+    
+    weak private(set) var storyItem:StoryItem!
+    private(set) var cellIndex:Int?
+    
+    func preparePost(_ post:StoryItem, cellIndex: Int) {
+        self.storyItem = post
+        self.cellIndex = cellIndex
+        self.content.image = nil
+        self.destroyVideoPlayer()
+        self.headerView.clean()
+        self.footerView.clean()
+        storyItem.delegate = self
+        shouldAutoPause = true
+        setItem()
+    }
+    
+    deinit {
+        print("Deinit >> PostViewController")
+    }
+    
+    func showAuthor() {
+        guard let item = self.storyItem else { return }
+        delegate?.showUser(item.getAuthorId())
+    }
+
+    func handleFooterAction() {
+        delegate?.showComments()
+    }
+
     func animateIndicator() {
 
     }
@@ -71,9 +46,6 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     func stopIndicator() {
 
     }
-    
-        var footerTapped:UITapGestureRecognizer!
-    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -87,6 +59,10 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         headerView.snapTimer.removeFromSuperview()
 
         videoContent.isHidden = true
+    }
+    
+    func itemDownloaded() {
+        setItem()
     }
     
     func setItem() {
@@ -122,31 +98,37 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
                 storyItem.download()
             }
         }
-        
 
+        self.headerView.setup(withUid: item.authorId, date: item.getDateCreated(), _delegate: self)
+        
+        if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
+            self.captionView.text = caption
+            self.captionView.fitHeightToContent()
+            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
+            self.captionView.isHidden = false
+        } else {
+            self.captionView.isHidden = true
+            self.captionView.text = ""
+            self.captionView.fitHeightToContent()
+            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+        }
         
         if let locationKey = item.getLocationKey() {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
-                if location != nil {
-                    self.headerView.setupLocation(location: location!)
-                }
+                self.headerView.setupLocation(location: location)
             })
+        } else {
+            self.headerView.setupLocation(location: nil)
         }
         
         UploadService.addView(post: item)
-        footerView.setCommentsLabelToCount(item.getNumComments())
+        footerView.setup(item)
         
-        delegate?.newItem(item)
+        if let index = cellIndex {
+            delegate?.newItem(index, item)
+        }
+        
     }
-    
-    
-    func itemDownloaded() {
-        //activityView?.stopAnimating()
-        setItem()
-    }
-    
-    
-    var paused = false
     
     func setForPlay(){
         
@@ -205,7 +187,6 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     }
     
     func playVideo() {
-        guard let item = self.storyItem else { return }
         self.playerLayer?.player?.play()
     }
     
@@ -221,12 +202,15 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
     func cleanUp() {
         content.image = nil
         destroyVideoPlayer()
+        delegate = nil
+        animateInitiated = false
+        storyItem = nil
+        NotificationCenter.default.removeObserver(self)
     }
     
     func reset() {
-        content.isHidden = false
-        videoContent.isHidden = true
-        resetVideo()
+        shouldAutoPause = true
+        pause()
     }
     
     func destroyVideoPlayer() {
@@ -236,36 +220,9 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         videoContent.isHidden = true
     }
     
-    func enableTap() {
-        self.addGestureRecognizer(tap)
-    }
-    
-    func disableTap() {
-        self.removeGestureRecognizer(tap)
-    }
     
     func tapped(gesture:UITapGestureRecognizer) {
 
-    }
-    
-
-    func focusItem() {
-
-    }
-    
-    func unfocusItem() {
-    }
-    
-    
-    var commentsActive = false
-    func handleFooterTap(sender: UITapGestureRecognizer) {
-        delegate?.showComments()
-        commentsActive = true
-        UIView.animate(withDuration: 0.15, animations: {
-            self.footerView.alpha = 0
-            self.headerView.alpha = 0
-        })
-        // scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
     }
     
     func fadeInDetails() {
@@ -358,22 +315,4 @@ public class PostViewController: UICollectionViewCell, ItemDelegate {
         return captionView
     }()
 
-}
-
-extension PostViewController: UITextFieldDelegate {
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let text = textField.text {
-            if !text.isEmpty {
-                textField.text = ""
-                sendComment(text)
-            }
-        }
-        return true
-    }
-    
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
-    }
 }

@@ -47,6 +47,38 @@ class HomeStateController {
         fetchAll()
     }
     
+    func clear() {
+        myStory = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
+        
+        followingStories = [UserStory]()
+        nearbyFollowingStories = [UserStory]()
+        popularUserStories = [UserStory]()
+        nearbyUserStories = [UserStory]()
+        recentUserStories = [UserStory]()
+        
+        popularPlaceStories = [LocationStory]()
+        recentPlaceStories = [LocationStory]()
+        nearbyPlaceStories = [LocationStory]()
+        
+        myStoryRef?.removeAllObservers()
+        followingRef?.removeAllObservers()
+        nearbyFollowingRef?.removeAllObservers()
+        popularUsersRef?.removeAllObservers()
+        recentUsersRef?.removeAllObservers()
+        popularPlacesRef?.removeAllObservers()
+        nearbyPlacesRef?.removeAllObservers()
+        recentPlacesRef?.removeAllObservers()
+        
+        myStoryRef = nil
+        followingRef = nil
+        nearbyFollowingRef = nil
+        popularUsersRef = nil
+        recentUsersRef = nil
+        popularPlacesRef = nil
+        nearbyPlacesRef = nil
+        recentPlacesRef = nil
+    }
+    
     func fetchAll() {
         observeMyStory()
         

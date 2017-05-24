@@ -34,27 +34,27 @@ class NotificationFollowCell: UITableViewCell {
     var user:User?
     
     func setup(withNotification notification: Notification) {
-        if notification.getType() != .follow { return }
+        if notification.type != .follow { return }
         
         followButton.layer.cornerRadius = 4.0
         followButton.clipsToBounds = true
         followButton.backgroundColor = accentColor
         
-        UserService.getUser(notification.getSender(), completion: { user in
+        UserService.getUser(notification.sender, completion: { user in
             if user != nil {
                 self.user = user
                 self.userImageView.clipsToBounds = true
                 self.userImageView.layer.cornerRadius = self.userImageView.frame.width/2
                 self.userImageView.contentMode = .scaleAspectFill
                 
-                self.userImageView.loadImageAsync(user!.getImageUrl(), completion: { fromCache in })
+                self.userImageView.loadImageAsync(user!.imageURL, completion: { fromCache in })
                 
-                self.setLabel(username: user!.getUsername(), date: notification.getDate())
+                self.setLabel(username: user!.username, date: notification.date)
                 
             }
         })
         
-        setUserStatus(status: checkFollowingStatus(uid: notification.getSender()))
+        setUserStatus(status: checkFollowingStatus(uid: notification.sender))
     }
     
     func setLabel(username:String, date: Date) {
@@ -127,7 +127,7 @@ class NotificationFollowCell: UITableViewCell {
             break
         case .None:
             setUserStatus(status: .Requested)
-            UserService.followUser(uid: user.getUserId())
+            UserService.followUser(uid: user.uid)
             break
         case .Requested:
             break

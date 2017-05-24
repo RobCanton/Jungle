@@ -11,14 +11,85 @@ import Firebase
 import ReSwift
 
 
-class NotificationService {
+protocol NotificationServiceProtocol:ServiceProtocol {
+    func notificationsUpdated(_ notificationsDict:[String:Bool])
+}
+
+
+class NotificationService: Service {
     
-    static func getNotification(_ key:String, completion: @escaping((_ notification:Notification?, _ fromCache: Bool)->())) {
+    private(set) var notifications:[String:Bool]!
+    private(set) var cache:NSCache<NSString, AnyObject>!
+    
+    override init(_ subscribers:[String:ServiceProtocol]) {
+        super.init(subscribers)
+        cache = NSCache<NSString, AnyObject>()
+        notifications = [String:Bool]()
+       
+    }
+    
+    internal override func subscribe(_ name: String, subscriber: ServiceProtocol) {
+        if let s = subscriber as? NotificationServiceProtocol {
+            super.subscribe(name, subscriber: s)
+            s.notificationsUpdated(self.notifications)
+        }
+    }
+    
+    fileprivate func getSubscribers() -> [String:NotificationServiceProtocol]? {
+        guard let subscribers = subscribers as? [String:NotificationServiceProtocol] else { return nil }
+        return subscribers
+    }
+    
+    fileprivate func updateSubscribers() {
+        guard let subscribers = getSubscribers() else { return }
+        subscribers.forEach { $0.value.notificationsUpdated(notifications) }
+    }
+    
+    internal func clear() {
+        cache = NSCache<NSString, AnyObject>()
+        notifications = [String:Bool]()
+        clearSubscribers()
+    }
+    
+    internal func startListeningToNotifications() {
+        let current_uid = mainStore.state.userState.uid
+        let ref = FIRDatabase.database().reference()
+        let notificationsRef = ref.child("users/notifications/\(current_uid)")
+        notificationsRef.observe(.childAdded, with: { snapshot in
+            if snapshot.exists() {
+                guard let seen = snapshot.value as? Bool else { return }
+                self.notifications[snapshot.key] = seen
+                self.updateSubscribers()
+            }
+        })
         
+        notificationsRef.observe(.childChanged, with: { snapshot in
+            if snapshot.exists() {
+                guard let seen = snapshot.value as? Bool else { return }
+                self.notifications[snapshot.key] = seen
+                self.updateSubscribers()
+            }
+        })
         
-        if let cachedNotification = dataCache.object(forKey: "notification-\(key)" as NSString) as? Notification {
-            if cachedNotification.getType() != .comment || cachedNotification.getType() != .comment_also || cachedNotification.getType() != .comment_to_sub  {
-               return completion(cachedNotification, true)
+        notificationsRef.observe(.childRemoved, with: { snapshot in
+            self.notifications[snapshot.key] = nil
+            self.updateSubscribers()
+        })
+    }
+    
+    
+    internal func stopListeningToNotifications() {
+        let uid = mainStore.state.userState.uid
+        let ref = FIRDatabase.database().reference()
+        let notificationsRef = ref.child("notifications/\(uid)")
+        notificationsRef.removeAllObservers()
+    }
+    
+    internal func getNotification(_ key:String, completion: @escaping((_ notification:Notification?, _ fromCache: Bool)->())) {
+        
+        if let cachedNotification = cache.object(forKey: "notification-\(key)" as NSString) as? Notification {
+            if cachedNotification.type != .comment || cachedNotification.type != .comment_also || cachedNotification.type != .comment_to_sub  {
+                return completion(cachedNotification, true)
             }
         }
         
@@ -37,7 +108,7 @@ class NotificationService {
                 let text            = dict["text"] as? String
                 let numCommenters   = dict["commenters"] as? Int
                 notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, numCommenters: numCommenters)
-                dataCache.setObject(notification!, forKey: "notification-\(key)" as NSString)
+                self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             }
             return completion(notification, false)
         }, withCancel: { error in
@@ -47,10 +118,19 @@ class NotificationService {
         
     }
     
-    static func markNotificationAsSeen(key:String) {
+    internal func markNotificationAsSeen(key:String) {
         let uid = mainStore.state.userState.uid
         let ref = FIRDatabase.database().reference()
         let notificationRef = ref.child("users/notifications/\(uid)/\(key)")
         notificationRef.setValue(true)
     }
+    
+    internal func markAllNotificationsAsSeen() {
+        for (key,seen) in notifications {
+            if !seen {
+                markNotificationAsSeen(key: key)
+            }
+        }
+    }
+
 }

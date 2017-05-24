@@ -15,9 +15,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     weak var transitionController: TransitionController!
     
     var uid:String!
-    var label:UILabel!
     var posts = [StoryItem]()
-    var currentIndex:IndexPath!
     var collectionView:UICollectionView!
     
     var isSingleItem = false
@@ -26,9 +24,15 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     var statusBarShouldHide = false
     var shouldScrollToBottom = false
     
+    var currentIndexPath:IndexPath?
+    
     fileprivate var commentBar:CommentBar!
     fileprivate var scrollView:UIScrollView!
     fileprivate var commentsViewController:CommentsViewController!
+    
+    deinit {
+        print("Deinit >> GalleryViewController")
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -37,7 +41,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         if self.navigationController!.delegate !== transitionController {
             self.collectionView.reloadData()
         }
-        globalMainRef?.statusBar(hide: true, animated: false)
+        globalMainInterfaceProtocol?.statusBar(hide: true, animated: false)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -80,11 +84,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        NotificationCenter.default.removeObserver(self)
-        
         for cell in collectionView.visibleCells as! [PostViewController] {
-            //cell.yo()
+            cell.pause()
         }
+        
+        NotificationCenter.default.removeObserver(self)
+
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -154,10 +159,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         self.view.addSubview(commentBar)
         
-        label = UILabel(frame: CGRect(x:0,y:0,width:self.view.frame.width,height:100))
-        label.textColor = UIColor.white
-        label.center = view.center
-        label.textAlignment = .center
     }
     
     func appMovedToBackground() {
@@ -166,10 +167,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let cell = getCurrentCell() else { return false }
-        if cell.keyboardUp {
-            return false
-        }
         
         let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
         let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
@@ -206,21 +203,8 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: PostViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! PostViewController
         cell.delegate = self
-        cell.storyItem = posts[indexPath.item]
+        cell.preparePost(posts[indexPath.item], cellIndex: indexPath.item)
         return cell
-    }
-    
-    func getCurrentCell() -> PostViewController? {
-        if let cell = collectionView.visibleCells.first as? PostViewController {
-            return cell
-        }
-        return nil
-    }
-    
-    func stopPreviousItem() {
-        if let cell = getCurrentCell() {
-            cell.pauseVideo()
-        }
     }
     
     func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -235,7 +219,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
         let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
         
-        return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
+        return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
     }
     
     
@@ -243,9 +227,16 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         if scrollView != collectionView { return }
         //SHOULD HANDLE COMMENTS VIEW AS WELL
         
-        let xOffset = scrollView.contentOffset.x
-        let newItem = Int(xOffset / self.collectionView.frame.width)
-        currentIndex = IndexPath(item: newItem, section: 0)
+        var visibleRect = CGRect()
+        
+        visibleRect.origin = collectionView.contentOffset
+        visibleRect.size = collectionView.bounds.size
+        
+        let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
+        
+        let visibleIndexPath: IndexPath = collectionView.indexPathForItem(at: visiblePoint)!
+        
+        currentIndexPath = visibleIndexPath
         
         if let cell = getCurrentCell() {
             cell.resume()
@@ -260,6 +251,15 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         cell.reset()
     }
     
+    func getCurrentCell() -> PostViewController? {
+        if let index = currentIndexPath {
+            if let cell = collectionView.cellForItem(at: index) as? PostViewController {
+                return cell
+            }
+        }
+        return nil
+    }
+    
     override var prefersStatusBarHidden: Bool {
         get {
             return true
@@ -268,11 +268,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
 }
 
 extension GalleryViewController: PopupProtocol {
-    
-    func newItem(_ item: StoryItem) {
+    func newItem(_ cellIndex: Int, _ item: StoryItem) {
+        guard let currentIndex = currentIndexPath else { return }
+        
+        if currentIndex.item != cellIndex { return }
         commentsViewController.setupItem(item)
     }
-    
     
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pauseVideo()
@@ -373,6 +374,10 @@ extension GalleryViewController: PopupProtocol {
         })
     }
     
+    func keyboardDidDisappear(notification :NSNotification) {
+        scrollView.isScrollEnabled = true
+    }
+    
     func handleDismiss() {
         if scrollView.isScrollEnabled {
             scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
@@ -466,7 +471,7 @@ extension GalleryViewController: View2ViewTransitionPresented {
         
         if isPresenting {
             let indexPath: IndexPath = userInfo!["destinationIndexPath"] as! IndexPath
-            currentIndex = indexPath
+            currentIndexPath = indexPath
             let contentOffset: CGPoint = CGPoint(x: self.collectionView.frame.size.width*CGFloat(indexPath.item), y: 0.0)
             self.collectionView.contentOffset = contentOffset
             self.collectionView.reloadData()

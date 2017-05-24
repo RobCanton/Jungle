@@ -28,21 +28,17 @@ class UserService {
     
     static func logout() {
         Listeners.stopListeningToAll()
-        mainStore.dispatch(ClearAllNotifications())
-        mainStore.dispatch(ClearConversations())
-        mainStore.dispatch(ClearMyActivity())
         mainStore.dispatch(ClearSocialState())
         mainStore.dispatch(UserIsUnauthenticated())
         
         try! FIRAuth.auth()!.signOut()
-        globalMainRef?.dismiss(animated: false, completion: nil)
     }
 
 //    
     static func sendFCMToken() {
         if let token = FIRInstanceID.instanceID().token() {
             if let user = mainStore.state.userState.user {
-                let fcmRef = ref.child("users/FCMToken/\(user.getUserId())")
+                let fcmRef = ref.child("users/FCMToken/\(user.uid)")
                 fcmRef.setValue(token)
             }
         }
@@ -279,23 +275,24 @@ class UserService {
         currentUserRef.removeValue()
         
     }
-    
-    static func sendMessage(conversation:Conversation, message:String, uploadKey:String?, completion: ((_ success:Bool)->())?) {
-        let convoRef = ref.child("conversations/\(conversation.getKey())")
-        
+
+    static func sendMessage(conversationKey:String,recipientId:String, message:String, completion: ((_ success:Bool)->())?) {
+        let convoRef = FIRDatabase.database().reference().child("conversations/\(conversationKey)")
         let messageRef = convoRef.child("messages").childByAutoId()
         let uid = mainStore.state.userState.uid
         
         let updateObject = [
-                "recipientId": conversation.getPartnerId(),
-                "senderId": uid as AnyObject,
-                "text": message as AnyObject,
-                "timestamp": [".sv":"timestamp"] as AnyObject
-        ] as [String:AnyObject]
+            "recipientId": recipientId,
+            "senderId": uid as AnyObject,
+            "text": message as AnyObject,
+            "timestamp": [".sv":"timestamp"] as AnyObject
+            ] as [String:AnyObject]
         
-        messageRef.setValue(updateObject, withCompletionBlock: { error, ref in })
+        messageRef.setValue(updateObject, withCompletionBlock: { error, ref in
+            completion?(error == nil)
+        })
     }
-
+    
     static func listenToFollowers(uid:String, completion:@escaping (_ followers:[String])->()) {
         let followersRef = ref.child("social/followers/\(uid)")
         followersRef.observe(.value, with: { snapshot in
@@ -341,10 +338,10 @@ class UserService {
     static func reportUser(user:User, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = FIRDatabase.database().reference()
         let uid = mainStore.state.userState.uid
-        let reportRef = ref.child("reports/\(uid):\(user.getUserId())")
+        let reportRef = ref.child("reports/\(uid):\(user.uid)")
         let value: [String: Any] = [
             "sender": uid,
-            "userId": user.getUserId(),
+            "userId": user.uid,
             "type": type.rawValue,
             "timestamp": [".sv": "timestamp"]
         ]

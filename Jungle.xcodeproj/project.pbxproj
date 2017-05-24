@@ -42,7 +42,7 @@
 		B0550DA91E91EE25007DAAAC /* UsersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550DA61E91EE20007DAAAC /* UsersListViewController.swift */; };
 		B0550DAA1E91EE25007DAAAC /* UserViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550DA71E91EE21007DAAAC /* UserViewCell.swift */; };
 		B0550DAB1E91EE25007DAAAC /* UserViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0550DA81E91EE21007DAAAC /* UserViewCell.xib */; };
-		B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0697BA81E84ECAB0076EC87 /* AuthService.swift */; };
+		B06BFD731ED2D4360052EC08 /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06BFD721ED2D4360052EC08 /* MessageService.swift */; };
 		B07169A91E83681B00AF6A41 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A71E83681B00AF6A41 /* GalleryViewController.swift */; };
 		B07169AA1E83681B00AF6A41 /* PostViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07169A81E83681B00AF6A41 /* PostViewController.swift */; };
 		B07169AD1E838C6400AF6A41 /* EditProfileViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */; };
@@ -119,7 +119,6 @@
 		B0F8948B1E7BD55A00E490C4 /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8948A1E7BD55A00E490C4 /* Tree.swift */; };
 		B0F8948D1E7BD57A00E490C4 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8948C1E7BD57A00E490C4 /* Conversation.swift */; };
 		B0F8948F1E7BD60900E490C4 /* UserReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8948E1E7BD60900E490C4 /* UserReducer.swift */; };
-		B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894901E7BD67D00E490C4 /* ConversationsReducer.swift */; };
 		B0F894931E7BD68800E490C4 /* SocialReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894921E7BD68800E490C4 /* SocialReducer.swift */; };
 		B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894951E7C528800E490C4 /* UserProfileViewController.swift */; };
 		B0F894991E7C717F00E490C4 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */; };
@@ -170,7 +169,7 @@
 		B0550DA61E91EE20007DAAAC /* UsersListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UsersListViewController.swift; sourceTree = "<group>"; };
 		B0550DA71E91EE21007DAAAC /* UserViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewCell.swift; sourceTree = "<group>"; };
 		B0550DA81E91EE21007DAAAC /* UserViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserViewCell.xib; sourceTree = "<group>"; };
-		B0697BA81E84ECAB0076EC87 /* AuthService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		B06BFD721ED2D4360052EC08 /* MessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageService.swift; sourceTree = "<group>"; };
 		B07169A71E83681B00AF6A41 /* GalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
 		B07169A81E83681B00AF6A41 /* PostViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostViewController.swift; sourceTree = "<group>"; };
 		B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = EditProfileViewController.storyboard; sourceTree = "<group>"; };
@@ -249,7 +248,6 @@
 		B0F8948A1E7BD55A00E490C4 /* Tree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
 		B0F8948C1E7BD57A00E490C4 /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		B0F8948E1E7BD60900E490C4 /* UserReducer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserReducer.swift; sourceTree = "<group>"; };
-		B0F894901E7BD67D00E490C4 /* ConversationsReducer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationsReducer.swift; sourceTree = "<group>"; };
 		B0F894921E7BD68800E490C4 /* SocialReducer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialReducer.swift; sourceTree = "<group>"; };
 		B0F894951E7C528800E490C4 /* UserProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 		B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
@@ -277,14 +275,14 @@
 		B03D735E1E82F77500BBB660 /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				B093FFA81E790D5E00011B43 /* CameraButton.swift */,
 				B0F894A11E7F17AE00E490C4 /* MainViewController.swift */,
+				B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */,
+				B0C86D411E8098850067E004 /* MasterNavigationController.swift */,
+				B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */,
+				B093FFA81E790D5E00011B43 /* CameraButton.swift */,
 				B0550D7F1E8A1A94007DAAAC /* LocationHeaderView.swift */,
 				B0550D7B1E8A1498007DAAAC /* LocationHeaderView.xib */,
-				B0C86D411E8098850067E004 /* MasterNavigationController.swift */,
 				B093FFDC1E79BEB100011B43 /* CameraViewController.swift */,
-				B0F894A31E7F24DA00E490C4 /* MainNavigationController.swift */,
-				B0F894A51E7F250F00E490C4 /* MainTabBarController.swift */,
 				B093FFB11E790D5E00011B43 /* SendProfileViewCell.swift */,
 				B093FFCA1E7910E700011B43 /* SendProfileViewCell.xib */,
 				B093FFB21E790D5E00011B43 /* SendTableViewController.swift */,
@@ -426,11 +424,11 @@
 		B0F894661E7B434400E490C4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				B0697BA81E84ECAB0076EC87 /* AuthService.swift */,
 				B093FFAA1E790D5E00011B43 /* GPSService.swift */,
 				B093FFAD1E790D5E00011B43 /* LocationService.swift */,
-				B0C86D301E7FC6B40067E004 /* Listeners.swift */,
+				B06BFD721ED2D4360052EC08 /* MessageService.swift */,
 				B04DFB581E94C8300016FE5D /* NotificationService.swift */,
+				B0C86D301E7FC6B40067E004 /* Listeners.swift */,
 				B093FFB51E790D5E00011B43 /* UploadService.swift */,
 				B0F8945C1E7B216500E490C4 /* UserService.swift */,
 				B05091B71EB936CB001B84B1 /* Reachability.swift */,
@@ -441,10 +439,10 @@
 		B0F894671E7B435500E490C4 /* Stories */ = {
 			isa = PBXGroup;
 			children = (
-				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
-				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
 				B093FFD01E79399C00011B43 /* StoriesViewController.swift */,
 				B093FFD41E79399C00011B43 /* StoryViewController.swift */,
+				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
+				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
 				B0F894691E7B7E1400E490C4 /* CommentsViewController.swift */,
 				B0F894751E7BAED000E490C4 /* CommentsHeaderView.swift */,
 				B0F894731E7BAC5800E490C4 /* CommentsHeaderView.xib */,
@@ -490,7 +488,6 @@
 			isa = PBXGroup;
 			children = (
 				B0F894881E7BD52C00E490C4 /* AppState.swift */,
-				B0F894901E7BD67D00E490C4 /* ConversationsReducer.swift */,
 				B0F8948E1E7BD60900E490C4 /* UserReducer.swift */,
 				B0F894921E7BD68800E490C4 /* SocialReducer.swift */,
 			);
@@ -726,6 +723,7 @@
 				B0A6FCD81EC43113009933F8 /* EmptyMyStoryCell.swift in Sources */,
 				B0C86D451E80B7E00067E004 /* FollowingHeader.swift in Sources */,
 				B0550D9F1E8E21C4007DAAAC /* TextFieldEffects.swift in Sources */,
+				B06BFD731ED2D4360052EC08 /* MessageService.swift in Sources */,
 				B0C86D3F1E80831F0067E004 /* ConversationCell.swift in Sources */,
 				B093FFD51E79399C00011B43 /* StoriesViewController.swift in Sources */,
 				B0550D981E8E21C4007DAAAC /* HoshiTextField.swift in Sources */,
@@ -739,9 +737,7 @@
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0550DA01E8E21C4007DAAAC /* YokoTextField.swift in Sources */,
 				B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */,
-				B0F894911E7BD67D00E490C4 /* ConversationsReducer.swift in Sources */,
 				B0B0E3BE1EC24EC7005DC0C1 /* HomeStateController.swift in Sources */,
-				B0697BA91E84ECAB0076EC87 /* AuthService.swift in Sources */,
 				B0F894931E7BD68800E490C4 /* SocialReducer.swift in Sources */,
 				B093FFD81E79399C00011B43 /* StoryProgressIndicator.swift in Sources */,
 				B04DFB591E94C8300016FE5D /* NotificationService.swift in Sources */,

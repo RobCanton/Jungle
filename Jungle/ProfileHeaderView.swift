@@ -73,15 +73,15 @@ class ProfileHeaderView: UICollectionReusableView {
 
         guard let user = _user else {return}
         self.user = _user
-        setUserStatus(status: checkFollowingStatus(uid: user.getUserId()))
+        setUserStatus(status: checkFollowingStatus(uid: user.uid))
         
         setFollowersCount(user.followers)
         setFollowingCount(user.following)
-        usernameLabel.text = user.getUsername()
+        usernameLabel.text = user.username
         
-        bioLabel.text = user.getBio()
+        bioLabel.text = user.bio
         
-        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromFile in
+        loadImageUsingCacheWithURL(user.imageURL, completion: { image, fromFile in
             self.imageView.image = image
         })
         

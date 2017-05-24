@@ -17,9 +17,7 @@ import Firebase
 
 class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
-
     var popUpMode = false
-    var isEmpty = false
     var refreshControl: UIRefreshControl!
 
     //var containerDelegate:ContainerViewController?
@@ -29,7 +27,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
     var settingUp = true
     
-    var conversation:Conversation!
+    var conversationKey:String!
     var partner:User!
     var partnerImage:UIImage?
     
@@ -63,12 +61,11 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         activityIndicator.center = CGPoint(x:UIScreen.main.bounds.size.width / 2, y: UIScreen.main.bounds.size.height / 2 - 50)
         view.addSubview(activityIndicator)
         activityIndicator.startAnimating()
-
-
-        conversation.delegate = self
-        title = partner.getUsername()
+    
+        conversationKey = createUserIdPairKey(uid1: mainStore.state.userState.uid, uid2: partner.uid)
+        title = partner.username
         
-        downloadRef = UserService.ref.child("conversations/\(conversation.getKey())/messages")
+        downloadRef = UserService.ref.child("conversations/\(conversationKey!)/messages")
         
         downloadRef?.queryOrderedByKey().queryLimited(toLast: 1).observeSingleEvent(of: .value, with: { snapshot in
             if !snapshot.exists() {
@@ -88,11 +85,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         let optionsButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: #selector(showUserOptions))
         optionsButton.tintColor = UIColor.black
         navigationItem.rightBarButtonItem = optionsButton
-        
-        if popUpMode {
-            let close = UIBarButtonItem(title: "Close", style: .plain, target: self, action: #selector(handleClose))
-            self.navigationItem.leftBarButtonItem = close
-        }
+
     }
     
     
@@ -105,13 +98,13 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
 
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        if !popUpMode {
-            sheet.addAction(UIAlertAction(title: "View User Profile", style: .default, handler: { _ in
-                let controller = UserProfileViewController()
-                controller.uid = self.conversation.getPartnerId()
-                self.navigationController?.pushViewController(controller, animated: true)
-            }))
-        }
+//        if !popUpMode {
+//            sheet.addAction(UIAlertAction(title: "View User Profile", style: .default, handler: { _ in
+//                let controller = UserProfileViewController()
+//                controller.uid = self.partner.uid
+//                self.navigationController?.pushViewController(controller, animated: true)
+//            }))
+//        }
         
         sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
             let reportSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
@@ -225,9 +218,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
         downloadRef?.removeAllObservers()
-        conversation.listen()
-       // self.navigationController?.navigationBar.isTranslucent = true
-        //self.navigationController?.navigationBar.isUserInteractionEnabled = false
+        
         self.navigationController?.view.backgroundColor = UIColor.clear
     }
     
@@ -245,7 +236,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
             let lastMessage = messages[messages.count - 1]
             let uid = mainStore.state.userState.uid
             if lastMessage.senderId != uid {
-                let ref = UserService.ref.child("conversations/\(conversation.getKey())/meta/\(uid)")
+                let ref = UserService.ref.child("conversations/\(conversationKey!)/meta/\(uid)")
                 ref.setValue([".sv":"timestamp"])
             }
         }
@@ -280,7 +271,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
             break
         default:
             let controller = UserProfileViewController()
-            controller.uid = partner.getUserId()
+            controller.uid = partner.uid
             self.navigationController?.pushViewController(controller, animated: true)
             break
         }
@@ -415,25 +406,11 @@ extension ChatViewController {
     
     
     override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-        UserService.sendMessage(conversation: conversation, message: text, uploadKey: nil, completion: nil)
+        UserService.sendMessage(conversationKey: conversationKey, recipientId: partner.uid, message: text, completion: nil)
         self.finishSendingMessage(animated: true)
         
-//        if !NotificationService.shared.notificationsEnabled() && !NotificationService.shared.messagePromptShown {
-//            NotificationService.shared.messagePromptShown = true
-//            
-//            let alert = UIAlertController(title: "Do you want to be notified when you receive a reply?", message: nil, preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "No", style: .destructive, handler: { _ in }))
-//            
-//            alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { _ in
-//                NotificationService.shared.registerForUserNotifications()
-//            }))
-//            
-//            self.present(alert, animated: true, completion: nil)
-//        }
     }
-
     
-
     func downloadMessages() {
         
         self.messages = []

@@ -298,7 +298,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             }
             
             if story.state == .contentLoaded {
-                globalMainRef?.presentUserStory(stories: stories, destinationIndexPath: indexPath, initialIndexPath: indexPath, hasMyStory: true)
+                globalMainInterfaceProtocol?.presentUserStory(stories: stories, destinationIndexPath: indexPath, initialIndexPath: indexPath, hasMyStory: true)
             } else {
                 story.downloadStory()
             }
@@ -306,7 +306,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         case collectionViewPeople:
             let story = bottomStories[indexPath.row]
             if story.state == .contentLoaded {
-                globalMainRef?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }

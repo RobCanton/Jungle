@@ -11,11 +11,12 @@ import CoreLocation
 
 class Location: NSObject {
     
-    fileprivate var key:String                    // Key in database
-    fileprivate var name:String
-    fileprivate var address:String
-    fileprivate var coordinates:CLLocation
-    fileprivate var types:[String]
+    private(set) var key:String                    // Key in database
+    private(set) var name:String
+    private(set) var address:String
+    private(set) var shortAddress:String
+    private(set) var coordinates:CLLocation
+    private(set) var types:[String]
     
     init(key:String, name:String, address:String, coordinates:CLLocation, types:[String])
     {
@@ -24,6 +25,7 @@ class Location: NSObject {
         self.address     = address
         self.coordinates = coordinates
         self.types       = types
+        self.shortAddress = getShortFormattedAddress(address)
 
     }
     
@@ -48,42 +50,6 @@ class Location: NSObject {
     }
     
     /* Getters */
-    
-    func getKey() -> String
-    {
-        return key
-    }
-    
-    func getName()-> String
-    {
-        return name
-    }
-    
-    func getAddress() -> String
-    {
-        return address
-    }
-    
-    func getShortAddress() -> String {
-        return getShortFormattedAddress(address)
-    }
-    
-    func getCoordinates() -> CLLocation
-    {
-        return coordinates
-    }
-    
-    func getTypes() -> [String] {
-        return types
-    }
-    
-    /*func getStory() -> Story {
-        return story
-    }
-    
-    func getContributers() -> [String:Any] {
-        return contributers
-    }*/
     
     func getDistance() -> Double {
        // let lastLocation = GPSService.sharedInstance.lastLocation!

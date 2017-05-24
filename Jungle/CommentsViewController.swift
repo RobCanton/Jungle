@@ -72,18 +72,21 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    
+    func setup() {
         self.automaticallyAdjustsScrollViewInsets = false
-        navHeight = 44.0 + 20.0
+        navHeight = 50.0
         
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-        blurView.frame = view.bounds
+        view.backgroundColor = UIColor.white//(white: 0.0, alpha: 0.75)
         
-        view.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
-
         header = UINib(nibName: "CommentsHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsHeaderView
         header.frame = CGRect(x: 0, y: 0 , width: view.frame.width, height: navHeight)
         header.delegate = self
         view.addSubview(header)
+        
+        header.applyShadow(radius: 4.0, opacity: 0.15, height: 0.0, shouldRasterize: false)
         
         let containerView = UIView(frame: CGRect(x: 0, y: navHeight, width: view.frame.width, height: view.frame.height - 50.0 - navHeight))
         view.addSubview(containerView)
@@ -97,14 +100,14 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.register(nib2, forCellReuseIdentifier: "userViewCell")
         
         //header.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
-        tableView.separatorColor = UIColor(white: 1.0, alpha: 0.20)
+        tableView.separatorColor = UIColor(white: 0.9, alpha: 1.0)
         tableView.separatorInset = UIEdgeInsets.zero
-        tableView.backgroundColor = UIColor.clear//(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
+        tableView.backgroundColor = UIColor.white//(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
         tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
         tableView.keyboardDismissMode = .onDrag
         //tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
-        tableView.tableFooterView = UIView()
+        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 70))
         
         
         containerView.addSubview(tableView)
@@ -220,7 +223,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     let childSnapshot = child as! FIRDataSnapshot
                     viewers.append(childSnapshot.key)
                 }
-                print("VIEWERS: \(viewers)")
                 self.viewers = viewers
                 if self.mode == .Viewers {
                     self.tableView.reloadData()

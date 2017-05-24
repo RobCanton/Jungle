@@ -17,11 +17,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
 
     private(set) var viewIndex = 0
     var returnIndex:Int?
+    private(set) var cellIndex:Int?
+    weak var story:Story!
     weak var item:StoryItem?
     weak var delegate:PopupProtocol?
     var activityView:NVActivityIndicatorView!
-    
-    var footerTapped:UITapGestureRecognizer!
     
     var playerLayer:AVPlayerLayer?
     var currentProgress:Double = 0.0
@@ -29,18 +29,14 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     var totalTime:Double = 0.0
     
-    var progressBar:StoryProgressIndicator?
-    weak var story:Story!
-    
     var shouldAutoPause = true
     
     var flagLabel:UILabel?
     
     func addFlagLabel() {
        
-        
-    
     }
+    
     deinit {
         print("Deinit >> StoryViewController")
     }
@@ -54,10 +50,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.showComments()
     }
     
-    func prepareStory(withLocation location:LocationStory, atIndex index:Int?) {
+    func prepareStory(withLocation location:LocationStory, cellIndex: Int, atIndex index:Int?) {
+        clearStoryView()
         shouldAutoPause = true
+        self.cellIndex = cellIndex
         viewIndex = index ?? 0
-        print("Start index: \(viewIndex)")
         self.story = location
         self.story.delegate = self
         story.determineState()
@@ -68,21 +65,21 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         returnIndex = viewIndex
     }
     
-    func prepareStory(withStory story:UserStory, atIndex index:Int?) {
+    func prepareStory(withStory story:UserStory, cellIndex: Int,  atIndex index:Int?) {
+        clearStoryView()
         shouldAutoPause = true
+        self.cellIndex = cellIndex
         viewIndex = index ?? 0
-        print("Start index: \(viewIndex)")
         self.story = story
         self.story.delegate = self
         story.determineState()
     }
     
-    func observeKeyboard() {
-        
-    }
-    
-    func removeObserver() {
-        
+    func clearStoryView() {
+        self.content.image = nil
+        self.destroyVideoPlayer()
+        self.headerView.clean()
+        self.footerView.clean()
     }
     
     func stateChange(_ state:UserStoryState) {
@@ -131,27 +128,18 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     
     func contentLoaded() {
+        for item in story.items! {
 
-//        if returnIndex != nil {
-//            viewIndex = returnIndex!
-//            returnIndex = nil
-//        } else {
-//            viewIndex = 0
-    
-            for item in story.items! {
-
-                totalTime += item.getLength()
-            }
-            
-            if viewIndex >= story.items!.count{
-                viewIndex = 0
-            }
-        //}
+            totalTime += item.getLength()
+        }
+        
+        if viewIndex >= story.items!.count{
+            viewIndex = 0
+        }
         self.setupItem()
     }
     
     func setupItem() {
-        
         
         killTimer()
         pauseVideo()
@@ -194,27 +182,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         UploadService.addView(post: item)
         footerView.setup(item)
-        /*
-        numCommentsRef?.removeAllObservers()
-        numCommentsRef = FIRDatabase.database().reference().child("uploads/meta/\(item.getKey())/comments")
-        numCommentsRef!.observe(.value, with: { snapshot in
-            var numComments = 0
-            if snapshot.exists() {
-                if let _numComments = snapshot.value as? Int {
-                    numComments = _numComments
-                }
-            }
-            self.whatsup()
-            //item.updateNumComments(numComments)
-            //self.footerView.setCommentsLabelToCount(item.getNumComments())
-        })
-        */
-        delegate?.newItem(item)
- 
-    }
-    
-    func whatsup() {
         
+        if cellIndex != nil {
+            delegate?.newItem(cellIndex!, item)
+        }
     }
     
     func prepareImageContent(item:StoryItem) {
@@ -339,22 +310,19 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         animateInitiated = false
         item = nil
         returnIndex = nil
-        progressBar = nil
         NotificationCenter.default.removeObserver(self)
         
     }
     
     func reset() {
-        
-        killTimer()
-        pauseVideo()
+        shouldAutoPause = true
+        pause()
     }
     
     var blockInappropriateContent = true
     
     func playVideo() {
         guard let item = self.item else { return }
-
         self.playerLayer?.player?.play()
     }
     
@@ -374,7 +342,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if paused { return }
         paused = true
         pauseVideo()
-        //progressBar?.pauseActiveIndicator()
         headerView.pauseTimer()
         guard let timer = self.timer else { return }
         remainingTime = timer.fireDate.timeIntervalSinceNow
@@ -385,9 +352,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if !paused { return }
         paused = false
         guard let item = self.item else { return }
-        print("RESUME ITEM: \(item.getKey())")
         if remainingTime != nil {
-            //timer?.invalidate()
             timer = Timer.scheduledTimer(timeInterval: remainingTime!, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
             remainingTime = nil
         } else {
@@ -398,19 +363,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         }
         
         headerView.resumeTimer()
-        //progressBar?.resumeActiveIndicator()
-    }
-    
-    func focusItem() {
-        UIView.animate(withDuration: 0.15, animations: {
-            //self.progressBar?.alpha = 0.0
-        })
-    }
-    
-    func unfocusItem() {
-        UIView.animate(withDuration: 0.2, animations: {
-            //self.progressBar?.alpha = 1.0
-        })
     }
     
     
@@ -428,7 +380,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             //story.delegate = nil
             /*killTimer()
             resetVideo()
-            progressBar?.resetActiveIndicator()
             */
             pause()
         }
@@ -437,20 +388,16 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func tapped(gesture:UITapGestureRecognizer) {
         guard let _ = item else { return }
-        if keyboardUp {
-            
+        let tappedPoint = gesture.location(in: self)
+        let width = self.bounds.width
+        if tappedPoint.x < width * 0.25 {
+            prevItem()
+            prevView.alpha = 1.0
+            UIView.animate(withDuration: 0.25, animations: {
+                self.prevView.alpha = 0.0
+            })
         } else {
-            let tappedPoint = gesture.location(in: self)
-            let width = self.bounds.width
-            if tappedPoint.x < width * 0.25 {
-                prevItem()
-                prevView.alpha = 1.0
-                UIView.animate(withDuration: 0.25, animations: {
-                    self.prevView.alpha = 0.0
-                })
-            } else {
-                nextItem()
-            }
+            nextItem()
         }
     }
 
@@ -460,7 +407,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
 
-    var keyboardUp = false
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -477,7 +423,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         activityView.center = contentView.center
         contentView.addSubview(activityView)
         
-        //footerView.pullUpTapHandler = handleFooterAction
     }
     
     func fadeOutDetails() {

@@ -140,10 +140,10 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         if isBlocked {
             sheet.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { _ in
-                let alert = UIAlertController(title: "Unblock \(user.getUsername())?", message: "They will be able to view your profile and posts, and send you direct messages.", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Unblock \(user.username)?", message: "They will be able to view your profile and posts, and send you direct messages.", preferredStyle: .alert)
                 
                 alert.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { (action) -> Void in
-                    UserService.unblockUser(uid: user.getUserId(), completion: { success in })
+                    UserService.unblockUser(uid: user.uid, completion: { success in })
                 }))
                 
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
@@ -153,10 +153,10 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             }))
         } else {
             sheet.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { _ in
-                let alert = UIAlertController(title: "Block \(user.getUsername())?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Block \(user.username)?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
                 
                 alert.addAction(UIAlertAction(title: "Block", style: .default, handler: { (action) -> Void in
-                    UserService.blockUser(uid: user.getUserId(), completion: { success in })
+                    UserService.blockUser(uid: user.uid, completion: { success in })
                 }))
                 
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in }))
@@ -168,7 +168,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
             
-            let reportSheet = UIAlertController(title: nil, message: "Why are you reporting \(user.getUsername())?", preferredStyle: .actionSheet)
+            let reportSheet = UIAlertController(title: nil, message: "Why are you reporting \(user.username)?", preferredStyle: .actionSheet)
             reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
             reportSheet.addAction(UIAlertAction(title: "Inappropriate Profile", style: .destructive, handler: { _ in
                 UserService.reportUser(user: user, type: .InappropriateProfile, completion: { success in })
@@ -286,7 +286,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
         
         if user != nil {
-            let bio = user!.getBio()
+            let bio = user!.bio
             if bio != "" {
                 var size =  UILabel.size(withText: bio, forWidth: collectionView.frame.size.width - 24.0, withFont: UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightRegular))
                 let height2 = size.height + staticHeight + 8  // +8 for some bio padding
@@ -354,14 +354,22 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
 extension UserProfileViewController: ProfileHeaderProtocol {
     
     func showFollowers() {
+        guard let _user = user else { return }
+        guard let _uid = uid else { return }
+        if _user.followers == 0 { return }
         let controller = UsersListViewController()
-        controller.title = "Followers"
+        controller.type = .Followers
+        controller.uid = _uid
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
     func showFollowing() {
+        guard let _user = user else { return }
+        guard let _uid = uid else { return }
+        if _user.following == 0 { return }
         let controller = UsersListViewController()
-        controller.title = "Following"
+        controller.type = .Following
+        controller.uid = _uid
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -369,33 +377,12 @@ extension UserProfileViewController: ProfileHeaderProtocol {
         let current_uid = mainStore.state.userState.uid
         guard let partner_uid = uid else { return }
         if current_uid == partner_uid { return }
-        if let conversation = checkForExistingConversation(partner_uid: current_uid) {
-            prepareConversationForPresentation(conversation: conversation)
-        } else {
-            
-            let pairKey = createUserIdPairKey(uid1: current_uid, uid2: partner_uid)
-            let conversation = Conversation(key: pairKey, partner_uid: partner_uid, seen: true, date: Date(), lastMessage: "", listening: true)
-            self.presentingEmptyConversation = true
-            self.prepareConversationForPresentation(conversation: conversation)
-        }
-    }
-    
-    func prepareConversationForPresentation(conversation:Conversation) {
-        guard let uid = self.uid else { return }
-        conversation.listen()
-        UserService.getUser(uid, completion: { user in
-            if user != nil {
-                self.presentConversation(conversation: conversation, user: user!)
-            }
-        })
-    }
-    
-    func presentConversation(conversation:Conversation, user:User) {
-        loadImageUsingCacheWithURL(user.getImageUrl(), completion: { image, fromCache in
+        guard let partner = user else { return }
+        
+        loadImageUsingCacheWithURL(partner.imageURL, completion: { image, fromCache in
             let controller = ChatViewController()
-            controller.conversation = conversation
             controller.partnerImage = image
-            controller.partner = user
+            controller.partner = partner
             self.navigationController?.pushViewController(controller, animated: true)
         })
     }
@@ -431,7 +418,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
     
     func unfollow() {
         guard let user = self.user else { return }
-        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.getUsername())?", preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
         
         let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
         }
@@ -440,7 +427,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
         let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
         { action -> Void in
             
-            UserService.unfollowUser(uid: user.getUserId())
+            UserService.unfollowUser(uid: user.uid)
         }
         actionSheet.addAction(saveActionButton)
         

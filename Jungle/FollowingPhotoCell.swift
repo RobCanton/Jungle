@@ -98,11 +98,11 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         getUser(withCheck: check, uid: story.getUserId(), completion: { check, user in
             if self.check != check { return }
             if user != nil {
-                if user!.getUserId() == mainStore.state.userState.uid {
+                if user!.uid == mainStore.state.userState.uid {
                     self.nameLabel.text = "Me"
                     self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightBold)
                 } else {
-                    self.nameLabel.text = user!.getUsername()
+                    self.nameLabel.text = user!.username
                     self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
                 }
             }

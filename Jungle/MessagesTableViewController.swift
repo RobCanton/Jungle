@@ -6,30 +6,24 @@
 //  Copyright © 2017 Robert Canton. All rights reserved.
 //
 
-import ReSwift
 import UIKit
 
-class MessagesViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
+class MessagesViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, MessageServiceProtocol {
 
+    let identifier = "MessagesViewController"
     let cellIdentifier = "conversationCell"
     
-    var conversations = [Conversation]()
+    weak var message_service:MessageService?
     
-    var tableView:UITableView!
+    fileprivate var conversations = [Conversation]()
+    
+    private(set) var tableView:UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         self.automaticallyAdjustsScrollViewInsets = false
-        
-//        var searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width - 108, height: 44 - 16))
-//        searchBar.center = CGPoint(x: view.frame.width/2, y: 22)
-//        searchBar.barStyle = .default
-//        //searchBar.barTintColor = UIColor.red
-//        searchBar.placeholder = "Search"
-//        searchBar.searchBarStyle = .minimal
-//        view.addSubview(searchBar)
         
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width - 96, height: 44))
         label.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightMedium)
@@ -52,41 +46,26 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
         
-        conversations = getNonEmptyConversations()
-        conversations.sort(by: { $0 > $1 })
         tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        mainStore.subscribe(self)
+        message_service?.subscribe(identifier, subscriber: self)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        mainStore.unsubscribe(self)
+        message_service?.unsubscribe(identifier)
     }
     
-    func newState(state: AppState) {
-        
-        conversations = getNonEmptyConversations()
-        for conversation in conversations {
-            print("CONVERSATION:  \(conversation.getKey())")
-        }
-        conversations.sort(by: { $0 > $1 })
+    func conversationsUpdated(_ conversations: [Conversation]) {
+        print("DEM CONVOS UPDATED")
+        self.conversations = conversations
         tableView.reloadData()
-        
     }
     
-    func checkForExistingConversation(partner_uid:String) -> Conversation? {
-        for conversation in conversations {
-            if conversation.getPartnerId() == partner_uid {
-                return conversation
-            }
-        }
-        return nil
-    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -113,7 +92,6 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
         let cell = tableView.cellForRow(at: indexPath) as! ConversationViewCell
         if let user = cell.user, let image = cell.userImageView.image {
             let controller = ChatViewController()
-            controller.conversation = conversations[indexPath.row]
             controller.partnerImage = image
             controller.partner = user
             globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)

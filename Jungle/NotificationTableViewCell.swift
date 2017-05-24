@@ -35,15 +35,15 @@ class NotificationTableViewCell: UITableViewCell {
     var userTap:UITapGestureRecognizer!
     
     func setup(withNotification notification: Notification) {
-        let type = notification.getType()
+        let type = notification.type
         if type != .comment && type != .comment_also && type != .comment_to_sub &&  type != .like && type != .mention { return }
         self.notification = notification
         
         userTap = UITapGestureRecognizer(target: self, action: #selector(userTapped))
         
-        guard let postKey = notification.getPostKey() else { return }
+        guard let postKey = notification.postKey else { return }
         
-        getUser(withCheck: check, uid: notification.getSender(), completion: { check, user in
+        getUser(withCheck: check, uid: notification.sender, completion: { check, user in
             if self.check != check { return }
             self.user = user
             self.checkContentLoaded()
@@ -85,16 +85,16 @@ class NotificationTableViewCell: UITableViewCell {
         self.userImageView.isUserInteractionEnabled = true
         self.userImageView.addGestureRecognizer(userTap)
         
-        self.userImageView.loadImageAsync(user.getImageUrl(), completion: { fromCache in })
+        self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })
         
         UploadService.retrieveImage(byKey: post.getKey(), withUrl: post.getDownloadUrl(), completion: { image, fromFile in
             self.postImageView.image = image
         })
         
-        let type = notification.getType()
+        let type = notification.type
         if type == .comment {
             var prefix = ""
-            if let numCommenters = notification.getNumCommenters() {
+            if let numCommenters = notification.numCommenters {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
@@ -102,13 +102,13 @@ class NotificationTableViewCell: UITableViewCell {
                 }
             }
             var suffix = "."
-            if let text = notification.getText() {
+            if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.getUsername(), message: " \(prefix)commented on your post\(suffix)", date: notification.getDate())
+            setMessageLabel(username: user.username, message: " \(prefix)commented on your post\(suffix)", date: notification.date)
         } else if type == .comment_also {
             var prefix = ""
-            if let numCommenters = notification.getNumCommenters() {
+            if let numCommenters = notification.numCommenters {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
@@ -116,13 +116,13 @@ class NotificationTableViewCell: UITableViewCell {
                 }
             }
             var suffix = "."
-            if let text = notification.getText() {
+            if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.getUsername(), message: " \(prefix)also commented\(suffix)", date: notification.getDate())
+            setMessageLabel(username: user.username, message: " \(prefix)also commented\(suffix)", date: notification.date)
         } else if type == .comment_to_sub {
             var prefix = ""
-            if let numCommenters = notification.getNumCommenters() {
+            if let numCommenters = notification.numCommenters {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
@@ -130,14 +130,14 @@ class NotificationTableViewCell: UITableViewCell {
                 }
             }
             var suffix = "."
-            if let text = notification.getText() {
+            if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.getUsername(), message: " \(prefix)commented on a post you are following\(suffix)", date: notification.getDate())
+            setMessageLabel(username: user.username, message: " \(prefix)commented on a post you are following\(suffix)", date: notification.date)
         } else if type == .like {
-            setMessageLabel(username: user.getUsername(), message: " liked your post.", date: notification.getDate())
+            setMessageLabel(username: user.username, message: " liked your post.", date: notification.date)
         } else if type == .mention {
-            setMessageLabel(username: user.getUsername(), message: " mentioned you in a comment.", date: notification.getDate())
+            setMessageLabel(username: user.username, message: " mentioned you in a comment.", date: notification.date)
         }
     }
     
@@ -165,6 +165,6 @@ class NotificationTableViewCell: UITableViewCell {
     
     func userTapped() {
         guard let notification = self.notification else { return }
-        userTappedHandler?(notification.getSender())
+        userTappedHandler?(notification.sender)
     }
 }
