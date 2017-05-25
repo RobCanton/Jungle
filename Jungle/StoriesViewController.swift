@@ -126,13 +126,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
         
-        closeButton = UIButton(frame: CGRect(x: view.frame.width - 50.0, y: 0, width: 50, height: 50))
-        closeButton.setImage(UIImage(named: "delete_thin"), for: .normal)
-        closeButton.setTitleColor(UIColor.black, for: .normal)
-        closeButton.tintColor = UIColor.black
-        closeButton.alpha = 0.0
-        
-        
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.itemSize = UIScreen.main.bounds.size
         layout.sectionInset = UIEdgeInsets(top: 0 , left: 0, bottom: 0, right: 0)
@@ -197,6 +190,11 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         tapGR.delegate = self
         self.view.addGestureRecognizer(tapGR)
         
+        closeButton = UIButton(frame: CGRect(x: view.frame.width - 50.0, y: 0, width: 50, height: 50))
+        closeButton.setImage(UIImage(named: "delete_thin"), for: .normal)
+        closeButton.setTitleColor(UIColor.black, for: .normal)
+        closeButton.tintColor = UIColor.black
+        closeButton.alpha = 0.0
         
         closeButton.addTarget(self, action: #selector(dismissComments), for: .touchUpInside)
         self.view.addSubview(closeButton)
@@ -272,7 +270,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: StoryViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! StoryViewController
-        cell.contentView.backgroundColor = UIColor.white
         cell.delegate = self
         if storyType == .UserStory {
             
@@ -296,8 +293,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             
             if scrollView.contentOffset.y == 0 {
                 self.collectionContainerView.removeGestureRecognizer(collectionTap)
+                self.collectionView.isScrollEnabled = true
             } else {
                 self.collectionContainerView.addGestureRecognizer(collectionTap)
+                self.collectionView.isScrollEnabled = false
             }
             
             return
@@ -496,11 +495,6 @@ extension StoriesViewController: UIScrollViewDelegate {
         
         closeButton.alpha = progressMultiple
         
-        let ra = yOffset/view.frame.height
-        let ry = ra * ra
-        var cFrame = collectionView.frame
-        cFrame.origin.y = yOffset
-        //collectionView.frame = cFrame
         collectionContainerView.transform = CGAffineTransform(scaleX: reverseProgress * 0.5 + 0.5, y: reverseProgress * 0.5 + 0.5)
         collectionContainerView.transform = CGAffineTransform(translationX: 0.0, y: view.frame.height/2.0)
         let scale = CGAffineTransform(scaleX: reverseProgress * 0.8 + 0.20, y: reverseProgress * 0.8 + 0.20)
@@ -509,14 +503,14 @@ extension StoriesViewController: UIScrollViewDelegate {
         
         
         var barFrame = commentBar.frame
-        barFrame.origin.y = view.frame.height - 50.0 * (ry)
+        barFrame.origin.y = view.frame.height - 50.0 * (progress * progress)
         commentBar.frame = barFrame
         
         if let cell = getCurrentCell() {
             if yOffset > 0 {
-                cell.pause()
+                cell.looping = true
             } else {
-                cell.resume()
+                cell.looping = false
             }
             
             cell.setDetailFade(reverseProgress)

@@ -64,15 +64,17 @@ class User:NSObject, NSCoding {
     private(set) var username: String
     private(set) var imageURL: String
     private(set) var bio: String
+    private(set) var posts:Int
     private(set) var followers:Int
     private(set) var following:Int
     
-    init(uid:String, username:String, imageURL:String, bio:String, followers:Int, following:Int)
+    init(uid:String, username:String, imageURL:String, bio:String, posts:Int, followers:Int, following:Int)
     {
         self.uid       = uid
         self.username  = username
         self.imageURL  = imageURL
         self.bio       = bio
+        self.posts     = posts
         self.followers = followers
         self.following = following
     }
@@ -83,9 +85,10 @@ class User:NSObject, NSCoding {
         let username = decoder.decodeObject(forKey: "username") as! String
         let imageURL = decoder.decodeObject(forKey: "imageURL") as! String
         let bio = decoder.decodeObject(forKey: "bio") as! String
+        let posts = decoder.decodeObject(forKey: "posts") as! Int
         let followers = decoder.decodeObject(forKey: "followers") as! Int
         let following = decoder.decodeObject(forKey: "following") as! Int
-        self.init(uid: uid, username: username, imageURL: imageURL, bio: bio, followers: followers, following: following)
+        self.init(uid: uid, username: username, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
 
     }
 
@@ -94,6 +97,7 @@ class User:NSObject, NSCoding {
         coder.encode(uid, forKey: "uid")
         coder.encode(username, forKey: "username")
         coder.encode(imageURL, forKey: "imageURL")
+        coder.encode(posts, forKey: "posts")
         coder.encode(followers, forKey: "followers")
         coder.encode(following, forKey: "following")
     }

@@ -147,7 +147,7 @@ class CreateAccountViewController: UIViewController, UINavigationControllerDeleg
                             "bio":""
                             ], withCompletionBlock: { error, ref in
                                 
-                                FIRDatabase.database().reference().child("lookup/username/uid/\(username)").setValue(user!.uid)
+                                FIRDatabase.database().reference().child("users/lookup/username/uid/\(username)").setValue(user!.uid)
                                 self.dismiss(animated: true, completion: nil)
                         })
                         

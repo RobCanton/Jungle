@@ -944,12 +944,8 @@ extension MainViewController: View2ViewTransitionPresenting {
             return convertedFrame//view.convert(rect, to: view)
         } else if storyType == .ProfileStory {
             let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
-            let image_frame = cell.imageView.frame
-            let x = cell.frame.origin.x + 1
-            let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-            let y = cell.frame.origin.y + navHeight - profile.collectionView!.contentOffset.y//+ navHeight
-            let rect = CGRect(x: x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
-            return view.convert(rect, to: view)
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return convertedFrame
         } else {
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
             let image_frame = cell.postImageView.frame

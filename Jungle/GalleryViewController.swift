@@ -16,6 +16,8 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var uid:String!
     var posts = [StoryItem]()
+    
+    var collectionContainerView:UIView!
     var collectionView:UICollectionView!
     
     var isSingleItem = false
@@ -26,9 +28,13 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var currentIndexPath:IndexPath?
     
+    var closeButton:UIButton!
+    var collectionTap:UITapGestureRecognizer!
+    
     fileprivate var commentBar:CommentBar!
     fileprivate var scrollView:UIScrollView!
     fileprivate var commentsViewController:CommentsViewController!
+    
     
     deinit {
         print("Deinit >> GalleryViewController")
@@ -107,7 +113,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.edgesForExtendedLayout = UIRectEdge.all
         self.extendedLayoutIncludesOpaqueBars = true
         self.automaticallyAdjustsScrollViewInsets = false
-        self.view.backgroundColor = UIColor.black
+        self.view.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -118,11 +124,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
         
-        collectionView = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout)
+        collectionContainerView = UIView(frame: UIScreen.main.bounds)
+        collectionView = UICollectionView(frame: collectionContainerView.bounds, collectionViewLayout: layout)
         collectionView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
         
         collectionView.register(PostViewController.self, forCellWithReuseIdentifier: "presented_cell")
-        collectionView.backgroundColor = UIColor.black
+        collectionView.backgroundColor = UIColor.white
         collectionView.bounces = false
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -131,10 +138,13 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.decelerationRate = UIScrollViewDecelerationRateFast
         
+        collectionContainerView.addSubview(collectionView)
+        collectionContainerView.applyShadow(radius: 5.0, opacity: 0.25, height: 0.0, shouldRasterize: false)
+        
         scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
         scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height * 2.0)
         
-        self.scrollView.addSubview(collectionView)
+        self.scrollView.addSubview(collectionContainerView)
         self.view.addSubview(scrollView)
         scrollView.isPagingEnabled = true
         scrollView.decelerationRate = UIScrollViewDecelerationRateFast
@@ -145,7 +155,9 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         scrollView.delegate = self
         
         commentsViewController = CommentsViewController()
-        commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: view.frame.height)
+        commentsViewController.delegate = self
+        commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height * 1.23, width: view.frame.width, height: view.frame.height * 0.77)
+        commentsViewController.setup()
         
         self.addChildViewController(commentsViewController)
         self.scrollView.addSubview(commentsViewController.view)
@@ -158,6 +170,17 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentBar.textField.delegate = self
         
         self.view.addSubview(commentBar)
+        
+        closeButton = UIButton(frame: CGRect(x: view.frame.width - 50.0, y: 0, width: 50, height: 50))
+        closeButton.setImage(UIImage(named: "delete_thin"), for: .normal)
+        closeButton.setTitleColor(UIColor.black, for: .normal)
+        closeButton.tintColor = UIColor.black
+        closeButton.alpha = 0.0
+        
+        closeButton.addTarget(self, action: #selector(dismissComments), for: .touchUpInside)
+        self.view.addSubview(closeButton)
+        
+        collectionTap = UITapGestureRecognizer(target: self, action: #selector(dismissComments))
         
     }
     
@@ -224,8 +247,21 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView != collectionView { return }
-        //SHOULD HANDLE COMMENTS VIEW AS WELL
+        if scrollView == self.scrollView {
+            
+            if scrollView.contentOffset.y == 0 {
+                self.collectionContainerView.removeGestureRecognizer(collectionTap)
+                self.collectionView.isScrollEnabled = true
+            } else {
+                
+                self.collectionContainerView.addGestureRecognizer(collectionTap)
+                self.collectionView.isScrollEnabled = false
+                getCurrentCell()?.setDetailFade(0.0)
+            }
+            
+            return
+        }
+
         
         var visibleRect = CGRect()
         
@@ -245,6 +281,8 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             }
         }
     }
+    
+    
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let cell = cell as! PostViewController
@@ -391,6 +429,28 @@ extension GalleryViewController: PopupProtocol {
     }
 }
 
+extension GalleryViewController: StoryCommentsProtocol {
+    func dismissComments() {
+        if scrollView.isScrollEnabled {
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        } else {
+            commentBar.textField.resignFirstResponder()
+        }
+    }
+    
+    func dismissStory() {
+        dismissPopup(true)
+    }
+    
+    func replyToUser(_ username:String) {
+        if username == mainStore.state.userState.user?.username { return }
+        
+        self.commentBar.textField.text = "@\(username) "
+        self.commentBar.textField.becomeFirstResponder()
+    }
+}
+
+
 
 extension GalleryViewController: UIScrollViewDelegate {
     
@@ -401,17 +461,21 @@ extension GalleryViewController: UIScrollViewDelegate {
         }
         if scrollView !== self.scrollView { return }
         let yOffset = scrollView.contentOffset.y
-        let alpha = 1 - yOffset/view.frame.height
-        let multiple = alpha * alpha
+        let progress = yOffset/view.frame.height
+        let reverseProgress = 1 - progress
+        let progressMultiple = progress * progress * progress * progress * progress
         
-        let ra = yOffset/view.frame.height
-        let ry = ra * ra
-        var cFrame = collectionView.frame
-        cFrame.origin.y = yOffset
-        collectionView.frame = cFrame
+        closeButton.alpha = progressMultiple
+
+        collectionContainerView.transform = CGAffineTransform(scaleX: reverseProgress * 0.5 + 0.5, y: reverseProgress * 0.5 + 0.5)
+        collectionContainerView.transform = CGAffineTransform(translationX: 0.0, y: view.frame.height/2.0)
+        let scale = CGAffineTransform(scaleX: reverseProgress * 0.8 + 0.20, y: reverseProgress * 0.8 + 0.20)
+        let translate = CGAffineTransform(translationX: 0.0, y: view.frame.height * (progress) * 0.6125)
+        collectionContainerView.transform = scale.concatenating(translate)
+        
         
         var barFrame = commentBar.frame
-        barFrame.origin.y = view.frame.height - 50.0 * (ry)
+        barFrame.origin.y = view.frame.height - 50.0 * (progress * progress)
         commentBar.frame = barFrame
         
         if let cell = getCurrentCell() {
@@ -421,8 +485,7 @@ extension GalleryViewController: UIScrollViewDelegate {
                 cell.resume()
             }
             
-            cell.setDetailFade(alpha)
-            collectionView.alpha = 0.75 + 0.25 * alpha
+            cell.setDetailFade(reverseProgress)
         }
     }
     

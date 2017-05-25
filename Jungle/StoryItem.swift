@@ -219,10 +219,12 @@ class StoryItem: NSObject, NSCoding {
             if image != nil {
                 return false
             }
-            if let savedImage = UploadService.readImageFromFile(withKey: key) {
-                image = savedImage
-                return false
-            }
+            
+            return !UploadService.imageFileExists(withKey: key)
+//            if let savedImage = UploadService.readImageFromFile(withKey: key) {
+//                image = savedImage
+//                return false
+//            }
         }
         
         if contentType == .video {

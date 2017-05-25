@@ -30,20 +30,29 @@ class UploadService {
     fileprivate static let sm = SwiftMessages()
     
     static func writeImageToFile(withKey key:String, image:UIImage) {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_image-\(key).jpg"))
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
         if let jpgData = UIImageJPEGRepresentation(image, 1.0) {
             do {
-                try jpgData.write(to: fileURL, options: [.atomic])
+                try jpgData.write(to: dataPath, options: [.atomic])
             } catch {
                 print("Error writing to disk")
             }
-            
         }
     }
     
     static func readImageFromFile(withKey key:String) -> UIImage? {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_image-\(key).jpg"))
-        return UIImage(contentsOfFile: fileURL.path)
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
+        return UIImage(contentsOfFile: dataPath.path)
+    }
+    
+    static func imageFileExists(withKey key:String) -> Bool {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
+        let exists = FileManager.default.fileExists(atPath: dataPath.path)
+        print("Image exists: \(exists)")
+        return exists
     }
     
     fileprivate static func downloadImage(withUrl url:URL, completion: @escaping (_ image:UIImage?)->()) {
@@ -95,17 +104,20 @@ class UploadService {
     }
     
     static func writeVideoToFile(withKey key:String, video:Data) -> URL {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_video-\(key).mp4"))
-        try! video.write(to: fileURL, options: [.atomic])
-        return fileURL
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_video-\(key).mp4")
+
+        try! video.write(to: dataPath, options: [.atomic])
+        return dataPath
     }
     
     static func readVideoFromFile(withKey key:String) -> URL? {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("upload_video-\(key).mp4"))
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_video-\(key).mp4")
         do {
-            let _ = try Data(contentsOf: fileURL)
+            let _ = try Data(contentsOf: dataPath)
             
-            return fileURL
+            return dataPath
         } catch let error as Error{
             //print("ERROR: \(error.localizedDescription)")
             return nil

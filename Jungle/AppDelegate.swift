@@ -105,6 +105,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UIApplication.shared.registerForRemoteNotifications()
         }
         
+        
+        createDirectory("user_content")
         return true
     }
     
@@ -193,16 +195,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func clearTmpDirectory() {
+        
+        clearDirectory(name: "user_content")
         print("Clear temp directory")
-        do {
-            let tmpDirectory = try FileManager.default.contentsOfDirectory(atPath: NSTemporaryDirectory())
-            try tmpDirectory.forEach { file in
-                let path = String.init(format: "%@%@", NSTemporaryDirectory(), file)
-                try FileManager.default.removeItem(atPath: path)
-            }
-        } catch {
-            print(error)
-        }
+//        do {
+//            let tmpDirectory = try FileManager.default.contentsOfDirectory(atPath: NSTemporaryDirectory())
+//            try tmpDirectory.forEach { file in
+//                let path = String.init(format: "%@%@", NSTemporaryDirectory(), file)
+//                try FileManager.default.removeItem(atPath: path)
+//            }
+//        } catch {
+//            print(error)
+//        }
     }
     
     

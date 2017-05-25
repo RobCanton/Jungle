@@ -14,6 +14,10 @@ enum UsersListType {
     case Followers, Following, None
 }
 
+protocol UserCellProtocol:class {
+    func unfollowHandler(_ user:User)
+}
+
 class UsersListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber {
     
     var location:Location?
@@ -116,23 +120,6 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
         
     }
     
-    func unfollowHandler(user:User) {
-        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
-        
-        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-        }
-        actionSheet.addAction(cancelActionButton)
-        
-        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
-        { action -> Void in
-            
-            UserService.unfollowUser(uid: user.uid)
-        }
-        actionSheet.addAction(saveActionButton)
-        
-        self.present(actionSheet, animated: true, completion: nil)
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return userIds.count
     }
@@ -148,8 +135,7 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! UserViewCell
         cell.setupUser(uid: userIds[indexPath.row])
-        cell.unfollowHandler = unfollowHandler
-        cell.followHandler = followHandler
+        cell.delegate = self
         let labelX = cell.usernameLabel.frame.origin.x
         cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
         return cell
@@ -162,12 +148,6 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
         tableView.deselectRow(at: indexPath as IndexPath, animated: true)
     }
     
-    
-    func followHandler() {
-        
-    }
-
-    
     func addDoneButton() {
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneTapped))
         self.navigationItem.rightBarButtonItem  = doneButton
@@ -178,9 +158,24 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     func doneTapped() {
         self.performSegue(withIdentifier: "showLit", sender: self)
     }
-    
+}
 
-    
-
+extension UsersListViewController: UserCellProtocol {
+    func unfollowHandler(_ user:User) {
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
+        { action -> Void in
+            
+            UserService.unfollowUser(uid: user.uid)
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+    }
 
 }

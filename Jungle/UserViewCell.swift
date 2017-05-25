@@ -20,6 +20,10 @@ class UserViewCell: UITableViewCell {
     
     @IBOutlet weak var verifiedBadge: UIImageView!
     
+    var followButtonColor = UIColor.black
+    
+    weak var delegate:UserCellProtocol?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -77,8 +81,6 @@ class UserViewCell: UITableViewCell {
         }
     }
     
-    var followButtonColor = UIColor.black
-    
     func setUserStatus(status:FollowingStatus) {
         if self.status == status { return }
         self.status = status
@@ -111,11 +113,6 @@ class UserViewCell: UITableViewCell {
         }
     }
     
-    
-    var followHandler:(()->())?
-    
-    var unfollowHandler:((_ user:User)->())?
-    
     @IBAction func handleFollowTap(sender: AnyObject) {
         guard let user = self.user else { return }
         guard let status = self.status else { return }
@@ -124,13 +121,12 @@ class UserViewCell: UITableViewCell {
         case .CurrentUser:
             break
         case .Following:
-            unfollowHandler?(user)
+            delegate?.unfollowHandler(user)
             break
         case .None:
             if mainStore.state.socialState.blockedBy.contains(user.uid) { return }
             setUserStatus(status: .Requested)
             UserService.followUser(uid: user.uid)
-            followHandler?()
             break
         case .Requested:
             break

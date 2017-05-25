@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol ProfileHeaderProtocol {
+protocol ProfileHeaderProtocol:class {
     func showFollowers()
     func showFollowing()
     func showConversation()
@@ -26,7 +26,7 @@ class ProfileHeaderView: UICollectionReusableView {
     @IBOutlet weak var bioLabel: UILabel!
     @IBOutlet weak var followButton: UIButton!
     
-    var delegate:ProfileHeaderProtocol?
+    weak var delegate:ProfileHeaderProtocol?
     
     
     override func awakeFromNib() {
@@ -75,6 +75,7 @@ class ProfileHeaderView: UICollectionReusableView {
         self.user = _user
         setUserStatus(status: checkFollowingStatus(uid: user.uid))
         
+        setPostsCount(user.posts)
         setFollowersCount(user.followers)
         setFollowingCount(user.following)
         usernameLabel.text = user.username

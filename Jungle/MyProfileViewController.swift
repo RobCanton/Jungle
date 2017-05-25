@@ -36,19 +36,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         }
     }
     
-    var followers:[String]?
-        {
-        didSet {
-            getHeaderView()?.setFollowersCount(followers!.count)
-        }
-    }
-    var following:[String]?
-        {
-        didSet {
-            getHeaderView()?.setFollowingCount(following!.count)
-        }
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         uid = mainStore.state.userState.uid
@@ -113,7 +100,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         listenToPosts()
-        setFollowing()
         
     }
     
@@ -129,26 +115,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     func newState(state: AppState) {
         let status = checkFollowingStatus(uid: uid)
         getHeaderView()?.setUserStatus(status: status)
-        
-        setFollowing()
-        
-    }
-    
-    func setFollowing() {
-        let followers = mainStore.state.socialState.followers
-        var tempFollowers = [String]()
-        for follower in followers {
-            tempFollowers.append(follower)
-        }
-        
-        self.followers = tempFollowers
-        
-        let following = mainStore.state.socialState.following
-        var tempFollowing = [String]()
-        for follower in following {
-            tempFollowing.append(follower)
-        }
-        self.following = tempFollowing
+
     }
     
     
@@ -169,7 +136,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
                 }
             }
             self.postKeys = postKeys
-            self.getHeaderView()?.setPostsCount(postKeys.count)
             self.downloadStory(postKeys: postKeys)
         })
     }
@@ -290,21 +256,11 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
 extension MyProfileViewController: ProfileHeaderProtocol {
     
     func showFollowers() {
-        guard let followers = followers else { return }
-        let controller = UsersListViewController()
-        controller.title = "Followers"
-        controller.tempIds = followers
-        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
-        ///self.navigationController?.pushViewController(controller, animated: true)
+       
     }
     
     func showFollowing() {
-        guard let following = following else { return }
-        let controller = UsersListViewController()
-        controller.title = "Following"
-        controller.tempIds = following
-        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
-        //self.navigationController?.pushViewController(controller, animated: true)
+       
     }
     
     func showConversation() {}

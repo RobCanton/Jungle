@@ -142,7 +142,7 @@ class NotificationTableViewCell: UITableViewCell {
     }
     
     func setMessageLabel(username:String, message:String, date: Date) {
-        let timeStr = " \(date.timeStringSinceNowWithAgo())"
+        let timeStr = " \(date.timeStringSinceNow())"
         let str = "\(username)\(message)\(timeStr)"
         let attributes: [String: AnyObject] = [
             NSFontAttributeName : UIFont.systemFont(ofSize: 14, weight: UIFontWeightRegular)

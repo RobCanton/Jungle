@@ -244,7 +244,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
                 }
             }
             self.postKeys = postKeys
-            self.getHeaderView()?.setPostsCount(postKeys.count)
             self.downloadStory(postKeys: postKeys)
         })
     }

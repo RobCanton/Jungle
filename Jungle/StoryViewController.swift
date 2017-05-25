@@ -58,7 +58,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.story = location
         self.story.delegate = self
         story.determineState()
-        
     }
     
     func saveIndex() {
@@ -118,7 +117,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func stopIndicator() {
-        if activityView.animating {
+        if activityView.isAnimating {
             DispatchQueue.main.async {
                 self.activityView.stopAnimating()
                 self.animateInitiated = false
@@ -258,7 +257,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func nextItem() {
         guard let items = story.items else { return }
-        viewIndex += 1
+        if !looping {
+           viewIndex += 1
+        }
         
         if viewIndex >= items.count {
             delegate?.dismissPopup(true)
@@ -322,7 +323,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     var blockInappropriateContent = true
     
     func playVideo() {
-        guard let item = self.item else { return }
+        guard let _ = self.item else { return }
         self.playerLayer?.player?.play()
     }
     
@@ -347,6 +348,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         remainingTime = timer.fireDate.timeIntervalSinceNow
         timer.invalidate()
     }
+    
+    var looping = false
+
     
     func resume() {
         if !paused { return }
@@ -419,7 +423,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         contentView.addSubview(captionView)
         
         /* Activity view */
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.white, padding: 1.0)
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.black, padding: 1.0)
         activityView.center = contentView.center
         contentView.addSubview(activityView)
         

@@ -27,28 +27,28 @@
                             <constraint firstAttribute="width" constant="32" id="J2E-G1-wmu"/>
                         </constraints>
                     </imageView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K8S-yc-OWp">
-                        <rect key="frame" x="57" y="0.0" width="42" height="20"/>
-                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="16"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K8S-yc-OWp">
+                        <rect key="frame" x="56" y="10" width="0.0" height="0.0"/>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J7m-wK-Gyg" customClass="ActiveLabel" customModule="ActiveLabel">
-                        <rect key="frame" x="57" y="29" width="321" height="20"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J7m-wK-Gyg" customClass="ActiveLabel" customModule="ActiveLabel">
+                        <rect key="frame" x="56" y="26" width="320" height="15.5"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="color" keyPath="mentionColor">
-                                <color key="value" red="0.42140614986419678" green="0.95739591121673584" blue="0.60009157657623291" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="value" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                             </userDefinedRuntimeAttribute>
                             <userDefinedRuntimeAttribute type="color" keyPath="mentionSelectedColor">
-                                <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="value" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="5m" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mFH-ly-0OP">
-                        <rect key="frame" x="130" y="8" width="42" height="21"/>
+                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="5m" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mFH-ly-0OP">
+                        <rect key="frame" x="64" y="-7" width="21" height="17"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                         <nil key="highlightedColor"/>
@@ -57,8 +57,8 @@
                 <constraints>
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="6WB-zi-X86" secondAttribute="top" id="8ve-Eb-K1c"/>
                     <constraint firstItem="6WB-zi-X86" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="CmB-fF-YJt"/>
+                    <constraint firstItem="mFH-ly-0OP" firstAttribute="baseline" secondItem="K8S-yc-OWp" secondAttribute="baseline" id="F5w-Ey-MDQ"/>
                     <constraint firstItem="J7m-wK-Gyg" firstAttribute="top" secondItem="K8S-yc-OWp" secondAttribute="bottom" constant="-7" id="Jpk-vK-S5l"/>
-                    <constraint firstItem="mFH-ly-0OP" firstAttribute="centerY" secondItem="K8S-yc-OWp" secondAttribute="centerY" id="Oj2-41-7jV"/>
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="8" id="Oqa-Tt-WtU"/>
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" id="PUU-OY-2X7"/>
                     <constraint firstAttribute="bottomMargin" secondItem="6WB-zi-X86" secondAttribute="bottom" id="S0O-MB-PSP"/>
@@ -68,14 +68,14 @@
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="ZRJ-d6-Yoj"/>
                     <constraint firstItem="J7m-wK-Gyg" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="8" id="abw-Ux-o1W"/>
                     <constraint firstItem="J7m-wK-Gyg" firstAttribute="bottom" secondItem="6WB-zi-X86" secondAttribute="bottom" id="faJ-Wu-9Tm"/>
-                    <constraint firstItem="mFH-ly-0OP" firstAttribute="leading" secondItem="K8S-yc-OWp" secondAttribute="trailing" constant="8" id="hsh-cT-SpU"/>
                     <constraint firstItem="6WB-zi-X86" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="12" id="lhO-9v-5ri"/>
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="6WB-zi-X86" secondAttribute="top" id="oYp-xV-tVw"/>
+                    <constraint firstItem="mFH-ly-0OP" firstAttribute="leading" secondItem="K8S-yc-OWp" secondAttribute="trailing" constant="8" id="s2N-aQ-O0R"/>
                     <constraint firstAttribute="leadingMargin" secondItem="6WB-zi-X86" secondAttribute="leading" id="uJx-2D-0u4"/>
                     <constraint firstAttribute="trailing" secondItem="J7m-wK-Gyg" secondAttribute="trailing" constant="10" id="uOR-Di-PzB"/>
                     <constraint firstItem="J7m-wK-Gyg" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="12" id="vMx-7K-LRz"/>
-                    <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="vTq-Ac-A1J"/>
-                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="31" id="xmw-ve-WBR"/>
+                    <constraint firstItem="K8S-yc-OWp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="vTq-Ac-A1J"/>
+                    <constraint firstItem="J7m-wK-Gyg" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="26" id="xmw-ve-WBR"/>
                     <constraint firstAttribute="bottom" secondItem="J7m-wK-Gyg" secondAttribute="bottom" constant="8" id="z3o-cj-mYL"/>
                     <constraint firstItem="K8S-yc-OWp" firstAttribute="leading" secondItem="6WB-zi-X86" secondAttribute="trailing" constant="12" id="zvp-U4-LBg"/>
                 </constraints>

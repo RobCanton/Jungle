@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import ReSwift
 
 enum PostInfoMode {
     case Viewers, Comments
@@ -31,7 +32,7 @@ protocol CommentsHeaderProtocol: class {
 }
 
 
-class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
+class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, StoreSubscriber  {
     
     var mode:PostInfoMode = .Comments
     
@@ -75,6 +76,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     
+    func newState(state: AppState) {
+        tableView.reloadData()
+    }
+    
     func setup() {
         self.automaticallyAdjustsScrollViewInsets = false
         navHeight = 50.0
@@ -109,7 +114,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         //tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 8))
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 70))
         
-        
         containerView.addSubview(tableView)
     }
     
@@ -129,9 +133,13 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        mainStore.subscribe(self)
     }
     
     func setupItem(_ item: StoryItem) {
+        if self.itemRef != nil {
+            if self.itemRef!.getKey() == item.getKey() { return }
+        }
         self.itemRef = item
         self.header.setViewsLabel(count: item.getNumViews())
         
@@ -247,6 +255,11 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         NotificationCenter.default.removeObserver(self)
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        mainStore.unsubscribe(self)
+    }
+    
     func showUser(uid:String) {
         if let nav = self.navigationController {
             nav.delegate = nil
@@ -281,7 +294,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             let text = comment.getText()
             let width = tableView.frame.width - (12 + 12 + 10 + 32)
             let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
-            let height2 = size.height + 26 + 14 + 2 + 6  // +8 for some bio padding
+            let height2 = size.height + 26 + 14 + 1  // +8 for some bio padding
             return height2
         }
     }
@@ -291,8 +304,9 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         switch mode {
         case .Viewers:
             let cell = tableView.dequeueReusableCell(withIdentifier: "userViewCell", for: indexPath) as! UserViewCell
-            cell.clearMode(true)
+            cell.clearMode(false)
             cell.setupUser(uid: viewers[indexPath.row])
+            cell.delegate = self
             let labelX = cell.usernameLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
             return cell
@@ -447,6 +461,26 @@ extension CommentsViewController: CommentsHeaderProtocol {
         }
         
     }
+}
+
+extension CommentsViewController: UserCellProtocol {
+    func unfollowHandler(_ user:User) {
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
+        { action -> Void in
+            
+            UserService.unfollowUser(uid: user.uid)
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+    }
+    
 }
 
 class tempViewController: UIViewController {
