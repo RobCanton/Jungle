@@ -421,7 +421,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MqN-L3-DIF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2949.5999999999999" y="659.82008995502258"/>
+            <point key="canvasLocation" x="2924" y="660"/>
         </scene>
         <!--Main View Controller-->
         <scene sceneID="Jgl-e2-jWK">
@@ -440,7 +440,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EXc-c5-O3O" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4640.8000000000002" y="606.74662668665667"/>
+            <point key="canvasLocation" x="4726" y="27"/>
         </scene>
         <!--Send To-->
         <scene sceneID="4nl-gc-Fed">
@@ -544,7 +544,7 @@
                         <inset key="imageInsets" minX="0.0" minY="6" maxX="0.0" maxY="-6"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="SEa-f8-Nqc">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="SEa-f8-Nqc">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -587,7 +587,7 @@
                         <inset key="imageInsets" minX="0.0" minY="6" maxX="0.0" maxY="-6"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="aFY-7g-KAH">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="aFY-7g-KAH">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -631,7 +631,7 @@
                         <inset key="imageInsets" minX="0.0" minY="6" maxX="0.0" maxY="-6"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="FWk-ih-g73">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="FWk-ih-g73">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -674,7 +674,7 @@
                         <inset key="imageInsets" minX="0.0" minY="6" maxX="0.0" maxY="-6"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="pRT-7m-dlr">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="pRT-7m-dlr">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -910,7 +910,7 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="H6M-M2-RCL" customClass="MasterNavigationController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="1Mh-Zn-NYX" customClass="MasterNavigationBar" customModule="Jungle" customModuleProvider="target">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="1Mh-Zn-NYX" customClass="MasterNavigationBar" customModule="Jungle" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -922,7 +922,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="k31-4k-bdU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4282" y="715"/>
+            <point key="canvasLocation" x="4054" y="27"/>
         </scene>
         <!--Create Account View Controller-->
         <scene sceneID="4QL-Xu-qHC">
@@ -1214,7 +1214,7 @@
                                                         <rect key="frame" x="12" y="85" width="291" height="22"/>
                                                         <nil key="textColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                     </textField>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2oA-mj-qCm">
                                                         <rect key="frame" x="12" y="111" width="291" height="1"/>
@@ -1233,7 +1233,7 @@
                                                         <rect key="frame" x="12" y="157" width="291" height="22"/>
                                                         <nil key="textColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
+                                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
                                                     </textField>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6eE-NB-LqV">
                                                         <rect key="frame" x="12" y="183" width="291" height="1"/>
@@ -1306,11 +1306,112 @@
                         <outlet property="firstnameField" destination="vlW-hJ-7bm" id="RwW-OC-6Hx"/>
                         <outlet property="lastnameField" destination="rZc-26-zBx" id="UYq-gO-wSk"/>
                         <outlet property="legal" destination="J0Z-GM-tuz" id="yNS-QT-A1f"/>
+                        <segue destination="Tvo-oz-2BA" kind="show" identifier="toBirthday" animates="NO" id="gTT-MN-Qhy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="50s-Ga-HhT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3597.5999999999999" y="659.82008995502258"/>
+            <point key="canvasLocation" x="3630" y="660"/>
+        </scene>
+        <!--Sign Up Birthday View Controller-->
+        <scene sceneID="gdF-Re-MtD">
+            <objects>
+                <viewController id="Tvo-oz-2BA" customClass="SignUpBirthdayViewController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Z7n-Yn-fnr"/>
+                        <viewControllerLayoutGuide type="bottom" id="1do-uB-OuF"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="chv-Sx-ZWQ">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IRQ-Iv-9LL">
+                                <rect key="frame" x="30" y="80" width="315" height="132"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="When's your birthday?" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vIh-fa-ILO">
+                                        <rect key="frame" x="54" y="8" width="207" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="BIRTHDAY" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I8r-vP-1fZ">
+                                        <rect key="frame" x="12" y="56" width="70.5" height="17"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textField opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YxV-LT-Xju">
+                                        <rect key="frame" x="12" y="85" width="291" height="22"/>
+                                        <nil key="textColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" spellCheckingType="no" returnKeyType="next"/>
+                                    </textField>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vt3-kr-HXS">
+                                        <rect key="frame" x="12" y="111" width="291" height="1"/>
+                                        <color key="backgroundColor" white="0.75" alpha="1" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="1" id="9OW-2w-d8B"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="YxV-LT-Xju" secondAttribute="trailing" constant="12" id="4u8-5x-32l"/>
+                                    <constraint firstItem="YxV-LT-Xju" firstAttribute="leading" secondItem="IRQ-Iv-9LL" secondAttribute="leading" constant="12" id="EUR-fE-wIU"/>
+                                    <constraint firstItem="YxV-LT-Xju" firstAttribute="top" secondItem="I8r-vP-1fZ" secondAttribute="bottom" constant="12" id="GUC-yb-j2r"/>
+                                    <constraint firstItem="vt3-kr-HXS" firstAttribute="centerX" secondItem="YxV-LT-Xju" secondAttribute="centerX" id="Ng5-Ih-WCl"/>
+                                    <constraint firstItem="vt3-kr-HXS" firstAttribute="top" secondItem="YxV-LT-Xju" secondAttribute="bottom" constant="4" id="SC8-ZQ-ai7"/>
+                                    <constraint firstAttribute="bottom" secondItem="vt3-kr-HXS" secondAttribute="bottom" constant="20" id="XLp-2U-Dg1"/>
+                                    <constraint firstItem="vt3-kr-HXS" firstAttribute="width" secondItem="YxV-LT-Xju" secondAttribute="width" id="dbt-Qj-5Is"/>
+                                    <constraint firstItem="I8r-vP-1fZ" firstAttribute="leading" secondItem="IRQ-Iv-9LL" secondAttribute="leading" constant="12" id="dvn-0e-0Kd"/>
+                                    <constraint firstItem="vIh-fa-ILO" firstAttribute="top" secondItem="IRQ-Iv-9LL" secondAttribute="top" constant="8" id="lDU-rM-ngH"/>
+                                    <constraint firstItem="I8r-vP-1fZ" firstAttribute="top" secondItem="vIh-fa-ILO" secondAttribute="bottom" constant="24" id="ovE-Wj-qRP"/>
+                                    <constraint firstItem="vIh-fa-ILO" firstAttribute="centerX" secondItem="IRQ-Iv-9LL" secondAttribute="centerX" id="z9O-TX-IPC"/>
+                                </constraints>
+                            </view>
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="iOO-jg-cuo">
+                                <rect key="frame" x="0.0" y="431" width="375" height="216"/>
+                                <date key="date" timeIntervalSinceReferenceDate="517480780.12717599">
+                                    <!--2017-05-26 08:39:40 +0000-->
+                                </date>
+                                <connections>
+                                    <action selector="datePickerChanged:" destination="Tvo-oz-2BA" eventType="valueChanged" id="ZCZ-Wb-2ch"/>
+                                </connections>
+                            </datePicker>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3k6-M5-fID">
+                                <rect key="frame" x="97" y="373" width="180" height="50"/>
+                                <color key="backgroundColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="180" id="lbs-xX-CwJ"/>
+                                    <constraint firstAttribute="height" constant="50" id="t1c-eM-Csu"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                <state key="normal" title="CONTINUE">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="3k6-M5-fID" firstAttribute="centerX" secondItem="chv-Sx-ZWQ" secondAttribute="centerX" id="7Q1-sv-SCV"/>
+                            <constraint firstItem="IRQ-Iv-9LL" firstAttribute="top" secondItem="chv-Sx-ZWQ" secondAttribute="topMargin" constant="80" id="aYu-gb-i4n"/>
+                            <constraint firstItem="iOO-jg-cuo" firstAttribute="top" secondItem="3k6-M5-fID" secondAttribute="bottom" constant="8" id="bUl-s5-RQI"/>
+                            <constraint firstAttribute="trailing" secondItem="IRQ-Iv-9LL" secondAttribute="trailing" constant="30" id="d20-Ds-oh3"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="iOO-jg-cuo" secondAttribute="bottom" constant="20" id="en9-Zc-spY"/>
+                            <constraint firstItem="IRQ-Iv-9LL" firstAttribute="leading" secondItem="chv-Sx-ZWQ" secondAttribute="leading" constant="30" id="mnZ-Ty-07T"/>
+                            <constraint firstAttribute="trailing" secondItem="iOO-jg-cuo" secondAttribute="trailing" id="uxc-48-PvV"/>
+                            <constraint firstItem="iOO-jg-cuo" firstAttribute="leading" secondItem="chv-Sx-ZWQ" secondAttribute="leading" id="xpd-fl-HFO"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="dateField" destination="YxV-LT-Xju" id="akV-Yj-zvg"/>
+                        <outlet property="datePicker" destination="iOO-jg-cuo" id="8RZ-Oq-Pal"/>
+                        <outlet property="submitButton" destination="3k6-M5-fID" id="Y2P-1c-XnO"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3TD-xt-KhK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4316" y="659.82008995502258"/>
         </scene>
     </scenes>
     <resources>

@@ -85,6 +85,8 @@
 		B093FFDD1E79BEB100011B43 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFDC1E79BEB100011B43 /* CameraViewController.swift */; };
 		B0A053E61EAACC3000922AAC /* PostFooterView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A053E51EAACC3000922AAC /* PostFooterView.xib */; };
 		B0A4C5EA1ED7FC7E00A9F7CF /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */; };
+		B0A4C5EC1ED806FB00A9F7CF /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A4C5EB1ED806FB00A9F7CF /* WebViewController.swift */; };
+		B0A4C5EE1ED8222200A9F7CF /* SignUpBirthdayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A4C5ED1ED8222200A9F7CF /* SignUpBirthdayViewController.swift */; };
 		B0A6FCCD1EC2E057009933F8 /* HorizontalCollectionView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A6FCCC1EC2E057009933F8 /* HorizontalCollectionView.xib */; };
 		B0A6FCCF1EC2E066009933F8 /* HorizontalCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A6FCCE1EC2E066009933F8 /* HorizontalCollectionView.swift */; };
 		B0A6FCD81EC43113009933F8 /* EmptyMyStoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A6FCD61EC43112009933F8 /* EmptyMyStoryCell.swift */; };
@@ -218,6 +220,8 @@
 		B093FFDC1E79BEB100011B43 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		B0A053E51EAACC3000922AAC /* PostFooterView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostFooterView.xib; sourceTree = "<group>"; };
 		B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
+		B0A4C5EB1ED806FB00A9F7CF /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		B0A4C5ED1ED8222200A9F7CF /* SignUpBirthdayViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpBirthdayViewController.swift; sourceTree = "<group>"; };
 		B0A6FCCC1EC2E057009933F8 /* HorizontalCollectionView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HorizontalCollectionView.xib; sourceTree = "<group>"; };
 		B0A6FCCE1EC2E066009933F8 /* HorizontalCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HorizontalCollectionView.swift; sourceTree = "<group>"; };
 		B0A6FCD61EC43112009933F8 /* EmptyMyStoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmptyMyStoryCell.swift; sourceTree = "<group>"; };
@@ -489,8 +493,10 @@
 				B093FFAE1E790D5E00011B43 /* LoginViewController.swift */,
 				B00732891ED7EC10007D6C5F /* SignInViewController.swift */,
 				B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */,
+				B0A4C5ED1ED8222200A9F7CF /* SignUpBirthdayViewController.swift */,
 				B0F894831E7BD41400E490C4 /* CreateAccountViewController.swift */,
 				B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */,
+				B0A4C5EB1ED806FB00A9F7CF /* WebViewController.swift */,
 				B0550D8A1E8E21C4007DAAAC /* TextFieldEffects */,
 			);
 			name = Login;
@@ -719,6 +725,7 @@
 				B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */,
 				B0A6FCDC1EC45AB4009933F8 /* EmptyCollectionHeader.swift in Sources */,
 				B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */,
+				B0A4C5EC1ED806FB00A9F7CF /* WebViewController.swift in Sources */,
 				B0F8948B1E7BD55A00E490C4 /* Tree.swift in Sources */,
 				B093FFBF1E790D5E00011B43 /* HomeViewController.swift in Sources */,
 				B093FFDD1E79BEB100011B43 /* CameraViewController.swift in Sources */,
@@ -772,6 +779,7 @@
 				B0550D971E8E21C4007DAAAC /* AkiraTextField.swift in Sources */,
 				B0550D801E8A1A94007DAAAC /* LocationHeaderView.swift in Sources */,
 				B093FFBE1E790D5E00011B43 /* PhotoCell.swift in Sources */,
+				B0A4C5EE1ED8222200A9F7CF /* SignUpBirthdayViewController.swift in Sources */,
 				B0F894861E7BD43F00E490C4 /* Utilities.swift in Sources */,
 				B05091B81EB936CB001B84B1 /* Reachability.swift in Sources */,
 				B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */,

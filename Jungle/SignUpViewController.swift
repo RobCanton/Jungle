@@ -66,6 +66,11 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         
         legal.handleCustomTap(for: termsType) { element in
             print("Custom type tapped: \(element)")
+            let web = WebViewController()
+            web.title = "Terms of Use"
+            web.urlString = "https://getlit.site/terms.html"
+            let nav = UINavigationController(rootViewController: web)
+            self.present(nav, animated: true, completion: nil)
         }
         
         legal.customColor[privacyType] = infoColor
@@ -73,6 +78,11 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         
         legal.handleCustomTap(for: privacyType) { element in
             print("Custom type tapped: \(element)")
+            let web = WebViewController()
+            web.title = "Privacy Policy"
+            web.urlString = "https://getlit.site/privacypolicy.html"
+            let nav = UINavigationController(rootViewController: web)
+            self.present(nav, animated: true, completion: nil)
         }
         
         legal.text = "By tapping Sign Up & Accept, you accept the Terms of Use and Privacy Policy."
@@ -112,7 +122,9 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
     }
     
     func handleSubmit() {
+        guard let firstname = firstnameField.text, firstname != "" else { return }
         
+        self.performSegue(withIdentifier: "toBirthday", sender: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
