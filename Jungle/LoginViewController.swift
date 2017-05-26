@@ -68,36 +68,11 @@ class FirstAuthViewController: FirstViewController {
 }
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
-    
-    
-    @IBOutlet weak var signupButton: UIButton!
-    
+
     var gradientView:UIView!
     var gradient:CAGradientLayer?
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        gradientView = UIView(frame: view.bounds)
-        self.view.insertSubview(gradientView, at: 0)
-        gradientView.backgroundColor = UIColor.white
-        
-        self.gradient?.removeFromSuperlayer()
-        self.gradient = CAGradientLayer()
-        self.gradient!.frame = self.gradientView.bounds
-        self.gradient!.colors = [
-            lightAccentColor.cgColor,
-            darkAccentColor.cgColor
-        ]
-        self.gradient!.locations = [0.0, 1.0]
-        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-        self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
-
-        signupButton.layer.cornerRadius = 8.0
-        signupButton.clipsToBounds = true
-        
-        
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -117,9 +92,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             })
         }
     }
-    @IBAction func handleSignup(_ sender: Any) {
-        //self.performSegue(withIdentifier: "toCreateAccount", sender: self)
-    }
+
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
@@ -141,7 +114,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
 }
 
-class SignInViewController: UIViewController, UITextFieldDelegate {
+class whoa: UIViewController, UITextFieldDelegate {
     
     var gradientView:UIView!
     var gradient:CAGradientLayer?
@@ -153,21 +126,21 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        gradientView = UIView(frame: view.bounds)
-        self.view.insertSubview(gradientView, at: 0)
-        gradientView.backgroundColor = UIColor.white
-        
-        self.gradient?.removeFromSuperlayer()
-        self.gradient = CAGradientLayer()
-        self.gradient!.frame = self.gradientView.bounds
-        self.gradient!.colors = [
-            lightAccentColor.cgColor,
-            darkAccentColor.cgColor
-        ]
-        self.gradient!.locations = [0.0, 1.0]
-        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-        self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
+//        gradientView = UIView(frame: view.bounds)
+//        self.view.insertSubview(gradientView, at: 0)
+//        gradientView.backgroundColor = UIColor.white
+//        
+//        self.gradient?.removeFromSuperlayer()
+//        self.gradient = CAGradientLayer()
+//        self.gradient!.frame = self.gradientView.bounds
+//        self.gradient!.colors = [
+//            lightAccentColor.cgColor,
+//            darkAccentColor.cgColor
+//        ]
+//        self.gradient!.locations = [0.0, 1.0]
+//        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+//        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+//        self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
         
         emailTextField.layer.cornerRadius = 8.0
         emailTextField.clipsToBounds = true

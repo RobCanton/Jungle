@@ -10,6 +10,7 @@
 		A4D9CDEF6B0C05B70963B2B0 /* Pods_Jungle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24440022F614359253D5F062 /* Pods_Jungle.framework */; };
 		B003D7E41ED6C32200256FBB /* CommentViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B003D7E21ED6C32100256FBB /* CommentViewCell.swift */; };
 		B003D7E51ED6C32300256FBB /* CommentViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B003D7E31ED6C32100256FBB /* CommentViewCell.xib */; };
+		B007328A1ED7EC10007D6C5F /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00732891ED7EC10007D6C5F /* SignInViewController.swift */; };
 		B012177B1EB0407F00F13F64 /* PostFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012177A1EB0407F00F13F64 /* PostFooterView.swift */; };
 		B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
@@ -83,6 +84,7 @@
 		B093FFDB1E793AC100011B43 /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */; };
 		B093FFDD1E79BEB100011B43 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFDC1E79BEB100011B43 /* CameraViewController.swift */; };
 		B0A053E61EAACC3000922AAC /* PostFooterView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A053E51EAACC3000922AAC /* PostFooterView.xib */; };
+		B0A4C5EA1ED7FC7E00A9F7CF /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */; };
 		B0A6FCCD1EC2E057009933F8 /* HorizontalCollectionView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A6FCCC1EC2E057009933F8 /* HorizontalCollectionView.xib */; };
 		B0A6FCCF1EC2E066009933F8 /* HorizontalCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A6FCCE1EC2E066009933F8 /* HorizontalCollectionView.swift */; };
 		B0A6FCD81EC43113009933F8 /* EmptyMyStoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A6FCD61EC43112009933F8 /* EmptyMyStoryCell.swift */; };
@@ -137,6 +139,7 @@
 		2D43160F37AB716EE717D3AE /* Pods-Jungle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Jungle.release.xcconfig"; path = "Pods/Target Support Files/Pods-Jungle/Pods-Jungle.release.xcconfig"; sourceTree = "<group>"; };
 		B003D7E21ED6C32100256FBB /* CommentViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentViewCell.swift; sourceTree = "<group>"; };
 		B003D7E31ED6C32100256FBB /* CommentViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CommentViewCell.xib; sourceTree = "<group>"; };
+		B00732891ED7EC10007D6C5F /* SignInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
 		B012177A1EB0407F00F13F64 /* PostFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFooterView.swift; sourceTree = "<group>"; };
 		B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordRecoveryViewController.swift; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -214,6 +217,7 @@
 		B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		B093FFDC1E79BEB100011B43 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		B0A053E51EAACC3000922AAC /* PostFooterView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostFooterView.xib; sourceTree = "<group>"; };
+		B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		B0A6FCCC1EC2E057009933F8 /* HorizontalCollectionView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HorizontalCollectionView.xib; sourceTree = "<group>"; };
 		B0A6FCCE1EC2E066009933F8 /* HorizontalCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HorizontalCollectionView.swift; sourceTree = "<group>"; };
 		B0A6FCD61EC43112009933F8 /* EmptyMyStoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmptyMyStoryCell.swift; sourceTree = "<group>"; };
@@ -483,6 +487,8 @@
 			isa = PBXGroup;
 			children = (
 				B093FFAE1E790D5E00011B43 /* LoginViewController.swift */,
+				B00732891ED7EC10007D6C5F /* SignInViewController.swift */,
+				B0A4C5E91ED7FC7E00A9F7CF /* SignUpViewController.swift */,
 				B0F894831E7BD41400E490C4 /* CreateAccountViewController.swift */,
 				B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */,
 				B0550D8A1E8E21C4007DAAAC /* TextFieldEffects */,
@@ -726,6 +732,7 @@
 				B0F894991E7C717F00E490C4 /* ProfileHeaderView.swift in Sources */,
 				B0F8946A1E7B7E1500E490C4 /* CommentsViewController.swift in Sources */,
 				B0F894841E7BD41400E490C4 /* CreateAccountViewController.swift in Sources */,
+				B0A4C5EA1ED7FC7E00A9F7CF /* SignUpViewController.swift in Sources */,
 				B093FFC41E790D5E00011B43 /* UploadService.swift in Sources */,
 				B0A6FCD81EC43113009933F8 /* EmptyMyStoryCell.swift in Sources */,
 				B0C86D451E80B7E00067E004 /* FollowingHeader.swift in Sources */,
@@ -783,6 +790,7 @@
 				B003D7E41ED6C32200256FBB /* CommentViewCell.swift in Sources */,
 				B093FFBB1E790D5E00011B43 /* Location.swift in Sources */,
 				B05091B61EB915C1001B84B1 /* AlertBuilders.swift in Sources */,
+				B007328A1ED7EC10007D6C5F /* SignInViewController.swift in Sources */,
 				B07169A91E83681B00AF6A41 /* GalleryViewController.swift in Sources */,
 				B091B6071ECC22DA0031B057 /* GapCollectionHeader.swift in Sources */,
 				B07313C51EA69FDE00405F06 /* SortOptionsView.swift in Sources */,

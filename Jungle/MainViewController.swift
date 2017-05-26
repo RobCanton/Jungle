@@ -578,7 +578,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let storiesViewController: StoriesViewController = StoriesViewController()
         storiesViewController.storyType = storyType
         storiesViewController.userStories = stories
-        storiesViewController.currentIndexPath = destinationIndexPath
+        //storiesViewController.currentIndexPath = destinationIndexPath
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]

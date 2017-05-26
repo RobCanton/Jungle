@@ -284,6 +284,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let destinationPath = IndexPath(item: indexPath.item, section: 0)
         switch collectionView {
         case collectionViewFollowing:
             var story:UserStory!
@@ -298,7 +299,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             }
             
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentUserStory(stories: stories, destinationIndexPath: indexPath, initialIndexPath: indexPath, hasMyStory: true)
+                globalMainInterfaceProtocol?.presentUserStory(stories: stories, destinationIndexPath: destinationPath, initialIndexPath: indexPath, hasMyStory: true)
             } else {
                 story.downloadStory()
             }
@@ -306,7 +307,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         case collectionViewPeople:
             let story = bottomStories[indexPath.row]
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: destinationPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }

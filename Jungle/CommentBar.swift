@@ -34,4 +34,12 @@ class CommentBar: UIView {
 
     }
     
+    func sendLabelState(_ active:Bool) {
+        if active {
+            sendButton.setTitleColor(accentColor, for: .normal)
+        } else {
+            sendButton.setTitleColor(UIColor(white: 0.5, alpha: 1.0), for: .normal)
+        }
+    }
+    
 }

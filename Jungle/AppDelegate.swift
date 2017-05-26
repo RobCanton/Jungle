@@ -23,6 +23,7 @@ let photoCellColorAlpha:CGFloat = 1.0
 
 let accentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
 let errorColor = UIColor(red: 1, green: 110/255, blue: 110/255, alpha: 1.0)
+let infoColor = UIColor(red: 100/255, green: 225/255, blue: 220/255, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
 let mainStore = Store<AppState>(

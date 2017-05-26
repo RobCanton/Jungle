@@ -41,7 +41,7 @@
                     </constraints>
                     <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                     <state key="normal" title="Send">
-                        <color key="titleColor" white="0.35088942307692306" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="titleColor" white="0.5" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </state>
                     <connections>
                         <action selector="sendButton:" destination="iN0-l3-epB" eventType="touchUpInside" id="TcN-tW-rmQ"/>

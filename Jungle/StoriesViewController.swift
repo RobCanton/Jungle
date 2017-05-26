@@ -71,10 +71,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
          globalMainInterfaceProtocol?.statusBar(hide: true, animated: false)
         
         if let cell = getCurrentCell() {
-            if scrollView.contentOffset.y == 0 {
-                cell.resume()
-            }
-            
+            cell.resume()            
             if let item = cell.item {
                 commentsViewController.setupItem(item)
             }
@@ -177,6 +174,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
         commentBar.textField.delegate = self
         commentBar.delegate = self
+        commentBar.textField.addTarget(self, action: #selector(commentTextChanged), for: .editingChanged)
         
         self.view.addSubview(commentBar)
         
@@ -201,8 +199,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
 
         collectionTap = UITapGestureRecognizer(target: self, action: #selector(dismissComments))
     }
-    
-    
     
     func appMovedToBackground() {
         dismissPopup(false)
@@ -371,6 +367,8 @@ extension StoriesViewController: CommentBarProtocol {
     func sendComment(_ text:String) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
+        commentBar.textField.text = ""
+        commentBar.sendLabelState(false)
         UploadService.addComment(post: item, comment: text)
         commentBar.textField.resignFirstResponder()
     }
@@ -533,6 +531,20 @@ extension StoriesViewController: UITextFieldDelegate {
         guard let text = textField.text else { return true }
         let newLength = text.characters.count + string.characters.count - range.length
         return newLength <= 140 // Bool
+    }
+    
+    func commentTextChanged (_ target: UITextField){
+        switch target {
+        case commentBar.textField:
+            if let text = target.text, text != "" {
+                commentBar.sendLabelState(true)
+            } else {
+                commentBar.sendLabelState(false)
+            }
+            break
+        default:
+            break
+        }
     }
 
 }
