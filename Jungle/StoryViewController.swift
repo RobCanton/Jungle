@@ -453,7 +453,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
-        self.footerView.alpha = multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
+        self.footerView.alpha = multiple
         self.headerView.alpha = multiple
         self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
         self.captionView.alpha = 0.5 + 0.5 * alpha

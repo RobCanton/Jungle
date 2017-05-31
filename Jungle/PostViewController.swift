@@ -2,7 +2,7 @@ import UIKit
 import AVFoundation
 import Firebase
 
-public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemDelegate {
+public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate {
     
     var playerLayer:AVPlayerLayer?
     weak var delegate:PopupProtocol?
@@ -10,6 +10,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemD
     var animateInitiated = false
     var shouldAnimate = false
     var paused = false
+    
+    var likedRef:DatabaseReference?
     
     weak private(set) var storyItem:StoryItem!
     private(set) var cellIndex:Int?
@@ -41,6 +43,15 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemD
 
     func handleFooterAction() {
         delegate?.showComments()
+    }
+    
+    func liked(_ liked:Bool) {
+        guard let item = self.storyItem else { return }
+        if liked {
+            UploadService.addLike(post: item)
+        } else {
+            UploadService.removeLike(post: item)
+        }
     }
 
     func animateIndicator() {
@@ -127,6 +138,15 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemD
         
         UploadService.addView(post: item)
         footerView.setup(item)
+        footerView.delegate = self
+        
+        let uid = mainStore.state.userState.uid
+        likedRef?.removeAllObservers()
+        likedRef = Database.database().reference().child("uploads/likes/\(item.getKey())/\(uid)")
+        likedRef!.observe(.value, with: { snapshot in
+            print("LIKED: \(snapshot.exists())")
+            self.footerView.setupLiked(snapshot.exists(), animated: true)
+        })
         
         if let index = cellIndex {
             delegate?.newItem(index, item)
@@ -238,7 +258,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemD
     
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
-        self.footerView.alpha = 0.75 * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple * multiple
+        self.footerView.alpha = multiple
         self.headerView.alpha = multiple
         self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
         self.captionView.alpha = 0.5 + 0.5 * alpha

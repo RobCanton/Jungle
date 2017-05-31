@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 import Firebase
+import NVActivityIndicatorView
+
 
 class SignInViewController: UIViewController, UITextFieldDelegate {
     
@@ -18,6 +20,8 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
     
     var closeButton:UIButton!
     var loginButton:UIButton!
+    var activityView:NVActivityIndicatorView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -50,6 +54,9 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
         passwordField.enablesReturnKeyAutomatically = true
         
         setLoginButton(enabled: false)
+        
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 36, height: 36), type: .ballBeat, color: UIColor.white, padding: 1.0)
+        view.addSubview(activityView)
         
     }
     
@@ -90,16 +97,28 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
     func handleSignin() {
         guard let email = emailField.text else { return }
         guard let pass = passwordField.text else { return }
+        closeButton.isEnabled = false
+        setLoginButton(enabled: false)
+        loginButton.setTitle("", for: .normal)
+        activityView.startAnimating()
         
         Auth.auth().signIn(withEmail: email, password: pass, completion: { (user, error) in
+            
             if error != nil && user == nil {
-                print("Error signing in to accoutn")
+                self.reset()
                 return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to sign in.")
             } else {
                 self.dismiss(animated: false, completion: nil)
                 return
             }
         })
+    }
+    
+    func reset() {
+        loginButton.setTitle("Log In", for: .normal)
+        setLoginButton(enabled: true)
+        closeButton.isEnabled = true
+        self.activityView.stopAnimating()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -146,7 +165,7 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
         loginButton.center = CGPoint(x: view.center.x, y: view.frame.height - keyboardFrame.height - 16.0 - loginButton.frame.height / 2)
-        
+        activityView.center = loginButton.center
     }
     
     func keyboardWillDisappear(notification: NSNotification){

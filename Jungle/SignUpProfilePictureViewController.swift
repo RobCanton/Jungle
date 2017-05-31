@@ -52,7 +52,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
         
         profileImage = profileImageView.image
         
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballBeat, color: UIColor.white, padding: 1.0)
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 36, height: 36), type: .ballBeat, color: UIColor.white, padding: 1.0)
         activityView.center = submitButton.center
         view.addSubview(activityView)
 

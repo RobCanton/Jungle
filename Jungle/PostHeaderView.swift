@@ -57,6 +57,8 @@ class PostHeaderView: UIView {
         tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2!)
+        
+        self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
     }
     
     func clean() {

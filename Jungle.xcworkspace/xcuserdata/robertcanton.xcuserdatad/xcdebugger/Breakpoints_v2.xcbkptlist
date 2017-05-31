@@ -310,11 +310,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/PostHeaderView.swift"
-            timestampString = "517886415.757734"
+            timestampString = "517950660.041507"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "107"
-            endingLineNumber = "107"
+            startingLineNumber = "109"
+            endingLineNumber = "109"
             landmarkName = "PostHeaderView"
             landmarkType = "3">
          </BreakpointContent>
@@ -752,27 +752,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "517736493.727096"
+            timestampString = "517960645.979536"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "575"
-            endingLineNumber = "575"
-            landmarkName = "addLike(post:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Jungle/UploadService.swift"
-            timestampString = "517736512.340114"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "661"
-            endingLineNumber = "661"
+            startingLineNumber = "673"
+            endingLineNumber = "673"
             landmarkName = "subscribeToPost(withKey:subscribe:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -784,11 +768,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "517736512.883247"
+            timestampString = "517960645.979536"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "662"
-            endingLineNumber = "662"
+            startingLineNumber = "674"
+            endingLineNumber = "674"
             landmarkName = "subscribeToPost(withKey:subscribe:)"
             landmarkType = "7">
          </BreakpointContent>

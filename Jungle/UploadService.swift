@@ -462,20 +462,13 @@ class UploadService {
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     var viewers = [String:Double]()
+                    var likes = [String:Double]()
+                    var comments = [Comment]()
+                    
                     var numViews = 0
                     if let _views = dict["views"] as? Int {
                         numViews = _views
                     }
-                    
-                    
-                    var likes = [String:Double]()
-                    if snapshot.hasChild("likes") {
-                        likes = dict["likes"] as! [String:Double]
-                    }
-                    
-                    var comments = [Comment]()
-                    
-                    comments.sort(by: { return $0 < $1 })
                     
                     var flagged = false
                     
@@ -536,7 +529,7 @@ class UploadService {
     static func removeComment(postKey:String, commentKey:String, completion: @escaping ((_ success: Bool, _ commentKey:String)->())) {
         let ref = Database.database().reference()
         let uploadRef = ref.child("uploads/comments/\(postKey)/\(commentKey)")
-        uploadRef.removeValue(completionBlock: { error, ref in
+        uploadRef.removeValue() { error, ref in
         
             if error == nil {
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment deleted!")
@@ -546,7 +539,7 @@ class UploadService {
                 return completion(false, commentKey)
             }
         
-        })
+        }
     }
     
     static func addView(post:StoryItem) {
@@ -565,9 +558,9 @@ class UploadService {
             "uploads/views/\(post.getKey())/\(uid)": [".sv":"timestamp"]
         ] as [String : Any]
         
-        ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+        ref.updateChildValues(updateObject) { error, ref in
         
-        })
+        }
     }
     
     static func addLike(post:StoryItem) {
@@ -575,23 +568,42 @@ class UploadService {
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         
-        let postRef = ref.child("api/requests/like").childByAutoId()
-        postRef.setValue([
-            "sender": uid,
-            "recipient": post.getAuthorId(),
-            "postKey": post.getKey(),
-            "isVideo": post.getContentType() == .video,
-            "timestamp":[".sv":"timestamp"]
-            ])
+        
+        if uid == post.getAuthorId() { return }
+        if post.likes[uid] != nil { return }
+        
+        let updateObject = [
+            "users/liked/\(uid)/\(post.getKey())": true,
+            "uploads/likes/\(post.getKey())/\(uid)": [".sv":"timestamp"]
+            ] as [String : Any]
+        
+        ref.updateChildValues(updateObject) { error, ref in
+            if error != nil {
+                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
+            }
+        }
     }
     
-    static func removeLike(postKey:String) {
+    static func removeLike(post:StoryItem) {
+        
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         
-        let postRef = ref.child("uploads/\(postKey)/likes/\(uid)")
-        postRef.removeValue()
+        
+        if uid == post.getAuthorId() { return }
+        
+        ref.child("users/liked/\(uid)/\(post.getKey())").removeValue() { error, ref in
+            if error != nil {
+                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to remove like.")
+            }
+        }
+        ref.child("uploads/likes/\(post.getKey())/\(uid)").removeValue() { error, ref in
+            if error != nil {
+                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to remove like.")
+            }
+        }
     }
+
     
     static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
         let ref = Database.database().reference()
