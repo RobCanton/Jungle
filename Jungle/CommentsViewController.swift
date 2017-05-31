@@ -49,8 +49,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var header:CommentsHeaderView!
     
-    var commentsRef:FIRDatabaseReference?
-    var viewsRef:FIRDatabaseReference?
+    var commentsRef:DatabaseReference?
+    var viewsRef:DatabaseReference?
     
     var tapGesture:UITapGestureRecognizer!
     
@@ -228,7 +228,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             viewsRef?.observe(.value, with: { snapshot in
                 var viewers = [String]()
                 for child in snapshot.children {
-                    let childSnapshot = child as! FIRDataSnapshot
+                    let childSnapshot = child as! DataSnapshot
                     viewers.append(childSnapshot.key)
                 }
                 self.viewers = viewers
@@ -239,7 +239,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    var subscribedRef:FIRDatabaseReference?
+    var subscribedRef:DatabaseReference?
     
     fileprivate func updateComments() {
         self.header.setCommentsLabel(count: self.comments.count)

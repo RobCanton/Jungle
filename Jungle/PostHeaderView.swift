@@ -11,6 +11,7 @@ import SnapTimer
 
 protocol PostHeaderProtocol: class {
     func showAuthor()
+    func dismiss()
 }
 
 class PostHeaderView: UIView {
@@ -21,10 +22,17 @@ class PostHeaderView: UIView {
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var snapTimer: SnapTimerView!
     
+    @IBOutlet weak var closeButton: UIButton!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         self.userImageView.cropToCircle()
         
+    }
+    
+    @IBAction func handleClose(_ sender: Any) {
+            delegate?.dismiss()
     }
     
     weak var delegate:PostHeaderProtocol?

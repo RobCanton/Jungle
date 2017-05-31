@@ -53,7 +53,7 @@ class NotificationService: Service {
     
     internal func startListeningToNotifications() {
         let current_uid = mainStore.state.userState.uid
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let notificationsRef = ref.child("users/notifications/\(current_uid)")
         notificationsRef.observe(.childAdded, with: { snapshot in
             if snapshot.exists() {
@@ -80,7 +80,7 @@ class NotificationService: Service {
     
     internal func stopListeningToNotifications() {
         let uid = mainStore.state.userState.uid
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let notificationsRef = ref.child("notifications/\(uid)")
         notificationsRef.removeAllObservers()
     }
@@ -93,7 +93,7 @@ class NotificationService: Service {
             }
         }
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let notificationsRef = ref.child("notifications/\(key)")
         notificationsRef.observeSingleEvent(of: .value, with: { snapshot in
             var notification:Notification?
@@ -120,7 +120,7 @@ class NotificationService: Service {
     
     internal func markNotificationAsSeen(key:String) {
         let uid = mainStore.state.userState.uid
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let notificationRef = ref.child("users/notifications/\(uid)/\(key)")
         notificationRef.setValue(true)
     }

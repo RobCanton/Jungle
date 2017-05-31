@@ -29,7 +29,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var settingsView: UIView!
 
-    @IBOutlet weak var sliderLabels: TGPCamelLabels!
     @IBOutlet weak var slider: TGPDiscreteSlider!
     
     @IBOutlet weak var followingBanner: UIView!
@@ -50,10 +49,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         for distance in distances {
             distanceLabels.append("\(distance) km")
         }
-        sliderLabels.names = distanceLabels
-        
-        slider.ticksListener = sliderLabels
-        
         slider.addTarget(self,
                          action: #selector(valueChanged(_:event:)),
                          for: .valueChanged)
@@ -78,7 +73,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
          let headerNib = UINib(nibName: "EmptyCollectionHeader", bundle: nil)
         
         collectionViewFollowing.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView")
-        
         
         let headerNib3 = UINib(nibName: "GapCollectionHeader", bundle: nil)
         
@@ -155,44 +149,33 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         self.stateRef = state
         
         resetStack()
-        self.myStory = state.myStory
         
         switch mode {
         case .Popular:
-            topStories = state.followingStories
-            bottomStories = state.popularUserStories
             removeStackView(view: settingsView)
-            if state.popularPlaceStories.count == 0 {
-                removeStackView(view: placesBanner)
-            }
-            break
-        case .Nearby:
-            topStories = state.nearbyFollowingStories
-            bottomStories = state.nearbyUserStories
-            if state.nearbyPlaceStories.count == 0 {
-                removeStackView(view: placesBanner)
-            }
-            break
-        case .Recent:
-            topStories = state.followingStories
-            removeStackView(view: settingsView)
-            bottomStories = state.recentUserStories
-            if state.recentPlaceStories.count == 0 {
-                removeStackView(view: placesBanner)
-            }
-            break
-        }
-        
-        if topStories.count == 0 && myStory.count  == 0 {
             removeStackView(view: followingBanner)
             removeStackView(view: collectionViewFollowing)
-        }
-        
-        if bottomStories.count == 0 {
             removeStackView(view: storiesBanner)
             removeStackView(view: collectionViewPeople)
+            removeStackView(view: placesBanner)
+            break
+        case .Nearby:
+            removeStackView(view: followingBanner)
+            removeStackView(view: collectionViewFollowing)
+            removeStackView(view: storiesBanner)
+            removeStackView(view: collectionViewPeople)
+            removeStackView(view: placesBanner)
+            break
+        case .Recent:
+            removeStackView(view: settingsView)
+            removeStackView(view: followingBanner)
+            removeStackView(view: collectionViewFollowing)
+            removeStackView(view: storiesBanner)
+            removeStackView(view: collectionViewPeople)
+            removeStackView(view: placesBanner)
+            break
         }
-        
+
         collectionViewFollowing.reloadData()
         collectionViewPeople.reloadData()
     }
@@ -215,7 +198,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         switch collectionView {
         case collectionViewFollowing:
-            if section == 0 && myStory.count == 0 {
+            if section == 0 {
                 return getItemSize()
             } else if section == 1 && myStory.count > 0 && topStories.count > 0 {
                 return CGSize(width: 12.0, height: itemSideLength * 1.3333)
@@ -230,7 +213,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         var sections = 0
         switch collectionView {
         case collectionViewFollowing:
-            sections = myStory.count > 0 ? 2 : 1
             break
         case collectionViewPeople:
             sections = 1
@@ -245,7 +227,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         var count = 0
         switch collectionView {
         case collectionViewFollowing:
-            count = myStory.count > 0 && section == 0 ? 1 : topStories.count
             break
         case collectionViewPeople:
             count = bottomStories.count
@@ -261,7 +242,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         if collectionView == collectionViewFollowing {
             var story:UserStory!
             if indexPath.section == 0 && myStory.count > 0 {
-                story = myStory
             } else {
                 story = topStories[indexPath.row]
             }
@@ -290,7 +270,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             var story:UserStory!
             var stories:[UserStory]!
             
-            if indexPath.section == 0 && myStory.count > 0 {
+            if indexPath.section == 0 {
                 story = myStory
                 stories = [myStory]
             } else {
@@ -325,7 +305,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
         let value = Int(sender.value)
-        sliderLabels.value = UInt(value)
+        //sliderLabels.value = UInt(value)
         let distance = distances[value]
         print("DISTANCE SELECTED: \(distance)")
         LocationService.sharedInstance.radius = distance
@@ -333,7 +313,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
-        sliderLabels.value = UInt(sender.value)
+        //sliderLabels.value = UInt(sender.value)
     }
     
     

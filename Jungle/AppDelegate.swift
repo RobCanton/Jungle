@@ -31,7 +31,7 @@ let mainStore = Store<AppState>(
     state: nil
 )
 
-var remoteConfig: FIRRemoteConfig?
+var remoteConfig: RemoteConfig?
 
 
 @UIApplicationMain
@@ -55,12 +55,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSPlacesClient.provideAPIKey(GMSAPIKEY)
         GMSServices.provideAPIKey(GMSAPIKEY)
-        FIRApp.configure()
+        FirebaseApp.configure()
         
-        remoteConfig = FIRRemoteConfig.remoteConfig()
-        let remoteConfigSettings = FIRRemoteConfigSettings(developerModeEnabled: true)
+        remoteConfig = RemoteConfig.remoteConfig()
+        let remoteConfigSettings = RemoteConfigSettings(developerModeEnabled: true)
         remoteConfig?.configSettings = remoteConfigSettings!
-        remoteConfig?.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+        remoteConfig?.setDefaults(fromPlist: "RemoteConfigDefaults")
         fetchConfig()
         
         if #available(iOS 10, *) {

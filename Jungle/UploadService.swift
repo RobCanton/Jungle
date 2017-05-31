@@ -126,10 +126,10 @@ class UploadService {
     
     
     fileprivate static func downloadVideo(byAuthor author:String, withKey key:String, completion: @escaping (_ data:Data?)->()) {
-        let videoRef = FIRStorage.storage().reference().child("user_uploads/videos/\(author)/\(key)")
+        let videoRef = Storage.storage().reference().child("user_uploads/videos/\(author)/\(key)")
         
         // Download in memory with a maximum allowed size of 2MB (2 * 1024 * 1024 bytes)
-        videoRef.data(withMaxSize: 2 * 1024 * 1024) { (data, error) -> Void in
+        videoRef.getData(maxSize: 2 * 1024 * 1024) { (data, error) -> Void in
             if (error != nil) {
                 print("Error - \(error!.localizedDescription)")
                 completion(nil)
@@ -158,7 +158,7 @@ class UploadService {
         //If upload has no destination do not upload it
         guard let image = upload.image else { return }
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let dataRef = ref.child("uploads/meta").childByAutoId()
         let postKey = dataRef.key
         
@@ -173,12 +173,12 @@ class UploadService {
             // Create a reference to the file you want to upload
             // Create the file metadata
             let contentTypeStr = "image"
-            let metadata = FIRStorageMetadata()
+            let metadata = StorageMetadata()
             metadata.contentType = contentTypeStr
             
             // Upload file and metadata to the object
-            let storageRef = FIRStorage.storage().reference()
-            let uploadTask = storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: metadata) { metadata, error in
+            let storageRef = Storage.storage().reference()
+            let uploadTask = storageRef.child("user_uploads/images/\(uid)/\(postKey)").putData(data, metadata: metadata) { metadata, error in
                 
                 if (error != nil) {
                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -210,28 +210,28 @@ class UploadService {
                     
                     var updateValues: [String : Any] = [
                         "uploads/meta/\(postKey)": obj,
-                        "stories/stats/users/\(uid)/posts/\(postKey)/t": [".sv": "timestamp"],
-                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
+                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
+                        "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
                     ]
                     
                     if let coordinates = upload.coordinates {
-                        updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lat"] = coordinates.coordinate.latitude
-                        updateValues["stories/stats/users/\(uid)/posts/\(postKey)/lon"] = coordinates.coordinate.longitude
+                        updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
+                        updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
                     }
                     
-                    if let place = upload.place {
-                        let placeId = place.placeID
-                        updateValues["places/\(placeId)/info/name"] = place.name
-                        updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
-                        updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
-                        updateValues["places/\(placeId)/info/address"] = place.formattedAddress
-                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/a"] = uid
-                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
-                        for type in place.types {
-                            updateValues["places/\(place.placeID)/info/types/\(type)"] = true
-                        }
-                    }
-                    
+//                    if let place = upload.place {
+//                        let placeId = place.placeID
+//                        updateValues["places/\(placeId)/info/name"] = place.name
+//                        updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
+//                        updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
+//                        updateValues["places/\(placeId)/info/address"] = place.formattedAddress
+//                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/a"] = uid
+//                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
+//                        for type in place.types {
+//                            updateValues["places/\(place.placeID)/info/types/\(type)"] = true
+//                        }
+//                    }
+//                    
                     
                     ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
@@ -257,13 +257,13 @@ class UploadService {
         
         let url = upload.videoURL!
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let dataRef = ref.child("uploads/meta").childByAutoId()
         let postKey = dataRef.key
         
         Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
         
-        let storageRef = FIRStorage.storage().reference()
+        let storageRef = Storage.storage().reference()
         if let videoStill = generateVideoStill(url: url) {
             let avgColor = videoStill.areaAverage()
             let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
@@ -272,10 +272,10 @@ class UploadService {
                 
                 completion(true)
                 
-                let stillMetaData = FIRStorageMetadata()
+                let stillMetaData = StorageMetadata()
                 stillMetaData.contentType = "image/jpg"
                 let uid = mainStore.state.userState.uid
-                storageRef.child("user_uploads/images/\(uid)/\(postKey)").put(data, metadata: stillMetaData) { metadata, error in
+                storageRef.child("user_uploads/images/\(uid)/\(postKey)").putData(data, metadata: stillMetaData) { metadata, error in
                   
                     let thumbURL = metadata?.downloadURL()?.absoluteString
                     if (thumbURL == nil || error != nil) {
@@ -284,14 +284,14 @@ class UploadService {
                     
                     let data = NSData(contentsOf: url)
                     
-                    let metadata = FIRStorageMetadata()
+                    let metadata = StorageMetadata()
                     let contentTypeStr = "video"
                     let playerItem = AVAsset(url: url)
                     let length = CMTimeGetSeconds(playerItem.duration)
                     metadata.contentType = contentTypeStr
                     
-                    let storageRef = FIRStorage.storage().reference()
-                    storageRef.child("user_uploads/videos/\(uid)/\(postKey)").put(data as! Data, metadata: metadata) { metadata, error in
+                    let storageRef = Storage.storage().reference()
+                    storageRef.child("user_uploads/videos/\(uid)/\(postKey)").putData(data as! Data, metadata: metadata) { metadata, error in
                         
                         if (error != nil) {
                             // HANDLE ERROR
@@ -426,7 +426,7 @@ class UploadService {
             return completion(cachedUpload)
         }
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let postRef = ref.child("uploads/meta/\(key)")
         
         postRef.observeSingleEvent(of: .value, with: { snapshot in
@@ -509,7 +509,7 @@ class UploadService {
     
     static func addComment(post:StoryItem, comment:String) {
         if comment == "" { return }
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         
         let uid = mainStore.state.userState.uid
         
@@ -534,7 +534,7 @@ class UploadService {
     }
     
     static func removeComment(postKey:String, commentKey:String, completion: @escaping ((_ success: Bool, _ commentKey:String)->())) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uploadRef = ref.child("uploads/comments/\(postKey)/\(commentKey)")
         uploadRef.removeValue(completionBlock: { error, ref in
         
@@ -551,7 +551,7 @@ class UploadService {
     
     static func addView(post:StoryItem) {
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         
         
@@ -572,7 +572,7 @@ class UploadService {
     
     static func addLike(post:StoryItem) {
         
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         
         let postRef = ref.child("api/requests/like").childByAutoId()
@@ -586,7 +586,7 @@ class UploadService {
     }
     
     static func removeLike(postKey:String) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         
         let postRef = ref.child("uploads/\(postKey)/likes/\(uid)")
@@ -594,7 +594,7 @@ class UploadService {
     }
     
     static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let postRef = ref.child("uploads/meta/\(item.getKey())")
         postRef.removeValue(completionBlock: { error, ref in
             if error == nil {
@@ -609,7 +609,7 @@ class UploadService {
     }
     
     static func reportItem(item:StoryItem, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         let reportRef = ref.child("reports/\(uid):\(item.getKey())")
         let value: [String: Any] = [
@@ -636,7 +636,7 @@ class UploadService {
     }
     
     static func reportComment(itemKey: String, commentKey:String, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         let reportRef = ref.child("reports/\(uid):\(itemKey):\(commentKey)")
         let value: [String: Any] = [
@@ -658,7 +658,7 @@ class UploadService {
     }
     
     static func subscribeToPost(withKey postKey:String, subscribe:Bool) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         let subscribeRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
         if subscribe {

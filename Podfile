@@ -7,16 +7,16 @@ target 'Jungle' do
 
   # Pods for Jungle
 
-  pod 'GoogleMaps'
-  pod 'GooglePlaces'
-  pod 'GooglePlacePicker'
-  pod 'Firebase'
+pod 'GoogleMaps'
+pod 'GooglePlaces'
+pod 'GooglePlacePicker'
+pod 'Firebase'
 pod 'Firebase/Auth'
 pod 'Firebase/Database'
 pod 'Firebase/Storage'
 pod 'Firebase/Messaging'
 pod 'Firebase/RemoteConfig'
-pod 'View2ViewTransition'
+pod 'View2ViewTransition', '1.0.0'
 pod 'ReSwift', '3.0.0'
 pod 'JSQMessagesViewController'
 pod 'NVActivityIndicatorView'

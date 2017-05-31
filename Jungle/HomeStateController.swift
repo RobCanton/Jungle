@@ -16,7 +16,11 @@ protocol HomeProtocol: class {
 class HomeStateController {
     weak var delegate:HomeProtocol?
     
-    private(set) var myStory = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
+    private(set) var nearbyPosts = [StoryItem]()
+    private(set) var popularPosts = [StoryItem]()
+    
+    fileprivate var nearbyRef:DatabaseReference?
+    fileprivate var popularRef:DatabaseReference?
     
     private(set) var followingStories = [UserStory]()
     private(set) var nearbyFollowingStories = [UserStory]()
@@ -29,16 +33,16 @@ class HomeStateController {
     private(set) var nearbyPlaceStories = [LocationStory]()
     
     
-    fileprivate var myStoryRef:FIRDatabaseReference?
-    fileprivate var followingRef:FIRDatabaseReference?
-    fileprivate var nearbyFollowingRef:FIRDatabaseReference?
-    fileprivate var popularUsersRef:FIRDatabaseReference?
-    fileprivate var nearbyUsersRef:FIRDatabaseReference?
-    fileprivate var recentUsersRef:FIRDatabaseReference?
+    fileprivate var myStoryRef:DatabaseReference?
+    fileprivate var followingRef:DatabaseReference?
+    fileprivate var nearbyFollowingRef:DatabaseReference?
+    fileprivate var popularUsersRef:DatabaseReference?
+    fileprivate var nearbyUsersRef:DatabaseReference?
+    fileprivate var recentUsersRef:DatabaseReference?
     
-    fileprivate var popularPlacesRef:FIRDatabaseReference?
-    fileprivate var nearbyPlacesRef:FIRDatabaseReference?
-    fileprivate var recentPlacesRef:FIRDatabaseReference?
+    fileprivate var popularPlacesRef:DatabaseReference?
+    fileprivate var nearbyPlacesRef:DatabaseReference?
+    fileprivate var recentPlacesRef:DatabaseReference?
     
     init(delegate:HomeProtocol)
     {
@@ -48,7 +52,6 @@ class HomeStateController {
     }
     
     func clear() {
-        myStory = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
         
         followingStories = [UserStory]()
         nearbyFollowingStories = [UserStory]()
@@ -80,20 +83,11 @@ class HomeStateController {
     }
     
     func fetchAll() {
-        observeMyStory()
-        
+        observeNearbyPosts()
+        observePopularPosts()
         fetchFollowing()
-        
-        fetchPopularUsers()
-        fetchPopularPlaces()
-        
-        fetchRecentUsers()
-        fetchRecentPlaces()
-        
-        observeNearbyFollowing()
-        observeNearbyUsers()
-        observeNearbyPlaces()
     }
+
     
     func sortFollowingByDate() {
         followingStories.sort(by: { $0 > $1})
@@ -101,7 +95,7 @@ class HomeStateController {
         var swapIndex:Int?
         for i in 0..<followingStories.count {
             let story = followingStories[i]
-            if story.getUserId() == uid {
+            if story.uid == uid {
                 swapIndex = i
                 break
             }
@@ -113,76 +107,28 @@ class HomeStateController {
         }
     }
     
-    func sortFollowingByPopularity() {
-        followingStories.sort(by: { $0.popularity > $1.popularity })
-        let uid = mainStore.state.userState.uid
-        var swapIndex:Int?
-        for i in 0..<followingStories.count {
-            let story = followingStories[i]
-            if story.getUserId() == uid {
-                swapIndex = i
-                break
-            }
-        }
-        if swapIndex != nil {
-            let swapStory = followingStories[swapIndex!]
-            followingStories.remove(at: swapIndex!)
-            followingStories.insert(swapStory, at: 0)
-        }
-        
-    }
-
-    fileprivate func observeMyStory() {
-        let uid = mainStore.state.userState.uid
-        myStoryRef?.removeAllObservers()
-        myStoryRef = UserService.ref.child("stories/users/\(uid)")
-        myStoryRef?.observe(.value, with: { snapshot in
-            var story:UserStory?
-            print("MY STORY UPDATED")
-            if let dict = snapshot.value as? [String:AnyObject] {
-                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
-                    let lastPost = meta["k"] as! String
-                    let timestamp = meta["t"] as! Double
-                    var popularity = 0
-                    if let p = meta["p"] as? Int {
-                        popularity = p
-                    }
-                    var posts = [String]()
-                    for (key,_) in postObject {
-                        posts.append(key)
-                    }
-                    story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
-                }
-            }
-            if story == nil {
-                story = UserStory(posts: [], lastPostKey: "", timestamp: 0, popularity: 0, uid: "")
-            }
-            
-            self.myStory = story!
-            self.myStory.printDescription()
-            DispatchQueue.main.async {
-                print("LIKE WHATS GOOD")
-                self.delegate?.update(nil)
-            }
-        })
-    }
     
     fileprivate func fetchFollowing() {
         let uid = mainStore.state.userState.uid
         followingRef = UserService.ref.child("social/following/\(uid)")
         followingRef?.observeSingleEvent(of: .value, with: { snapshot in
-            var following:[String] = [] // Include current user id to pull my story
+            var following:[String] = [uid] // Include current user id to pull my story
             for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
+                let childSnap = child as! DataSnapshot
                 following.append(childSnap.key)
             }
+            
+            print("FOLLOWING: \(following)")
             self.downloadFollowingStories(following)
         })
     }
     
     fileprivate func downloadFollowingStories(_ following:[String]) {
         var stories = [UserStory]()
-        
+        if following.count == 0 {
+            delegate?.update(.Recent)
+            return
+        }
         var count = 0
         for uid in following {
             UserService.getUserStory(uid, completion: { story in
@@ -193,318 +139,106 @@ class HomeStateController {
                 if count >= following.count {
                     count = -1
                     let uid = mainStore.state.userState.uid
-                    var temp = stories.sorted(by: { return $0.popularity > $1.popularity})
-                    var swapIndex:Int?
-                    for i in 0..<temp.count {
-                        let story = temp[i]
-                        if story.getUserId() == uid {
-                        
-                            swapIndex = i
-                            break
-                        }
-                    }
-                    if swapIndex != nil {
-                        let swapStory = temp[swapIndex!]
-                        temp.remove(at: swapIndex!)
-                        temp.insert(swapStory, at: 0)
-                    }
-                    self.followingStories = temp
+                    self.followingStories = stories.sorted(by: { return $0 > $1 })
+                    
+                    print("stories: \(self.followingStories.count)")
                     DispatchQueue.main.async {
-                        self.delegate?.update(nil)
+                        self.delegate?.update(.Recent)
                     }
                 }
             })
         }
     }
     
-    fileprivate func fetchPopularUsers() {
-        popularUsersRef?.removeAllObservers()
-        popularUsersRef = UserService.ref.child("stories/sorted/popular/userStories")
-        popularUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [(String,Int)]()
+    
+    fileprivate func observeNearbyPosts() {
+        let uid = mainStore.state.userState.uid
+        nearbyRef?.removeAllObservers()
+        nearbyRef = UserService.ref.child("users/location/nearby/\(uid)/posts")
+        nearbyRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+            var posts = [String]()
             for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
+                let childSnap = child as! DataSnapshot
                 let key = childSnap.key
-                if let score = childSnap.value as? Int, !mainStore.state.socialState.following.contains(key) {
-                    stories.append((key,score))
+                if let _ = childSnap.value as? Double {
+                    posts.append(key)
                 }
             }
-            self.downloadPopularStories(stories)
+            self.downloadPosts(posts)
         })
     }
     
-    fileprivate func downloadPopularStories(_ popular:[(String,Int)]) {
-        var stories = [UserStory]()
+    fileprivate func downloadPosts(_ posts:[String]) {
+        var nearbyPosts = [StoryItem]()
+        if posts.count == 0 {
+            delegate?.update(.Nearby)
+            return
+        }
         
         var count = 0
-        for pair in popular {
-            UserService.getUserStory(pair.0, completion: { story in
-                if story != nil {
-                    stories.append(story!)
+        for key in posts {
+            UploadService.getUpload(key: key, completion: { item in
+                if item != nil {
+                    nearbyPosts.append(item!)
                 }
-                count += 1
-                if count >= popular.count {
-                    count = -1
-                    
-                    self.popularUserStories = stories.sorted(by: { return $0.popularity > $1.popularity})
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Popular)
-                    }
-                }
-            })
-        }
-    }
-    
-    fileprivate func observeNearbyFollowing() {
-        let uid = mainStore.state.userState.uid
-        nearbyFollowingRef?.removeAllObservers()
-        nearbyFollowingRef = UserService.ref.child("users/location/nearby/\(uid)/following")
-        nearbyFollowingRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
-            var stories: [(String,Double)] = []
-            for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
-                let key = childSnap.key
-                if let distance = childSnap.value as? Double {
-                    stories.append((key,distance))
-                }
-            }
-            self.downloadNearbyFollowingStories(stories)
-        })
-    }
-    
-    fileprivate func downloadNearbyFollowingStories(_ nearby:[(String,Double)]) {
-        var stories = [UserStory]()
-        
-        var count = 0
-        for (key, distance) in nearby {
-            UserService.getUserStory(key, completion: { story in
-                if story != nil {
-                    story!.distance = distance
-                    stories.append(story!)
-                }
-                count += 1
-                if count >= nearby.count {
-                    count = -1
-                    let uid = mainStore.state.userState.uid
-                    var temp = stories.sorted(by: { return $0.distance! < $1.distance!})
-                    var swapIndex:Int?
-                    for i in 0..<temp.count {
-                        let story = temp[i]
-                        if story.getUserId() == uid {
-                            
-                            swapIndex = i
-                            break
-                        }
-                    }
-                    if swapIndex != nil {
-                        let swapStory = temp[swapIndex!]
-                        temp.remove(at: swapIndex!)
-                        temp.insert(swapStory, at: 0)
-                    }
-                    
-                    self.nearbyFollowingStories = temp
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Nearby)
-                    }
-                }
-            })
-        }
-    }
-    
-    fileprivate func observeNearbyUsers() {
-        let uid = mainStore.state.userState.uid
-        nearbyUsersRef?.removeAllObservers()
-        nearbyUsersRef = UserService.ref.child("users/location/nearby/\(uid)/users")
-        nearbyUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
-            var stories = [(String,Double)]()
-            for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
-                let key = childSnap.key
                 
-                if let distance = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key), key != uid {
-                    stories.append((key,distance))
-                }
-            }
-            self.downloadNearbyUserStories(stories)
-        })
-    }
-    
-    fileprivate func downloadNearbyUserStories(_ nearby:[(String,Double)]) {
-        var stories = [UserStory]()
-        
-        var count = 0
-        for (key, distance) in nearby {
-            UserService.getUserStory(key, completion: { story in
-                if story != nil {
-                    story!.distance = distance
-                    stories.append(story!)
-                }
                 count += 1
-                if count >= nearby.count {
+                if count >= posts.count {
                     count = -1
                     
-                    self.nearbyUserStories = stories.sorted(by: { return $0.distance! < $1.distance!})
+                    self.nearbyPosts = nearbyPosts.sorted(by: { return $0 > $1 })
                     DispatchQueue.main.async {
                         self.delegate?.update(.Nearby)
                     }
                 }
+                
             })
         }
     }
     
-    
-    fileprivate func observeNearbyPlaces() {
-        let uid = mainStore.state.userState.uid
-        nearbyPlacesRef?.removeAllObservers()
-        nearbyPlacesRef = UserService.ref.child("users/location/nearby/\(uid)/places")
-        nearbyPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
-            var stories = [(String,Double)]()
+    fileprivate func observePopularPosts() {
+        popularRef?.removeAllObservers()
+        popularRef = UserService.ref.child("uploads/popular/")
+        popularRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+            var posts = [String]()
+            print("NEW POPULAR LIST")
             for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
+                let childSnap = child as! DataSnapshot
                 let key = childSnap.key
-                if let distance = childSnap.value as? Double, key != mainStore.state.userState.uid {
-                    stories.append((key,distance))
+                if let _ = childSnap.value as? Int {
+                    posts.append(key)
                 }
             }
-            self.downloadNearbyPlacesStories(stories)
+            self.downloadPopularPosts(posts)
         })
     }
     
-    fileprivate func downloadNearbyPlacesStories(_ nearby:[(String,Double)]) {
-        var stories = [LocationStory]()
+    fileprivate func downloadPopularPosts(_ posts:[String]) {
+        var popularPosts = [StoryItem]()
         
-        var count = 0
-        for (key,distance) in nearby {
-            UserService.getPlaceStory(key, completion: { story in
-                if story != nil {
-                    
-                    story!.distance = distance
-                    stories.append(story!)
-                }
-                count += 1
-                if count >= nearby.count {
-                    count = -1
-                    
-                    self.nearbyPlaceStories = stories.sorted(by: { return $0.distance! < $1.distance!})
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Nearby)
-                    }
-                }
-            })
+        if posts.count == 0 {
+            delegate?.update(.Popular)
+            return
         }
-    }
-    
-    fileprivate func fetchRecentUsers() {
-        
-        recentUsersRef = UserService.ref.child("stories/sorted/recent/userStories")
-        recentUsersRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [(String,Double)]()
-            for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
-                let key = childSnap.key
-                if let score = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key), key != mainStore.state.userState.uid {
-                    stories.append((key,score))
-                }
-            }
-            self.downloadRecentStories(stories)
-        })
-    }
-    
-    fileprivate func downloadRecentStories(_ recent:[(String,Double)]) {
-        var stories = [UserStory]()
         
         var count = 0
-        for pair in recent {
-            UserService.getUserStory(pair.0, completion: { story in
-                if story != nil {
-                    stories.append(story!)
+        for key in posts {
+            UploadService.getUpload(key: key, completion: { item in
+                if item != nil {
+                    popularPosts.append(item!)
                 }
+                
                 count += 1
-                if count >= recent.count {
+                if count >= posts.count {
                     count = -1
                     
-                    self.recentUserStories = stories.sorted(by: { return $0 > $1})
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Recent)
-                    }
-                }
-            })
-        }
-    }
-    
-    fileprivate func fetchPopularPlaces() {
-        popularPlacesRef?.removeAllObservers()
-        popularPlacesRef = UserService.ref.child("stories/sorted/popular/places")
-        popularPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [(String,Double)]()
-            for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
-                let key = childSnap.key
-                if let score = childSnap.value as? Double, !mainStore.state.socialState.following.contains(key) {
-                    stories.append((key,score))
-                }
-            }
-            self.downloadPlacesStories(stories)
-        })
-    }
-    
-    fileprivate func downloadPlacesStories(_ popular:[(String,Double)]) {
-        var stories = [LocationStory]()
-        
-        var count = 0
-        for pair in popular {
-            UserService.getPlaceStory(pair.0, completion: { story in
-                if story != nil {
-                    stories.append(story!)
-                }
-                count += 1
-                if count >= popular.count {
-                    count = -1
-                    
-                    self.popularPlaceStories = stories.sorted(by: { return $0.popularity > $1.popularity})
+                    self.popularPosts = popularPosts.sorted(by: { return $0 > $1 })
                     DispatchQueue.main.async {
                         self.delegate?.update(.Popular)
                     }
                 }
+                
             })
         }
     }
-    
-    fileprivate func fetchRecentPlaces() {
-        recentPlacesRef?.removeAllObservers()
-        recentPlacesRef = UserService.ref.child("stories/sorted/recent/places")
-        recentPlacesRef?.queryOrderedByValue().queryLimited(toLast: 25).observeSingleEvent(of: .value, with: { snapshot in
-            var stories = [String]()
-            for child in snapshot.children {
-                let childSnap = child as! FIRDataSnapshot
-                let key = childSnap.key
-                stories.append(key)
-            }
-            self.downloadRecentPlacesStories(stories)
-        })
-    }
-    
-    fileprivate func downloadRecentPlacesStories(_ recent:[String]) {
-        var stories = [LocationStory]()
-        
-        var count = 0
-        for key in recent {
-            UserService.getPlaceStory(key, completion: { story in
-                if story != nil {
-                    stories.append(story!)
-                }
-                count += 1
-                if count >= recent.count {
-                    count = -1
-                    
-                    self.recentPlaceStories = stories.sorted(by: { return $0 > $1})
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Recent)
-                    }
-                }
-            })
-        }
-    }
-    
-    
 }

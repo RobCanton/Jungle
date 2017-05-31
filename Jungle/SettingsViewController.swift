@@ -51,7 +51,7 @@ class SettingsViewController: UITableViewController {
         print("Deinit >> SettingsViewController")
     }
     
-    var notificationsRef:FIRDatabaseReference?
+    var notificationsRef:DatabaseReference?
     
     override func viewDidLoad() {
         super.viewDidLoad()

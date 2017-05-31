@@ -133,21 +133,21 @@ class CreateAccountViewController: UIViewController, UINavigationControllerDeleg
         
         backButton.isEnabled = false
         signupButton.isEnabled = false
-        FIRAuth.auth()?.createUser(withEmail: email, password: password) { (user, error) in
+        Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
             if error == nil && user != nil {
                 print("USER: \(user.debugDescription)")
                 
                 UserService.uploadProfileImage(image: image, completion: { url in
                     
                     if url != nil {
-                        let userRef = FIRDatabase.database().reference().child("users/profile/\(user!.uid)")
+                        let userRef = Database.database().reference().child("users/profile/\(user!.uid)")
                         userRef.setValue([
                             "username": username,
                             "imageURL": url,
                             "bio":""
                             ], withCompletionBlock: { error, ref in
                                 
-                                FIRDatabase.database().reference().child("users/lookup/username/uid/\(username)").setValue(user!.uid)
+                                Database.database().reference().child("users/lookup/username/\(user!.uid)").setValue(username)
                                 self.dismiss(animated: true, completion: nil)
                         })
                         

@@ -37,7 +37,7 @@ class FirstAuthViewController: FirstViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if let user = FIRAuth.auth()?.currentUser {
+        if let user = Auth.auth().currentUser {
             UserService.getUser(user.uid, completion: { user in
                 self.authFetched = true
                 if user != nil {
@@ -59,7 +59,7 @@ class FirstAuthViewController: FirstViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if authFetched && FIRAuth.auth()?.currentUser == nil {
+        if authFetched && Auth.auth().currentUser == nil {
             self.performSegue(withIdentifier: "toLoginScreen", sender: self)
         }
         
@@ -75,10 +75,14 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
     }
     
+    @IBAction func unwindToMenu(segue: UIStoryboardSegue) {
+        
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let user = FIRAuth.auth()?.currentUser {
+        if let user = Auth.auth().currentUser {
             UserService.getUser(user.uid, completion: { user in
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
@@ -112,6 +116,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             return .lightContent
         }
     }
+    
+    
 }
 
 class whoa: UIViewController, UITextFieldDelegate {
@@ -159,7 +165,7 @@ class whoa: UIViewController, UITextFieldDelegate {
         guard let email = emailTextField.text else { return }
         guard let pass = passwordTextField.text else { return }
         
-        FIRAuth.auth()?.signIn(withEmail: email, password: pass, completion: { (user, error) in
+        Auth.auth().signIn(withEmail: email, password: pass, completion: { (user, error) in
             if error != nil && user == nil {
                 print("Error signing in to accoutn")
                 return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to sign in.")

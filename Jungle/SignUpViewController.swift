@@ -13,6 +13,30 @@ import UIKit
 import Firebase
 import ActiveLabel
 
+class NewUser {
+    
+    var firstname:String?
+    var lastname:String?
+    var birthday:Double?
+    var username:String?
+    var password:String?
+    var email:String?
+    var phoneNumber:String?
+    
+    func printDescription() {
+        print("\nNew User:")
+        print(firstname ?? "NIL")
+        print(lastname ?? "NIL")
+        print(birthday ?? "NIL")
+        print(username ?? "NIL")
+        print(email ?? "NIL")
+        print(phoneNumber ?? "NIL")
+        print("\n")
+    }
+    
+}
+
+
 class SignUpNameViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var firstnameField: UITextField!
@@ -22,10 +46,21 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
     var closeButton:UIButton!
     var submitButton:UIButton!
     
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var legal: ActiveLabel!
+    
+    var newUser:NewUser = NewUser()
+    
+    var bottomGradientView:UIView!
+    
+    deinit {
+        print("Deinit >> SignUpNameViewController")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        scrollView.decelerationRate = UIScrollViewDecelerationRateFast
         
         firstnameField.delegate = self
         lastnameField.delegate = self
@@ -87,6 +122,34 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         
         legal.text = "By tapping Sign Up & Accept, you accept the Terms of Use and Privacy Policy."
         
+        let gradientView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
+        self.view.insertSubview(gradientView, aboveSubview: scrollView)
+
+        let gradient = CAGradientLayer()
+        gradient.frame = gradientView.bounds
+        gradient.colors = [
+            UIColor(white: 1.0, alpha: 1.0).cgColor,
+            UIColor(white: 1.0, alpha: 0.0).cgColor
+        ]
+        gradient.locations = [0.0, 1.0]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 0, y: 1)
+        gradientView.layer.insertSublayer(gradient, at: 0)
+        
+        bottomGradientView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
+        self.view.insertSubview(bottomGradientView, aboveSubview: scrollView)
+        
+        let gradient2 = CAGradientLayer()
+        gradient2.frame = gradientView.bounds
+        gradient2.colors = [
+            UIColor(white: 1.0, alpha: 0.0).cgColor,
+            UIColor(white: 1.0, alpha: 1.0).cgColor
+        ]
+        gradient2.locations = [0.0, 1.0]
+        gradient2.startPoint = CGPoint(x: 0, y: 0)
+        gradient2.endPoint = CGPoint(x: 0, y: 1)
+        bottomGradientView.layer.insertSublayer(gradient2, at: 0)
+        
     }
     
     func textFieldChanged(_ target:UITextField) {
@@ -99,6 +162,10 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
             break
         }
         
+        validateForm()
+    }
+    
+    func validateForm() {
         if let firstname = firstnameField.text,
             firstname != "" {
             setLoginButton(enabled: true)
@@ -123,12 +190,26 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
     
     func handleSubmit() {
         guard let firstname = firstnameField.text, firstname != "" else { return }
+        newUser.firstname = firstname
+        newUser.lastname = lastnameField.text
+        
+        closeButton.isEnabled = false
+        setLoginButton(enabled: false)
         
         self.performSegue(withIdentifier: "toBirthday", sender: self)
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toBirthday" {
+            let dest = segue.destination as! SignUpBirthdayViewController
+            dest.newUser = newUser
+        }
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        validateForm()
+        closeButton.isEnabled = true
         firstnameField.becomeFirstResponder()
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
@@ -147,9 +228,9 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         switch textField {
         case firstnameField:
             firstnameField.resignFirstResponder()
-            firstnameField.becomeFirstResponder()
+            lastnameField.becomeFirstResponder()
             break
-        case firstnameField:
+        case lastnameField:
             handleSubmit()
             break
         default:
@@ -166,6 +247,7 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
         submitButton.center = CGPoint(x: view.center.x, y: view.frame.height - keyboardFrame.height - 16.0 - submitButton.frame.height / 2)
+        bottomGradientView.center = CGPoint(x: view.center.x, y: view.frame.height - keyboardFrame.height - bottomGradientView.frame.height / 2)
         
     }
     

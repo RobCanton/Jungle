@@ -34,6 +34,10 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, ItemD
         guard let item = self.storyItem else { return }
         delegate?.showUser(item.getAuthorId())
     }
+    
+    func dismiss() {
+        delegate?.dismissPopup(true)
+    }
 
     func handleFooterAction() {
         delegate?.showComments()

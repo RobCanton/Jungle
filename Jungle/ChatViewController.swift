@@ -169,7 +169,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
                 _ = snapshot.value as! [String:AnyObject]
                 
                 for message in snapshot.children {
-                    let messageSnap = message as! FIRDataSnapshot
+                    let messageSnap = message as! DataSnapshot
                     let value = messageSnap.value as! [String: Any]
                     let senderId  = value["senderId"] as! String
                     let text      = value["text"] as! String
@@ -389,7 +389,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
         
     var loadingNextBatch = false
-    var downloadRef:FIRDatabaseReference?
+    var downloadRef:DatabaseReference?
     
     var lastTimeStamp:Double?
     var limit:UInt = 16

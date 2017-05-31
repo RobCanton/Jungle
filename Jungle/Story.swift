@@ -17,68 +17,72 @@ protocol StoryProtocol: class {
     func stateChange(_ state: UserStoryState)
 }
 
+
 class UserStory:Story {
-    fileprivate var uid:String
+    private(set) var uid:String
     
-    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, uid:String) {
+    init(postKeys:[(String,Double)], uid:String) {
         self.uid = uid
-        super.init(posts:posts, lastPostKey:lastPostKey, timestamp:timestamp, popularity:popularity)
+        super.init(postKeys: postKeys)
     }
-    
-    func getUserId() -> String {
-        return uid
-    }
-    override func printDescription() {
-        print("USER STORY: \(uid)")
-        super.printDescription()
-    }
-    
-    
 }
+
 
 class LocationStory:Story {
     fileprivate var locationKey:String
+    fileprivate var distance:Double
     
-    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int, locationKey:String) {
+    init(postKeys:[(String,Double)], locationKey:String, distance:Double) {
         self.locationKey = locationKey
-        super.init(posts:posts, lastPostKey:lastPostKey, timestamp:timestamp, popularity:popularity)
+        self.distance = distance
+        super.init(postKeys: postKeys)
     }
     
     func getLocationKey() -> String {
         return locationKey
     }
     
+    func getDistance() -> Double {
+        return distance
+    }
+    
+    
 }
 
 class Story: ItemDelegate {
-    private(set) var posts:[String]
+    fileprivate var postKeys:[(String,Double)]
+    fileprivate var posts:[String]
+    
     private(set) var lastPostKey:String
     private(set) var date:Date
-    private(set) var popularity:Int
-    var distance:Double?
-    weak var delegate:StoryProtocol?
-    
     var count:Int {
         get {
             return posts.count
         }
     }
-
+    
+    var delegate:StoryProtocol?
+    
+    
     var items:[StoryItem]?
     var state:UserStoryState = .notLoaded
-        {
+    {
         didSet {
             delegate?.stateChange(state)
         }
     }
     
-    init(posts:[String], lastPostKey:String, timestamp:Double, popularity:Int) {
+    init(postKeys:[(String,Double)]) {
+        self.postKeys = postKeys
         
-        self.posts = posts
-        self.lastPostKey = lastPostKey
-        self.date = Date(timeIntervalSince1970: timestamp/1000) as Date
-        self.popularity = popularity
-
+        self.posts = [String]()
+        for (key, _) in postKeys {
+            self.posts.append(key)
+        }
+        
+        self.lastPostKey = postKeys.last!.0
+        self.date = Date(timeIntervalSince1970: postKeys.last!.1/1000) as Date
+        
         downloadItems()
     }
     

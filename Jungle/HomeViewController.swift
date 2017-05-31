@@ -27,7 +27,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var collectionView:UICollectionView!
     
     var masterNav:UINavigationController?
-    var sortMode:SortedBy = .Recent
+    var sortMode:SortedBy = .Nearby
     weak var gps_service:GPSService!
     
     var tabHeader:PlacesTabHeader!
@@ -40,13 +40,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var midCollectionViewRef:UICollectionView?
     
     func didSelect(_ segmentIndex: Int) {
-        var selectedMode:SortedBy = .Recent
+        var selectedMode:SortedBy = .Nearby
         switch segmentIndex {
         case 1:
-            selectedMode = .Nearby
+            selectedMode = .Popular
             break
         case 2:
-            selectedMode = .Popular
+            selectedMode = .Recent
             break
         default:
             break
@@ -63,7 +63,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                 self.sortMode = selectedMode
                 switch self.sortMode {
                 case .Popular:
-                    self.state.sortFollowingByPopularity()
                     break
                 case .Nearby:
                     break
@@ -101,7 +100,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         self.view.addSubview(tabHeader)
         
-        let titles = ["Recent", "Nearby", "Popular"]
+        let titles = ["Nearby", "Popular", "Stories"]
         let frame = CGRect(x: 0, y: 44.0, width: view.frame.width, height: 44)
         
         control = TwicketSegmentedControl(frame: frame)
@@ -137,6 +136,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         collectionView.isPagingEnabled = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.backgroundColor = UIColor.white
+        
         view.addSubview(collectionView)
         
         //LocationService.sharedInstance.delegate = self
@@ -149,10 +149,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     }
     
     
-    
     func update(_ mode:SortedBy?) {
         print("UPDATE !")
         tabHeader.stopRefreshing()
+        
+        for post in state.popularPosts {
+            print(post.getKey())
+        }
         if mode == nil || mode! == self.sortMode{
             print("RELOAD TABLE")
             return self.collectionView.reloadData()
@@ -174,33 +177,23 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
-        let bannerHeight:CGFloat = 32
-        let collectionViewHeight:CGFloat = getItemSize().height * 0.75
-        
         var verticalHeight:CGFloat = 0
         
         switch sortMode {
         case .Popular:
-            verticalHeight += state.followingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += state.popularUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += state.popularPlaceStories.count > 0 ? bannerHeight : 0
             break
         case .Nearby:
-            verticalHeight += state.nearbyFollowingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += state.nearbyUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += 60
-            verticalHeight += state.nearbyPlaceStories.count > 0 ? bannerHeight : 0
+            verticalHeight += 48
             break
         case .Recent:
-            verticalHeight += state.followingStories.count > 0 || state.myStory.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += state.recentUserStories.count > 0 ? collectionViewHeight + bannerHeight : 0
-            verticalHeight += state.recentPlaceStories.count > 0 ? bannerHeight : 0
             break
         }
         return CGSize(width: collectionView.frame.size.width, height: verticalHeight)
     }
 
-    func refreshData() {}
+    func refreshData() {
+    
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -234,11 +227,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch sortMode {
         case .Popular:
-            return state.popularPlaceStories.count
+            return state.popularPosts.count
         case .Nearby:
-            return state.nearbyPlaceStories.count
+            return state.nearbyPosts.count
         case .Recent:
-            return state.recentPlaceStories.count
+            return state.followingStories.count//recentPlaceStories.count
         }
     }
     
@@ -247,13 +240,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
         switch sortMode {
         case .Popular:
-            cell.setupLocationCell(state.popularPlaceStories[indexPath.row])
+            cell.setupCell(withPost: state.popularPosts[indexPath.row])
             break
         case .Nearby:
-            cell.setupLocationCell(state.nearbyPlaceStories[indexPath.row])
+            cell.setupCell(withPost: state.nearbyPosts[indexPath.row])
             break
         case .Recent:
-            cell.setupLocationCell(state.recentPlaceStories[indexPath.row])
+            cell.setupCell(withUserStory: state.followingStories[indexPath.row])
             break
         }
         
@@ -273,28 +266,16 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch sortMode {
         case .Popular:
-            let story = state.popularPlaceStories[indexPath.row]
-            if story.state == .contentLoaded {
-                self.selectedIndexPath = indexPath
-                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.popularPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadStory()
-            }
+            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             break
         case .Nearby:
-            let story = state.nearbyPlaceStories[indexPath.row]
-            if story.state == .contentLoaded {
-                self.selectedIndexPath = indexPath
-                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadStory()
-            }
+            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             break
         case .Recent:
-            let story = state.recentPlaceStories[indexPath.row]
+            let story = state.followingStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.recentPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }

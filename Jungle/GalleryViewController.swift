@@ -13,8 +13,7 @@ import View2ViewTransition
 class GalleryViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
     weak var transitionController: TransitionController!
-    
-    var uid:String!
+
     var posts = [StoryItem]()
     
     var collectionContainerView:UIView!
@@ -166,8 +165,9 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
         commentBar.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
-        
+        commentBar.delegate = self
         commentBar.textField.delegate = self
+        commentBar.textField.addTarget(self, action: #selector(commentTextChanged), for: .editingChanged)
         
         self.view.addSubview(commentBar)
         
@@ -328,7 +328,12 @@ extension GalleryViewController: PopupProtocol {
     }
     
     func showUser(_ uid:String) {
-        
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = UserProfileViewController()
+        controller.uid = uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     
@@ -337,14 +342,6 @@ extension GalleryViewController: PopupProtocol {
     
     func showComments() {
         scrollView.setContentOffset(CGPoint(x: 0, y:self.view.frame.height), animated: true)
-    }
-    
-    
-    func sendComment(_ comment: String) {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.storyItem else { return }
-        UploadService.addComment(post: item, comment: comment)
-        commentBar.textField.resignFirstResponder()
     }
     
     func keyboardWillAppear(notification: NSNotification){
@@ -451,6 +448,18 @@ extension GalleryViewController: StoryCommentsProtocol {
 }
 
 
+extension GalleryViewController: CommentBarProtocol {
+    func sendComment(_ text:String) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        commentBar.textField.text = ""
+        commentBar.sendLabelState(false)
+        UploadService.addComment(post: item, comment: text)
+        commentBar.textField.resignFirstResponder()
+    }
+}
+
+
 
 extension GalleryViewController: UIScrollViewDelegate {
     
@@ -511,9 +520,21 @@ extension GalleryViewController: UITextFieldDelegate {
         let newLength = text.characters.count + string.characters.count - range.length
         return newLength <= 140 // Bool
     }
+    
+    func commentTextChanged (_ target: UITextField){
+        switch target {
+        case commentBar.textField:
+            if let text = target.text, text != "" {
+                commentBar.sendLabelState(true)
+            } else {
+                commentBar.sendLabelState(false)
+            }
+            break
+        default:
+            break
+        }
+    }
 }
-
-
 
 
 extension GalleryViewController: View2ViewTransitionPresented {

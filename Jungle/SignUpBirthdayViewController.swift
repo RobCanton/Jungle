@@ -21,12 +21,25 @@ import Firebase
 
 class SignUpBirthdayViewController: UIViewController {
     
+    @IBOutlet weak var topGradientView: UIView!
+    
+    
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var dateField: UITextField!
     
+    func recieveUserInfo(firstname:String, lastname:String?) {
+        
+    }
+    
     var birthdate:Date?
     var closeButton:UIButton!
+    
+    weak var newUser:NewUser?
+    
+    deinit {
+        print("Deinit >> SignUpBirthdayViewController")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +58,12 @@ class SignUpBirthdayViewController: UIViewController {
         
         setLoginButton(enabled: false)
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setLoginButton(enabled: birthdate != nil)
+        closeButton.isEnabled = true
     }
   
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
@@ -75,25 +94,35 @@ class SignUpBirthdayViewController: UIViewController {
     func handleSubmit() {
         guard let birthdate = self.birthdate else { return }
         
+        closeButton.isEnabled = true
+        setLoginButton(enabled: false)
         let now = Date()
         let calendar = Calendar.current
         
         let ageComponents = calendar.dateComponents([.year], from: birthdate, to: now)
         let age = ageComponents.year!
-        print("AGE: \(age)")
         
         if age < 12 {
             let alert = UIAlertController(title: nil, message: "Sorry, looks like you're not eligible for Jungle... but thanks for checking us out!", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: { _ in
-                
+                self.performSegue(withIdentifier: "unwindToMenu", sender: self)
             }))
             
             self.present(alert, animated: true, completion: nil)
             
         } else {
-            print("OKAY! Continue")
+            newUser?.birthday = birthdate.timeIntervalSince1970
+            self.performSegue(withIdentifier: "toUsername", sender: self)
         }
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toUsername" {
+            let dest = segue.destination as! SignUpUsernameViewController
+            dest.newUser = newUser
+        }
+    }
+    
     
     
     override var prefersStatusBarHidden: Bool

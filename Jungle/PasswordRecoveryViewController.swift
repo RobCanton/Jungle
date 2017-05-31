@@ -25,7 +25,7 @@ class PasswordRecoveryViewController:UIViewController, UITextFieldDelegate {
     @IBAction func handleSubmit(_ sender: Any) {
         guard let email = emailTextField.text else { return }
         
-        FIRAuth.auth()?.sendPasswordReset(withEmail: email, completion: { error in
+        Auth.auth().sendPasswordReset(withEmail: email, completion: { error in
             if error == nil {
                 Alerts.showStatusSuccessAlert(inWrapper: nil, withMessage: "Email sent!")
                 self.dismiss(animated: true, completion: nil)

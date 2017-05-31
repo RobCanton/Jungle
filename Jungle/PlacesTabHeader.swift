@@ -20,6 +20,7 @@ class PlacesTabHeader: UIView {
     
 
     @IBAction func handleRefresh(_ sender: Any) {
+        print("REFERSH")
         startRefreshing()
         globalMainInterfaceProtocol?.fetchAllStories()
     }

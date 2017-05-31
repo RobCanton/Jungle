@@ -17,7 +17,7 @@ protocol LocationDelegate {
 class LocationService: NSObject {
     
     fileprivate let locationsCache = NSCache<NSString, AnyObject>()
-    fileprivate let ref = FIRDatabase.database().reference()
+    fileprivate let ref = Database.database().reference()
     
     var nearbyLocations = [Location]()
     var radius = 25

@@ -23,7 +23,8 @@ protocol MainInterfaceProtocol {
     func presentCamera()
     func fetchAllStories()
     func statusBar(hide: Bool, animated:Bool)
-    func presentPlaceStory(locationStories:[LocationStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentPlaceStory(locationStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath, hasMyStory:Bool)
     func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
@@ -54,6 +55,8 @@ extension MainViewController: MainInterfaceProtocol {
     
     func fetchAllStories() {
         places.state.fetchAll()
+        LocationService.sharedInstance.requestNearbyLocations()
+        
     }
 }
 
@@ -552,13 +555,27 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     let transitionController: TransitionController = TransitionController()
     
-    func presentPlaceStory(locationStories:[LocationStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+    func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        storyType = .NearbyPost
+        let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.posts = posts
+        galleryViewController.transitionController = self.transitionController
+        self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 0.0
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
+        nav.delegate = transitionController
+        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
+    }
+    
+    func presentPlaceStory(locationStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
         storyType = .PlaceStory
         
         let storiesViewController: StoriesViewController = StoriesViewController()
-        storiesViewController.storyType = storyType
-        storiesViewController.locationStories = locationStories
+        storiesViewController.storyType = .UserStory
+        storiesViewController.userStories = locationStories
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
@@ -613,7 +630,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         guard let nav = self.navigationController else { return }
         storyType = .ProfileStory
         let galleryViewController: GalleryViewController = GalleryViewController()
-        galleryViewController.uid = mainStore.state.userState.uid
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
@@ -630,7 +646,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.showCommentsOnAppear = true
         galleryViewController.isSingleItem = true
-        galleryViewController.uid = post.getAuthorId()
         galleryViewController.posts = [post]
         galleryViewController.transitionController = self.transitionController
         
@@ -927,8 +942,11 @@ extension MainViewController: View2ViewTransitionPresenting {
         }
         
         let i =  IndexPath(row: indexPath.item, section: 0)
-        
-        if storyType == .PlaceStory {
+        if storyType == .NearbyPost {
+            let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return convertedFrame
+        } else if storyType == .PlaceStory {
             guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
@@ -960,7 +978,12 @@ extension MainViewController: View2ViewTransitionPresenting {
         
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        if storyType == .PlaceStory {
+        if storyType == .NearbyPost{
+            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
+                return UIView()
+            }
+            return cell.imageView
+        } else if storyType == .PlaceStory {
             guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
@@ -999,7 +1022,7 @@ extension MainViewController: View2ViewTransitionPresenting {
                 returningPeopleIndex = indexPath
             }
         } else if !isPresenting {
-            if storyType == .PlaceStory {
+            if storyType == .NearbyPost {
                 if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
                     
                     returningPlacesCell?.fadeInInfo(animated: false)
@@ -1056,6 +1079,14 @@ extension MainViewController: View2ViewTransitionPresenting {
             }
         }
         
+        if storyType == .NearbyPost {
+            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                places.collectionView!.reloadData()
+                places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                places.collectionView!.layoutIfNeeded()
+            }
+        }
+        
         if storyType == .ProfileStory {
             if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 profile.collectionView!.reloadData()
@@ -1094,5 +1125,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost
+    case NearbyPost, PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost
 }

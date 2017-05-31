@@ -29,7 +29,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var screenHeight: CGFloat!
     var navHeight: CGFloat!
     
-    var postsRef:FIRDatabaseReference?
+    var postsRef:DatabaseReference?
     var posts = [StoryItem]()
     var postKeys = [String]()
     
@@ -44,7 +44,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var presentConversation:Conversation?
     var partnerImage:UIImage?
     private(set) var isBlocked = false
-    private(set) var blockedRef:FIRDatabaseReference?
+    private(set) var blockedRef:DatabaseReference?
     
     var status:FollowingStatus = .None
     
@@ -315,7 +315,6 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.selectedIndexPath = indexPath
         
         let galleryViewController: GalleryViewController = GalleryViewController()
-        galleryViewController.uid = uid
         galleryViewController.posts = self.posts
         galleryViewController.transitionController = self.transitionController
         self.transitionController.userInfo = ["destinationIndexPath": indexPath as AnyObject, "initialIndexPath": indexPath as AnyObject]

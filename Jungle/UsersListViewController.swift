@@ -88,11 +88,11 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
             userIds = tempIds
         } else if type == .Followers && uid != nil {
             title = "Followers"
-            let ref = FIRDatabase.database().reference().child("social/followers/\(uid!)")
+            let ref = Database.database().reference().child("social/followers/\(uid!)")
             ref.observeSingleEvent(of: .value, with: { snapshot in
                 var tempIds = [String]()
                 for child in snapshot.children {
-                    let childSnap = child as! FIRDataSnapshot
+                    let childSnap = child as! DataSnapshot
                     tempIds.append(childSnap.key)
                 }
                 self.userIds = tempIds
@@ -103,11 +103,11 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
             })
         } else if type == .Following && uid != nil {
             title = "Following"
-            let ref = FIRDatabase.database().reference().child("social/following/\(uid!)")
+            let ref = Database.database().reference().child("social/following/\(uid!)")
             ref.observeSingleEvent(of: .value, with: { snapshot in
                 var tempIds = [String]()
                 for child in snapshot.children {
-                    let childSnap = child as! FIRDataSnapshot
+                    let childSnap = child as! DataSnapshot
                     tempIds.append(childSnap.key)
                 }
                 self.userIds = tempIds

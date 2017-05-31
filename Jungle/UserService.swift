@@ -22,7 +22,7 @@ import SwiftMessages
 class UserService {
     
     fileprivate static let sm = SwiftMessages()
-    static let ref = FIRDatabase.database().reference()
+    static let ref = Database.database().reference()
     
     static var allowContent = false
     
@@ -31,12 +31,12 @@ class UserService {
         mainStore.dispatch(ClearSocialState())
         mainStore.dispatch(UserIsUnauthenticated())
         
-        try! FIRAuth.auth()!.signOut()
+        try! Auth.auth().signOut()
     }
 
 //    
     static func sendFCMToken() {
-        if let token = FIRInstanceID.instanceID().token() {
+        if let token = InstanceID.instanceID().token() {
             if let user = mainStore.state.userState.user {
                 let fcmRef = ref.child("users/FCMToken/\(user.uid)")
                 fcmRef.setValue(token)
@@ -46,9 +46,20 @@ class UserService {
 //
     
     static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
-        ref.child("users/lookup/username/uid/\(username)").observeSingleEvent(of: .value, with: { snapshot in
-            let uid = snapshot.value as? String
-            completion(uid)
+        ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
+            
+            if snapshot.exists() {
+                completion(snapshot.key)
+            } else {
+                completion(nil)
+            }
+            
+        })
+    }
+    
+    static func checkUsernameAvailability(byUsername username: String, completion: @escaping ((_ username:String, _ available:Bool)->())) {
+        ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
+            completion(username, !snapshot.exists())
         })
     }
 
@@ -168,24 +179,14 @@ class UserService {
     
     static func getUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
         
-        let storyRef = ref.child("stories/users/\(uid)")
+        let storyRef = ref.child("users/story/\(uid)")
         
         storyRef.observeSingleEvent(of: .value, with: { snapshot in
             var story:UserStory?
-            if let dict = snapshot.value as? [String:AnyObject] {
-                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
-                    let lastPost = meta["k"] as! String
-                    let timestamp = meta["t"] as! Double
-                    var popularity = 0
-                    if let p = meta["p"] as? Int {
-                        popularity = p
-                    }
-                    var posts = [String]()
-                    for (key,_) in postObject {
-                        posts.append(key)
-                    }
-                    story = UserStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity:popularity, uid: snapshot.key)
-                }
+            if let dict = snapshot.value as? [String:AnyObject], let _postsKeys = dict["posts"]  as? [String:Double] {
+                let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
+                story = UserStory(postKeys: postKeys, uid: uid)
+
             }
             completion(story)
         
@@ -196,27 +197,28 @@ class UserService {
     
     
     static func getPlaceStory(_ placeId:String, completion: @escaping ((_ story:LocationStory?)->())) {
-        let storyRef = ref.child("stories/places/\(placeId)")
-        storyRef.observe(.value, with: { snapshot in
-            var story:LocationStory?
-            if let dict = snapshot.value as? [String:AnyObject] {
-                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
-                    let lastPost = meta["k"] as! String
-                    let timestamp = meta["t"] as! Double
-                    var popularity = 0
-                    if let p = meta["p"] as? Int {
-                        popularity = p
-                    }
-                    var posts = [String]()
-                    for (key,_) in postObject {
-                        posts.append(key)
-                    }
-                    story = LocationStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity: popularity, locationKey: snapshot.key)
-                }
-            }
-            completion(story)
-            
-        })
+        completion(nil)
+//        let storyRef = ref.child("stories/places/\(placeId)")
+//        storyRef.observe(.value, with: { snapshot in
+//            var story:LocationStory?
+//            if let dict = snapshot.value as? [String:AnyObject] {
+//                if let meta = dict["meta"] as? [String:AnyObject], let postObject = dict["posts"] as? [String:AnyObject] {
+//                    let lastPost = meta["k"] as! String
+//                    let timestamp = meta["t"] as! Double
+//                    var popularity = 0
+//                    if let p = meta["p"] as? Int {
+//                        popularity = p
+//                    }
+//                    var posts = [String]()
+//                    for (key,_) in postObject {
+//                        posts.append(key)
+//                    }
+//                    story = LocationStory(posts: posts, lastPostKey: lastPost, timestamp: timestamp, popularity: popularity, locationKey: snapshot.key)
+//                }
+//            }
+//            completion(story)
+//            
+//        })
     }
     
     
@@ -245,21 +247,20 @@ class UserService {
     
 
     static func uploadProfileImage(image:UIImage, completion: @escaping ((_ downloadURL:String?) ->())) {
-        guard let user = FIRAuth.auth()?.currentUser else {
+        guard let user = Auth.auth().currentUser else {
             completion(nil)
             return
         }
         
         
         
-        let storageRef = FIRStorage.storage().reference()
+        let storageRef = Storage.storage().reference()
         let imageRef = storageRef.child("user_profiles/\(user.uid)")
         if let picData = UIImageJPEGRepresentation(image, 0.9) {
             let contentTypeStr = "image/jpg"
-            let metadata = FIRStorageMetadata()
+            let metadata = StorageMetadata()
             metadata.contentType = contentTypeStr
-            
-            imageRef.put(picData, metadata: metadata) { metadata, error in
+            imageRef.putData(picData, metadata: metadata) { metadata, error in
                 if error == nil && metadata != nil {
                     let url =  metadata!.downloadURL()!.absoluteString
                     completion(url)
@@ -293,7 +294,7 @@ class UserService {
     }
 
     static func sendMessage(conversationKey:String,recipientId:String, message:String, completion: ((_ success:Bool)->())?) {
-        let convoRef = FIRDatabase.database().reference().child("conversations/\(conversationKey)")
+        let convoRef = Database.database().reference().child("conversations/\(conversationKey)")
         let messageRef = convoRef.child("messages").childByAutoId()
         let uid = mainStore.state.userState.uid
         
@@ -352,7 +353,7 @@ class UserService {
     }
     
     static func reportUser(user:User, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
         let reportRef = ref.child("reports/\(uid):\(user.uid)")
         let value: [String: Any] = [

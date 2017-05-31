@@ -40,13 +40,13 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
         self.imageContainer.layer.borderWidth = 2.0
         self.imageContainer.clipsToBounds = true
         
-        getUserAndImage(withCheck: check, uid: story.getUserId(), completion: { check, user, image, fromCache in
+        getUserAndImage(withCheck: check, uid: story.uid, completion: { check, user, image, fromCache in
             if self.check != check { return }
             if image != nil {
                 self.imageView.image = image
             }
             
-            if story.getUserId() == mainStore.state.userState.uid {
+            if story.uid == mainStore.state.userState.uid {
                 self.usernameLabel.text = "Me"
                 self.usernameLabel.font = UIFont.systemFont(ofSize: 12.0, weight: UIFontWeightBold)
             } else {

@@ -73,8 +73,17 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </view>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VPf-iq-W5C">
+                    <rect key="frame" x="486" y="15.5" width="25" height="25"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <state key="normal" image="delete_thin"/>
+                    <connections>
+                        <action selector="handleClose:" destination="gtv-pI-kcX" eventType="touchUpInside" id="eRz-Wr-A66"/>
+                    </connections>
+                </button>
             </subviews>
             <constraints>
+                <constraint firstItem="VPf-iq-W5C" firstAttribute="centerY" secondItem="9h5-nk-yFJ" secondAttribute="centerY" id="0wA-4Y-CL2"/>
                 <constraint firstItem="E7o-DA-g2z" firstAttribute="leading" secondItem="9h5-nk-yFJ" secondAttribute="trailing" constant="8" id="2LH-D1-GMZ"/>
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="top" secondItem="9h5-nk-yFJ" secondAttribute="top" id="5PS-MC-y47"/>
                 <constraint firstAttribute="trailing" secondItem="XsV-iO-uuX" secondAttribute="trailing" constant="16" id="F6S-Iw-3gX"/>
@@ -83,11 +92,13 @@
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="leading" secondItem="9h5-nk-yFJ" secondAttribute="trailing" constant="8" id="dc5-vC-NHb"/>
                 <constraint firstItem="UG1-Az-r6Z" firstAttribute="leading" secondItem="E7o-DA-g2z" secondAttribute="trailing" constant="6" id="nT3-5h-Xx0"/>
                 <constraint firstItem="XsV-iO-uuX" firstAttribute="centerY" secondItem="9h5-nk-yFJ" secondAttribute="centerY" id="nzU-Ux-r4e"/>
+                <constraint firstAttribute="trailing" secondItem="VPf-iq-W5C" secondAttribute="trailing" constant="12" id="qsW-S9-ERV"/>
                 <constraint firstItem="UG1-Az-r6Z" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="1" id="vAf-XC-Qoj"/>
                 <constraint firstItem="E7o-DA-g2z" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="1" id="yxt-SH-MAJ"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="closeButton" destination="VPf-iq-W5C" id="TBU-7f-NNP"/>
                 <outlet property="locationTitle" destination="UG1-Az-r6Z" id="M7t-0p-Qq9"/>
                 <outlet property="snapTimer" destination="XsV-iO-uuX" id="7vL-pr-up1"/>
                 <outlet property="timeLabel" destination="E7o-DA-g2z" id="a7Z-MK-R9K"/>
@@ -97,4 +108,7 @@
             <point key="canvasLocation" x="435.5" y="7.5"/>
         </view>
     </objects>
+    <resources>
+        <image name="delete_thin" width="25" height="25"/>
+    </resources>
 </document>

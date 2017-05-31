@@ -52,7 +52,7 @@ class MessageService: Service {
     
     internal func startListeningToConversations() {
         let uid = mainStore.state.userState.uid
-        let conversationsRef = FIRDatabase.database().reference().child("users/conversations/\(uid)")
+        let conversationsRef = Database.database().reference().child("users/conversations/\(uid)")
         conversationsRef.observe(.childAdded, with: { snapshot in
             if snapshot.exists() {
                 
@@ -104,7 +104,7 @@ class MessageService: Service {
     
     internal func stopListeningToConversatons() {
         let uid = mainStore.state.userState.uid
-        let conversationsRef = FIRDatabase.database().reference().child("users/conversations/\(uid)")
+        let conversationsRef = Database.database().reference().child("users/conversations/\(uid)")
         conversationsRef.removeAllObservers()
     }
     

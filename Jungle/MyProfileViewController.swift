@@ -119,7 +119,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     }
     
     
-    var postsRef:FIRDatabaseReference?
+    var postsRef:DatabaseReference?
     
     func listenToPosts() {
         

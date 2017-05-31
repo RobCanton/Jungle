@@ -84,7 +84,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.timeLabel.text = ""
         self.colorView.alpha = 0.0
         
-        if story.getUserId() == mainStore.state.userState.uid {
+        if story.uid == mainStore.state.userState.uid {
             //colorView.isHidden = true
             newDot.isHidden = true
             dotBorder.isHidden = true
@@ -95,7 +95,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             dotBorder.isHidden = showDot ? viewed : true
         }
         
-        getUser(withCheck: check, uid: story.getUserId(), completion: { check, user in
+        getUser(withCheck: check, uid: story.uid, completion: { check, user in
             if self.check != check { return }
             if user != nil {
                 if user!.uid == mainStore.state.userState.uid {

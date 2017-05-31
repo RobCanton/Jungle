@@ -91,7 +91,7 @@ class SignInViewController: UIViewController, UITextFieldDelegate {
         guard let email = emailField.text else { return }
         guard let pass = passwordField.text else { return }
         
-        FIRAuth.auth()?.signIn(withEmail: email, password: pass, completion: { (user, error) in
+        Auth.auth().signIn(withEmail: email, password: pass, completion: { (user, error) in
             if error != nil && user == nil {
                 print("Error signing in to accoutn")
                 return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to sign in.")

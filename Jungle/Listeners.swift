@@ -13,7 +13,7 @@ import Firebase
 
 class Listeners {
     
-    fileprivate static let ref = FIRDatabase.database().reference()
+    fileprivate static let ref = Database.database().reference()
     
     fileprivate static var listeningToFollowers = false
     fileprivate static var listeningToFollowing = false
@@ -136,7 +136,7 @@ class Listeners {
                 if snapshot.exists() {
                     
                     for postKey in snapshot.children {
-                        let childSnap = postKey as! FIRDataSnapshot
+                        let childSnap = postKey as! DataSnapshot
                         viewed.append(childSnap.key)
                     }
                 }
