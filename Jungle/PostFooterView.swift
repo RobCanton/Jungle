@@ -21,6 +21,8 @@ class PostFooterView: UIView {
     
     var gradient:CAGradientLayer?
     @IBOutlet weak var gradientView: UIView!
+    @IBOutlet weak var likesView: UIView!
+    @IBOutlet weak var commentsView: UIView!
     
     weak var delegate:PostFooterProtocol?
     var pullUpTapHandler:(()->())?
@@ -47,14 +49,20 @@ class PostFooterView: UIView {
             commentsLabel.text = "\(getNumericShorthandString(count)) COMMENTS"
         }
         
-        self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
+        
+        likesView.layer.cornerRadius = 2.0
+        likesView.clipsToBounds = true
+        
+        commentsView.layer.cornerRadius = 2.0
+        commentsView.clipsToBounds = true
+        //self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
     
     }
     
     func setup(_ item:StoryItem) {
 
-        setCommentsLabelToCount(item.getNumComments())
-        let numCommentsRef = UserService.ref.child("uploads/meta/\(item.getKey())/comments")
+        setCommentsLabelToCount(item.numComments)
+        let numCommentsRef = UserService.ref.child("uploads/meta/\(item.key)/comments")
         numCommentsRef.removeAllObservers()
         numCommentsRef.observe(.value, with: { snapshot in
             var numComments = 0
@@ -65,7 +73,7 @@ class PostFooterView: UIView {
             }
             
             item.updateNumComments(numComments)
-            self.setCommentsLabelToCount(item.getNumComments())
+            self.setCommentsLabelToCount(item.numComments)
         })
 
         //setupLiked(item.likes[mainStore.state.userState.uid] != nil)

@@ -51,7 +51,7 @@ class CommentCell: UITableViewCell {
 
     func handleTap(sender:UITapGestureRecognizer) {
         if comment == nil { return }
-        delegate?.showAuthor(comment!.getAuthor())
+        delegate?.showAuthor(comment!.author)
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -79,16 +79,19 @@ class CommentCell: UITableViewCell {
         backgroundColor = UIColor.clear
         backgroundView = nil
         
-        UserService.getUser(comment.getAuthor(), withCheck: check, completion: { user, check in
+        UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
                 self.authorLabel.text = user!.username
-                self.commentLabel.text = comment.getText()
+                self.commentLabel.text = comment.text
                 self.commentLabel.sizeToFit()
                 self.userImage.loadImageAsync(user!.imageURL, completion: nil)
-                self.timeLabel.text = comment.getDate().timeStringSinceNow()
+                self.timeLabel.text = comment.date.timeStringSinceNow()
             }
             
         })
+        
+        authorLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
+        commentLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
         
     }
     

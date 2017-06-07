@@ -38,7 +38,7 @@ class StoryProgressIndicator: UIView {
             let itemWidth = widthMinusGap / CGFloat(storyItems.count)
             
             for item in storyItems {
-                totalLength += item.getLength()
+                totalLength += item.length
             }
             
             for i in 0 ... storyItems.count - 1 {
@@ -72,7 +72,7 @@ class StoryProgressIndicator: UIView {
             
             let bar = progressBars[activeBarIndex]
             let item = storyItems[activeBarIndex]
-            bar.startAnimating(duration: item.getLength())
+            bar.startAnimating(duration: item.length)
         }
     }
     

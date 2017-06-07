@@ -64,12 +64,14 @@ class MessageService: Service {
                         self.removeConversation(pairKey)
                     } else {
                         let seen = dict["seen"] as! Bool
+                        let sender = dict["sender"] as! String
                         let lastMessage = dict["text"] as! String
                         let timestamp = dict["latest"] as! Double
+                        let isMediaMessage = dict["isMediaMessage"] as! Bool
                         let date = Date(timeIntervalSince1970: timestamp/1000) as Date
                         let listening = true
 
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: lastMessage, isMediaMessage:isMediaMessage, listening: listening)
                         self.conversations.append(conversation)
                         self.updateSubscribers()
                     }
@@ -87,12 +89,14 @@ class MessageService: Service {
                         self.removeConversation(pairKey)
                     } else {
                         let seen = dict["seen"] as! Bool
+                        let sender = dict["sender"] as! String
                         let lastMessage = dict["text"] as! String
                         let timestamp = dict["latest"] as! Double
+                        let isMediaMessage = dict["isMediaMessage"] as! Bool
                         let date = Date(timeIntervalSince1970: timestamp/1000) as Date
                         let listening = true
                         
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, lastMessage: lastMessage, listening: listening)
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: lastMessage, isMediaMessage:isMediaMessage, listening: listening)
                         self.changeConversation(conversation)
                     }
                     

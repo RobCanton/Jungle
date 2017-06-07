@@ -44,13 +44,7 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FLd-Vf-772">
-                                <rect key="frame" x="21" y="280.5" width="8" height="13.5"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="comments_filled" translatesAutoresizingMaskIntoConstraints="NO" id="hE6-iS-b7k">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="liked" translatesAutoresizingMaskIntoConstraints="NO" id="hE6-iS-b7k">
                                 <rect key="frame" x="6" y="281" width="11" height="11"/>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
@@ -58,14 +52,38 @@
                                     <constraint firstAttribute="width" constant="11" id="XHJ-HY-dCe"/>
                                 </constraints>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FLd-Vf-772">
+                                <rect key="frame" x="21" y="280" width="8" height="13.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="comments_filled" translatesAutoresizingMaskIntoConstraints="NO" id="u6s-KE-y5C">
+                                <rect key="frame" x="37" y="281" width="11" height="11"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="11" id="JF5-sK-Nbl"/>
+                                    <constraint firstAttribute="height" constant="11" id="O7N-aI-dco"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="6" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Qc-sD-LDR">
+                                <rect key="frame" x="52" y="280" width="8" height="13.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="8Qc-sD-LDR" firstAttribute="leading" secondItem="u6s-KE-y5C" secondAttribute="trailing" constant="4" id="1x0-Ms-i9O"/>
+                            <constraint firstItem="u6s-KE-y5C" firstAttribute="centerY" secondItem="hE6-iS-b7k" secondAttribute="centerY" id="4b7-jC-Q2h"/>
                             <constraint firstAttribute="bottom" secondItem="FLd-Vf-772" secondAttribute="bottom" constant="6" id="Ng5-Jn-43s"/>
                             <constraint firstAttribute="bottom" secondItem="hE6-iS-b7k" secondAttribute="bottom" constant="7.5" id="Xwt-y8-q1E"/>
                             <constraint firstItem="FLd-Vf-772" firstAttribute="leading" secondItem="hE6-iS-b7k" secondAttribute="trailing" constant="4" id="auX-NB-fLP"/>
                             <constraint firstAttribute="trailing" secondItem="S0Z-88-odW" secondAttribute="trailing" constant="6" id="f1d-bM-xyC"/>
                             <constraint firstAttribute="bottom" secondItem="S0Z-88-odW" secondAttribute="bottom" constant="6" id="fBo-Dt-8xt"/>
+                            <constraint firstItem="u6s-KE-y5C" firstAttribute="leading" secondItem="FLd-Vf-772" secondAttribute="trailing" constant="8" id="hb5-N7-dCk"/>
+                            <constraint firstItem="8Qc-sD-LDR" firstAttribute="centerY" secondItem="FLd-Vf-772" secondAttribute="centerY" id="yJ5-4d-Ob6"/>
                             <constraint firstItem="hE6-iS-b7k" firstAttribute="leading" secondItem="Hed-VB-mXR" secondAttribute="leading" constant="6" id="z8j-Rd-aR8"/>
                         </constraints>
                     </view>
@@ -88,11 +106,13 @@
             <size key="customSize" width="236" height="184"/>
             <connections>
                 <outlet property="colorView" destination="Xko-wG-XaC" id="eoy-eb-1Ct"/>
-                <outlet property="commentsIcon" destination="hE6-iS-b7k" id="UzP-Vy-lw5"/>
-                <outlet property="commentsLabel" destination="FLd-Vf-772" id="vpb-E4-71Q"/>
+                <outlet property="firstIcon" destination="hE6-iS-b7k" id="MJi-38-3ZX"/>
+                <outlet property="firstLabel" destination="FLd-Vf-772" id="EtA-My-oIl"/>
                 <outlet property="imageView" destination="gA3-5I-6cL" id="67h-Oa-Plr"/>
                 <outlet property="nameLabel" destination="zLT-Da-Vh8" id="eRn-Pq-vpb"/>
                 <outlet property="overlay" destination="Hed-VB-mXR" id="zVr-73-mYs"/>
+                <outlet property="secondIcon" destination="u6s-KE-y5C" id="qqL-cf-gz8"/>
+                <outlet property="secondLabel" destination="8Qc-sD-LDR" id="XER-e2-1c0"/>
                 <outlet property="timeLabel" destination="S0Z-88-odW" id="Ght-uI-pmN"/>
             </connections>
             <point key="canvasLocation" x="546" y="404"/>
@@ -100,5 +120,6 @@
     </objects>
     <resources>
         <image name="comments_filled" width="25" height="25"/>
+        <image name="liked" width="25" height="25"/>
     </resources>
 </document>

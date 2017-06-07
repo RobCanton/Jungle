@@ -11,10 +11,10 @@ import Foundation
 
 class Comment: NSObject {
     
-    fileprivate var key:String                    // Key in database
-    fileprivate var author:String
-    fileprivate var text:String
-    fileprivate var date:Date
+    private(set) var key:String                    // Key in database
+    private(set) var author:String
+    private(set) var text:String
+    private(set) var date:Date
     
     init(key:String, author:String, text:String, timestamp:Double)
     {
@@ -23,28 +23,8 @@ class Comment: NSObject {
         self.text    = text
         self.date    = Date(timeIntervalSince1970: timestamp/1000)
     }
+
     
-    /* Getters */
-    
-    func getKey() -> String
-    {
-        return key
-    }
-    
-    func getAuthor()-> String
-    {
-        return author
-    }
-    
-    func getText() -> String
-    {
-        return text
-    }
-    
-    func getDate() -> Date
-    {
-        return date
-    }
 }
 
 func < (lhs: Comment, rhs: Comment) -> Bool {

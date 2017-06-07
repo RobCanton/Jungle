@@ -38,8 +38,8 @@ class UserService {
     static func sendFCMToken() {
         if let token = InstanceID.instanceID().token() {
             if let user = mainStore.state.userState.user {
-                let fcmRef = ref.child("users/FCMToken/\(user.uid)")
-                fcmRef.setValue(token)
+                let fcmRef = ref.child("users/FCMToken/\(token)")
+                fcmRef.setValue(user.uid)
             }
         }
     }
@@ -47,9 +47,10 @@ class UserService {
     
     static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
         ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
-            
-            if snapshot.exists() {
-                completion(snapshot.key)
+
+            if let dict = snapshot.value as? [String:String], let first = dict.first {
+                print("DICT: \(dict)")
+                completion(first.key)
             } else {
                 completion(nil)
             }

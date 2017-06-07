@@ -20,18 +20,22 @@ class Conversation: NSObject, Comparable {
     private var partner_uid:String
     private var seen:Bool
     private var date:Date
+    private(set)  var sender:String
     private var lastMessage:String
+    private(set) var isMediaMessage:Bool
     private var partner:User?
     private var listening:Bool
     var delegate:GetUserProtocol?
     
-    init(key:String, partner_uid:String, seen:Bool, date:Date, lastMessage:String, listening:Bool)
+    init(key:String, partner_uid:String, seen:Bool, date:Date, sender:String, lastMessage:String, isMediaMessage:Bool, listening:Bool)
     {
         self.key         = key
         self.partner_uid = partner_uid
         self.seen        = seen
         self.date        = date
+        self.sender      = sender
         self.lastMessage = lastMessage
+        self.isMediaMessage = isMediaMessage
         self.listening   = listening
         
         super.init()

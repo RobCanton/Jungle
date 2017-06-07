@@ -73,6 +73,7 @@ class NotificationService: Service {
         
         notificationsRef.observe(.childRemoved, with: { snapshot in
             self.notifications[snapshot.key] = nil
+            self.cache.removeObject(forKey: "notification-\(snapshot.key)" as NSString)
             self.updateSubscribers()
         })
     }
@@ -106,8 +107,8 @@ class NotificationService: Service {
                 let postKey         = dict["postKey"] as? String
                 let date            = Date(timeIntervalSince1970: timestamp/1000)
                 let text            = dict["text"] as? String
-                let numCommenters   = dict["commenters"] as? Int
-                notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, numCommenters: numCommenters)
+                let count           = dict["count"] as? Int
+                notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
                 self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             }
             return completion(notification, false)

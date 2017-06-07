@@ -65,7 +65,7 @@ class NotificationTableViewCell: UITableViewCell {
     func getPost(withCheck check:Int, key:String, completion: @escaping((_ check:Int, _ item:StoryItem?)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
-                UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
+                UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in
                     self.postImageView.image = image
                 })
             }
@@ -87,18 +87,18 @@ class NotificationTableViewCell: UITableViewCell {
         
         self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })
         
-        UploadService.retrieveImage(byKey: post.getKey(), withUrl: post.getDownloadUrl(), completion: { image, fromFile in
+        UploadService.retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
             self.postImageView.image = image
         })
         
         let type = notification.type
         if type == .comment {
             var prefix = ""
-            if let numCommenters = notification.numCommenters {
+            if let numCommenters = notification.count {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
-                    prefix = "and \(numCommenters - 1) others "
+                    prefix = "and \(getNumericShorthandString(numCommenters - 1)) others "
                 }
             }
             var suffix = "."
@@ -108,11 +108,11 @@ class NotificationTableViewCell: UITableViewCell {
             setMessageLabel(username: user.username, message: " \(prefix)commented on your post\(suffix)", date: notification.date)
         } else if type == .comment_also {
             var prefix = ""
-            if let numCommenters = notification.numCommenters {
+            if let numCommenters = notification.count {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
-                    prefix = "and \(numCommenters - 1) others "
+                    prefix = "and \(getNumericShorthandString(numCommenters - 1)) others "
                 }
             }
             var suffix = "."
@@ -122,11 +122,11 @@ class NotificationTableViewCell: UITableViewCell {
             setMessageLabel(username: user.username, message: " \(prefix)also commented\(suffix)", date: notification.date)
         } else if type == .comment_to_sub {
             var prefix = ""
-            if let numCommenters = notification.numCommenters {
+            if let numCommenters = notification.count {
                 if numCommenters == 2 {
                     prefix = "and 1 other "
                 } else if numCommenters > 2 {
-                    prefix = "and \(numCommenters - 1) others "
+                    prefix = "and \(getNumericShorthandString(numCommenters - 1)) others "
                 }
             }
             var suffix = "."
@@ -135,7 +135,16 @@ class NotificationTableViewCell: UITableViewCell {
             }
             setMessageLabel(username: user.username, message: " \(prefix)commented on a post you are following\(suffix)", date: notification.date)
         } else if type == .like {
-            setMessageLabel(username: user.username, message: " liked your post.", date: notification.date)
+            var prefix = ""
+            if let numLikes = notification.count {
+                if numLikes == 2 {
+                    prefix = "and 1 other "
+                } else if numLikes > 2 {
+                    prefix = "and \(getNumericShorthandString(numLikes - 1)) others "
+                }
+            }
+            
+            setMessageLabel(username: user.username, message: " \(prefix)liked your post.", date: notification.date)
         } else if type == .mention {
             setMessageLabel(username: user.username, message: " mentioned you in a comment.", date: notification.date)
         }
@@ -161,6 +170,7 @@ class NotificationTableViewCell: UITableViewCell {
         title.addAttributes(a2, range: NSRange(location: username.characters.count + message.characters.count, length: timeStr.characters.count))
         
         messageLabel.attributedText = title
+        
     }
     
     func userTapped() {

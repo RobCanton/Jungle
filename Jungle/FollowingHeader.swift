@@ -9,6 +9,7 @@
 import UIKit
 
 import TGPControls
+import TwicketSegmentedControl
 func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
     
 }
@@ -42,6 +43,9 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     weak var stateRef:HomeStateController?
     var mode:SortedBy = .Popular
     
+    weak var sliderLabels:TGPCamelLabels?
+    weak var segmentedControl:TwicketSegmentedControl?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -53,6 +57,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                          action: #selector(valueChanged(_:event:)),
                          for: .valueChanged)
         
+        slider.addTarget(self, action: #selector(down), for: .touchDown)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
@@ -112,8 +117,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         
         //resetStack()
     }
-    
-    
     
     var discoverLabel:UILabel?
     
@@ -303,17 +306,43 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
     }
     
+    var animateShow = false
+    
+    func down() {
+        animateShow = true
+        UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
+            self.segmentedControl?.alpha = 0.0
+        }) { _ in
+            if self.animateShow {
+                UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseIn, animations: {
+                    self.sliderLabels?.alpha = 1.0
+                })
+            }
+        }
+    }
+    
     func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
         let value = Int(sender.value)
-        //sliderLabels.value = UInt(value)
+        sliderLabels?.value = UInt(value)
         let distance = distances[value]
         print("DISTANCE SELECTED: \(distance)")
         LocationService.sharedInstance.radius = distance
         LocationService.sharedInstance.requestNearbyLocations()
+        animateShow = false
+        UIView.animate(withDuration: 0.15, delay: 0.5, options: .curveEaseIn, animations: {
+            self.sliderLabels?.alpha = 0.0
+        }) { _ in
+            if !self.animateShow {
+                UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
+                    self.segmentedControl?.alpha = 1.0
+                })
+            }
+        }
+        
     }
     
     func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
-        //sliderLabels.value = UInt(sender.value)
+        sliderLabels?.value = UInt(sender.value)
     }
     
     

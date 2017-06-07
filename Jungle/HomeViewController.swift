@@ -11,6 +11,7 @@ import View2ViewTransition
 import Firebase
 import ReSwift
 import MapKit
+import TGPControls
 import TwicketSegmentedControl
 
 enum SortedBy {
@@ -83,7 +84,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
     }
     
-    
+    var sliderLabels:TGPCamelLabels!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,6 +110,20 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         control.sliderBackgroundColor = accentColor
         
         view.addSubview(control)
+        
+        var distanceLabels = [String]()
+        for distance in distances {
+            distanceLabels.append("\(distance) km")
+        }
+        
+        sliderLabels = TGPCamelLabels()
+        sliderLabels.frame = CGRect(x: 0, y: 52.0, width: view.frame.width, height: 36)
+        sliderLabels.names = distanceLabels
+        sliderLabels.upFontColor = UIColor.black
+        sliderLabels.downFontColor = UIColor.clear
+        sliderLabels.alpha = 0.0
+        
+        view.addSubview(sliderLabels)
         
         screenSize = self.view.frame
         screenWidth = screenSize.width
@@ -154,7 +169,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         tabHeader.stopRefreshing()
         
         for post in state.popularPosts {
-            print(post.getKey())
+            
         }
         if mode == nil || mode! == self.sortMode{
             print("RELOAD TABLE")
@@ -169,6 +184,9 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             topCollectionViewRef = view.collectionViewFollowing
             midCollectionViewRef = view.collectionViewPeople
             view.setupStories(mode: sortMode, state: state)
+            view.sliderLabels = self.sliderLabels
+            view.segmentedControl = self.control
+            view.slider.ticksListener = self.sliderLabels
             return view
         }
         

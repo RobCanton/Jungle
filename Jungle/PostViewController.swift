@@ -2,7 +2,7 @@ import UIKit
 import AVFoundation
 import Firebase
 
-public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate {
+public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate, CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
     
     var playerLayer:AVPlayerLayer?
     weak var delegate:PopupProtocol?
@@ -11,8 +11,14 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     var shouldAnimate = false
     var paused = false
     
-    var likedRef:DatabaseReference?
+    var keyboardUp = false
+    var subscribedToPost = false
     
+    var likedRef:DatabaseReference?
+    var numLikesRef:DatabaseReference?
+    var commentsRef:DatabaseReference?
+    var subscribedRef:DatabaseReference?
+
     weak private(set) var storyItem:StoryItem!
     private(set) var cellIndex:Int?
     
@@ -26,15 +32,66 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         storyItem.delegate = self
         shouldAutoPause = true
         setItem()
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     deinit {
         print("Deinit >> PostViewController")
     }
     
+    func sendComment(_ comment: String) {
+        
+        guard let item = self.storyItem else { return }
+        
+        if editCaptionMode {
+            self.commentBar.textField.resignFirstResponder()
+            UploadService.editCaption(postKey: item.key, caption: comment) { success in
+                if success {
+                    item.editCaption(caption: comment)
+                }
+                self.setItem()
+            }
+        } else {
+            UploadService.addComment(post: item, comment: comment)
+        }
+    }
+    
+    func toggleLike(_ like: Bool) {
+        guard let item = self.storyItem else { return }
+        
+        if like {
+            UploadService.addLike(post: item)
+            item.addLike(mainStore.state.userState.uid)
+        } else {
+            UploadService.removeLike(post: item)
+            item.removeLike(mainStore.state.userState.uid)
+        }
+    }
+    
+    func more() {
+        delegate?.showMore()
+    }
+    
+    var editCaptionMode = false
+    func editCaption() {
+        guard let item = self.storyItem else { return }
+        editCaptionMode = true
+        commentBar.textField.placeholder = "Edit Caption"
+        commentBar.sendButton.setTitle("Set", for: .normal)
+        commentBar.textField.becomeFirstResponder()
+        commentBar.textField.text = item.caption
+        //delegate?.editCaption()
+    }
+    
     func showAuthor() {
         guard let item = self.storyItem else { return }
-        delegate?.showUser(item.getAuthorId())
+        delegate?.showUser(item.authorId)
+    }
+    
+    func showUser(_ uid:String) {
+        delegate?.showUser(uid)
     }
     
     func dismiss() {
@@ -42,6 +99,10 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
 
     func handleFooterAction() {
+        delegate?.showComments()
+    }
+    
+    func showComments() {
         delegate?.showComments()
     }
     
@@ -66,9 +127,20 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         super.init(frame: frame)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
+        contentView.addSubview(gradientView)
         contentView.addSubview(headerView)
         contentView.addSubview(footerView)
         contentView.addSubview(captionView)
+        
+        /* Info view */
+        infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: infoView.frame.height)
+        contentView.addSubview(infoView)
+        
+        contentView.addSubview(commentBar)
+        
+        /* Comments view */
+        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
+        contentView.addSubview(commentsView)
         
         headerView.snapTimer.isHidden = true
         headerView.snapTimer.removeFromSuperview()
@@ -83,6 +155,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func setItem() {
         guard let item = storyItem else { return }
 
+        commentBar.setup(item.authorId == mainStore.state.userState.uid)
         content.alpha = 1.0
         videoContent.alpha = 1.0
         
@@ -97,7 +170,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         if item.contentType == .video {
             
-            if let videoURL = UploadService.readVideoFromFile(withKey: item.getKey()) {
+            if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
                 stopIndicator()
                 createVideoPlayer()
                 let asset = AVAsset(url: videoURL)
@@ -114,21 +187,29 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             }
         }
 
-        self.headerView.setup(withUid: item.authorId, date: item.getDateCreated(), _delegate: self)
+        self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
+        self.headerView.setNumLikes(item.numLikes)
+        self.headerView.setNumComments(item.numComments)
         
-        if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
-            self.captionView.text = caption
-            self.captionView.fitHeightToContent()
-            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
-            self.captionView.isHidden = false
+        let width = self.frame.width - (10 + 8 + 8 + 32)
+        var size:CGFloat = 0.0
+        
+        if let caption = item.caption, caption != "" {
+            size =  UILabel.size(withText: caption, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular)).height + 34
+            infoView.isHidden = false
+            commentsView.hasCaption = true
         } else {
-            self.captionView.isHidden = true
-            self.captionView.text = ""
-            self.captionView.fitHeightToContent()
-            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+            infoView.isHidden = true
+            commentsView.hasCaption = false
         }
         
-        if let locationKey = item.getLocationKey() {
+        infoView.frame = CGRect(x: 0, y: commentBar.frame.origin.y - size, width: frame.width, height: size)
+        commentsView.frame = CGRect(x: 0, y: getCommentsViewOriginY(), width: commentsView.frame.width, height: commentsView.frame.height)
+        commentsView.delegate = self
+        self.infoView.setInfo(withUid: item.authorId, item: item, delegate: self)
+        
+        
+        if let locationKey = item.locationKey {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
                 self.headerView.setupLocation(location: location)
             })
@@ -142,16 +223,68 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         let uid = mainStore.state.userState.uid
         likedRef?.removeAllObservers()
-        likedRef = Database.database().reference().child("uploads/likes/\(item.getKey())/\(uid)")
+        likedRef = Database.database().reference().child("uploads/likes/\(item.key)/\(uid)")
         likedRef!.observe(.value, with: { snapshot in
-            print("LIKED: \(snapshot.exists())")
-            self.footerView.setupLiked(snapshot.exists(), animated: true)
+
+            self.commentBar.setLikedStatus(snapshot.exists(), animated: false)
         })
         
-        if let index = cellIndex {
-            delegate?.newItem(index, item)
-        }
+        numLikesRef?.removeAllObservers()
+        numLikesRef = Database.database().reference().child("uploads/meta/\(item.key)/likes")
+        numLikesRef!.observe(.value, with: { snapshot in
+            var count = 0
+            if let _count = snapshot.value as? Int {
+                count = _count
+            }
+            self.headerView.setNumLikes(count)
+            item.numLikes = count
+            
+        })
         
+        commentsView.setTableComments(comments: item.comments, animated: false)
+        commentsRef?.removeAllObservers()
+        commentsRef = UserService.ref.child("uploads/comments/\(item.key)")
+        
+        if let lastItem = item.comments.last {
+            let lastKey = lastItem.key
+            let ts = lastItem.date.timeIntervalSince1970 * 1000
+            commentsRef?.queryOrdered(byChild: "timestamp").queryStarting(atValue: ts).observe(.childAdded, with: { snapshot in
+                
+                let dict = snapshot.value as! [String:Any]
+                let key = snapshot.key
+                if key != lastKey {
+                    let author = dict["author"] as! String
+                    let text = dict["text"] as! String
+                    let timestamp = dict["timestamp"] as! Double
+                    
+                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                    item.addComment(comment)
+                    self.headerView.setNumComments(item.numComments)
+                    self.commentsView.setTableComments(comments: item.comments, animated: true)
+                }
+            })
+        } else {
+            commentsRef?.observe(.childAdded, with: { snapshot in
+                let dict = snapshot.value as! [String:Any]
+                let key = snapshot.key
+                let author = dict["author"] as! String
+                let text = dict["text"] as! String
+                let timestamp = dict["timestamp"] as! Double
+                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                item.addComment(comment)
+                self.headerView.setNumComments(item.numComments)
+                self.commentsView.setTableComments(comments: item.comments, animated: true)
+            })
+        }
+        commentBar.textField.delegate = self
+        commentBar.delegate = self
+        
+        subscribedToPost = false
+        subscribedRef?.removeAllObservers()
+        subscribedRef = UserService.ref.child("uploads/subscribers/\(item.key)/\(uid)")
+        subscribedRef?.observe(.value, with: { snapshot in
+            self.subscribedToPost = snapshot.exists()
+        })
     }
     
     func setForPlay(){
@@ -274,11 +407,93 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         }
     }
 
+    
+
+    func keyboardWillAppear(notification: NSNotification){
+        keyboardUp = true
+        delegate?.keyboardStateChange(keyboardUp)
+        let info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        
+        self.commentBar.likeButton.isUserInteractionEnabled = false
+        self.commentBar.moreButton.isUserInteractionEnabled = false
+        self.commentBar.sendButton.isUserInteractionEnabled = true
+        self.commentsView.showTimeLabels(visible: true)
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            let height = self.frame.height
+            let textViewFrame = self.commentBar.frame
+            let textViewY = height - keyboardFrame.height - textViewFrame.height
+            self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
+            
+            self.commentsView.frame = CGRect(x: 0,y: self.getCommentsViewOriginY(),width: self.commentsView.frame.width,height: self.commentsView.frame.height)
+            
+            let infoFrame = self.infoView.frame
+            let infoY = textViewY - infoFrame.height
+            self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
+            
+            var gradientFrame = self.gradientView.frame
+            gradientFrame.origin.y = height - keyboardFrame.height - gradientFrame.height
+            self.gradientView.frame = gradientFrame
+            
+            self.commentBar.likeButton.alpha = 0.0
+            self.commentBar.moreButton.alpha = 0.0
+            self.commentBar.sendButton.alpha = 1.0
+            self.commentBar.backgroundView.alpha = 1.0
+            self.headerView.alpha = 0.0
+        })
+    }
+    
+    func keyboardWillDisappear(notification: NSNotification){
+        keyboardUp = false
+        delegate?.keyboardStateChange(keyboardUp)
+        self.commentBar.likeButton.isUserInteractionEnabled = true
+        self.commentBar.moreButton.isUserInteractionEnabled = true
+        self.commentBar.sendButton.isUserInteractionEnabled = false
+        self.commentsView.showTimeLabels(visible: false)
+        
+        if editCaptionMode {
+            commentBar.textField.placeholder = "Comment"
+            commentBar.textField.text = ""
+            commentBar.sendButton.setTitle("Send", for: .normal)
+            editCaptionMode = false
+        }
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            
+            let height = self.frame.height
+            let textViewFrame = self.commentBar.frame
+            let textViewStart = height - textViewFrame.height
+            self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
+            
+            self.commentsView.frame = CGRect(x: 0,y: self.getCommentsViewOriginY(),width: self.commentsView.frame.width,height: self.commentsView.frame.height)
+            
+            let infoFrame = self.infoView.frame
+            let infoY = height - textViewFrame.height - infoFrame.height
+            self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
+            
+            
+            var gradientFrame = self.gradientView.frame
+            gradientFrame.origin.y = height - gradientFrame.height
+            self.gradientView.frame = gradientFrame
+            
+            self.commentBar.likeButton.alpha = 1.0
+            self.commentBar.moreButton.alpha = 1.0
+            self.commentBar.sendButton.alpha = 0.0
+            self.commentBar.backgroundView.alpha = 0.0
+            self.headerView.alpha = 1.0
+        })
+        
+    }
+    
+    func getCommentsViewOriginY() -> CGFloat {
+        return commentBar.frame.origin.y - infoView.frame.height - commentsView.frame.height
+    }
 
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
     
     public lazy var content: UIImageView = {
         let margin: CGFloat = 2.0
@@ -308,7 +523,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
+        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height/2)
         return view
     }()
     
@@ -338,5 +553,55 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         captionView.center = CGPoint(x: definiteBounds.width / 2, y: definiteBounds.height / 2)
         return captionView
     }()
+    
+    lazy var commentsView: CommentsOverlayTableView = {
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        var view = UINib(nibName: "CommentsOverlayTableView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsOverlayTableView
+        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.36 )
+        view.setup()
+        return view
+    }()
+    
+    lazy var infoView: StoryInfoView = {
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        var view: StoryInfoView = UINib(nibName: "StoryInfoView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! StoryInfoView
+        return view
+    }()
+    
+    lazy var commentBar: CommentItemBar = {
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        var view: CommentItemBar = UINib(nibName: "CommentItemBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentItemBar
+        view.frame = CGRect(x: 0, y: height - 50.0, width: width, height: 50.0)
+        return view
+    }()
+    
+    public lazy var gradientView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.45, width: self.bounds.width, height: self.bounds.height * 0.55))
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 0, y: 1)
+        let dark = UIColor(white: 0.0, alpha: 0.35)
+        gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
+        view.layer.insertSublayer(gradient, at: 0)
+        view.isUserInteractionEnabled = false
+        return view
+    }()
 
+}
+
+extension PostViewController: UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        return newLength <= 140 // Bool
+    }
 }

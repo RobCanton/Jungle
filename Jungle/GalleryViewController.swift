@@ -30,11 +30,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     var closeButton:UIButton!
     var collectionTap:UITapGestureRecognizer!
     
-    fileprivate var commentBar:CommentBar!
-    fileprivate var scrollView:UIScrollView!
-    fileprivate var commentsViewController:CommentsViewController!
-    
-    
     deinit {
         print("Deinit >> GalleryViewController")
     }
@@ -47,16 +42,23 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             self.collectionView.reloadData()
         }
         globalMainInterfaceProtocol?.statusBar(hide: true, animated: false)
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         if showCommentsOnAppear {
             showCommentsOnAppear = false
-            scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height), animated: false)
             getCurrentCell()?.setDetailFade(0.0)
         }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(foreground), name: NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
     }
     
+    func foreground() {
+        getCurrentCell()?.setItem()
+    }
+    
+    
+    func keyboardStateChange(_ up: Bool) {
+        collectionView.isScrollEnabled = !up
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -64,22 +66,13 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         self.navigationController?.delegate = transitionController
         
-        if let cell = getCurrentCell() {
-            if scrollView.contentOffset.y == 0 {
-                cell.resume()
-            }
-            
-            if let item = cell.storyItem {
-                commentsViewController.setupItem(item)
-            }
-        }
+        getCurrentCell()?.resume()
         
         if let gestureRecognizers = self.view.gestureRecognizers {
             for gestureRecognizer in gestureRecognizers {
                 if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
                     panGestureRecognizer.delegate = self
-                    scrollView.panGestureRecognizer.require(toFail: panGestureRecognizer)
-                    scrollView.isScrollEnabled = true
+                    
                 }
             }
         }
@@ -92,8 +85,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         for cell in collectionView.visibleCells as! [PostViewController] {
             cell.pause()
         }
-        
-        NotificationCenter.default.removeObserver(self)
 
     }
     
@@ -140,37 +131,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionContainerView.addSubview(collectionView)
         collectionContainerView.applyShadow(radius: 5.0, opacity: 0.25, height: 0.0, shouldRasterize: false)
         
-        scrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
-        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height * 2.0)
-        
-        self.scrollView.addSubview(collectionContainerView)
-        self.view.addSubview(scrollView)
-        scrollView.isPagingEnabled = true
-        scrollView.decelerationRate = UIScrollViewDecelerationRateFast
-        scrollView.bounces = false
-        scrollView.canCancelContentTouches = false
-        scrollView.isScrollEnabled = false
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.delegate = self
-        
-        commentsViewController = CommentsViewController()
-        commentsViewController.delegate = self
-        commentsViewController.view.frame = CGRect(x: 0, y: view.frame.height * 1.23, width: view.frame.width, height: view.frame.height * 0.77)
-        commentsViewController.setup()
-        
-        self.addChildViewController(commentsViewController)
-        self.scrollView.addSubview(commentsViewController.view)
-        commentsViewController.didMove(toParentViewController: self)
-        
-        commentBar = UINib(nibName: "CommentBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentBar
-        commentBar.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        commentBar.frame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 50.0)
-        commentBar.delegate = self
-        commentBar.textField.delegate = self
-        commentBar.textField.addTarget(self, action: #selector(commentTextChanged), for: .editingChanged)
-        
-        self.view.addSubview(commentBar)
-        
+        self.view.addSubview(collectionContainerView)
         closeButton = UIButton(frame: CGRect(x: view.frame.width - 50.0, y: 0, width: 50, height: 50))
         closeButton.setImage(UIImage(named: "delete_thin"), for: .normal)
         closeButton.setTitleColor(UIColor.black, for: .normal)
@@ -191,6 +152,21 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
+        guard let cell = getCurrentCell() else { return false }
+        let keyboardUp = cell.keyboardUp
+        
+        let point = gestureRecognizer.location(ofTouch: 0, in: self.view)
+        let authorBottomY = cell.headerView.frame.origin.y + cell.headerView.frame.height
+        let commentsTableHeight = cell.commentsView.getTableHeight()
+        let commentsTopY = cell.infoView.frame.origin.y - commentsTableHeight
+        
+        
+        if keyboardUp {
+            if point.y > commentsTopY {
+                return false
+            }
+        }
+        
         let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
         let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
         if !isSingleItem {
@@ -201,12 +177,18 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
         let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
         
-        if scrollView.contentOffset.y != 0 {
+        if keyboardUp {
+            if translate.y > 0 {
+                cell.commentBar.textField.resignFirstResponder()
+            }
             return false
+        } else {
+            if translate.y < 0 {
+                cell.commentBar.textField.becomeFirstResponder()
+            }
         }
-
         
-        return Double(abs(translate.y)/abs(translate.x)) > M_PI_4 && translate.y > 0
+        return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
@@ -247,21 +229,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView == self.scrollView {
-            
-            if scrollView.contentOffset.y == 0 {
-                self.collectionContainerView.removeGestureRecognizer(collectionTap)
-                self.collectionView.isScrollEnabled = true
-            } else {
-                
-                self.collectionContainerView.addGestureRecognizer(collectionTap)
-                self.collectionView.isScrollEnabled = false
-                getCurrentCell()?.setDetailFade(0.0)
-            }
-            
-            return
-        }
-
         
         var visibleRect = CGRect()
         
@@ -276,9 +243,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         if let cell = getCurrentCell() {
             cell.resume()
-            if let item = cell.storyItem {
-                commentsViewController.setupItem(item)
-            }
         }
     }
     
@@ -306,17 +270,11 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
 }
 
 extension GalleryViewController: PopupProtocol {
-    func newItem(_ cellIndex: Int, _ item: StoryItem) {
-        guard let currentIndex = currentIndexPath else { return }
-        
-        if currentIndex.item != cellIndex { return }
-        commentsViewController.setupItem(item)
-    }
     
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pauseVideo()
         getCurrentCell()?.destroyVideoPlayer()
-        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as? IndexPath {
+        if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first {
             let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
             if !isSingleItem {
                 self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
@@ -341,84 +299,95 @@ extension GalleryViewController: PopupProtocol {
     }
     
     func showComments() {
-        scrollView.setContentOffset(CGPoint(x: 0, y:self.view.frame.height), animated: true)
+        //globalMainInterfaceProtocol?.navigationPush(withController: commentsViewController, animated: true)
     }
     
-    func keyboardWillAppear(notification: NSNotification){
+    func editCaption() {}
+    
+    func showMore() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else {
+            cell.resume()
+        return }
         
-        let info = notification.userInfo!
-        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        
-        scrollView.isScrollEnabled = false
-        commentsViewController.setInfoMode(.Comments)
-        commentsViewController.header.setCurrentUserMode(false)
-        
-        self.commentBar.sendButton.isEnabled = true
-        
-        let height = self.view.frame.height
-        let textViewFrame = self.commentBar.frame
-        let textViewY = height - keyboardFrame.height - textViewFrame.height
-        
-        let table = self.commentsViewController.tableView!
-        var tableFrame = table.frame
-        let tableContainerStart:CGFloat = table.superview!.frame.origin.y
-        let tableContentBottom = table.contentSize.height + tableContainerStart
-        
-        UIView.animate(withDuration: 0.1, animations: { () -> Void in
-            
-            self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
-            
-            self.commentBar.sendButton.alpha = 1.0
-            
-            if tableContentBottom >= tableFrame.height {
-                let diff = tableContentBottom - textViewY
-                let max = min(diff, textViewY)
-                tableFrame.origin.y =  -keyboardFrame.height//tableContainerStart - textViewY//max//textViewY - tableFrame.height - table.superview!.frame.origin.y
-                table.frame = tableFrame
+        if cell.storyItem.authorId == mainStore.state.userState.uid {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
             }
+            actionSheet.addAction(cancelActionButton)
             
-        })
-    }
-    
-    
-    func keyboardWillDisappear(notification: NSNotification){
-        
-        self.commentBar.sendButton.isEnabled = false
-        if let item = getCurrentCell()?.storyItem {
-            commentsViewController.header.setCurrentUserMode(item.getAuthorId() == mainStore.state.userState.uid)
+            let subscribed = cell.subscribedToPost
+            var message = "Recieve Notifications"
+            
+            if subscribed {
+                message = "Mute Notifications"
+            }
+            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+            }
+            actionSheet.addAction(notificationsAction)
+            
+            let deleteAction: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
+                UploadService.deleteItem(item: item) { success in
+                    if success {
+                        self.dismissPopup(true)
+                    }
+                }
+            }
+            actionSheet.addAction(deleteAction)
+            self.present(actionSheet, animated: true, completion: nil)
+        } else {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let subscribed = cell.subscribedToPost
+            var message = "Recieve Notifications"
+            
+            if subscribed {
+                message = "Mute Notifications"
+            }
+            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+               UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+            }
+            actionSheet.addAction(notificationsAction)
+            
+            let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
+                let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+                    cell.resume()
+                }
+                alertController.addAction(cancelAction)
+                
+                let OKAction = UIAlertAction(title: "It's Inappropriate", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Inappropriate, completion: { success in
+                    })
+                }
+                alertController.addAction(OKAction)
+                
+                let OKAction2 = UIAlertAction(title: "It's Spam", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Spam, completion: { success in
+                        
+                    })
+                }
+                alertController.addAction(OKAction2)
+                
+                self.present(alertController, animated: true, completion: nil)
+            }
+            actionSheet.addAction(OKAction)
+            
+            self.present(actionSheet, animated: true, completion: nil)
         }
-        scrollView.isScrollEnabled = true
         
-        UIView.animate(withDuration: 0.1, animations: { () -> Void in
-            
-            let height = self.view.frame.height
-            let textViewFrame = self.commentBar.frame
-            let textViewStart = height - textViewFrame.height
-            self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
-            
-            let table = self.commentsViewController.tableView!
-            var tableFrame = table.frame
-            tableFrame.origin.y = 0
-            table.frame = tableFrame
-            
-        }, completion: { _ in
-            if self.shouldScrollToBottom {
-                self.shouldScrollToBottom = false
-                self.commentsViewController.scrollBottom(animated: true)
-            }
-        })
-    }
-    
-    func keyboardDidDisappear(notification :NSNotification) {
-        scrollView.isScrollEnabled = true
     }
     
     func handleDismiss() {
-        if scrollView.isScrollEnabled {
-            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        } else {
-            commentBar.textField.resignFirstResponder()
-        }
+        
     }
     
     func showDeleteOptions() {
@@ -428,11 +397,7 @@ extension GalleryViewController: PopupProtocol {
 
 extension GalleryViewController: StoryCommentsProtocol {
     func dismissComments() {
-        if scrollView.isScrollEnabled {
-            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        } else {
-            commentBar.textField.resignFirstResponder()
-        }
+        
     }
     
     func dismissStory() {
@@ -442,20 +407,21 @@ extension GalleryViewController: StoryCommentsProtocol {
     func replyToUser(_ username:String) {
         if username == mainStore.state.userState.user?.username { return }
         
-        self.commentBar.textField.text = "@\(username) "
-        self.commentBar.textField.becomeFirstResponder()
+        //self.commentBar.textField.text = "@\(username) "
+        //self.commentBar.textField.becomeFirstResponder()
     }
 }
 
 
 extension GalleryViewController: CommentBarProtocol {
     func sendComment(_ text:String) {
-        guard let cell = getCurrentCell() else { return }
+       /* guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
         commentBar.textField.text = ""
         commentBar.sendLabelState(false)
         UploadService.addComment(post: item, comment: text)
         commentBar.textField.resignFirstResponder()
+ */
     }
 }
 
@@ -464,76 +430,13 @@ extension GalleryViewController: CommentBarProtocol {
 extension GalleryViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView == collectionView {
-            getCurrentCell()?.pause()
-            return
-        }
-        if scrollView !== self.scrollView { return }
-        let yOffset = scrollView.contentOffset.y
-        let progress = yOffset/view.frame.height
-        let reverseProgress = 1 - progress
-        let progressMultiple = progress * progress * progress * progress * progress
-        
-        closeButton.alpha = progressMultiple
-
-        collectionContainerView.transform = CGAffineTransform(scaleX: reverseProgress * 0.5 + 0.5, y: reverseProgress * 0.5 + 0.5)
-        collectionContainerView.transform = CGAffineTransform(translationX: 0.0, y: view.frame.height/2.0)
-        let scale = CGAffineTransform(scaleX: reverseProgress * 0.8 + 0.20, y: reverseProgress * 0.8 + 0.20)
-        let translate = CGAffineTransform(translationX: 0.0, y: view.frame.height * (progress) * 0.6125)
-        collectionContainerView.transform = scale.concatenating(translate)
-        
-        
-        var barFrame = commentBar.frame
-        barFrame.origin.y = view.frame.height - 50.0 * (progress * progress)
-        commentBar.frame = barFrame
-        
-        if let cell = getCurrentCell() {
-            if yOffset > 0 {
-                cell.pause()
-            } else {
-                cell.resume()
-            }
-            
-            cell.setDetailFade(reverseProgress)
-        }
+        getCurrentCell()?.pause()
     }
     
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         scrollViewDidEndDecelerating(scrollView)
     }
     
-}
-
-extension GalleryViewController: UITextFieldDelegate {
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let text = textField.text {
-            if !text.isEmpty {
-                textField.text = ""
-                sendComment(text)
-            }
-        }
-        return true
-    }
-    
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
-    }
-    
-    func commentTextChanged (_ target: UITextField){
-        switch target {
-        case commentBar.textField:
-            if let text = target.text, text != "" {
-                commentBar.sendLabelState(true)
-            } else {
-                commentBar.sendLabelState(false)
-            }
-            break
-        default:
-            break
-        }
-    }
 }
 
 

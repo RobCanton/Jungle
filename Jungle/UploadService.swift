@@ -14,14 +14,6 @@ import GooglePlaces
 import GoogleMaps
 import SwiftMessages
 
-class Upload {
-    var place:GMSPlace?
-    var caption:String?
-    var captionPos:Double?
-    var coordinates:CLLocation?
-    var image:UIImage?
-    var videoURL:URL?
-}
 
 let dataCache = NSCache<NSString, AnyObject>()
 
@@ -192,7 +184,7 @@ class UploadService {
                         "dateCreated": [".sv": "timestamp"],
                         "length": 6.0,
                         "color": colorHex,
-                        "live": true
+                        "live": upload.toStory
                     ] as [String : Any]
                     
                     if let place = upload.place {
@@ -203,35 +195,46 @@ class UploadService {
                         obj["caption"] = caption
                     }
                     
-                    if let y = upload.captionPos {
-                        obj["captionPos"] = y
-                    }
-                    
-                    
                     var updateValues: [String : Any] = [
-                        "uploads/meta/\(postKey)": obj,
-                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
-                        "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
+                        "uploads/meta/\(postKey)": obj
                     ]
                     
-                    if let coordinates = upload.coordinates {
+                    if upload.toProfile {
+                        updateValues["users/uploads/\(uid)/\(postKey)"] = [".sv": "timestamp"]
+                    }
+                    
+                    if upload.toStory {
+                        updateValues["users/story/\(uid)/posts/\(postKey)"] = [".sv": "timestamp"]
+                    }
+                    
+                    if let coordinates = upload.coordinates, upload.toNearby {
                         updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
                         updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
                     }
                     
-//                    if let place = upload.place {
-//                        let placeId = place.placeID
-//                        updateValues["places/\(placeId)/info/name"] = place.name
-//                        updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
-//                        updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
-//                        updateValues["places/\(placeId)/info/address"] = place.formattedAddress
-//                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/a"] = uid
-//                        updateValues["stories/stats/places/\(placeId)/posts/\(postKey)/t"] = [".sv": "timestamp"]
-//                        for type in place.types {
-//                            updateValues["places/\(place.placeID)/info/types/\(type)"] = true
-//                        }
-//                    }
-//                    
+                    if let place = upload.place {
+                        let placeId = place.placeID
+                        updateValues["places/\(placeId)/info/name"] = place.name
+                        updateValues["places/\(placeId)/info/lat"] = place.coordinate.latitude
+                        updateValues["places/\(placeId)/info/lon"] = place.coordinate.longitude
+                        updateValues["places/\(placeId)/info/address"] = place.formattedAddress
+                        for type in place.types {
+                            updateValues["places/\(place.placeID)/info/types/\(type)"] = true
+                        }
+                    }
+                    
+
+                    for (recipientId, _) in upload.recipients {
+                        let conversationKey = createUserIdPairKey(uid1: uid, uid2: recipientId)
+                        let convoRef = Database.database().reference().child("conversations/\(conversationKey)/messages").childByAutoId()
+                        let path = "conversations/\(conversationKey)/messages/\(convoRef.key)"
+                        updateValues["\(path)/recipientId"] = recipientId
+                        updateValues["\(path)/senderId"] = uid as AnyObject
+                        updateValues["\(path)/uploadKey"] = postKey
+                        updateValues["\(path)/uploadURL"] = downloadURL!.absoluteString
+                        updateValues["\(path)/timestamp"] = [".sv":"timestamp"]
+                    }
+                    
                     
                     ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
@@ -317,10 +320,6 @@ class UploadService {
                             
                             if let caption = upload.caption {
                                 obj["caption"] = caption
-                            }
-                            
-                            if let y = upload.captionPos {
-                                obj["captionPos"] = y
                             }
                             
                             var updateValues: [String : Any] = [
@@ -445,7 +444,6 @@ class UploadService {
                     guard let contentTypeStr = dict["contentType"] as? String else { return completion(item) }
                     
                     let caption        = dict["caption"] as? String
-                    let captionPos    = dict["captionPos"] as? Double
                     
                     var contentType = ContentType.invalid
                     var videoURL:URL?
@@ -461,16 +459,20 @@ class UploadService {
                     guard let dateCreated = dict["dateCreated"] as? Double else { return completion(item) }
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
-                    var viewers = [String:Double]()
-                    var likes = [String:Double]()
-                    var comments = [Comment]()
+                    let viewers = [String:Double]()
+                    let likes = [String:Double]()
+                    let comments = [Comment]()
+                    let flagged = false
                     
                     var numViews = 0
                     if let _views = dict["views"] as? Int {
                         numViews = _views
                     }
                     
-                    var flagged = false
+                    var numLikes = 0
+                    if let _likes = dict["likes"] as? Int {
+                        numLikes = _likes
+                    }
                     
                     var numComments = 0
                     if let _numComments = dict["comments"] as? Int {
@@ -486,7 +488,7 @@ class UploadService {
                         color = hex
                     }
                     
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numViews: numViews, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: color)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: color)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -506,16 +508,17 @@ class UploadService {
         
         let uid = mainStore.state.userState.uid
         
-        let uploadRef = ref.child("uploads/comments/\(post.getKey())").childByAutoId()
-        let path = "uploads/comments/\(post.getKey())/\(uploadRef.key)"
+        let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
+        let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
         
         let updateObject = [
             "\(path)/author" : uid,
             "\(path)/text" : comment,
             "\(path)/timestamp" : [".sv":"timestamp"],
-            "uploads/subscribers/\(post.getKey())/\(uid)": true
+            "uploads/subscribers/\(post.key)/\(uid)": true
         ] as [String:Any]
         
+        print("FAMEIO")
         ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
             
             if error != nil {
@@ -548,14 +551,14 @@ class UploadService {
         let uid = mainStore.state.userState.uid
         
         
-        if uid == post.getAuthorId() { return }
+        if uid == post.authorId { return }
         if post.viewers[uid] != nil { return }
         
         post.addView(uid)
         
         let updateObject = [
-            "users/viewed/\(uid)/\(post.getKey())": true,
-            "uploads/views/\(post.getKey())/\(uid)": [".sv":"timestamp"]
+            "users/viewed/\(uid)/\(post.key)": true,
+            "uploads/views/\(post.key)/\(uid)": [".sv":"timestamp"]
         ] as [String : Any]
         
         ref.updateChildValues(updateObject) { error, ref in
@@ -569,12 +572,12 @@ class UploadService {
         let uid = mainStore.state.userState.uid
         
         
-        if uid == post.getAuthorId() { return }
+        if uid == post.authorId { return }
         if post.likes[uid] != nil { return }
         
         let updateObject = [
-            "users/liked/\(uid)/\(post.getKey())": true,
-            "uploads/likes/\(post.getKey())/\(uid)": [".sv":"timestamp"]
+            "users/liked/\(uid)/\(post.key)": true,
+            "uploads/likes/\(post.key)/\(uid)": [".sv":"timestamp"]
             ] as [String : Any]
         
         ref.updateChildValues(updateObject) { error, ref in
@@ -590,14 +593,14 @@ class UploadService {
         let uid = mainStore.state.userState.uid
         
         
-        if uid == post.getAuthorId() { return }
+        if uid == post.authorId{ return }
         
-        ref.child("users/liked/\(uid)/\(post.getKey())").removeValue() { error, ref in
+        ref.child("users/liked/\(uid)/\(post.key)").removeValue() { error, ref in
             if error != nil {
                 return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to remove like.")
             }
         }
-        ref.child("uploads/likes/\(post.getKey())/\(uid)").removeValue() { error, ref in
+        ref.child("uploads/likes/\(post.key)/\(uid)").removeValue() { error, ref in
             if error != nil {
                 return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to remove like.")
             }
@@ -607,9 +610,10 @@ class UploadService {
     
     static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
         let ref = Database.database().reference()
-        let postRef = ref.child("uploads/meta/\(item.getKey())")
+        let postRef = ref.child("uploads/meta/\(item.key)")
         postRef.removeValue(completionBlock: { error, ref in
             if error == nil {
+                dataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
                 globalMainInterfaceProtocol?.fetchAllStories()
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
                 return completion(true)
@@ -623,10 +627,10 @@ class UploadService {
     static func reportItem(item:StoryItem, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
-        let reportRef = ref.child("reports/\(uid):\(item.getKey())")
+        let reportRef = ref.child("reports/\(uid):\(item.key)")
         let value: [String: Any] = [
             "sender": uid,
-            "itemKey": item.getKey(),
+            "itemKey": item.key,
             "type": type.rawValue,
             "timestamp": [".sv": "timestamp"]
         ]
@@ -645,6 +649,20 @@ class UploadService {
             let uploadRef = ref.child("uploads/\(item.getKey())/flagged")
             uploadRef.setValue(true)
         }*/
+    }
+    
+    static func editCaption(postKey:String, caption:String, completion:@escaping ((_ success:Bool)->())) {
+        let ref = Database.database().reference()
+        let uploadRef = ref.child("uploads/meta/\(postKey)/caption")
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Updating caption...")
+        uploadRef.setValue(caption) { error, ref in
+            if error != nil {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to edit caption")
+                return completion(false)
+            }
+            Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Caption edited!")
+            return completion(true)
+        }
     }
     
     static func reportComment(itemKey: String, commentKey:String, type:ReportType, completion:@escaping ((_ success:Bool)->())) {

@@ -27,9 +27,9 @@ class Notification: NSObject {
     private(set) var sender:String
     private(set) var postKey:String?
     private(set) var text:String?
-    private(set) var numCommenters:Int?
+    private(set) var count:Int?
     
-    init(key:String, type:String, date:Date, sender:String, postKey:String?, text:String?, numCommenters:Int?)
+    init(key:String, type:String, date:Date, sender:String, postKey:String?, text:String?, count:Int?)
     {
         self.key          = key
         switch type {
@@ -60,7 +60,7 @@ class Notification: NSObject {
         self.sender = sender
         self.postKey = postKey
         self.text = text
-        self.numCommenters = numCommenters
+        self.count = count
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -71,8 +71,8 @@ class Notification: NSObject {
         let sender = decoder.decodeObject(forKey: "sender") as! String
         let postKey = decoder.decodeObject(forKey: "postKey") as? String
         let text = decoder.decodeObject(forKey: "text") as? String
-        let numCommenters = decoder.decodeObject(forKey: "numCommenters") as? Int
-        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, numCommenters: numCommenters)
+        let count = decoder.decodeObject(forKey: "count") as? Int
+        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
     }
     
     
@@ -82,8 +82,8 @@ class Notification: NSObject {
         coder.encode(date, forKey: "date")
         coder.encode(sender, forKey: "sender")
         coder.encode(postKey, forKey: "postKey")
-        coder.encode(postKey, forKey: "text")
-        coder.encode(postKey, forKey: "numCommenters")
+        coder.encode(text, forKey: "text")
+        coder.encode(count, forKey: "count")
     }
     }
 

@@ -13,6 +13,7 @@ import View2ViewTransition
 import GoogleMaps
 import GooglePlaces
 import ReSwift
+import JSQMessagesViewController
 
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
@@ -29,6 +30,7 @@ protocol MainInterfaceProtocol {
     func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentChatPost(chatController: ChatViewController, post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
 }
 
 extension MainViewController: MainInterfaceProtocol {
@@ -119,6 +121,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         button.backgroundColor = UIColor(red: 69/255, green: 182/255, blue: 73/255, alpha: 1.0)
         button.layer.cornerRadius = button.frame.width / 2
         button.clipsToBounds = true
+        button.imageEdgeInsets = UIEdgeInsets(top: 6.0, left: 7.0, bottom: 6.0, right: 5.0)
         button.applyShadow(radius: 5, opacity: 0.4, height: 2.5, shouldRasterize: false)
         return button
     }()
@@ -128,6 +131,17 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
         button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.5, y: button.frame.height * 0.5)
         button.setImage(UIImage(named: "type"), for: .normal)
+        button.tintColor = UIColor.white
+        button.clipsToBounds = true
+        button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
+        return button
+    }()
+    
+    fileprivate lazy var locationButton: UIButton = {
+        let definiteBounds = UIScreen.main.bounds
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
+        button.center = CGPoint(x: definiteBounds.width - button.frame.width * 1.5, y: button.frame.height * 0.5)
+        button.setImage(UIImage(named: "poi"), for: .normal)
         button.tintColor = UIColor.white
         button.clipsToBounds = true
         button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
@@ -657,6 +671,28 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
+    var chatController:ChatViewController?
+    
+    func presentChatPost(chatController: ChatViewController, post: StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        self.chatController = chatController
+        storyType = .ChatPost
+        let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.showCommentsOnAppear = true
+        galleryViewController.isSingleItem = true
+        galleryViewController.posts = [post]
+        galleryViewController.transitionController = self.transitionController
+        
+        self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 6.0
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
+        nav.delegate = transitionController
+        print("presentChatPost")
+        //nav.pushViewController(galleryViewController, animated: true)
+        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
+    }
+    
 }
 
 extension MainViewController: CameraDelegate, UITextViewDelegate {
@@ -703,6 +739,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         self.view.addSubview(cancelButton)
         self.view.addSubview(sendButton)
         self.view.addSubview(captionButton)
+        //self.view.addSubview(locationButton)
         
         textView.resignFirstResponder()
         textView.isUserInteractionEnabled = false
@@ -710,12 +747,9 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         textView.delegate = self
         textView.backgroundColor = UIColor.clear
         textView.textAlignment = .center
-        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height/2)
+        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height * 0.75)
         textView.center = textViewCenter
         self.view.addSubview(textView)
-        
-        textViewPanGesture = UIPanGestureRecognizer(target: self, action: #selector(dragTextView))
-        textView.addGestureRecognizer(textViewPanGesture!)
  
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
@@ -726,6 +760,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         
         uploadCoordinate = gps_service.getLastLocation()
         uploadLikelihoods = gps_service.getLikelihoods()
+        
     }
     
     func dragTextView(pan: UIPanGestureRecognizer) {
@@ -741,12 +776,10 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     }
     
     func hideEditOptions() {
-        if textViewPanGesture != nil {
-            textView.removeGestureRecognizer(textViewPanGesture!)
-        }
         cancelButton.removeFromSuperview()
         sendButton.removeFromSuperview()
         captionButton.removeFromSuperview()
+        //locationButton.removeFromSuperview()
         textView.removeFromSuperview()
     
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
@@ -791,7 +824,6 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         
         if textView.text != "" {
             upload.caption = textView.text
-            upload.captionPos = Double(textViewCenter.y / view.frame.height)
         }
         
         upload.coordinates = uploadCoordinate
@@ -936,7 +968,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
 extension MainViewController: View2ViewTransitionPresenting {
     
     func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
-        
+        print("initialFrame")
         guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
             return CGRect.zero
         }
@@ -964,18 +996,25 @@ extension MainViewController: View2ViewTransitionPresenting {
             let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
-        } else {
+        } else if storyType == .NotificationPost {
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
             let image_frame = cell.postImageView.frame
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
             let y = cell.frame.origin.y + image_frame.origin.y + navHeight - notifications.tableView.contentOffset.y//+ navHeight
             let rect = CGRect(x: image_frame.origin.x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
+        } else if storyType == .ChatPost {
+            print("WHAT IS GOING ON")
+            guard let chat = chatController else { return CGRect.zero  }
+            guard let cell = chat.collectionView.cellForItem(at: indexPath) else { return CGRect.zero  }
+            return CGRect.zero
+        } else {
+            return CGRect.zero
         }
     }
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
-        
+        print("initialView")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
         if storyType == .NearbyPost{
@@ -1003,15 +1042,28 @@ extension MainViewController: View2ViewTransitionPresenting {
                 return UIView()
             }
             return cell.imageView
-        } else {
+        } else if storyType == .NotificationPost {
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
+            print("YUH!")
             return cell.postImageView
+        } else if storyType == .ChatPost {
+            print("ITS A CHATPOST TING")
+            guard let chat = chatController else {
+                print("YO")
+                return UIView() }
+            guard let cell = chat.collectionView.cellForItem(at: indexPath) as? JSQMessagesCollectionViewCell else {
+                print("MADTING")
+                return UIView() }
+            print("CELL FRAME: \(cell.frame)")
+            return UIView()
+        } else {
+            return UIView()
         }
         
     }
     
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
-        
+        print("prepareInitialView")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
 
         if isPresenting {
@@ -1125,5 +1177,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case NearbyPost, PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost
+    case NearbyPost, PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost, ChatPost
 }

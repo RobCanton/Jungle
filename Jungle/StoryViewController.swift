@@ -43,7 +43,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func showAuthor() {
         guard let item = self.item else { return }
-        delegate?.showUser(item.getAuthorId())
+        delegate?.showUser(item.authorId)
     }
     
     func dismiss() {
@@ -66,6 +66,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func saveIndex() {
         returnIndex = viewIndex
+    }
+    
+    func showComments() {
+        
     }
     
     func prepareStory(withStory story:UserStory, cellIndex: Int,  atIndex index:Int?) {
@@ -133,7 +137,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func contentLoaded() {
         for item in story.items! {
 
-            totalTime += item.getLength()
+            totalTime += item.length
         }
         
         if viewIndex >= story.items!.count{
@@ -161,21 +165,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             prepareVideoContent(item: item)
         }
         
-        self.headerView.setup(withUid: item.authorId, date: item.getDateCreated(), _delegate: self)
+        self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
         
-        if let caption = item.getCaption(), let captionPos = item.getCaptionPos() {
-            self.captionView.text = caption
-            self.captionView.fitHeightToContent()
-            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height * captionPos)
-            self.captionView.isHidden = false
-        } else {
-            self.captionView.isHidden = true
-            self.captionView.text = ""
-            self.captionView.fitHeightToContent()
-            self.captionView.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
-        }
-        
-        if let locationKey = item.getLocationKey() {
+        if let locationKey = item.locationKey {
             LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
                 self.headerView.setupLocation(location: location)
             })
@@ -185,10 +177,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         UploadService.addView(post: item)
         footerView.setup(item)
-        
-        if cellIndex != nil {
-            delegate?.newItem(cellIndex!, item)
-        }
     }
     
     func prepareImageContent(item:StoryItem) {
@@ -213,7 +201,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             return story.downloadStory()
         }
         createVideoPlayer()
-        if let videoURL = UploadService.readVideoFromFile(withKey: item.getKey()) {
+        if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
 
             let asset = AVAsset(url: videoURL)
             asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
@@ -238,7 +226,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         paused = false
         
-        var itemLength = item.getLength()
+        var itemLength = item.length
         if item.contentType == .image {
             videoContent.isHidden = true
             
@@ -276,7 +264,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         guard let item = self.item else { return }
         guard let timer = self.timer else { return }
         let remaining = timer.fireDate.timeIntervalSinceNow
-        let diff = remaining / item.getLength()
+        let diff = remaining / item.length
         
         if diff > 0.75 {
             if viewIndex > 0 {

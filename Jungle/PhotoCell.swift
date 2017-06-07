@@ -17,9 +17,13 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var imageView: UIImageView!
+
+    @IBOutlet weak var firstIcon: UIImageView!
+    @IBOutlet weak var firstLabel: UILabel!
     
-    @IBOutlet weak var commentsIcon: UIImageView!
-    @IBOutlet weak var commentsLabel: UILabel!
+    @IBOutlet weak var secondIcon: UIImageView!
+    @IBOutlet weak var secondLabel: UILabel!
+    
     @IBOutlet weak var overlay: UIView!
     var location:Location!
     var gradient:CAGradientLayer?
@@ -117,8 +121,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 self.colorView.alpha = photoCellColorAlpha
             }
             
-            self.nameLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
-            self.timeLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            //self.nameLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            //self.timeLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
             
         })
     }
@@ -137,18 +141,59 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
         
-        let numComments = post.getNumComments()
-        self.commentsLabel.text = getNumericShorthandString(numComments)
-        if numComments > 0 {
-            self.commentsIcon.isHidden = false
-            self.commentsLabel.isHidden = false
+//        let numComments = post.getNumComments()
+//        self.commentsLabel.text = getNumericShorthandString(numComments)
+//        if numComments > 0 {
+//            self.commentsIcon.isHidden = false
+//            self.commentsLabel.isHidden = false
+//            
+//        } else {
+//            self.commentsIcon.isHidden = true
+//            self.commentsLabel.isHidden = true
+//        }
+        
+        let numLikes = post.numLikes
+        let numComments = post.numComments
+        let likesImage = UIImage(named: "liked")
+        let commentsImage = UIImage(named: "comments_filled")
+        self.timeLabel.isHidden = true
+        if numLikes > 0 {
+            self.firstLabel.text = getNumericShortesthandString(numLikes)
+            self.firstIcon.image = likesImage
+            self.firstIcon.isHidden = false
+            self.firstLabel.isHidden = false
             
+            self.secondLabel.text = getNumericShortesthandString(numComments)
+            
+            if numComments > 0 {
+                self.secondIcon.image = commentsImage
+                self.secondIcon.isHidden = false
+                self.secondLabel.isHidden = false
+                
+            } else {
+                self.secondIcon.image = nil
+                self.secondIcon.isHidden = true
+                self.secondLabel.isHidden = true
+            }
         } else {
-            self.commentsIcon.isHidden = true
-            self.commentsLabel.isHidden = true
+            self.firstLabel.text = getNumericShortesthandString(numComments)
+            self.secondLabel.text = ""
+            if numComments > 0 {
+                self.firstIcon.image = commentsImage
+                self.firstIcon.isHidden = false
+                self.firstLabel.isHidden = false
+            } else {
+                self.firstIcon.image = nil
+                self.firstIcon.isHidden = true
+                self.firstLabel.isHidden = true
+            }
+            
+            self.secondIcon.image = nil
+            self.secondIcon.isHidden = true
+            self.secondLabel.isHidden = true
         }
         
-        UploadService.retrieveImage(byKey: post.getKey(), withUrl: post.getDownloadUrl(), completion: { image, fromFile in
+        UploadService.retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
             
             
             self.imageView.image = image
@@ -176,10 +221,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 self.colorView.layer.insertSublayer(self.gradient!, at: 0)
                 self.colorView.alpha = photoCellColorAlpha
             }
-            
-            self.commentsLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: false)
-            self.commentsIcon.applyShadow(radius: 3, opacity: 0.45, height: 1.0, shouldRasterize: false)
-            self.timeLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: false)
         })
         
     }
@@ -211,7 +252,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
                 
-                UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
+                UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in
                     self.colorView.alpha = photoCellColorAlpha
                     completion(check, item!, image, fromFile)
                 })
@@ -220,7 +261,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     }
     
     func getImage(withCheck check: Int, post:StoryItem, completion: @escaping ((_ check:Int, _ image:UIImage?, _ fromFile:Bool)->())) {
-        UploadService.retrieveImage(byKey: post.getKey(), withUrl: post.getDownloadUrl(), completion: { image, fromFile in
+        UploadService.retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
             completion(check, image, fromFile)
         })
     }

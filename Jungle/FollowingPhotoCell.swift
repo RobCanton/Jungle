@@ -160,7 +160,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
                 
-                UploadService.retrieveImage(byKey: item!.getKey(), withUrl: item!.getDownloadUrl(), completion: { image, fromFile in
+                UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in
                     completion(check, item!, image, fromFile)
                 })
             }

@@ -232,7 +232,7 @@ class HomeStateController {
                 if count >= posts.count {
                     count = -1
                     
-                    self.popularPosts = popularPosts.sorted(by: { return $0 > $1 })
+                    self.popularPosts = popularPosts.sorted(by: { return $0.popularity > $1.popularity })
                     DispatchQueue.main.async {
                         self.delegate?.update(.Popular)
                     }

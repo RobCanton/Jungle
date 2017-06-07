@@ -22,26 +22,31 @@ enum ContentType:Int {
 
 class StoryItem: NSObject, NSCoding {
     
-    var key:String                    // Key in database
-    var authorId:String
-    var caption:String?
-    var captionPos:CGFloat?
-    var locationKey:String?
-    var downloadUrl:URL
-    var videoURL:URL?
-    var contentType:ContentType
-    var dateCreated: Date
-    var length: Double
-    fileprivate var numComments:Int
-    fileprivate var numCommenters:Int
-    fileprivate var numViews:Int
+    private(set) var key:String                    // Key in database
+    private(set) var authorId:String
+    private(set) var caption:String?
+    private(set) var locationKey:String?
+    private(set) var downloadUrl:URL
+    private(set) var videoURL:URL?
+    private(set) var contentType:ContentType
+    private(set) var dateCreated: Date
+    private(set) var length: Double
+    private(set) var popularity:Int
+    
+    private(set) var numComments:Int
+    private(set) var numCommenters:Int
+    var numLikes:Int {
+        didSet {
+            cache()
+        }
+    }
+    private(set) var numViews:Int
     
     var flagged:Bool
 
     
     var viewers:[String:Double]
     var likes:[String:Double]
-    
     var comments:[Comment]
     
     var delegate:ItemDelegate?
@@ -52,14 +57,13 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoFilePath: URL?
     dynamic var videoData:Data?
     
-    init(key: String, authorId: String, caption:String?, captionPos:Double?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numComments:Int, numCommenters:Int,  flagged:Bool, colorHexcode:String?)
+    init(key: String, authorId: String, caption:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int,  flagged:Bool, colorHexcode:String?)
     {
         
         self.key          = key
         self.authorId     = authorId
         self.caption      = caption
-        self.captionPos   = captionPos != nil ? CGFloat(captionPos!) : nil
         self.locationKey  = locationKey
         self.downloadUrl  = downloadUrl
         self.videoURL     = videoURL
@@ -71,10 +75,11 @@ class StoryItem: NSObject, NSCoding {
         self.comments     = comments
         self.flagged      = flagged
         self.numViews     = numViews
+        self.numLikes     = numLikes
         self.numComments  = numComments
         self.numCommenters = numCommenters
         self.colorHexcode = colorHexcode
-
+        self.popularity   = numViews * 1 + numLikes * 3 + numCommenters * 3
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -82,7 +87,6 @@ class StoryItem: NSObject, NSCoding {
         let key         = decoder.decodeObject(forKey: "key") as! String
         let authorId    = decoder.decodeObject(forKey: "authorId") as! String
         let caption     = decoder.decodeObject(forKey: "caption") as? String
-        let captionPos  = decoder.decodeObject(forKey: "captionPos") as? Double
         let locationKey = decoder.decodeObject(forKey: "locationKey") as? String
         let downloadUrl = decoder.decodeObject(forKey: "downloadUrl") as! URL
         let ctInt       = decoder.decodeObject(forKey: "contentType") as! Int
@@ -91,6 +95,7 @@ class StoryItem: NSObject, NSCoding {
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
         let flagged     = decoder.decodeObject(forKey: "flagged") as! Bool
         let numViews    = decoder.decodeObject(forKey: "numViews") as! Int
+        let numLikes    = decoder.decodeObject(forKey: "numLikes") as! Int
         let numComments = decoder.decodeObject(forKey: "numComments") as! Int
         let numCommenters = decoder.decodeObject(forKey: "numCommenters") as! Int
         let colorHexcode    = decoder.decodeObject(forKey: "color") as? String
@@ -121,7 +126,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, captionPos: captionPos, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: colorHexcode)
+        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: colorHexcode)
     }
     
     
@@ -134,9 +139,7 @@ class StoryItem: NSObject, NSCoding {
         if caption != nil {
             coder.encode(caption!, forKey: "caption")
         }
-        if captionPos != nil {
-            coder.encode(Double(caption!), forKey: "captionPos")
-        }
+        
         coder.encode(downloadUrl, forKey: "downloadUrl")
         coder.encode(contentType.rawValue, forKey: "contentType")
         coder.encode(dateCreated, forKey: "dateCreated")
@@ -149,62 +152,12 @@ class StoryItem: NSObject, NSCoding {
         }
         coder.encode(flagged, forKey: "flagged")
         coder.encode(numComments, forKey: "numComments")
-        coder.encode(numComments, forKey: "numViews")
+        coder.encode(numViews, forKey: "numViews")
+        coder.encode(numLikes, forKey: "numLikes")
         coder.encode(colorHexcode, forKey: "colorHexcode")
     }
     
-    func getKey() -> String {
-        return key
-    }
     
-    func getAuthorId() -> String {
-        return authorId
-    }
-    
-    func getLocationKey() -> String? {
-        return locationKey
-    }
-    
-    func getDownloadUrl() -> URL {
-        return downloadUrl
-    }
-    
-    func getVideoURL() -> URL? {
-        return videoURL
-    }
-    
-    func getContentType() -> ContentType? {
-        return contentType
-    }
-    
-    func getDateCreated() -> Date? {
-        return dateCreated
-    }
-    
-    func getLength() -> Double {
-        return length
-    }
-    
-    func getCaption() -> String? {
-        return caption
-    }
-    
-    func getCaptionPos() -> CGFloat? {
-        return captionPos
-    }
-    
-    
-    func getNumViews() -> Int {
-        return numViews
-    }
-    
-    func getNumComments() -> Int {
-        return numComments
-    }
-    
-    func getNumCommenters() -> Int {
-        return numCommenters
-    }
     
     func getViewsList() -> [String] {
         var list = [String]()
@@ -221,10 +174,6 @@ class StoryItem: NSObject, NSCoding {
             }
             
             return !UploadService.imageFileExists(withKey: key)
-//            if let savedImage = UploadService.readImageFromFile(withKey: key) {
-//                image = savedImage
-//                return false
-//            }
         }
         
         if contentType == .video {
@@ -259,17 +208,18 @@ class StoryItem: NSObject, NSCoding {
     
     func addComment(_ comment:Comment) {
         for _comment in comments {
-            if _comment.getKey() == comment.getKey() { return }
+            if _comment.key == comment.key { return }
         }
         
         self.comments.append(comment)
+        self.numComments = self.comments.count
         cache()
     }
     
     func removeComment(key:String) {
         var removeIndex:Int?
         for i in 0..<comments.count {
-            if comments[i].getKey() == key {
+            if comments[i].key == key {
                 removeIndex = i
                 break
             }
@@ -278,6 +228,8 @@ class StoryItem: NSObject, NSCoding {
         if removeIndex != nil {
             comments.remove(at: removeIndex!)
         }
+        
+        self.numComments = self.comments.count
         
         cache()
     }
@@ -303,6 +255,11 @@ class StoryItem: NSObject, NSCoding {
            return hexStringToUIColor(hex: colorHexcode!)
         }
         return nil
+    }
+    
+    func editCaption(caption:String) {
+        self.caption = caption
+        cache()
     }
     
     func cache() {

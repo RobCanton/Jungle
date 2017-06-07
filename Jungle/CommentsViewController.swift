@@ -138,12 +138,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     func setupItem(_ item: StoryItem) {
         if self.itemRef != nil {
-            if self.itemRef!.getKey() == item.getKey() { return }
+            if self.itemRef!.key == item.key { return }
         }
         self.itemRef = item
-        self.header.setViewsLabel(count: item.getNumViews())
+        self.header.setViewsLabel(count: item.numViews)
         
-        header.setUserInfo(uid: item.getAuthorId())
+        header.setUserInfo(uid: item.authorId)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -152,17 +152,17 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         
         let uid = mainStore.state.userState.uid
         
-        header.postKey = item.getKey()
-        header.setCurrentUserMode(item.getAuthorId() == uid)
+        header.postKey = item.key
+        header.setCurrentUserMode(item.authorId == uid)
         
         self.updateComments()
         
         commentsRef?.removeAllObservers()
-        commentsRef = UserService.ref.child("uploads/comments/\(item.getKey())")
+        commentsRef = UserService.ref.child("uploads/comments/\(item.key)")
         
         if let lastItem = item.comments.last {
-            let lastKey = lastItem.getKey()
-            let ts = lastItem.getDate().timeIntervalSince1970 * 1000
+            let lastKey = lastItem.key
+            let ts = lastItem.date.timeIntervalSince1970 * 1000
             commentsRef?.queryOrdered(byChild: "timestamp").queryStarting(atValue: ts).observe(.childAdded, with: { snapshot in
                 
                 let dict = snapshot.value as! [String:Any]
@@ -209,7 +209,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         }
         header.subscribed = nil
         subscribedRef?.removeAllObservers()
-        subscribedRef = UserService.ref.child("uploads/subscribers/\(item.getKey())/\(uid)")
+        subscribedRef = UserService.ref.child("uploads/subscribers/\(item.key)/\(uid)")
         subscribedRef?.observe(.value, with: { snapshot in
             self.header.setupNotificationsButton(snapshot.exists())
         })
@@ -223,8 +223,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             self.tableView.reloadData()
         }
         viewsRef?.removeAllObservers()
-        if item.getAuthorId() == mainStore.state.userState.uid {
-            viewsRef = UserService.ref.child("uploads/views/\(item.getKey())")
+        if item.authorId == mainStore.state.userState.uid {
+            viewsRef = UserService.ref.child("uploads/views/\(item.key)")
             viewsRef?.observe(.value, with: { snapshot in
                 var viewers = [String]()
                 for child in snapshot.children {
@@ -291,7 +291,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             return 60
         case .Comments:
             let comment = comments[indexPath.row]
-            let text = comment.getText()
+            let text = comment.text
             let width = tableView.frame.width - (12 + 12 + 10 + 32)
             let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
             let height2 = size.height + 26 + 14 + 1  // +8 for some bio padding
@@ -340,7 +340,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         let comment = self.comments[indexPath.row]
         
         var action:UITableViewRowAction!
-        if comment.getAuthor() == mainStore.state.userState.uid {
+        if comment.author == mainStore.state.userState.uid {
             action = UITableViewRowAction(style: .normal, title: "Delete") { (rowAction, indexPath) in
                 guard let item = self.itemRef else { return }
                 let actionComment = self.comments[indexPath.row]
@@ -348,7 +348,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let alert = UIAlertController(title: "Delete comment?", message: nil, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
                     
-                    UploadService.removeComment(postKey: item.getKey(), commentKey: actionComment.getKey(), completion: { success, commentKey in
+                    UploadService.removeComment(postKey: item.key, commentKey: actionComment.key, completion: { success, commentKey in
                         if success {
                             item.removeComment(key: commentKey)
                             self.comments = item.comments
@@ -372,10 +372,10 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this comment?", preferredStyle: .actionSheet)
                 reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
                 reportSheet.addAction(UIAlertAction(title: "Spam or Scam", style: .destructive, handler: { _ in
-                    UploadService.reportComment(itemKey: item.getKey(), commentKey: actionComment.getKey(), type: .SpamComment, completion: { success in })
+                    UploadService.reportComment(itemKey: item.key, commentKey: actionComment.key, type: .SpamComment, completion: { success in })
                 }))
                 reportSheet.addAction(UIAlertAction(title: "Abusive Content", style: .destructive, handler: { _ in
-                    UploadService.reportComment(itemKey: item.getKey(), commentKey: actionComment.getKey(), type: .AbusiveComment, completion: { success in })
+                    UploadService.reportComment(itemKey: item.key, commentKey: actionComment.key, type: .AbusiveComment, completion: { success in })
                 }))
                 self.present(reportSheet, animated: true, completion: nil)
             }
@@ -430,7 +430,7 @@ extension CommentsViewController: CommentsHeaderProtocol {
     func actionHandler() {
         guard let item = self.itemRef else { return }
         
-        if item.getAuthorId() == mainStore.state.userState.uid {
+        if item.authorId == mainStore.state.userState.uid {
             let alert = UIAlertController(title: "Delete post?", message: "This is permanent.", preferredStyle: .alert)
             
             alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in

@@ -146,6 +146,36 @@ func getNumericShorthandString(_ number:Int) -> String {
     return str
 }
 
+
+func getNumericShortesthandString(_ number:Int) -> String {
+    var str = "\(number)"
+    
+    if number >= 1000000 {
+        let decimal = Double(number) / 1000000
+        str = "\(roundToOneDecimal(decimal))M"
+    } else if number >= 100000 {
+        let decimal = Int(Double(number) / 1000)
+        str = "\(decimal)K"
+    } else if number >= 1000 {
+        let decimal = Double(number) / 1000
+        str = "\(roundToOneDecimal(decimal))K"
+    }
+    
+    return str
+}
+
+func getDistanceString(distance:Double) -> String {
+    if distance < 0.5 {
+        // meters
+        let meters = Int(round(distance * 1000)/1)
+        return "\(meters) m"
+    } else {
+        let rounded = Int(distance)//Double(round(10*distance)/10)
+        return "\(rounded) km"
+    }
+}
+
+
 func roundToOneDecimal(_ value:Double) -> Double {
     return Double(floor(value*10)/10)
 }

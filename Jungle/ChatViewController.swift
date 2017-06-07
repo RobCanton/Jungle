@@ -11,8 +11,7 @@ import UIKit
 import JSQMessagesViewController
 import ReSwift
 import Firebase
-
-
+import View2ViewTransition
 
 
 class ChatViewController: JSQMessagesViewController, GetUserProtocol {
@@ -36,6 +35,8 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         partner = user
        
     }
+    
+    let transitionController: TransitionController = TransitionController()
 
     var activityIndicator:UIActivityIndicatorView!
     override func viewDidLoad() {
@@ -97,14 +98,6 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     func showUserOptions() {
 
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
-//        if !popUpMode {
-//            sheet.addAction(UIAlertAction(title: "View User Profile", style: .default, handler: { _ in
-//                let controller = UserProfileViewController()
-//                controller.uid = self.partner.uid
-//                self.navigationController?.pushViewController(controller, animated: true)
-//            }))
-//        }
         
         sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
             let reportSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
@@ -170,15 +163,24 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
                 
                 for message in snapshot.children {
                     let messageSnap = message as! DataSnapshot
-                    let value = messageSnap.value as! [String: Any]
-                    let senderId  = value["senderId"] as! String
-                    let text      = value["text"] as! String
-                    let timestamp = value["timestamp"] as! Double
-
+                    let dict = messageSnap.value as! [String: AnyObject]
+                    
+                    let senderId  = dict["senderId"] as! String
+                    let timestamp = dict["timestamp"] as! Double
+                    
                     if timestamp != endTimestamp {
-                        let date = Date(timeIntervalSince1970: timestamp/1000)
-                        let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date, text: text)
-                        messageBatch.append(message!)
+                        let date = NSDate(timeIntervalSince1970: timestamp/1000)
+                        
+                        if let uploadKey = dict["uploadKey"] as? String, let uploadURL = dict["uploadURL"] as? String {
+                            let mediaItem = AsyncPhotoMediaItem(key: uploadKey, withURL: uploadURL)
+                            let mediaMessage = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, media: mediaItem)
+                            messageBatch.append(mediaMessage!)
+                            
+                        } else if let text = dict["text"] as? String {
+                            let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
+                            self.messages.append(message!)
+                            messageBatch.append(message!)
+                        }
                     }
 
                 }
@@ -211,6 +213,12 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.barStyle = .black
+        self.navigationController?.view.backgroundColor = UIColor.clear
         self.navigationController?.navigationBar.barStyle = .default
     }
     
@@ -225,6 +233,9 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if self.navigationController?.delegate === transitionController {
+            self.navigationController?.delegate = nil
+        }
         //self.navigationController?.navigationBar.isUserInteractionEnabled = true
         
     }
@@ -263,6 +274,37 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         }
     }
     
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
+        let data = messages[indexPath.row]
+        print("didTapMessageBubbleAt!")
+        if data.isMediaMessage {
+            print("isMediaMessage")
+            if let media = data.media as? AsyncPhotoMediaItem {
+                print("AsyncPhotoMediaItem")
+                if let item = media.item {
+                    print("ITEM TING!")
+                    presentPost(post:item, indexPath: indexPath)
+                }
+            }
+            //globalMainInterfaceProtocol?.presentChatPost(chatController: self, post: data.media, initialIndexPath: <#T##IndexPath#>)
+        }
+    }
+    
+    func presentPost(post: StoryItem, indexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        let galleryViewController: GalleryViewController = GalleryViewController()
+        galleryViewController.showCommentsOnAppear = true
+        galleryViewController.isSingleItem = true
+        galleryViewController.posts = [post]
+        galleryViewController.transitionController = self.transitionController
+        
+        self.transitionController.userInfo = ["destinationIndexPath": IndexPath(item: 0, section: 0) as AnyObject, "initialIndexPath": indexPath as AnyObject]
+        transitionController.cornerRadius = 6.0
+        nav.delegate = transitionController
+        print("presentChatPost")
+        //nav.pushViewController(galleryViewController, animated: true)
+        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
+    }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapAvatarImageView avatarImageView: UIImageView!, at indexPath: IndexPath!) {
         let data = messages[indexPath.row]
@@ -361,32 +403,6 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     }
     
     
-    override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellBottomLabelAt indexPath: IndexPath!) -> CGFloat {
-            let prevItem = indexPath.item - 1
-            
-            if prevItem >= 0 {
-                let prevMessage = messages[prevItem]
-                if prevMessage.isMediaMessage {
-                    return kJSQMessagesCollectionViewCellLabelHeightDefault
-                }
-            }
-            return 0.0
-    }
-
-    override func collectionView(_ collectionView: JSQMessagesCollectionView!, attributedTextForCellBottomLabelAt indexPath: IndexPath!) -> NSAttributedString! {
-        let prevItem = indexPath.item - 1
-        
-        if prevItem >= 0 {
-            let prevMessage = messages[prevItem]
-            if prevMessage.isMediaMessage {
-                return NSAttributedString(string: "            Temporary message.", attributes: nil)
-            }
-        }
-        return NSAttributedString(string: "")
-    }
-        
-        
-    
         
     var loadingNextBatch = false
     var downloadRef:DatabaseReference?
@@ -417,54 +433,119 @@ extension ChatViewController {
 
         downloadRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).observe(.childAdded, with: { snapshot in
             let dict = snapshot.value as! [String:AnyObject]
-        
+            
             let senderId  = dict["senderId"] as! String
-            let text      = dict["text"] as! String
             let timestamp = dict["timestamp"] as! Double
             
             let date = NSDate(timeIntervalSince1970: timestamp/1000)
-
-            let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
-            self.messages.append(message!)
-            self.reloadMessagesView()
-            self.stopActivityIndicator()
-            self.finishReceivingMessage(animated: true)
-            //
+            
+            if let uploadKey = dict["uploadKey"] as? String, let uploadURL = dict["uploadURL"] as? String {
+                let mediaItem = AsyncPhotoMediaItem(key: uploadKey, withURL: uploadURL)
+                let mediaMessage = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, media: mediaItem)
+                self.messages.append(mediaMessage!)
+                self.reloadMessagesView()
+                self.stopActivityIndicator()
+                self.finishReceivingMessage(animated: true)
+                
+            } else if let text = dict["text"] as? String {
+                let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
+                self.messages.append(message!)
+                self.reloadMessagesView()
+                self.stopActivityIndicator()
+                self.finishReceivingMessage(animated: true)
+            }
         
         })
     }
 
 }
 
+
+extension ChatViewController: View2ViewTransitionPresenting {
+    
+    func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
+        print("initialFrame")
+        guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
+            return CGRect.zero
+        }
+        
+        guard let cell = collectionView.cellForItem(at: indexPath) as? JSQMessagesCollectionViewCell else {
+            return CGRect.zero
+        }
+        
+        let data = messages[indexPath.row]
+        if data.isMediaMessage, let media = data.media as? AsyncPhotoMediaItem {
+            return media.asyncImageView.convert(media.asyncImageView.frame, to: self.view)
+        }
+
+        return CGRect.zero
+
+    }
+    
+    func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
+        print("ITS A CHATPOST TING")
+        let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
+        
+        let data = messages[indexPath.row]
+        if data.isMediaMessage, let media = data.media as? AsyncPhotoMediaItem {
+            return media.asyncImageView
+        }
+        
+
+        return UIView()
+
+    }
+    
+    func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
+           }
+    
+    func dismissInteractionEnded(_ completed: Bool) {}
+    
+}
+
+
 class AsyncPhotoMediaItem: JSQPhotoMediaItem {
     var asyncImageView: UIImageView!
+    var uploadKey:String!
+    var item:StoryItem?
     
     override init!(maskAsOutgoing: Bool) {
         super.init(maskAsOutgoing: maskAsOutgoing)
     }
     
-    init(withURL url: String) {
+    init(key:String, withURL url: String) {
         super.init()
 
         let size = UIScreen.main.bounds
         asyncImageView = UIImageView()
-        asyncImageView.frame = CGRect(x: 0, y: 0, width: size.width * 0.5, height: size.height * 0.35)
+        asyncImageView.frame = CGRect(x: 0, y: 0, width: size.width * 0.3, height: size.height * 0.22)
         asyncImageView.contentMode = .scaleAspectFill
         asyncImageView.clipsToBounds = true
-        asyncImageView.layer.cornerRadius = 5
+        asyncImageView.layer.cornerRadius = 6
         asyncImageView.backgroundColor = UIColor.jsq_messageBubbleLightGray()
+        
+        
         
         let activityIndicator = JSQMessagesMediaPlaceholderView.withActivityIndicator()
         activityIndicator?.frame = asyncImageView.frame
         asyncImageView.addSubview(activityIndicator!)
         
-        
-        loadImageUsingCacheWithURL(url, completion: { image, fromCache in
-            if image != nil {
-                self.asyncImageView.image = image!
+        UploadService.getUpload(key: key, completion: { item in
+            if item != nil && url == item!.downloadUrl.absoluteString {
+                self.item = item!
+                loadImageUsingCacheWithURL(item!.downloadUrl.absoluteString, completion: { image, fromCache in
+                    if image != nil {
+                        self.asyncImageView.image = image!
+                        activityIndicator?.removeFromSuperview()
+                    }
+                })
+            } else {
                 activityIndicator?.removeFromSuperview()
+                self.item = nil
+                self.asyncImageView.image = nil
             }
         })
+        
     }
     
     override func mediaView() -> UIView! {

@@ -12,17 +12,27 @@ import SnapTimer
 protocol PostHeaderProtocol: class {
     func showAuthor()
     func dismiss()
+    func showComments()
 }
 
 class PostHeaderView: UIView {
 
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var locationTitle: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var snapTimer: SnapTimerView!
     
+    @IBOutlet weak var likesView: UIView!
+    @IBOutlet weak var commentsView: UIView!
     @IBOutlet weak var closeButton: UIButton!
+    
+    @IBOutlet weak var locationTitle: UILabel!
+    @IBOutlet weak var locationIcon: UIButton!
+    
+    
+    @IBOutlet weak var likesLabel: UILabel!
+    @IBOutlet weak var commentsLabel: UILabel!
+    var commentsTap:UITapGestureRecognizer?
     
     
     override func awakeFromNib() {
@@ -38,7 +48,7 @@ class PostHeaderView: UIView {
     weak var delegate:PostHeaderProtocol?
     var tap:UITapGestureRecognizer?
     var tap2:UITapGestureRecognizer?
-    func setup(withUid uid:String, date: Date?, _delegate:PostHeaderProtocol?) {
+    func setup(withUid uid:String, date: Date?,  _delegate:PostHeaderProtocol?) {
         delegate = _delegate
         clean()
         UserService.getUser(uid, completion: { _user in
@@ -58,7 +68,29 @@ class PostHeaderView: UIView {
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2!)
         
-        self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
+        commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
+        self.commentsView.isUserInteractionEnabled = true
+        self.commentsView.addGestureRecognizer(commentsTap!)
+        
+        //self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
+        likesView.layer.cornerRadius = 3.0
+        likesView.clipsToBounds = true
+        
+        commentsView.layer.cornerRadius = 3.0
+        commentsView.clipsToBounds = true
+    }
+    
+    func setNumLikes(_ numLikes:Int) {
+        likesLabel.text = getNumericShorthandString(numLikes)
+    }
+    
+    func setNumComments(_ numComments:Int) {
+        commentsLabel.text = getNumericShorthandString(numComments)
+    }
+    
+    
+    func commentsTapped() {
+        delegate?.showComments()
     }
     
     func clean() {
@@ -71,6 +103,9 @@ class PostHeaderView: UIView {
         if tap2 != nil {
             self.usernameLabel.removeGestureRecognizer(tap2!)
         }
+        locationTitle.text = ""
+        locationIcon.isHidden = true
+        
     }
     
     func userTapped(tap:UITapGestureRecognizer) {
@@ -80,8 +115,10 @@ class PostHeaderView: UIView {
     func setupLocation(location:Location?) {
         if location != nil {
             locationTitle.text = location!.name
+            locationIcon.isHidden = false
         } else {
             locationTitle.text = ""
+            locationIcon.isHidden = true
         }
     }
     

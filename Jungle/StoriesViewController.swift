@@ -11,10 +11,12 @@ import UIKit
 import View2ViewTransition
 
 protocol PopupProtocol: class {
-    func newItem(_ cellIndex:Int, _ item:StoryItem)
     func showComments()
+    func showMore()
+    func editCaption()
     func showUser(_ uid:String)
     func dismissPopup(_ animated:Bool)
+    func keyboardStateChange(_ up:Bool)
 }
 
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
@@ -375,14 +377,15 @@ extension StoriesViewController: CommentBarProtocol {
 }
 
 extension StoriesViewController: PopupProtocol {
-    
-    func newItem(_ cellIndex:Int, _ item:StoryItem) {
-        guard let currentIndex = currentIndexPath else { return }
+    func showMore() {
         
-        if currentIndex.item != cellIndex { return }
-        commentsViewController.setupItem(item)
     }
     
+    func editCaption() {
+        
+    }
+
+
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pause()
         getCurrentCell()?.destroyVideoPlayer()
@@ -392,6 +395,10 @@ extension StoriesViewController: PopupProtocol {
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
             navigationController?.popViewController(animated: animated)
         }
+    }
+    
+    func keyboardStateChange(_ up: Bool) {
+        
     }
     
     func showUser(_ uid:String) {
@@ -448,7 +455,7 @@ extension StoriesViewController: PopupProtocol {
         
         self.commentBar.sendButton.isEnabled = false
         if let item = getCurrentCell()?.item {
-            commentsViewController.header.setCurrentUserMode(item.getAuthorId() == mainStore.state.userState.uid)
+            commentsViewController.header.setCurrentUserMode(item.authorId == mainStore.state.userState.uid)
         }
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in

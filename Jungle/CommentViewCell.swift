@@ -39,9 +39,9 @@ class CommentViewCell: UITableViewCell {
         backgroundColor = UIColor.clear
         backgroundView = nil
         
-        UserService.getUser(comment.getAuthor(), withCheck: check, completion: { user, check in
+        UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
-                self.setMessageLabel(username: user!.username, message: comment.getText())
+                self.setMessageLabel(username: user!.username, message: comment.text)
                 self.userImageView.loadImageAsync(user!.imageURL, completion: nil)
             }
             

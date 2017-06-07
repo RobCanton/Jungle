@@ -20,6 +20,7 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     @IBOutlet weak var timeLabel: UILabel!
     
     
+    @IBOutlet weak var sentArrow: UIImageView!
     @IBOutlet weak var unreadDot: UIView!
     
     var user:User?
@@ -27,6 +28,11 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     
     var conversation:Conversation? {
         didSet{
+            userImageView.image = nil
+            messageLabel.text = ""
+            usernameLabel.text = ""
+            timeLabel.text = ""
+            userImageView.cropToCircle()
             unreadDot.cropToCircle()
             UserService.getUser(conversation!.getPartnerId(), completion: { _user in
                 if let user = _user {
@@ -36,20 +42,40 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
         }
     }
     
+    @IBOutlet weak var messageLabelLeading: NSLayoutConstraint!
     
     func userLoaded(user: User) {
         self.user = user
-        userImageView.clipsToBounds = true
-        userImageView.layer.cornerRadius = userImageView.frame.width/2
         userImageView.contentMode = .scaleAspectFill
             
         userImageView.loadImageAsync(user.imageURL, completion: nil)
         usernameLabel.text = user.username
         
-        let lastMessage = conversation!.getLastMessage()
-        messageLabel.text = lastMessage
-        timeLabel.text = conversation!.getDate().timeStringSinceNow()
+        let isSender = conversation!.sender == mainStore.state.userState.uid
+        if conversation!.isMediaMessage {
+            if isSender {
+                messageLabel.text = "You sent a post"
+            } else {
+               messageLabel.text = "Sent a post"
+            }
+            messageLabel.textColor = UIColor.lightGray
+        } else {
+            let lastMessage = conversation!.getLastMessage()
+            messageLabel.text = lastMessage
+            messageLabel.textColor = UIColor.black
+        }
+        if isSender {
+            messageLabelLeading.constant = 6.0
+            sentArrow.heightAnchor.constraint(equalToConstant: 14.0).isActive = true
+            sentArrow.isHidden = false
+        } else {
+            messageLabelLeading.constant = 0.0
+            sentArrow.heightAnchor.constraint(equalToConstant: 0.0).isActive = true
+            sentArrow.isHidden = true
+        }
+        self.layoutSubviews()
         
+        timeLabel.text = conversation!.getDate().timeStringSinceNow()
         
         if !conversation!.getSeen() {
             usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
