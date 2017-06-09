@@ -72,7 +72,11 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.imageView.image = nil
         self.nameLabel.text = ""
         self.timeLabel.text = ""
-        
+        self.firstIcon.isHidden = true
+        self.firstLabel.isHidden = true
+        self.secondIcon.isHidden = true
+        self.secondLabel.isHidden = true
+        self.timeLabel.isHidden = false
         self.timeLabel.text = story.date.timeStringSinceNow()
         
         self.colorView.backgroundColor = UIColor.clear
@@ -83,10 +87,10 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             if user != nil {
                 if user!.uid == mainStore.state.userState.uid {
                     self.nameLabel.text = "Me"
-                    self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightBold)
+                    self.nameLabel.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightBold)
                 } else {
-                    self.nameLabel.text = user!.username
-                    self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
+                    self.nameLabel.text = user!.fullname
+                    self.nameLabel.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium)
                 }
             }
         })
@@ -136,27 +140,20 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.nameLabel.text = ""
         self.timeLabel.text = ""
         
+        self.firstIcon.isHidden = false
+        self.firstLabel.isHidden = false
+        self.secondIcon.isHidden = false
+        self.secondLabel.isHidden = false
+        self.timeLabel.isHidden = true
         self.timeLabel.text = post.dateCreated.timeStringSinceNow()
         
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
         
-//        let numComments = post.getNumComments()
-//        self.commentsLabel.text = getNumericShorthandString(numComments)
-//        if numComments > 0 {
-//            self.commentsIcon.isHidden = false
-//            self.commentsLabel.isHidden = false
-//            
-//        } else {
-//            self.commentsIcon.isHidden = true
-//            self.commentsLabel.isHidden = true
-//        }
-        
         let numLikes = post.numLikes
         let numComments = post.numComments
         let likesImage = UIImage(named: "liked")
         let commentsImage = UIImage(named: "comments_filled")
-        self.timeLabel.isHidden = true
         if numLikes > 0 {
             self.firstLabel.text = getNumericShortesthandString(numLikes)
             self.firstIcon.image = likesImage
@@ -251,11 +248,13 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ item:StoryItem, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
-                
+                print("GOT ITEM")
                 UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in
                     self.colorView.alpha = photoCellColorAlpha
                     completion(check, item!, image, fromFile)
                 })
+            } else {
+                print("NO ITEM")
             }
         })
     }

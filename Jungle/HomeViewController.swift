@@ -101,7 +101,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         self.view.addSubview(tabHeader)
         
-        let titles = ["Nearby", "Popular", "Stories"]
+        let titles = ["Nearby", "Popular", "Following"]
         let frame = CGRect(x: 0, y: 44.0, width: view.frame.width, height: 44)
         
         control = TwicketSegmentedControl(frame: frame)
@@ -293,7 +293,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             let story = state.followingStories[indexPath.row]
             if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
-                globalMainInterfaceProtocol?.presentPlaceStory(locationStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadStory()
             }

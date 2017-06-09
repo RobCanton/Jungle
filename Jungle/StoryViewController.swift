@@ -46,6 +46,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.showUser(item.authorId)
     }
     
+    func showPlace(_ location: Location) {
+        delegate?.showPlace(location)
+    }
+    
     func dismiss() {
         delegate?.dismissPopup(true)
     }
@@ -167,13 +171,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
         
-        if let locationKey = item.locationKey {
-            LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
-                self.headerView.setupLocation(location: location)
-            })
-        } else {
-            self.headerView.setupLocation(location: nil)
-        }
+        self.headerView.setupLocation(locationKey: item.locationKey)
+
         
         UploadService.addView(post: item)
         footerView.setup(item)
@@ -181,7 +180,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func prepareImageContent(item:StoryItem) {
         
-        if let image = item.image {
+        if let image = UploadService.readImageFromFile(withKey: item.key) {
             content.image = image
             self.playerLayer?.player?.replaceCurrentItem(with: nil)
             self.setForPlay()
@@ -194,7 +193,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func prepareVideoContent(item:StoryItem) {
         /* CURRENTLY ASSUMING THAT IMAGE IS LOAD */
-        if let image = item.image {
+        if let image = UploadService.readImageFromFile(withKey: item.key)  {
             content.image = image
             
         } else {

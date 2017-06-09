@@ -49,6 +49,10 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
         
         NotificationCenter.default.addObserver(self, selector: #selector(foreground), name: NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
+        
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil, queue: nil) { notification in
+            self.getCurrentCell()?.replayVideo()
+        }
     }
     
     func foreground() {
@@ -272,7 +276,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
 extension GalleryViewController: PopupProtocol {
     
     func dismissPopup(_ animated:Bool) {
-        getCurrentCell()?.pauseVideo()
+        getCurrentCell()?.pause()
         getCurrentCell()?.destroyVideoPlayer()
         if let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first {
             let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
@@ -291,6 +295,15 @@ extension GalleryViewController: PopupProtocol {
         }
         let controller = UserProfileViewController()
         controller.uid = uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showPlace(_ location:Location) {
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PlaceViewController()
+        controller.place = location
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

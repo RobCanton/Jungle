@@ -78,7 +78,7 @@ class ProfileHeaderView: UICollectionReusableView {
         setPostsCount(user.posts)
         setFollowersCount(user.followers)
         setFollowingCount(user.following)
-        usernameLabel.text = user.username
+        usernameLabel.text = user.fullname
         
         bioLabel.text = user.bio
         

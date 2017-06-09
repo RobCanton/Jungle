@@ -52,7 +52,7 @@ class LocationService: NSObject {
         if let cachedLocation = dataCache.object(forKey: "place-\(locationKey)" as NSString) as? Location {
             completion(cachedLocation)
         } else {
-            let locRef = ref.child("places/\(locationKey)/info")
+            let locRef = ref.child("places/info/\(locationKey)")
             
             locRef.observeSingleEvent(of: .value, with: { snapshot in
                 var location:Location?

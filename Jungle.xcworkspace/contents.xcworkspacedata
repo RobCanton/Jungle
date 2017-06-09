@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:PlaceViewController.swift">
+   </FileRef>
+   <FileRef
       location = "group:BannerView.swift">
    </FileRef>
    <FileRef

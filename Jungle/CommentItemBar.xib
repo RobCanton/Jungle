@@ -17,7 +17,7 @@
             <subviews>
                 <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pzn-Zl-6vY">
                     <rect key="frame" x="0.0" y="0.0" width="392" height="64"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.43814506880733944" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
                 <label hidden="YES" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Comment" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NzT-bC-66D">
                     <rect key="frame" x="8" y="22" width="73" height="20"/>
@@ -36,6 +36,9 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </textField>
+                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="BNQ-9e-xhl">
+                    <rect key="frame" x="342" y="21" width="20" height="20"/>
+                </activityIndicatorView>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vi8-yM-kQW">
                     <rect key="frame" x="328" y="0.0" width="64" height="64"/>
                     <constraints>
@@ -76,6 +79,7 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="jxW-Vb-FFh" secondAttribute="bottom" constant="1" id="0ev-54-wEf"/>
+                <constraint firstItem="BNQ-9e-xhl" firstAttribute="centerX" secondItem="jxW-Vb-FFh" secondAttribute="centerX" id="50t-q9-Lkt"/>
                 <constraint firstItem="NzT-bC-66D" firstAttribute="centerY" secondItem="g8v-2R-i5l" secondAttribute="centerY" id="EMH-cM-mG2"/>
                 <constraint firstItem="vi8-yM-kQW" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="HNX-7e-Hpy"/>
                 <constraint firstAttribute="trailing" secondItem="pzn-Zl-6vY" secondAttribute="trailing" id="POh-39-hhU"/>
@@ -93,10 +97,12 @@
                 <constraint firstItem="jxW-Vb-FFh" firstAttribute="leading" secondItem="hnU-lj-oSe" secondAttribute="trailing" id="orC-zf-JbQ"/>
                 <constraint firstItem="hnU-lj-oSe" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" constant="8" id="rXa-Zw-JXF"/>
                 <constraint firstItem="hnU-lj-oSe" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="roU-WA-k4A"/>
+                <constraint firstItem="BNQ-9e-xhl" firstAttribute="centerY" secondItem="jxW-Vb-FFh" secondAttribute="centerY" id="yX8-97-5RR"/>
                 <constraint firstItem="pzn-Zl-6vY" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="zvP-7a-dPy"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="activityIndicator" destination="BNQ-9e-xhl" id="iUJ-HH-ZIh"/>
                 <outlet property="backgroundView" destination="pzn-Zl-6vY" id="Nol-JH-NkA"/>
                 <outlet property="commentPlaceHolder" destination="NzT-bC-66D" id="v51-E0-mo2"/>
                 <outlet property="likeButton" destination="5W8-GV-yg8" id="2W3-NI-Dxn"/>

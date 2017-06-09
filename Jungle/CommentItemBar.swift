@@ -29,6 +29,7 @@ class CommentItemBar: UIView {
     
     @IBOutlet weak var backgroundView: UIView!
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var delegate:CommentItemBarProtocol?
     var liked = false
     
@@ -108,6 +109,18 @@ class CommentItemBar: UIView {
             delegate?.sendComment(text)
         }
         
+    }
+    
+    func setBusyState(_ busy: Bool) {
+        if busy {
+            sendButton.isEnabled = false
+            sendButton.isHidden = true
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+            sendButton.isEnabled = true
+            sendButton.isHidden = false
+        }
     }
     
 }

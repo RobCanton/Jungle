@@ -75,6 +75,11 @@ class UserService {
                     guard let username = dict["username"] as? String else { return completion(user) }
                     guard let imageURL = dict["imageURL"] as? String else { return completion(user) }
                     guard let bio      = dict["bio"] as? String else { return completion(user) }
+                    guard let firstname = dict["firstname"] as? String else { return completion(user) }
+                    var lastname:String = ""
+                    if let _lastname = dict["lastname"] as? String {
+                        lastname = _lastname
+                    }
                     
                     var posts:Int = 0
                     if let _posts = dict["posts"] as? Int {
@@ -91,7 +96,7 @@ class UserService {
                         following = _following
                     }
                     
-                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, posts: posts,followers: followers, following: following)
+                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts,followers: followers, following: following)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 
@@ -117,7 +122,11 @@ class UserService {
                 guard let username = dict["username"] as? String else { return completion(user) }
                 guard let imageURL = dict["imageURL"] as? String else { return completion(user) }
                 guard let bio      = dict["bio"] as? String else { return completion(user) }
-                
+                guard let firstname = dict["firstname"] as? String else { return completion(user) }
+                var lastname:String = ""
+                if let _lastname = dict["lastname"] as? String {
+                    lastname = _lastname
+                }
                 
                 var posts:Int = 0
                 if let _posts = dict["posts"] as? Int {
@@ -134,7 +143,7 @@ class UserService {
                     following = _following
                 }
                 
-                user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
+                user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
                 dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
             }
             
@@ -153,6 +162,12 @@ class UserService {
                     guard let username = dict["username"] as? String else { return completion(user, check) }
                     guard let imageURL = dict["imageURL"] as? String else { return completion(user, check) }
                     guard let bio      = dict["bio"] as? String else { return completion(user, check) }
+                    guard let firstname = dict["firstname"] as? String else { return completion(user, check) }
+                    
+                    var lastname:String = ""
+                    if let _lastname = dict["lastname"] as? String {
+                        lastname = _lastname
+                    }
                     
                     var posts:Int = 0
                     if let _posts = dict["posts"] as? Int {
@@ -169,7 +184,7 @@ class UserService {
                         following = _following
                     }
                     
-                    user = User(uid: uid, username: username, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
+                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 

@@ -25,12 +25,9 @@ protocol MainInterfaceProtocol {
     func fetchAllStories()
     func statusBar(hide: Bool, animated:Bool)
     func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
-    func presentPlaceStory(locationStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
-    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath, hasMyStory:Bool)
-    func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
-    func presentChatPost(chatController: ChatViewController, post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
 }
 
 extension MainViewController: MainInterfaceProtocol {
@@ -99,7 +96,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var screenMode:ScreenMode = .Main
     
-    fileprivate var storyType:StoryType = .PlaceStory
+    fileprivate var storyType:StoryType = .UserStory
     
     fileprivate lazy var cancelButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
@@ -583,13 +580,13 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
-    func presentPlaceStory(locationStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+    func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
-        storyType = .PlaceStory
+        storyType = .NearbyPost
         
         let storiesViewController: StoriesViewController = StoriesViewController()
         storiesViewController.storyType = .UserStory
-        storiesViewController.userStories = locationStories
+        storiesViewController.userStories = userStories
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
@@ -603,42 +600,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
 
     }
     
-    func presentUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath, hasMyStory:Bool) {
-        guard let nav = self.navigationController else { return }
-        storyType = .UserStory
-        let storiesViewController: StoriesViewController = StoriesViewController()
-        storiesViewController.storyType = storyType
-        storiesViewController.userStories = stories
-        //storiesViewController.currentIndexPath = destinationIndexPath
-        
-        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
-                                         "initialIndexPath": initialIndexPath as AnyObject]
-        transitionController.cornerRadius = 4.0
-        
-        storiesViewController.transitionController = transitionController
-        recordBtn.isUserInteractionEnabled = false
-        scrollView.isScrollEnabled = false
-        nav.delegate = transitionController
-        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
-    }
-    
-    func presentPublicUserStory(stories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
-        guard let nav = self.navigationController else { return }
-        storyType = .PublicUserStory
-        let storiesViewController: StoriesViewController = StoriesViewController()
-        storiesViewController.storyType = .UserStory
-        storiesViewController.userStories = stories
-        
-        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
-                                         "initialIndexPath": initialIndexPath as AnyObject]
-        transitionController.cornerRadius = 4.0
-        
-        storiesViewController.transitionController = transitionController
-        recordBtn.isUserInteractionEnabled = false
-        scrollView.isScrollEnabled = false
-        nav.delegate = transitionController
-        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
-    }
     
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
@@ -671,27 +632,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
-    var chatController:ChatViewController?
-    
-    func presentChatPost(chatController: ChatViewController, post: StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
-        guard let nav = self.navigationController else { return }
-        self.chatController = chatController
-        storyType = .ChatPost
-        let galleryViewController: GalleryViewController = GalleryViewController()
-        galleryViewController.showCommentsOnAppear = true
-        galleryViewController.isSingleItem = true
-        galleryViewController.posts = [post]
-        galleryViewController.transitionController = self.transitionController
-        
-        self.transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject, "initialIndexPath": initialIndexPath as AnyObject]
-        transitionController.cornerRadius = 6.0
-        recordBtn.isUserInteractionEnabled = false
-        scrollView.isScrollEnabled = false
-        nav.delegate = transitionController
-        print("presentChatPost")
-        //nav.pushViewController(galleryViewController, animated: true)
-        transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
-    }
+
     
 }
 
@@ -978,17 +919,8 @@ extension MainViewController: View2ViewTransitionPresenting {
             let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
-        } else if storyType == .PlaceStory {
-            guard let cell: PhotoCell = places.collectionView?.cellForItem(at: i) as? PhotoCell else { return CGRect.zero }
-            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
-            return convertedFrame
         } else if storyType == .UserStory {
             guard let headerCollectionView = places.topCollectionViewRef else { return CGRect.zero }
-            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
-            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
-            return convertedFrame//view.convert(rect, to: view)
-        } else if storyType == .PublicUserStory {
-            guard let headerCollectionView = places.midCollectionViewRef else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame//view.convert(rect, to: view)
@@ -1003,11 +935,6 @@ extension MainViewController: View2ViewTransitionPresenting {
             let y = cell.frame.origin.y + image_frame.origin.y + navHeight - notifications.tableView.contentOffset.y//+ navHeight
             let rect = CGRect(x: image_frame.origin.x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
-        } else if storyType == .ChatPost {
-            print("WHAT IS GOING ON")
-            guard let chat = chatController else { return CGRect.zero  }
-            guard let cell = chat.collectionView.cellForItem(at: indexPath) else { return CGRect.zero  }
-            return CGRect.zero
         } else {
             return CGRect.zero
         }
@@ -1022,22 +949,12 @@ extension MainViewController: View2ViewTransitionPresenting {
                 return UIView()
             }
             return cell.imageView
-        } else if storyType == .PlaceStory {
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
-                return UIView()
-            }
-            return cell.imageView
         } else if storyType == .UserStory {
             guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
                 return UIView()
             }
             return cell.imageView
-        } else if storyType == .PublicUserStory {
-            guard let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
-                return UIView()
-            }
-            return cell.imageView
-        }else if storyType == .ProfileStory{
+        } else if storyType == .ProfileStory{
             guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
@@ -1046,16 +963,6 @@ extension MainViewController: View2ViewTransitionPresenting {
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
             print("YUH!")
             return cell.postImageView
-        } else if storyType == .ChatPost {
-            print("ITS A CHATPOST TING")
-            guard let chat = chatController else {
-                print("YO")
-                return UIView() }
-            guard let cell = chat.collectionView.cellForItem(at: indexPath) as? JSQMessagesCollectionViewCell else {
-                print("MADTING")
-                return UIView() }
-            print("CELL FRAME: \(cell.frame)")
-            return UIView()
         } else {
             return UIView()
         }
@@ -1066,14 +973,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         print("prepareInitialView")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
 
-        if isPresenting {
-            if storyType == .UserStory {
-                returningFollowingIndex = indexPath
-            }
-            if storyType == .PublicUserStory {
-                returningPeopleIndex = indexPath
-            }
-        } else if !isPresenting {
+if !isPresenting {
             if storyType == .NearbyPost {
                 if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
                     
@@ -1091,25 +991,9 @@ extension MainViewController: View2ViewTransitionPresenting {
                     returningFollowingIndex = indexPath
                     cell.fadeOutInfo()
                 }
-            } else if storyType == .PublicUserStory {
-                if let ri = returningPeopleIndex {
-                    if let oldCell = places.midCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
-                        oldCell.fadeInInfo(animated: false)
-                    }
-                }
-                if let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell {
-                    returningPeopleIndex = indexPath
-                    cell.fadeOutInfo()
-                }
             }
         }
-        if storyType == .PlaceStory {
-            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                places.collectionView!.reloadData()
-                places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
-                places.collectionView!.layoutIfNeeded()
-            }
-        }
+       
         
         if storyType == .UserStory {
             if !isPresenting, let c = places.topCollectionViewRef {
@@ -1120,17 +1004,7 @@ extension MainViewController: View2ViewTransitionPresenting {
                 }
             }
         }
-        
-        if storyType == .PublicUserStory {
-            if !isPresenting, let c = places.midCollectionViewRef {
-                if !c.indexPathsForVisibleItems.contains(indexPath) {
-                    c.reloadData()
-                    c.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-                    c.layoutIfNeeded()
-                }
-            }
-        }
-        
+      
         if storyType == .NearbyPost {
             if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
                 places.collectionView!.reloadData()
@@ -1148,14 +1022,7 @@ extension MainViewController: View2ViewTransitionPresenting {
         }
     }
     
-    func dismissInteractionEnded(_ completed: Bool) {
-        
-        //        if completed {
-        //            statusBarShouldHide = false
-        //            self.setNeedsStatusBarAppearanceUpdate()
-        //        }
-        
-    }
+    func dismissInteractionEnded(_ completed: Bool) {}
     
 }
 
@@ -1177,5 +1044,5 @@ enum ScreenMode {
 }
 
 enum StoryType {
-    case NearbyPost, PlaceStory, UserStory, PublicUserStory, ProfileStory, NotificationPost, ChatPost
+    case NearbyPost, UserStory, ProfileStory, NotificationPost
 }

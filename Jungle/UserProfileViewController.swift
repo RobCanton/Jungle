@@ -58,7 +58,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-        itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
+        itemSideLength = (UIScreen.main.bounds.width - 3.0) / 3.0
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -73,8 +73,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
         layout.itemSize = getItemSize()
-        layout.minimumInteritemSpacing = 1.0
-        layout.minimumLineSpacing = 1.0
+        layout.minimumInteritemSpacing = 1.5
+        layout.minimumLineSpacing = 1.5
         
         collectionView = UICollectionView(frame: CGRect(x: 0,y: navHeight,width: view.frame.width,height: view.frame.height - navHeight), collectionViewLayout: layout)
         
@@ -85,7 +85,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
         
-        collectionView.contentInset = UIEdgeInsets(top: 1.0, left: 1.0, bottom: 1.0, right: 1.0)
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.bounces = true
@@ -112,6 +112,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.status = checkFollowingStatus(uid: uid)
         UserService.observeUser(uid, completion: { user in
             if user != nil {
+                self.title = user!.username
                 self.user = user
                 self.collectionView.reloadData()
             }
@@ -306,7 +307,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        cell.setupUserCell(posts[indexPath.item])
+        cell.setupCell(withPost: posts[indexPath.row])
         return cell
     }
     

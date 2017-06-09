@@ -118,7 +118,6 @@ class HomeStateController {
                 following.append(childSnap.key)
             }
             
-            print("FOLLOWING: \(following)")
             self.downloadFollowingStories(following)
         })
     }
@@ -201,14 +200,14 @@ class HomeStateController {
         popularRef = UserService.ref.child("uploads/popular/")
         popularRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
             var posts = [String]()
-            print("NEW POPULAR LIST")
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 let key = childSnap.key
-                if let _ = childSnap.value as? Int {
+                if let d = childSnap.value as? Double {
                     posts.append(key)
                 }
             }
+        
             self.downloadPopularPosts(posts)
         })
     }

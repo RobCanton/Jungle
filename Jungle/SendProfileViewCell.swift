@@ -25,6 +25,16 @@ class SendProfileViewCell: UITableViewCell {
         
     }
 
+    
+    func lockState() {
+        bgView.backgroundColor = UIColor.white
+        circleButton.setImage(UIImage(named: "check_2"), for: .normal)
+        circleButton.layer.cornerRadius = circleButton.frame.width / 2
+        circleButton.clipsToBounds = true
+        circleButton.layer.borderColor = UIColor.clear.cgColor
+        label.textColor = UIColor.lightGray
+        circleButton.backgroundColor = UIColor.lightGray
+    }
     override func setSelected(_ selected: Bool, animated: Bool) {
         if(selected)  {
             contentView.backgroundColor = UIColor.red
@@ -43,6 +53,7 @@ class SendProfileViewCell: UITableViewCell {
     var key = ""
     private(set) var isActive = false
     func toggleSelection(_ selected: Bool) {
+        label.textColor = UIColor.black
         isActive = selected
         if selected {
             bgView.backgroundColor = UIColor.white
@@ -78,7 +89,7 @@ class SendProfileViewCell: UITableViewCell {
             if user != nil {
                 self.user = user!
                 self.label.text = user!.username
-                self.subtitle.text = "Robert Canton"
+                self.subtitle.text = user!.fullname
             }
         })
 

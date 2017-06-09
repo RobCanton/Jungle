@@ -1,6 +1,7 @@
 import UIKit
 import AVFoundation
 import Firebase
+import NVActivityIndicatorView
 
 public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate, CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
     
@@ -10,6 +11,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     var animateInitiated = false
     var shouldAnimate = false
     var paused = false
+    
+    var activityView:NVActivityIndicatorView!
     
     var keyboardUp = false
     var subscribedToPost = false
@@ -30,8 +33,21 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.headerView.clean()
         self.footerView.clean()
         storyItem.delegate = self
+        
+        if let image = UploadService.readImageFromFile(withKey: storyItem.key) {
+
+            if storyItem.contentType == .image {
+                stopIndicator()
+            }
+            self.content.image = image
+        }
+        
         shouldAutoPause = true
-        setItem()
+        if storyItem.needsDownload() {
+            storyItem.download()
+        } else {
+            setItem()
+        }
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -44,17 +60,21 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func sendComment(_ comment: String) {
         
         guard let item = self.storyItem else { return }
-        
+        commentBar.setBusyState(true)
         if editCaptionMode {
+            
             self.commentBar.textField.resignFirstResponder()
             UploadService.editCaption(postKey: item.key, caption: comment) { success in
+                self.commentBar.setBusyState(false)
                 if success {
                     item.editCaption(caption: comment)
                 }
                 self.setItem()
             }
         } else {
-            UploadService.addComment(post: item, comment: comment)
+            UploadService.addComment(post: item, comment: comment) { success in
+                self.commentBar.setBusyState(false)
+            }
         }
     }
     
@@ -90,6 +110,10 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.showUser(item.authorId)
     }
     
+    func showPlace(_ location: Location) {
+        delegate?.showPlace(location)
+    }
+    
     func showUser(_ uid:String) {
         delegate?.showUser(uid)
     }
@@ -116,11 +140,23 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
 
     func animateIndicator() {
-
+        if !animateInitiated {
+            animateInitiated = true
+            DispatchQueue.main.async {
+                if self.storyItem.needsDownload() {
+                    self.activityView.startAnimating()
+                }
+            }
+        }
     }
     
     func stopIndicator() {
-
+        if activityView.isAnimating {
+            DispatchQueue.main.async {
+                self.activityView.stopAnimating()
+                self.animateInitiated = false
+            }
+        }
     }
     
     override init(frame: CGRect) {
@@ -146,6 +182,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         headerView.snapTimer.removeFromSuperview()
 
         videoContent.isHidden = true
+        
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.black, padding: 1.0)
+        activityView.center = contentView.center
+        contentView.addSubview(activityView)
     }
     
     func itemDownloaded() {
@@ -154,16 +195,18 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func setItem() {
         guard let item = storyItem else { return }
-
-        commentBar.setup(item.authorId == mainStore.state.userState.uid)
-        content.alpha = 1.0
-        videoContent.alpha = 1.0
         
-        if let image = storyItem.image {
-            stopIndicator()
+        self.content.image = nil
+        commentBar.setup(item.authorId == mainStore.state.userState.uid)
+        
+        if let image = UploadService.readImageFromFile(withKey: item.key) {
+            
+            print("IMAGE SET")
+            if item.contentType == .image {
+                stopIndicator()
+            }
             self.content.image = image
         } else {
-            NotificationCenter.default.removeObserver(self)
             animateIndicator()
             storyItem.download()
         }
@@ -209,13 +252,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.infoView.setInfo(withUid: item.authorId, item: item, delegate: self)
         
         
-        if let locationKey = item.locationKey {
-            LocationService.sharedInstance.getLocationInfo(locationKey, completion: { location in
-                self.headerView.setupLocation(location: location)
-            })
-        } else {
-            self.headerView.setupLocation(location: nil)
-        }
+        self.headerView.setupLocation(locationKey: item.locationKey)
         
         UploadService.addView(post: item)
         footerView.setup(item)
@@ -301,7 +338,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         } else if storyItem.contentType == .video {
             videoContent.isHidden = false
             playVideo()
-            loopVideo()
+            //loopVideo()
+            //timer = Timer.scheduledTimer(timeInterval: storyItem.length, target: self, selector: #selector(setItem), userInfo: nil, repeats: false)
         }
         
         if shouldAutoPause {
@@ -349,6 +387,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func pauseVideo() {
         self.playerLayer?.player?.pause()
+    }
+    
+    func replayVideo() {
+        self.playerLayer?.player?.seek(to: kCMTimeZero)
+        self.playerLayer?.player?.play()
     }
     
     func resetVideo() {
@@ -431,10 +474,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             let infoY = textViewY - infoFrame.height
             self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
             
-            var gradientFrame = self.gradientView.frame
-            gradientFrame.origin.y = height - keyboardFrame.height - gradientFrame.height
-            self.gradientView.frame = gradientFrame
-            
             self.commentBar.likeButton.alpha = 0.0
             self.commentBar.moreButton.alpha = 0.0
             self.commentBar.sendButton.alpha = 1.0
@@ -469,11 +508,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             let infoFrame = self.infoView.frame
             let infoY = height - textViewFrame.height - infoFrame.height
             self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
-            
-            
-            var gradientFrame = self.gradientView.frame
-            gradientFrame.origin.y = height - gradientFrame.height
-            self.gradientView.frame = gradientFrame
             
             self.commentBar.likeButton.alpha = 1.0
             self.commentBar.moreButton.alpha = 1.0

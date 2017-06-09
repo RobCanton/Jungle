@@ -31,7 +31,7 @@ class StoryItem: NSObject, NSCoding {
     private(set) var contentType:ContentType
     private(set) var dateCreated: Date
     private(set) var length: Double
-    private(set) var popularity:Int
+    private(set) var popularity:Double
     
     private(set) var numComments:Int
     private(set) var numCommenters:Int
@@ -53,12 +53,11 @@ class StoryItem: NSObject, NSCoding {
     
     fileprivate var colorHexcode:String?
 
-    dynamic var image: UIImage?
     dynamic var videoFilePath: URL?
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int,  flagged:Bool, colorHexcode:String?)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  flagged:Bool, colorHexcode:String?)
     {
         
         self.key          = key
@@ -78,8 +77,9 @@ class StoryItem: NSObject, NSCoding {
         self.numLikes     = numLikes
         self.numComments  = numComments
         self.numCommenters = numCommenters
+        self.popularity   = popularity
         self.colorHexcode = colorHexcode
-        self.popularity   = numViews * 1 + numLikes * 3 + numCommenters * 3
+        
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -98,6 +98,7 @@ class StoryItem: NSObject, NSCoding {
         let numLikes    = decoder.decodeObject(forKey: "numLikes") as! Int
         let numComments = decoder.decodeObject(forKey: "numComments") as! Int
         let numCommenters = decoder.decodeObject(forKey: "numCommenters") as! Int
+        let popularity      = decoder.decodeObject(forKey: "popularity") as! Double
         let colorHexcode    = decoder.decodeObject(forKey: "color") as? String
         var viewers = [String:Double]()
         if let _viewers = decoder.decodeObject(forKey: "viewers") as? [String:Double] {
@@ -126,7 +127,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, flagged: flagged, colorHexcode: colorHexcode)
+        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, flagged: flagged, colorHexcode: colorHexcode)
     }
     
     
@@ -154,6 +155,7 @@ class StoryItem: NSObject, NSCoding {
         coder.encode(numComments, forKey: "numComments")
         coder.encode(numViews, forKey: "numViews")
         coder.encode(numLikes, forKey: "numLikes")
+        coder.encode(popularity, forKey: "popularity")
         coder.encode(colorHexcode, forKey: "colorHexcode")
     }
     
@@ -169,10 +171,6 @@ class StoryItem: NSObject, NSCoding {
     
     func needsDownload() -> Bool{
         if contentType == .image {
-            if image != nil {
-                return false
-            }
-            
             return !UploadService.imageFileExists(withKey: key)
         }
         
@@ -186,7 +184,6 @@ class StoryItem: NSObject, NSCoding {
     
     func download() {
         UploadService.retrieveImage(byKey: key, withUrl: downloadUrl, completion: { image, fromFile in
-            self.image = image
             if self.contentType == .image {
                 self.delegate?.itemDownloaded()
             } else if self.contentType == .video {

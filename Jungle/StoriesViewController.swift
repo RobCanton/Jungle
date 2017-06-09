@@ -15,6 +15,7 @@ protocol PopupProtocol: class {
     func showMore()
     func editCaption()
     func showUser(_ uid:String)
+    func showPlace(_ location:Location) 
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
 }
@@ -22,7 +23,7 @@ protocol PopupProtocol: class {
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
     weak var transitionController: TransitionController!
-    var storyType:StoryType = .PlaceStory
+    var storyType:StoryType = .UserStory
     
     var locationStories = [LocationStory]()
     var stories:[Story]!
@@ -65,6 +66,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardDidDisappear), name: NSNotification.Name.UIKeyboardDidHide, object: nil)
+        
  }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -371,7 +373,7 @@ extension StoriesViewController: CommentBarProtocol {
         guard let item = cell.item else { return }
         commentBar.textField.text = ""
         commentBar.sendLabelState(false)
-        UploadService.addComment(post: item, comment: text)
+        UploadService.addComment(post: item, comment: text) { success in }
         commentBar.textField.resignFirstResponder()
     }
 }
@@ -408,6 +410,10 @@ extension StoriesViewController: PopupProtocol {
         let controller = UserProfileViewController()
         controller.uid = uid
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showPlace(_ location:Location) {
+    
     }
     
     func showUsersList(_ uids:[String], _ title:String) {}

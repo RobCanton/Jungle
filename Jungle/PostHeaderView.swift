@@ -11,6 +11,7 @@ import SnapTimer
 
 protocol PostHeaderProtocol: class {
     func showAuthor()
+    func showPlace(_ location:Location)
     func dismiss()
     func showComments()
 }
@@ -48,8 +49,12 @@ class PostHeaderView: UIView {
     weak var delegate:PostHeaderProtocol?
     var tap:UITapGestureRecognizer?
     var tap2:UITapGestureRecognizer?
+    
+    var placeTap:UITapGestureRecognizer?
+    var placeTap2:UITapGestureRecognizer?
     func setup(withUid uid:String, date: Date?,  _delegate:PostHeaderProtocol?) {
         delegate = _delegate
+        
         clean()
         UserService.getUser(uid, completion: { _user in
             guard let user = _user else { return }
@@ -57,6 +62,7 @@ class PostHeaderView: UIView {
             self.usernameLabel.text = user.username
             if date != nil {
                 self.timeLabel.text = date!.timeStringSinceNow()
+                self.timeLabel2.text = self.timeLabel.text
             }
             
         })
@@ -67,7 +73,6 @@ class PostHeaderView: UIView {
         tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2!)
-        
         commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
         self.commentsView.isUserInteractionEnabled = true
         self.commentsView.addGestureRecognizer(commentsTap!)
@@ -88,6 +93,7 @@ class PostHeaderView: UIView {
         commentsLabel.text = getNumericShorthandString(numComments)
     }
     
+    @IBOutlet weak var timeLabel2: UILabel!
     
     func commentsTapped() {
         delegate?.showComments()
@@ -97,6 +103,7 @@ class PostHeaderView: UIView {
         self.userImageView.image = nil
         self.usernameLabel.text = ""
         self.timeLabel.text = ""
+        self.timeLabel2.text = ""
         if tap != nil {
             self.userImageView.removeGestureRecognizer(tap!)
         }
@@ -112,14 +119,58 @@ class PostHeaderView: UIView {
         delegate?.showAuthor()
     }
     
-    func setupLocation(location:Location?) {
+    weak var location:Location?
+    
+    func setupLocation(locationKey:String?) {
+        
+        if locationKey != nil {
+            timeLabel2.isHidden = true
+            timeLabel.isHidden = false
+            locationTitle.text = "Loading..."
+            LocationService.sharedInstance.getLocationInfo(locationKey!) { location in
+                self.locationRetrieved(location)
+            }
+        } else {
+            timeLabel2.isHidden = false
+            timeLabel.isHidden = true
+            clearLocation()
+        }
+        
+    }
+    
+    func locationRetrieved(_ location:Location?) {
+        self.location = location
         if location != nil {
             locationTitle.text = location!.name
             locationIcon.isHidden = false
+            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.locationTitle.isUserInteractionEnabled = true
+            self.locationTitle.addGestureRecognizer(placeTap!)
+            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.locationIcon.isUserInteractionEnabled = true
+            self.locationIcon.addGestureRecognizer(placeTap2!)
         } else {
-            locationTitle.text = ""
-            locationIcon.isHidden = true
+            clearLocation()
         }
+    }
+    
+    func clearLocation() {
+        locationTitle.text = ""
+        locationIcon.isHidden = true
+        if placeTap != nil {
+            self.locationTitle.removeGestureRecognizer(placeTap!)
+            placeTap = nil
+        }
+        if placeTap2 != nil {
+            self.locationIcon.removeGestureRecognizer(placeTap2!)
+            placeTap2 = nil
+        }
+    }
+    
+    func locationTapped(tap:UITapGestureRecognizer) {
+        guard let loc = self.location else { return }
+        print("PRESENT LOCATION: \(loc.name)")
+        delegate?.showPlace(loc)
     }
     
     

@@ -68,6 +68,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         sendView.isUserInteractionEnabled = true
         sendView.addGestureRecognizer(sendTap)
         
+        setSendEnabled(true)
+        
         if let location = gps_service.getLastLocation() {
             setupMapView(withLocation: location)
         }
@@ -90,9 +92,11 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             sendGradient!.startPoint = CGPoint(x: 0, y: 0)
             sendGradient!.endPoint = CGPoint(x: 1, y: 0)
             sendView.layer.insertSublayer(sendGradient!, at: 0)
+            sendView.isUserInteractionEnabled = true
         } else {
             sendGradient?.removeFromSuperlayer()
             sendGradient = nil
+            sendView.isUserInteractionEnabled = false
         }
     }
     
@@ -207,7 +211,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         case 0:
             return 3
         case 1:
-            return upload.toNearby ? likelihoods.count : 0
+            return likelihoods.count
         case 2:
             return followers.count
         default:
@@ -235,9 +239,9 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         case 0:
             return 0
         case 1:
-            return upload.toNearby && likelihoods.count > 0 ? 38 : 0
+            return likelihoods.count > 0 ? 38 : 0
         case 2:
-            return 38
+            return followers.count > 0 ? 38 : 0
         default:
             return 0
         }
@@ -255,7 +259,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             if indexPath.row == 0 {
                 cell.label.text = "Your Profile"
                 cell.subtitle.text = "Save to your public profile"
-                cell.toggleSelection(upload.toProfile)
+                cell.lockState()
             } else if indexPath.row == 1 {
                 cell.label.text = "Your Story"
                 cell.subtitle.text = "Share with your followers"
@@ -336,6 +340,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 selectedIndex =  indexPath
                 upload.place = place
             }
+            if upload.place != nil && !upload.toNearby {
+                upload.toNearby = true
+                tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .none)
+            }
             break
         case 2:
             let cell = tableView.cellForRow(at: indexPath) as! SendProfileViewCell
@@ -355,24 +363,9 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         tableView.deselectRow(at: indexPath, animated: false)
-        validateForm()
+        
     }
     
-    
-    func validateForm() {
-        upload.printDescription()
-        if !upload.toProfile &&
-            !upload.toStory &&
-            !upload.toNearby &&
-            upload.place == nil &&
-            upload.recipients.isEmpty {
-            print("SET TO FALSE")
-            setSendEnabled(false)
-        } else {
-            print("SET TO TRUE")
-            setSendEnabled(true)
-        }
-    }
 
 }
 
