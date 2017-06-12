@@ -104,7 +104,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "518736497.442056"
+            timestampString = "518949898.263199"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "182"
+            endingLineNumber = "182"
+            landmarkName = "gestureRecognizerShouldBegin(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Jungle/GalleryViewController.swift"
+            timestampString = "518949898.263199"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "181"
@@ -120,27 +136,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "518736497.442056"
+            timestampString = "518949898.263199"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "180"
-            endingLineNumber = "180"
-            landmarkName = "gestureRecognizerShouldBegin(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "518736497.442056"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "159"
-            endingLineNumber = "159"
+            startingLineNumber = "160"
+            endingLineNumber = "160"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -262,11 +262,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoryViewController.swift"
-            timestampString = "518566689.903771"
+            timestampString = "518946903.996573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "435"
-            endingLineNumber = "435"
+            startingLineNumber = "481"
+            endingLineNumber = "481"
             landmarkName = "fadeInDetails()"
             landmarkType = "7">
          </BreakpointContent>
@@ -301,22 +301,6 @@
             endingLineNumber = "16"
             landmarkName = "init(layer:)"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Jungle/PostHeaderView.swift"
-            timestampString = "518733554.302819"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "197"
-            endingLineNumber = "197"
-            landmarkName = "PostHeaderView"
-            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -482,11 +466,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/Story.swift"
-            timestampString = "517617087.623346"
+            timestampString = "518945565.69101"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "89"
-            endingLineNumber = "89"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
             landmarkName = "Story"
             landmarkType = "3">
          </BreakpointContent>
@@ -736,11 +720,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "518860258.153291"
+            timestampString = "518946695.028635"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "712"
-            endingLineNumber = "712"
+            startingLineNumber = "736"
+            endingLineNumber = "736"
             landmarkName = "reportComment(itemKey:commentKey:type:completion:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -752,11 +736,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "518860258.153291"
+            timestampString = "518946695.028635"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "713"
-            endingLineNumber = "713"
+            startingLineNumber = "737"
+            endingLineNumber = "737"
             landmarkName = "reportComment(itemKey:commentKey:type:completion:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -768,11 +752,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/GalleryViewController.swift"
-            timestampString = "518736497.442056"
+            timestampString = "518949898.263199"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "195"
-            endingLineNumber = "195"
+            startingLineNumber = "196"
+            endingLineNumber = "196"
             landmarkName = "gestureRecognizerShouldBegin(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -816,11 +800,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoryViewController.swift"
-            timestampString = "518566572.657529"
+            timestampString = "518946903.996573"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "197"
+            endingLineNumber = "197"
             landmarkName = "setupItem()"
             landmarkType = "7">
          </BreakpointContent>

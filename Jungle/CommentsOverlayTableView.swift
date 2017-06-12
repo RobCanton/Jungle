@@ -61,6 +61,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         
         divider = UIView(frame: CGRect(x: 8,y: frame.height-1, width: frame.width-16, height: 1))
         divider.backgroundColor = UIColor(white: 1.0, alpha: 0.5)
+        divider.isHidden = true
         self.addSubview(divider)
         
         reloadTable()

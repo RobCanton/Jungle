@@ -27,28 +27,6 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </view>
-                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XsV-iO-uuX" customClass="SnapTimerView" customModule="SnapTimer">
-                    <rect key="frame" x="487" y="18" width="20" height="20"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                    <constraints>
-                        <constraint firstAttribute="width" secondItem="XsV-iO-uuX" secondAttribute="height" multiplier="1:1" id="4Ms-Hb-3jL"/>
-                        <constraint firstAttribute="height" constant="20" id="e1j-kL-YNO"/>
-                    </constraints>
-                    <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="number" keyPath="outerValue">
-                            <real key="value" value="0.0"/>
-                        </userDefinedRuntimeAttribute>
-                        <userDefinedRuntimeAttribute type="number" keyPath="innerValue">
-                            <real key="value" value="0.0"/>
-                        </userDefinedRuntimeAttribute>
-                        <userDefinedRuntimeAttribute type="color" keyPath="borderBackgroundColor">
-                            <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        </userDefinedRuntimeAttribute>
-                        <userDefinedRuntimeAttribute type="color" keyPath="centerBackgroundColor">
-                            <color key="value" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                        </userDefinedRuntimeAttribute>
-                    </userDefinedRuntimeAttributes>
-                </view>
                 <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VPf-iq-W5C">
                     <rect key="frame" x="486" y="10" width="25" height="25"/>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -159,7 +137,6 @@
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="centerY" secondItem="VPf-iq-W5C" secondAttribute="centerY" id="1Zt-df-R4M"/>
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="leading" secondItem="KFe-EG-hp3" secondAttribute="trailing" constant="8" id="8KY-iH-GrP"/>
                 <constraint firstItem="KFe-EG-hp3" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="10" id="ErG-bn-zMh"/>
-                <constraint firstAttribute="trailing" secondItem="XsV-iO-uuX" secondAttribute="trailing" constant="16" id="F6S-Iw-3gX"/>
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8.5" id="G7e-vB-yMd"/>
                 <constraint firstItem="LJk-ao-zXT" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="0.5" id="GYm-NH-TNV"/>
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="leading" secondItem="6nJ-kD-aa6" secondAttribute="trailing" constant="8" id="HBb-iq-m6C"/>
@@ -167,7 +144,6 @@
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="10" id="P0B-ZS-OhF"/>
                 <constraint firstItem="dj6-Gf-N8G" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="0.5" id="RG5-gP-qVr"/>
                 <constraint firstItem="dj6-Gf-N8G" firstAttribute="leading" secondItem="KFe-EG-hp3" secondAttribute="trailing" constant="8" id="Rsa-S0-ieE"/>
-                <constraint firstItem="XsV-iO-uuX" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="18" id="Ujg-Tz-Mkz"/>
                 <constraint firstItem="KFe-EG-hp3" firstAttribute="leading" secondItem="gtv-pI-kcX" secondAttribute="leading" constant="10" id="UqP-Ko-gNl"/>
                 <constraint firstAttribute="trailing" secondItem="0gs-KU-pJi" secondAttribute="trailing" constant="10" id="WZs-Oc-fRD"/>
                 <constraint firstItem="6nJ-kD-aa6" firstAttribute="centerY" secondItem="0gs-KU-pJi" secondAttribute="centerY" id="Xcm-1x-K5U"/>
@@ -186,7 +162,6 @@
                 <outlet property="likesView" destination="6nJ-kD-aa6" id="AZG-Jh-suG"/>
                 <outlet property="locationIcon" destination="Xny-id-Zlz" id="uH8-n2-Plo"/>
                 <outlet property="locationTitle" destination="LJk-ao-zXT" id="8CL-oL-P4L"/>
-                <outlet property="snapTimer" destination="XsV-iO-uuX" id="7vL-pr-up1"/>
                 <outlet property="timeLabel" destination="E7o-DA-g2z" id="a7Z-MK-R9K"/>
                 <outlet property="timeLabel2" destination="dj6-Gf-N8G" id="esr-Bz-cHu"/>
                 <outlet property="userImageView" destination="KFe-EG-hp3" id="zT3-qc-cY4"/>

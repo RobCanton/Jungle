@@ -56,7 +56,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func foreground() {
-        getCurrentCell()?.setItem()
+        getCurrentCell()?.setOverlays()
     }
     
     
@@ -71,6 +71,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.navigationController?.delegate = transitionController
         
         getCurrentCell()?.resume()
+        
         
         if let gestureRecognizers = self.view.gestureRecognizers {
             for gestureRecognizer in gestureRecognizers {

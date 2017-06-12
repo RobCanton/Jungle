@@ -46,11 +46,10 @@ class StoryInfoView: UIView {
         }
     }
     
-    func setInfo(withUid uid:String, item:StoryItem, delegate: PostCaptionProtocol) {
-        self.delegate = delegate
-        
+    func setInfo(_ item:StoryItem) {
+
         self.userImageView.cropToCircle()
-        UserService.getUser(uid, completion: { user in
+        UserService.getUser(item.authorId, completion: { user in
             if user != nil {
                 self.usernameLabel.text = user!.username
                 self.captionLabel.text = item.caption

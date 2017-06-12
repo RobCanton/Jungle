@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 enum UserStoryState {
-    case notLoaded, loadingItemInfo, itemInfoLoaded, loadingContent, contentLoaded
+    case notLoaded, loadingItemInfo, itemInfoLoaded
 }
 
 protocol StoryProtocol: class {
@@ -49,7 +49,7 @@ class LocationStory:Story {
     
 }
 
-class Story: ItemDelegate {
+class Story {
     fileprivate var postKeys:[(String,Double)]
     fileprivate var posts:[String]
     
@@ -82,8 +82,6 @@ class Story: ItemDelegate {
         
         self.lastPostKey = postKeys.last!.0
         self.date = Date(timeIntervalSince1970: postKeys.last!.1/1000) as Date
-        
-        downloadItems()
     }
     
     
@@ -93,14 +91,11 @@ class Story: ItemDelegate {
     
     
     func determineState() {
-        if needsDownload() {
-            if items == nil {
-                state = .notLoaded
-            } else {
-                state = .itemInfoLoaded
-            }
+
+        if items == nil {
+            state = .notLoaded
         } else {
-            state = .contentLoaded
+            state = .itemInfoLoaded
         }
     }
     
@@ -121,46 +116,19 @@ class Story: ItemDelegate {
                 self.items = items.sorted(by: {
                     return $0 < $1
                 })
-                self.state = .itemInfoLoaded
-                if !self.needsDownload() {
-                    self.state = .contentLoaded
+                if self.items!.count > 0 {
+                    UploadService.retrievePostImageVideo(post: self.items![0]) { post in
+                        self.state = .itemInfoLoaded
+                    }
+                } else {
+                    self.state = .itemInfoLoaded
                 }
+                //self.state = .itemInfoLoaded
 
             })
-        } else if items != nil {
-            if !self.needsDownload() {
-                self.state = .contentLoaded
-            }
         }
     }
-    
-    func needsDownload() -> Bool {
-        if items != nil {
-            for item in items! {
-                if item.needsDownload() {
-                    return true
-                }
-            }
-            return false
-        }
-        return true
-    }
-    
-    func itemDownloaded() {
-        if !needsDownload() {
-            self.state = .contentLoaded
-        }
-    }
-    
-    func downloadStory() {
-        if items != nil {
-            state = .loadingContent
-            for item in items! {
-                item.delegate = self
-                item.download()
-            }
-        }
-    }
+
     
     func hasViewed() -> Bool {
         for key in posts {

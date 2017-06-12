@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SnapTimer
 
 protocol PostHeaderProtocol: class {
     func showAuthor()
@@ -21,7 +20,6 @@ class PostHeaderView: UIView {
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
-    @IBOutlet weak var snapTimer: SnapTimerView!
     
     @IBOutlet weak var likesView: UIView!
     @IBOutlet weak var commentsView: UIView!
@@ -30,11 +28,9 @@ class PostHeaderView: UIView {
     @IBOutlet weak var locationTitle: UILabel!
     @IBOutlet weak var locationIcon: UIButton!
     
-    
     @IBOutlet weak var likesLabel: UILabel!
     @IBOutlet weak var commentsLabel: UILabel!
     var commentsTap:UITapGestureRecognizer?
-    
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -49,21 +45,23 @@ class PostHeaderView: UIView {
     weak var delegate:PostHeaderProtocol?
     var tap:UITapGestureRecognizer?
     var tap2:UITapGestureRecognizer?
-    
     var placeTap:UITapGestureRecognizer?
     var placeTap2:UITapGestureRecognizer?
-    func setup(withUid uid:String, date: Date?,  _delegate:PostHeaderProtocol?) {
-        delegate = _delegate
+    
+    func setup(_ item:StoryItem) {
         
+        setupLocation(locationKey: item.locationKey)
+        setNumLikes(item.numLikes)
+        setNumComments(item.numViews)
+
         clean()
-        UserService.getUser(uid, completion: { _user in
+        UserService.getUser(item.authorId, completion: { _user in
             guard let user = _user else { return }
             self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
             self.usernameLabel.text = user.username
-            if date != nil {
-                self.timeLabel.text = date!.timeStringSinceNow()
-                self.timeLabel2.text = self.timeLabel.text
-            }
+
+            self.timeLabel.text = item.dateCreated.timeStringSinceNow()
+            self.timeLabel2.text = self.timeLabel.text
             
         })
         
@@ -173,31 +171,6 @@ class PostHeaderView: UIView {
         delegate?.showPlace(loc)
     }
     
-    
-    func startTimer(length:Double, index:Int, total:Int) {
-        let timeInterval = TimeInterval(length)
 
-        let innerStart = (CGFloat(index) / CGFloat(total)) * 100.0
-        
-        DispatchQueue.main.async {
-            
-            self.snapTimer.animateInnerToValue(innerStart, duration: 0.0, completion: { _ in
-                self.snapTimer.animateOuterToValue(0.0, duration: 0.0, completion: { _ in
-                    self.snapTimer.animateInnerToValue((CGFloat(index + 1) / CGFloat(total)) * 100.0, duration: timeInterval, completion: nil)
-                    self.snapTimer.animateOuterToValue(100, duration:timeInterval, completion: nil)
-                })
-            })
-
-        }
-    }
-    
-    func pauseTimer() {
-        self.snapTimer.pauseAnimation()
-    }
-    
-    func resumeTimer() {
-        self.snapTimer.resumeAnimation()
-    }
-    
     
 }

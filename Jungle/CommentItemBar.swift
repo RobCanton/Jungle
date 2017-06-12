@@ -13,7 +13,7 @@ protocol CommentItemBarProtocol {
     func sendComment(_ comment:String)
     func toggleLike(_ like:Bool)
     func editCaption()
-    func more()
+    func showMore()
 }
 
 class CommentItemBar: UIView {
@@ -100,7 +100,7 @@ class CommentItemBar: UIView {
     
     
     @IBAction func moreTapped(_ sender: Any) {
-        delegate?.more()
+        delegate?.showMore()
     }
     
     @IBAction func sendButton(_ sender: Any) {

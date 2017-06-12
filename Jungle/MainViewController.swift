@@ -1042,6 +1042,40 @@ if !isPresenting {
     
     func dismissInteractionEnded(_ completed: Bool) {}
     
+    func cameraButtonView() -> UIView {
+        return UIView()
+    }
+    
+    func topView() -> UIView {
+        if storyType == .NearbyPost || storyType == .UserStory {
+            if let view = places.header.snapshotImageTransparent() {
+                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 88.0 + 20.0))
+                topView.backgroundColor = UIColor.black
+                
+                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 88.0))
+                white.backgroundColor = UIColor.white
+                white.layer.cornerRadius = 16.0
+                white.clipsToBounds = true
+                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 88.0))
+                t.image = view
+                topView.addSubview(white)
+                topView.addSubview(t)
+                return topView
+            }
+        }
+
+        return UIView()
+    }
+    
+    func bottomView() -> UIView {
+        if let view = mainTabBar.tabBar.snapshotImage() {
+            let t = UIImageView(frame: mainTabBar.tabBar.frame)
+            t.image = view
+            return t
+        }
+        return UIView()
+    }
+    
 }
 
 

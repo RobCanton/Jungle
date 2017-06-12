@@ -23,7 +23,7 @@ class UploadService {
     
     static func writeImageToFile(withKey key:String, image:UIImage) {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).jpg")
         if let jpgData = UIImageJPEGRepresentation(image, 1.0) {
             do {
                 try jpgData.write(to: dataPath, options: [.atomic])
@@ -35,15 +35,23 @@ class UploadService {
     
     static func readImageFromFile(withKey key:String) -> UIImage? {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).jpg")
         return UIImage(contentsOfFile: dataPath.path)
     }
     
     static func imageFileExists(withKey key:String) -> Bool {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).mp4")
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).jpg")
         let exists = FileManager.default.fileExists(atPath: dataPath.path)
         print("Image exists: \(exists)")
+        return exists
+    }
+    
+    static func videoFileExists(withKey key:String) -> Bool {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_video-\(key).mp4")
+        let exists = FileManager.default.fileExists(atPath: dataPath.path)
+        print("Video exists: \(exists)")
         return exists
     }
     
@@ -124,7 +132,7 @@ class UploadService {
     
     
     fileprivate static func downloadVideo(byAuthor author:String, withKey key:String, completion: @escaping (_ data:Data?)->()) {
-        let videoRef = Storage.storage().reference().child("user_uploads/videos/\(author)/\(key)")
+        let videoRef = Storage.storage().reference().child("user_uploads/videos/\(author)/\(key).mp4")
         
         // Download in memory with a maximum allowed size of 2MB (2 * 1024 * 1024 bytes)
         videoRef.getData(maxSize: 2 * 1024 * 1024) { (data, error) -> Void in
@@ -149,6 +157,22 @@ class UploadService {
                 completion(nil, false)
             })
         }
+    }
+    
+    static func retrievePostImageVideo(post:StoryItem, completion: @escaping ((_ post:StoryItem)->())) {
+        retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
+            if post.contentType == .image {
+                completion(post)
+            } else if post.contentType == .video {
+                if let _ = readVideoFromFile(withKey: post.key) {
+                    completion(post)
+                } else {
+                    retrieveVideo(byAuthor: post.authorId, withKey: post.key, completion: { data in
+                        completion(post)
+                    })
+                }
+            }
+        })
     }
 
     static func sendImage(upload:Upload, completion:(()->())) {
@@ -176,7 +200,7 @@ class UploadService {
             
             // Upload file and metadata to the object
             let storageRef = Storage.storage().reference()
-            let uploadTask = storageRef.child("user_uploads/images/\(uid)/\(postKey)").putData(data, metadata: metadata) { metadata, error in
+            let uploadTask = storageRef.child("user_uploads/images/\(uid)/\(postKey).jpg").putData(data, metadata: metadata) { metadata, error in
                 
                 if (error != nil) {
                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -279,9 +303,9 @@ class UploadService {
                 completion(true)
                 
                 let stillMetaData = StorageMetadata()
-                stillMetaData.contentType = "image/jpg"
+                stillMetaData.contentType = "image"
                 let uid = mainStore.state.userState.uid
-                storageRef.child("user_uploads/images/\(uid)/\(postKey)").putData(data, metadata: stillMetaData) { metadata, error in
+                storageRef.child("user_uploads/images/\(uid)/\(postKey).jpg").putData(data, metadata: stillMetaData) { metadata, error in
                   
                     let thumbURL = metadata?.downloadURL()?.absoluteString
                     if (thumbURL == nil || error != nil) {
@@ -297,7 +321,7 @@ class UploadService {
                     metadata.contentType = contentTypeStr
                     
                     let storageRef = Storage.storage().reference()
-                    storageRef.child("user_uploads/videos/\(uid)/\(postKey)").putData(data as! Data, metadata: metadata) { metadata, error in
+                    storageRef.child("user_uploads/videos/\(uid)/\(postKey).mp4").putData(data as! Data, metadata: metadata) { metadata, error in
                         
                         if (error != nil) {
                             // HANDLE ERROR

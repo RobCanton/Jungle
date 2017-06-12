@@ -86,6 +86,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var sliderLabels:TGPCamelLabels!
     
+    var header:UIView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -93,23 +95,28 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         self.automaticallyAdjustsScrollViewInsets = true
         //navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
+        
         tabHeader = UINib(nibName: "PlacesTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PlacesTabHeader
         tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 88)
         
         tabHeader.refreshHandler = refreshData
         //tabHeader.sortHandler = showSortingOptions
         
-        self.view.addSubview(tabHeader)
+        //self.view.addSubview(tabHeader)
         
         let titles = ["Nearby", "Popular", "Following"]
-        let frame = CGRect(x: 0, y: 44.0, width: view.frame.width, height: 44)
+        let frame = CGRect(x: 0, y: 44.0, width: tabHeader.frame.width, height: 44)
         
-        control = TwicketSegmentedControl(frame: frame)
+        
+        
+        header = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 88))
+        
+        control = TwicketSegmentedControl(frame: CGRect(x: 0, y: 44, width: header.frame.width, height: 44))
         control.setSegmentItems(titles)
         control.delegate = self
         control.sliderBackgroundColor = accentColor
-        
-        view.addSubview(control)
+        header.addSubview(control)
+        view.addSubview(header)
         
         var distanceLabels = [String]()
         for distance in distances {
@@ -291,11 +298,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             break
         case .Recent:
             let story = state.followingStories[indexPath.row]
-            if story.state == .contentLoaded {
+            if story.state == .itemInfoLoaded {
                 self.selectedIndexPath = indexPath
                 globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
-                story.downloadStory()
+                story.downloadItems()
             }
             break
         }

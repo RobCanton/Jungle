@@ -281,19 +281,10 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                 stories = topStories
             }
             
-            if story.state == .contentLoaded {
-                //globalMainInterfaceProtocol?.presentUserStory(stories: stories, destinationIndexPath: destinationPath, initialIndexPath: indexPath, hasMyStory: true)
-            } else {
-                story.downloadStory()
-            }
             break
         case collectionViewPeople:
             let story = bottomStories[indexPath.row]
-            if story.state == .contentLoaded {
-                //globalMainInterfaceProtocol?.presentPublicUserStory(stories: bottomStories, destinationIndexPath: destinationPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadStory()
-            }
+            
             break
         default:
             break

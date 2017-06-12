@@ -269,6 +269,18 @@ extension PlaceViewController: View2ViewTransitionPresenting {
         if completed {
         }
     }
+    
+    func cameraButtonView() -> UIView {
+        return UIView()
+    }
+    
+    func topView() -> UIView {
+        return UIView()
+    }
+    
+    func bottomView() -> UIView {
+        return UIView()
+    }
 }
 
 

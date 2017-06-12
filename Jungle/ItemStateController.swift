@@ -11,6 +11,9 @@ import UIKit
 import Firebase
 
 protocol ItemStateProtocol: class {
+    
+    func itemDownloading()
+    func itemDownloaded()
     func itemStateDidChange(likedStatus:Bool)
     func itemStateDidChange(numLikes:Int)
     func itemStateDidChange(comments:[Comment])
@@ -28,7 +31,30 @@ class ItemStateController {
     
     func setupItem(_ item:StoryItem) {
         self.item = item
+        if item.needsDownload() {
+            download()
+        } else {
+            itemDownloaded()
+        }
         
+        observeLikeStatus()
+        observeNumLikes()
+        observeComments()
+        
+        observeSubscribeStatus()
+    }
+    
+    func download() {
+        guard let item = self.item else { return }
+        delegate?.itemDownloading()
+        UploadService.retrievePostImageVideo(post: item) { post in
+            if post.key != item.key { return }
+            self.delegate?.itemDownloaded()
+        }
+    }
+    
+    func itemDownloaded() {
+        delegate?.itemDownloaded()
         observeLikeStatus()
         observeNumLikes()
         observeComments()
@@ -36,6 +62,7 @@ class ItemStateController {
     }
     
     func removeAllObservers() {
+        item = nil
         likedRef?.removeAllObservers()
         numLikesRef?.removeAllObservers()
         commentsRef?.removeAllObservers()

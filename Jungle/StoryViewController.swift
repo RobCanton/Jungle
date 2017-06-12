@@ -13,7 +13,7 @@ import Firebase
 import NVActivityIndicatorView
 
 
-public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate {
+public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate, ItemStateProtocol {
 
     private(set) var viewIndex = 0
     var returnIndex:Int?
@@ -28,17 +28,49 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     var timer:Timer?
     
     var totalTime:Double = 0.0
-    
+    var subscribedToPost = false
     var shouldAutoPause = true
     
     var flagLabel:UILabel?
+    
+    var itemStateController:ItemStateController!
     
     func addFlagLabel() {
        
     }
     
-    deinit {
-        print("Deinit >> StoryViewController")
+    deinit { print("Deinit >> StoryViewController") }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
+        contentView.addSubview(content)
+        contentView.addSubview(videoContent)
+        contentView.addSubview(gradientView)
+        contentView.addSubview(prevView)
+        contentView.addSubview(headerView)
+        
+        /* Info view */
+        infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: 0)
+        contentView.addSubview(infoView)
+        
+        contentView.addSubview(commentBar)
+        
+        /* Comments view */
+        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
+        contentView.addSubview(commentsView)
+        
+        videoContent.isHidden = true
+        
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.white, padding: 1.0)
+        activityView.center = contentView.center
+        contentView.addSubview(activityView)
+        
+        /* Item State Controller */
+        itemStateController = ItemStateController()
+        
     }
     
     func showAuthor() {
@@ -90,28 +122,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.content.image = nil
         self.destroyVideoPlayer()
         self.headerView.clean()
-        self.footerView.clean()
     }
     
     func stateChange(_ state:UserStoryState) {
         switch state {
         case .notLoaded:
             story.downloadItems()
-            animateIndicator()
             break
         case .loadingItemInfo:
-            animateIndicator()
             break
         case .itemInfoLoaded:
-            animateIndicator()
-            story.downloadStory()
-            break
-        case .loadingContent:
-            animateIndicator()
-            break
-        case .contentLoaded:
-            stopIndicator()
-            contentLoaded()
+            itemsLoaded()
             break
         }
     }
@@ -121,7 +142,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if !animateInitiated {
             animateInitiated = true
             DispatchQueue.main.async {
-                if self.story.state != .contentLoaded {
+                if self.item!.needsDownload() {
                     self.activityView.startAnimating()
                 }
             }
@@ -138,7 +159,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     
-    func contentLoaded() {
+    func itemsLoaded() {
         for item in story.items! {
 
             totalTime += item.length
@@ -152,6 +173,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func setupItem() {
         
+        print("setupItem")
+        
         killTimer()
         pauseVideo()
         self.content.image = nil
@@ -163,73 +186,122 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         let item = items[viewIndex]
         self.item = item
 
-        if item.contentType == .image {
-            prepareImageContent(item: item)
-        } else if item.contentType == .video {
-            prepareVideoContent(item: item)
-        }
+        content.image = UploadService.readImageFromFile(withKey: item.key)
+        videoContent.isHidden = true
         
-        self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
+        itemStateController.removeAllObservers()
+        itemStateController.delegate = self
+        itemStateController.setupItem(item)
         
         self.headerView.setupLocation(locationKey: item.locationKey)
+        
+        setOverlays()
+        
+        let nextIndex = viewIndex + 1
+        if nextIndex >= items.count { return }
+        let nextItem = items[nextIndex]
+        UploadService.retrievePostImageVideo(post: nextItem) { _ in }
 
+    }
+    
+    func setOverlays() {
+        guard let item = item else { return }
+        
+        commentBar.setup(item.authorId == mainStore.state.userState.uid)
+        
+        self.headerView.setup(item)
+        self.headerView.delegate = self
+        
+        let width = self.frame.width - (10 + 8 + 8 + 32)
+        var size:CGFloat = 0.0
+        
+        if let caption = item.caption, caption != "" {
+            size =  UILabel.size(withText: caption, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular)).height + 34
+            infoView.isHidden = false
+            commentsView.hasCaption = true
+        } else {
+            infoView.isHidden = true
+            commentsView.hasCaption = false
+        }
+        
+        infoView.frame = CGRect(x: 0, y: commentBar.frame.origin.y - size, width: frame.width, height: size)
+        commentsView.frame = CGRect(x: 0, y: getCommentsViewOriginY(), width: commentsView.frame.width, height: commentsView.frame.height)
+        //commentsView.delegate = self
+        
+        self.infoView.setInfo(item)
+        //self.infoView.delegate = self
+        
+        commentsView.setTableComments(comments: item.comments, animated: false)
+        //commentBar.textField.delegate = self
+        //commentBar.delegate = self
         
         UploadService.addView(post: item)
-        footerView.setup(item)
+        
     }
     
-    func prepareImageContent(item:StoryItem) {
+    func itemStateDidChange(likedStatus: Bool) {
+        self.commentBar.setLikedStatus(likedStatus, animated: false)
+    }
+    
+    func itemStateDidChange(numLikes: Int) {
+        self.headerView.setNumLikes(numLikes)
+    }
+    
+    func itemStateDidChange(comments: [Comment]) {
+        self.headerView.setNumComments(comments.count)
+        self.commentsView.setTableComments(comments: comments, animated: true)
+    }
+    
+    func itemStateDidChange(subscribed: Bool) {
+        self.subscribedToPost = subscribed
         
+    }
+    
+    func itemDownloading() {
+        print("Item Downloading...")
+        animateIndicator()
+    }
+    
+    func itemDownloaded() {
+        print("Item Downloaded!")
+        guard let item = item else { return }
         if let image = UploadService.readImageFromFile(withKey: item.key) {
-            content.image = image
-            self.playerLayer?.player?.replaceCurrentItem(with: nil)
-            self.setForPlay()
-        } else {
-            story.downloadStory()
-        }
-    }
-    
-    var numCommentsRef: DatabaseReference?
-    
-    func prepareVideoContent(item:StoryItem) {
-        /* CURRENTLY ASSUMING THAT IMAGE IS LOAD */
-        if let image = UploadService.readImageFromFile(withKey: item.key)  {
-            content.image = image
             
+            if item.contentType == .image {
+                stopIndicator()
+            }
+            self.content.image = image
         } else {
-            return story.downloadStory()
-        }
-        createVideoPlayer()
-        if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
-
-            let asset = AVAsset(url: videoURL)
-            asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
-                DispatchQueue.main.async {
-                    let item = AVPlayerItem(asset: asset)
-                    self.playerLayer?.player?.replaceCurrentItem(with: item)
-                    self.setForPlay()
-                }
-            })
-        } else {
-            story.downloadStory()
-        }
-    }
-    
-    func setForPlay() {
-        if story.state != .contentLoaded {
-            return
+            itemStateController.download()
         }
         
-        guard let item = self.item else {
-            return }
+        if item.contentType == .video {
+            
+            if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
+                stopIndicator()
+                createVideoPlayer()
+                let asset = AVAsset(url: videoURL)
+                asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
+                    DispatchQueue.main.async {
+                        let item = AVPlayerItem(asset: asset)
+                        self.playerLayer?.player?.replaceCurrentItem(with: item)
+                        self.setForPlay()
+                    }
+                })
+            } else {
+                itemStateController.download()
+            }
+        }
+    }
+
+    func setForPlay() {
+        
+        guard let item = self.item else { return }
         
         paused = false
         
         var itemLength = item.length
-        if item.contentType == .image {
-            videoContent.isHidden = true
-            
-        } else if item.contentType == .video {
+        if item.contentType == .video {
             videoContent.isHidden = false
             playVideo()
             
@@ -237,7 +309,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
                 itemLength -= currentItem.seconds
             }
         }
-        headerView.startTimer(length: itemLength, index: viewIndex, total:story!.getPosts().count)
+        
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
         if shouldAutoPause {
@@ -334,7 +406,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if paused { return }
         paused = true
         pauseVideo()
-        headerView.pauseTimer()
         guard let timer = self.timer else { return }
         remainingTime = timer.fireDate.timeIntervalSinceNow
         timer.invalidate()
@@ -357,7 +428,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             playVideo()
         }
         
-        headerView.resumeTimer()
     }
     
     
@@ -372,10 +442,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             content.isHidden = false
             videoContent.isHidden = true
         } else {
-            //story.delegate = nil
-            /*killTimer()
-            resetVideo()
-            */
             pause()
         }
     }
@@ -396,54 +462,29 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         }
     }
 
+    func getCommentsViewOriginY() -> CGFloat {
+        return commentBar.frame.origin.y - infoView.frame.height - commentsView.frame.height
+    }
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-
-        contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
-        contentView.addSubview(content)
-        contentView.addSubview(videoContent)
-        contentView.addSubview(prevView)
-        contentView.addSubview(headerView)
-        contentView.addSubview(footerView)
-        contentView.addSubview(captionView)
-        
-        /* Activity view */
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.black, padding: 1.0)
-        activityView.center = contentView.center
-        contentView.addSubview(activityView)
-        
-    }
-    
     func fadeOutDetails() {
         UIView.animate(withDuration: 0.15, animations: {
-            self.footerView.alpha = 0
             self.headerView.alpha = 0
-            self.captionView.textColor = UIColor(white: 1.0, alpha: 0)
-            self.captionView.alpha = 0.65
         })
     }
     
     func fadeInDetails() {
         UIView.animate(withDuration: 0.15, animations: {
-            self.footerView.alpha = 1
             self.headerView.alpha = 1
-            self.captionView.textColor = UIColor(white: 1.0, alpha: 1)
-            self.captionView.alpha = 1
         })
     }
     
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
-        self.footerView.alpha = multiple
         self.headerView.alpha = multiple
-        self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
-        self.captionView.alpha = 0.5 + 0.5 * alpha
     }
     
     public lazy var content: UIImageView = {
@@ -490,34 +531,41 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         return view
     }()
     
-    lazy var footerView: PostFooterView = {
-        let margin:CGFloat = 0.0
-        var view = UINib(nibName: "PostFooterView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostFooterView
+    lazy var commentsView: CommentsOverlayTableView = {
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: margin, y: height - view.frame.height, width: width, height: view.frame.height)
+        var view = UINib(nibName: "CommentsOverlayTableView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsOverlayTableView
+        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.36 )
+        view.setup()
         return view
     }()
     
-    fileprivate lazy var captionView: UITextView = {
-        let definiteBounds = UIScreen.main.bounds
-        let captionView = UITextView(frame: CGRect(x: 0,y: 0,width: definiteBounds.width,height: 44))
-        captionView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
-        captionView.textColor = UIColor.white
-        captionView.textAlignment = .center
-        captionView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
-        captionView.isScrollEnabled = false
-        captionView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
-        captionView.isUserInteractionEnabled = false
-        captionView.isHidden = true
-        captionView.text = "test"
-        captionView.fitHeightToContent()
-        captionView.text = ""
-        captionView.center = CGPoint(x: definiteBounds.width / 2, y: definiteBounds.height / 2)
-        return captionView
+    lazy var infoView: StoryInfoView = {
+        var view: StoryInfoView = UINib(nibName: "StoryInfoView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! StoryInfoView
+        return view
     }()
     
+    lazy var commentBar: CommentItemBar = {
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        var view: CommentItemBar = UINib(nibName: "CommentItemBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentItemBar
+        view.frame = CGRect(x: 0, y: height - 50.0, width: width, height: 50.0)
+        return view
+    }()
     
+    public lazy var gradientView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.45, width: self.bounds.width, height: self.bounds.height * 0.55))
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 0, y: 1)
+        let dark = UIColor(white: 0.0, alpha: 0.35)
+        gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
+        view.layer.insertSublayer(gradient, at: 0)
+        view.isUserInteractionEnabled = false
+        return view
+    }()
+
 }
 
 class TouchScrollView: UIScrollView, UIGestureRecognizerDelegate {

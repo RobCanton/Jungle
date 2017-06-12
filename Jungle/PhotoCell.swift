@@ -45,19 +45,15 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     
     func stateChange(_ state:UserStoryState) {
         guard let story = self.story else { return }
-       
+       print("STATE: \(state)")
         switch state {
         case .notLoaded:
-            story.downloadItems()
+            self.timeLabel.text = story.date.timeStringSinceNow()
             break
         case .loadingItemInfo:
-            break
-        case .itemInfoLoaded:
-            break
-        case .loadingContent:
             timeLabel.text = "Loading..."
             break
-        case .contentLoaded:
+        case .itemInfoLoaded:
             self.timeLabel.text = story.date.timeStringSinceNow()
             break
         }

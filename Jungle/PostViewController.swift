@@ -3,12 +3,11 @@ import AVFoundation
 import Firebase
 import NVActivityIndicatorView
 
-public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate, CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
+public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostFooterProtocol, ItemDelegate, ItemStateProtocol, CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
     
     var playerLayer:AVPlayerLayer?
     weak var delegate:PopupProtocol?
     var shouldAutoPause = true
-    var animateInitiated = false
     var shouldAnimate = false
     var paused = false
     
@@ -17,44 +16,166 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     var keyboardUp = false
     var subscribedToPost = false
     
-    var likedRef:DatabaseReference?
-    var numLikesRef:DatabaseReference?
-    var commentsRef:DatabaseReference?
-    var subscribedRef:DatabaseReference?
+    var itemStateController:ItemStateController!
 
     weak private(set) var storyItem:StoryItem!
     private(set) var cellIndex:Int?
     
+    deinit { print("Deinit >> PostViewController") }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.backgroundColor = UIColor.black
+        contentView.addSubview(content)
+        contentView.addSubview(videoContent)
+        contentView.addSubview(gradientView)
+        contentView.addSubview(headerView)
+        
+        /* Info view */
+        infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: 0)
+        contentView.addSubview(infoView)
+        
+        contentView.addSubview(commentBar)
+        
+        /* Comments view */
+        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
+        contentView.addSubview(commentsView)
+        
+        videoContent.isHidden = true
+        
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballSpinFadeLoader, color: UIColor.white, padding: 1.0)
+        activityView.center = contentView.center
+        contentView.addSubview(activityView)
+        
+        /* Item State Controller */
+        itemStateController = ItemStateController()
+    }
+    
     func preparePost(_ post:StoryItem, cellIndex: Int) {
-        self.storyItem = post
+        storyItem = post
         self.cellIndex = cellIndex
-        self.content.image = nil
-        self.destroyVideoPlayer()
-        self.headerView.clean()
-        self.footerView.clean()
+        content.image = nil
+        destroyVideoPlayer()
+        headerView.clean()
+        videoContent.isHidden = true
         storyItem.delegate = self
         
-        if let image = UploadService.readImageFromFile(withKey: storyItem.key) {
+        content.image = UploadService.readImageFromFile(withKey: post.key)
 
-            if storyItem.contentType == .image {
-                stopIndicator()
-            }
-            self.content.image = image
-        }
+        itemStateController.removeAllObservers()
+        itemStateController.delegate = self
+        itemStateController.setupItem(post)
         
-        shouldAutoPause = true
-        if storyItem.needsDownload() {
-            storyItem.download()
-        } else {
-            setItem()
-        }
+        setOverlays()
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
-    deinit {
-        print("Deinit >> PostViewController")
+    func setOverlays() {
+        guard let item = storyItem else { return }
+        
+        commentBar.setup(item.authorId == mainStore.state.userState.uid)
+        
+        self.headerView.setup(item)
+        self.headerView.delegate = self
+        
+        let width = self.frame.width - (10 + 8 + 8 + 32)
+        var size:CGFloat = 0.0
+        
+        if let caption = item.caption, caption != "" {
+            size =  UILabel.size(withText: caption, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular)).height + 34
+            infoView.isHidden = false
+            commentsView.hasCaption = true
+        } else {
+            infoView.isHidden = true
+            commentsView.hasCaption = false
+        }
+        
+        infoView.frame = CGRect(x: 0, y: commentBar.frame.origin.y - size, width: frame.width, height: size)
+        commentsView.frame = CGRect(x: 0, y: getCommentsViewOriginY(), width: commentsView.frame.width, height: commentsView.frame.height)
+        commentsView.delegate = self
+        
+        self.infoView.setInfo(item)
+        self.infoView.delegate = self
+        
+        commentsView.setTableComments(comments: item.comments, animated: false)
+        commentBar.textField.delegate = self
+        commentBar.delegate = self
+        
+        UploadService.addView(post: item)
+        
+    }
+    
+    func itemStateDidChange(likedStatus: Bool) {
+        self.commentBar.setLikedStatus(likedStatus, animated: false)
+    }
+    
+    func itemStateDidChange(numLikes: Int) {
+        self.headerView.setNumLikes(numLikes)
+    }
+    
+    func itemStateDidChange(comments: [Comment]) {
+        self.headerView.setNumComments(comments.count)
+        self.commentsView.setTableComments(comments: comments, animated: true)
+    }
+    
+    func itemStateDidChange(subscribed: Bool) {
+        self.subscribedToPost = subscribed
+        
+    }
+    
+    func itemDownloading() {
+        print("Item downloading")
+        animateIndicator()
+    }
+    
+    func itemDownloaded() {
+        print("Item downloaded")
+        guard let item = storyItem else { return }
+        if let image = UploadService.readImageFromFile(withKey: item.key) {
+            
+            if item.contentType == .image {
+                stopIndicator()
+            }
+            self.content.image = image
+        } else {
+            itemStateController.download()
+        }
+        
+        if item.contentType == .video {
+            
+            if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
+                stopIndicator()
+                createVideoPlayer()
+                let asset = AVAsset(url: videoURL)
+                asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
+                    DispatchQueue.main.async {
+                        let item = AVPlayerItem(asset: asset)
+                        self.playerLayer?.player?.replaceCurrentItem(with: item)
+                        self.setForPlay()
+                    }
+                })
+            } else {
+                itemStateController.download()
+            }
+        }
+    }
+    func setForPlay(){
+        
+        paused = false
+        
+        if storyItem.contentType == .video {
+            videoContent.isHidden = false
+            playVideo()
+        }
+        
+        if shouldAutoPause {
+            shouldAutoPause = false
+            pause()
+        }
+        
     }
     
     func sendComment(_ comment: String) {
@@ -69,7 +190,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
                 if success {
                     item.editCaption(caption: comment)
                 }
-                self.setItem()
+                self.setOverlays()
             }
         } else {
             UploadService.addComment(post: item, comment: comment) { success in
@@ -90,7 +211,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         }
     }
     
-    func more() {
+    func showMore() {
         delegate?.showMore()
     }
     
@@ -102,7 +223,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         commentBar.sendButton.setTitle("Set", for: .normal)
         commentBar.textField.becomeFirstResponder()
         commentBar.textField.text = item.caption
-        //delegate?.editCaption()
     }
     
     func showAuthor() {
@@ -140,218 +260,14 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
 
     func animateIndicator() {
-        if !animateInitiated {
-            animateInitiated = true
-            DispatchQueue.main.async {
-                if self.storyItem.needsDownload() {
-                    self.activityView.startAnimating()
-                }
-            }
-        }
+        self.content.alpha = 0.6
+        
+        self.activityView.startAnimating()
     }
     
     func stopIndicator() {
-        if activityView.isAnimating {
-            DispatchQueue.main.async {
-                self.activityView.stopAnimating()
-                self.animateInitiated = false
-            }
-        }
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        contentView.addSubview(content)
-        contentView.addSubview(videoContent)
-        contentView.addSubview(gradientView)
-        contentView.addSubview(headerView)
-        contentView.addSubview(footerView)
-        contentView.addSubview(captionView)
-        
-        /* Info view */
-        infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: infoView.frame.height)
-        contentView.addSubview(infoView)
-        
-        contentView.addSubview(commentBar)
-        
-        /* Comments view */
-        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
-        contentView.addSubview(commentsView)
-        
-        headerView.snapTimer.isHidden = true
-        headerView.snapTimer.removeFromSuperview()
-
-        videoContent.isHidden = true
-        
-        /* Activity view */
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.black, padding: 1.0)
-        activityView.center = contentView.center
-        contentView.addSubview(activityView)
-    }
-    
-    func itemDownloaded() {
-        setItem()
-    }
-    
-    func setItem() {
-        guard let item = storyItem else { return }
-        
-        self.content.image = nil
-        commentBar.setup(item.authorId == mainStore.state.userState.uid)
-        
-        if let image = UploadService.readImageFromFile(withKey: item.key) {
-            
-            print("IMAGE SET")
-            if item.contentType == .image {
-                stopIndicator()
-            }
-            self.content.image = image
-        } else {
-            animateIndicator()
-            storyItem.download()
-        }
-        
-        if item.contentType == .video {
-            
-            if let videoURL = UploadService.readVideoFromFile(withKey: item.key) {
-                stopIndicator()
-                createVideoPlayer()
-                let asset = AVAsset(url: videoURL)
-                asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
-                    DispatchQueue.main.async {
-                        let item = AVPlayerItem(asset: asset)
-                        self.playerLayer?.player?.replaceCurrentItem(with: item)
-                        self.setForPlay()
-                    }
-                })
-            } else {
-                animateIndicator()
-                storyItem.download()
-            }
-        }
-
-        self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
-        self.headerView.setNumLikes(item.numLikes)
-        self.headerView.setNumComments(item.numViews)
-        
-        let width = self.frame.width - (10 + 8 + 8 + 32)
-        var size:CGFloat = 0.0
-        
-        if let caption = item.caption, caption != "" {
-            size =  UILabel.size(withText: caption, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular)).height + 34
-            infoView.isHidden = false
-            commentsView.hasCaption = true
-        } else {
-            infoView.isHidden = true
-            commentsView.hasCaption = false
-        }
-        
-        infoView.frame = CGRect(x: 0, y: commentBar.frame.origin.y - size, width: frame.width, height: size)
-        commentsView.frame = CGRect(x: 0, y: getCommentsViewOriginY(), width: commentsView.frame.width, height: commentsView.frame.height)
-        commentsView.delegate = self
-        self.infoView.setInfo(withUid: item.authorId, item: item, delegate: self)
-        
-        
-        self.headerView.setupLocation(locationKey: item.locationKey)
-        
-        UploadService.addView(post: item)
-        footerView.setup(item)
-        footerView.delegate = self
-        
-        let uid = mainStore.state.userState.uid
-        likedRef?.removeAllObservers()
-        likedRef = Database.database().reference().child("uploads/likes/\(item.key)/\(uid)")
-        likedRef!.observe(.value, with: { snapshot in
-
-            self.commentBar.setLikedStatus(snapshot.exists(), animated: false)
-        })
-        
-        numLikesRef?.removeAllObservers()
-        numLikesRef = Database.database().reference().child("uploads/meta/\(item.key)/likes")
-        numLikesRef!.observe(.value, with: { snapshot in
-            var count = 0
-            if let _count = snapshot.value as? Int {
-                count = _count
-            }
-            self.headerView.setNumLikes(count)
-            item.numLikes = count
-            
-        })
-        
-        commentsView.setTableComments(comments: item.comments, animated: false)
-        commentsRef?.removeAllObservers()
-        commentsRef = UserService.ref.child("uploads/comments/\(item.key)")
-        
-        if let lastItem = item.comments.last {
-            let lastKey = lastItem.key
-            let ts = lastItem.date.timeIntervalSince1970 * 1000
-            commentsRef?.queryOrdered(byChild: "timestamp").queryStarting(atValue: ts).observe(.childAdded, with: { snapshot in
-                
-                let dict = snapshot.value as! [String:Any]
-                let key = snapshot.key
-                if key != lastKey {
-                    let author = dict["author"] as! String
-                    let text = dict["text"] as! String
-                    let timestamp = dict["timestamp"] as! Double
-                    
-                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                    item.addComment(comment)
-                    self.headerView.setNumComments(item.numComments)
-                    self.commentsView.setTableComments(comments: item.comments, animated: true)
-                }
-            })
-        } else {
-            commentsRef?.observe(.childAdded, with: { snapshot in
-                let dict = snapshot.value as! [String:Any]
-                let key = snapshot.key
-                let author = dict["author"] as! String
-                let text = dict["text"] as! String
-                let timestamp = dict["timestamp"] as! Double
-                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                item.addComment(comment)
-                self.headerView.setNumComments(item.numComments)
-                self.commentsView.setTableComments(comments: item.comments, animated: true)
-            })
-        }
-        commentBar.textField.delegate = self
-        commentBar.delegate = self
-        
-        subscribedToPost = false
-        subscribedRef?.removeAllObservers()
-        subscribedRef = UserService.ref.child("uploads/subscribers/\(item.key)/\(uid)")
-        subscribedRef?.observe(.value, with: { snapshot in
-            self.subscribedToPost = snapshot.exists()
-        })
-    }
-    
-    func setForPlay(){
-        
-        if storyItem.needsDownload() {
-            return
-        }
-        
-        paused = false
-        
-        if storyItem.contentType == .image {
-            videoContent.isHidden = true
-            
-        } else if storyItem.contentType == .video {
-            videoContent.isHidden = false
-            playVideo()
-        }
-        
-        if shouldAutoPause {
-            shouldAutoPause = false
-            pause()
-        }
-        
-    }
-    
-    func loopVideo() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil, queue: nil) { notification in
-            self.playerLayer?.player?.seek(to: kCMTimeZero)
-            self.playerLayer?.player?.play()
-        }
+        self.content.alpha = 1.0
+        self.activityView.stopAnimating()
     }
     
     
@@ -367,15 +283,30 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func pause() {
+        print("Pause")
+        itemStateController.delegate = nil
         paused = true
         pauseVideo()
     }
     
     func resume() {
+        print("Resume")
+        activityView.alpha = 1.0
         paused = false
         guard let item = self.storyItem else { return }
-        if item.contentType == .video {
-            playVideo()
+        
+        itemStateController.delegate = self
+        if item.needsDownload() {
+            print("Download")
+            itemStateController.download()
+        } else if item.contentType == .video {
+            print("Resumed!")
+            if playerLayer == nil {
+                shouldAutoPause = false
+                itemDownloaded()
+            } else {
+                playVideo()
+            }
         }
     }
     
@@ -401,8 +332,12 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         content.image = nil
         destroyVideoPlayer()
         delegate = nil
-        animateInitiated = false
         storyItem = nil
+        
+        headerView.delegate = nil
+        infoView.delegate = nil
+        commentBar.delegate = nil
+        itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
     }
     
@@ -420,21 +355,17 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func fadeInDetails() {
         UIView.animate(withDuration: 0.15, animations: {
-            self.footerView.alpha = 1
             self.headerView.alpha = 1
         })
     }
     
     func setDetailFade(_ alpha:CGFloat) {
         let multiple = alpha * alpha
-        self.footerView.alpha = multiple
         self.headerView.alpha = multiple
-        self.captionView.textColor = UIColor(white: 1.0, alpha: 0.1 + 0.9 * alpha)
-        self.captionView.alpha = 0.5 + 0.5 * alpha
     }
 
     func prepareForTransition(isPresenting:Bool) {
-        
+        activityView.alpha = 0.0
         if isPresenting {
             content.isHidden = false
             videoContent.isHidden = true
@@ -519,8 +450,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    
     public lazy var content: UIImageView = {
         let margin: CGFloat = 2.0
         let width: CGFloat = (UIScreen.main.bounds.size.width)
@@ -553,33 +482,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         return view
     }()
     
-    lazy var footerView: PostFooterView = {
-        let margin:CGFloat = 0.0
-        var view = UINib(nibName: "PostFooterView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostFooterView
-        let width: CGFloat = (UIScreen.main.bounds.size.width)
-        let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: margin, y: height - view.frame.height, width: width, height: view.frame.height)
-        return view
-    }()
-    
-    fileprivate lazy var captionView: UITextView = {
-        let definiteBounds = UIScreen.main.bounds
-        let captionView = UITextView(frame: CGRect(x: 0,y: 0,width: definiteBounds.width,height: 44))
-        captionView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
-        captionView.textColor = UIColor.white
-        captionView.textAlignment = .center
-        captionView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
-        captionView.isScrollEnabled = false
-        captionView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
-        captionView.isUserInteractionEnabled = false
-        captionView.isHidden = true
-        captionView.text = "test"
-        captionView.fitHeightToContent()
-        captionView.text = ""
-        captionView.center = CGPoint(x: definiteBounds.width / 2, y: definiteBounds.height / 2)
-        return captionView
-    }()
-    
     lazy var commentsView: CommentsOverlayTableView = {
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
@@ -590,8 +492,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }()
     
     lazy var infoView: StoryInfoView = {
-        let width: CGFloat = (UIScreen.main.bounds.size.width)
-        let height: CGFloat = (UIScreen.main.bounds.size.height)
         var view: StoryInfoView = UINib(nibName: "StoryInfoView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! StoryInfoView
         return view
     }()

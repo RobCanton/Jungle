@@ -463,6 +463,19 @@ extension ChatViewController {
 
 extension ChatViewController: View2ViewTransitionPresenting {
     
+    func cameraButtonView() -> UIView {
+        return UIView()
+    }
+    
+    func topView() -> UIView {
+        return UIView()
+    }
+    
+    func bottomView() -> UIView {
+        return UIView()
+    }
+
+    
     func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
         print("initialFrame")
         guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {

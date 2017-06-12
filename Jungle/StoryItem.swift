@@ -175,9 +175,7 @@ class StoryItem: NSObject, NSCoding {
         }
         
         if contentType == .video {
-            if let _ = UploadService.readVideoFromFile(withKey: key) {
-                return false
-            }
+            return !UploadService.videoFileExists(withKey: key)
         }  
         return true
     }
