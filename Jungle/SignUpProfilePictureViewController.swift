@@ -81,36 +81,59 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
             if error == nil && user != nil {
                 print("USER: \(user.debugDescription)")
                 
-                UserService.uploadProfileImage(image: image, completion: { url in
-                    
-                    if url != nil, let uid = user?.uid {
-                        let userRef = Database.database().reference().child("users/profile/\(uid)")
-                        var userProfile = [
-                            "firstname": firstname,
-                            "username": username,
-                            "imageURL": url,
-                            "bio":""
-                        ]
-                        if let lastname = newUser.lastname {
-                            userProfile["lastname"] = lastname
-                        }
-                        
-                        userRef.setValue(userProfile, withCompletionBlock: { error, ref in
-                            
-                            if error != nil {
-                    
-                                print("Error: \(error!.localizedDescription)")
-                            }
-                            
-                            self.performSegue(withIdentifier: "unwindToLoginScreen", sender: self)
-                        })
-                        
-                    } else {
+                
+                let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+                changeRequest?.displayName = username
+                changeRequest?.commitChanges { (error) in
+                    if error != nil {
                         print("Error: \(error!.localizedDescription)")
                         self.reset()
-                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error sending verification email.")
                     }
-                })
+                    
+                    
+                    UserService.uploadProfileImage(image: image) { url in
+                        
+                        if url != nil, let uid = user?.uid {
+                            let userRef = Database.database().reference().child("users/profile/\(uid)")
+                            var userProfile = [
+                                "firstname": firstname,
+                                "username": username,
+                                "imageURL": url,
+                                "bio":""
+                            ]
+                            if let lastname = newUser.lastname {
+                                userProfile["lastname"] = lastname
+                            }
+                            
+                            userRef.setValue(userProfile, withCompletionBlock: { error, ref in
+                                
+                                Auth.auth().currentUser?.sendEmailVerification { error in
+                                    if error != nil {
+                                        print("Error: \(error!.localizedDescription)")
+                                        self.reset()
+                                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error sending verification email.")
+                                    }
+                                    self.performSegue(withIdentifier: "unwindToLoginScreen", sender: self)
+                                }
+                                if error != nil {
+                                    print("Error: \(error!.localizedDescription)")
+                                    self.reset()
+                                    return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                                }
+                                
+                            })
+                            
+                        } else {
+                            print("Error: \(error!.localizedDescription)")
+                            self.reset()
+                            return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                        }
+                    }
+                    
+                }
+                
+                
             } else {
                 print("Error: \(error!.localizedDescription)")
                 return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")

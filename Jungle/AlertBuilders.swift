@@ -38,6 +38,7 @@ struct Alerts {
     
     static func showStatusFailAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
         
+        
         let alert = MessageView.viewFromNib(layout: .StatusLine)
         alert.backgroundView.backgroundColor = errorColor
         alert.bodyLabel?.textColor = UIColor.white
@@ -45,6 +46,51 @@ struct Alerts {
         
         var config = SwiftMessages.defaultConfig
         config.duration = SwiftMessages.Duration.seconds(seconds: 3.0)
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+        
+    }
+    
+    static func showNoInternetConnectionAlert(inWrapper wrapper: SwiftMessages?) {
+        
+        
+        let alert = MessageView.viewFromNib(layout: .StatusLine)
+        alert.backgroundView.backgroundColor = errorColor
+        alert.bodyLabel?.textColor = UIColor.white
+        alert.configureContent(body: "No Internet Connection.")
+        
+        var config = SwiftMessages.defaultConfig
+        config.duration = SwiftMessages.Duration.forever
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+        
+    }
+
+    
+    static func showStatusWarningAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
+        
+        
+        let alert = MessageView.viewFromNib(layout: .StatusLine)
+        alert.backgroundView.backgroundColor = UIColor(red: 1.0, green: 232/255, blue: 61/255, alpha: 1.0)
+        alert.bodyLabel?.textColor = UIColor.white
+        alert.configureContent(body: message)
+        
+        var config = SwiftMessages.defaultConfig
+        config.duration = SwiftMessages.Duration.seconds(seconds: 4.0)
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
         
         if wrapper != nil {

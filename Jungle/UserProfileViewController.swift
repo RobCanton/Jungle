@@ -14,6 +14,17 @@ import Firebase
 extension UIViewController {
     func addNavigationBarBackdrop() {
         if let navbar = navigationController?.navigationBar {
+            let backdropView = UIView(frame: CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0))
+            backdropView.backgroundColor = UIColor.white
+            self.view.insertSubview(backdropView, belowSubview: navbar)
+            
+            let bar = UIView(frame: CGRect(x: 0, y: navbar.frame.height + 20.0 - 1, width: navbar.frame.width, height: 1))
+            bar.backgroundColor = UIColor(white: 0.94, alpha: 1.0)
+            self.view.insertSubview(bar, belowSubview: navbar)
+        }
+    }
+    func addNavigationBarBlurBackdrop() {
+        if let navbar = navigationController?.navigationBar {
             let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
             blurView.frame = CGRect(x: 0, y: 0, width: navbar.frame.width, height: navbar.frame.height + 20.0)
             self.view.insertSubview(blurView, belowSubview: navbar)

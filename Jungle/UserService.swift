@@ -33,6 +33,28 @@ class UserService {
         
         try! Auth.auth().signOut()
     }
+    
+    static var isEmailVerified:Bool {
+        get {
+            if let user = Auth.auth().currentUser {
+                return user.isEmailVerified
+            } else {
+                return false
+            }
+        }
+    }
+    
+    static var email:String? {
+        get {
+            return Auth.auth().currentUser?.email
+        }
+    }
+    
+    static func sendVerificationEmail(completion:@escaping ((_ success:Bool)->())) {
+        Auth.auth().currentUser?.sendEmailVerification { error in
+            completion(error == nil )
+        }
+    }
 
 //    
     static func sendFCMToken() {

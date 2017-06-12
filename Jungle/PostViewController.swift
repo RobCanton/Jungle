@@ -232,7 +232,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
 
         self.headerView.setup(withUid: item.authorId, date: item.dateCreated, _delegate: self)
         self.headerView.setNumLikes(item.numLikes)
-        self.headerView.setNumComments(item.numComments)
+        self.headerView.setNumComments(item.numViews)
         
         let width = self.frame.width - (10 + 8 + 8 + 32)
         var size:CGFloat = 0.0
@@ -338,8 +338,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         } else if storyItem.contentType == .video {
             videoContent.isHidden = false
             playVideo()
-            //loopVideo()
-            //timer = Timer.scheduledTimer(timeInterval: storyItem.length, target: self, selector: #selector(setItem), userInfo: nil, repeats: false)
         }
         
         if shouldAutoPause {
@@ -420,11 +418,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         videoContent.isHidden = true
     }
     
-    
-    func tapped(gesture:UITapGestureRecognizer) {
-
-    }
-    
     func fadeInDetails() {
         UIView.animate(withDuration: 0.15, animations: {
             self.footerView.alpha = 1
@@ -449,9 +442,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             pause()
         }
     }
-
-    
-
     func keyboardWillAppear(notification: NSNotification){
         keyboardUp = true
         delegate?.keyboardStateChange(keyboardUp)
@@ -477,6 +467,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             self.commentBar.likeButton.alpha = 0.0
             self.commentBar.moreButton.alpha = 0.0
             self.commentBar.sendButton.alpha = 1.0
+            self.commentBar.activityIndicator.alpha = 1.0
             self.commentBar.backgroundView.alpha = 1.0
             self.headerView.alpha = 0.0
         })
@@ -512,6 +503,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             self.commentBar.likeButton.alpha = 1.0
             self.commentBar.moreButton.alpha = 1.0
             self.commentBar.sendButton.alpha = 0.0
+            self.commentBar.activityIndicator.alpha = 0.0
             self.commentBar.backgroundView.alpha = 0.0
             self.headerView.alpha = 1.0
         })

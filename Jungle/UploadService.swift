@@ -73,12 +73,18 @@ class UploadService {
         if let image = readImageFromFile(withKey: key) {
             completion(image, true)
         } else {
-            downloadImage(withUrl: url, completion: { image in
+            downloadImage(withUrl: url) { image in
                 if image != nil {
                     writeImageToFile(withKey: key, image: image!)
                 }
                 completion(image, false)
-            })
+            }
+        }
+    }
+    
+    static func retrieveImage(withCheck check:Int, key:String, url:URL, completion: @escaping (_ check:Int, _ image:UIImage?, _ fromFile:Bool)->()) {
+        retrieveImage(byKey: key, withUrl: url) { image, fromFile in
+            completion(check, image, fromFile)
         }
     }
     
@@ -512,6 +518,11 @@ class UploadService {
         if comment == "" { return }
         let ref = Database.database().reference()
         
+        if !UserService.isEmailVerified {
+            completion(false)
+            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
+        
         let uid = mainStore.state.userState.uid
         
         let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
@@ -524,10 +535,11 @@ class UploadService {
             "uploads/subscribers/\(post.key)/\(uid)": true
         ] as [String:Any]
         
-        print("FAMEIO")
+        
         ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
             
             if error != nil {
+                print("LIKE YUH!")
                 print("ERROR: \(error)")
                 completion(false)
                 return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
@@ -535,6 +547,7 @@ class UploadService {
                 completion(true)
             }
         })
+        
         
     }
     
@@ -576,6 +589,10 @@ class UploadService {
     }
     
     static func addLike(post:StoryItem) {
+        
+        if !UserService.isEmailVerified {
+            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
         
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid

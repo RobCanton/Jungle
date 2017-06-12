@@ -631,9 +631,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         nav.delegate = transitionController
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
-    
-
-    
 }
 
 extension MainViewController: CameraDelegate, UITextViewDelegate {
@@ -735,7 +732,6 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     }
     
     func recordButtonTapped() {
-        print("RECORD TAPPED: \(screenMode)")
         switch screenMode {
         case .Camera:
             cameraView.didPressTakePhoto()
@@ -753,6 +749,28 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     }
     
     func sendButtonTapped(sender: UIButton) {
+        
+        if !UserService.isEmailVerified {
+            let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
+            
+                UserService.sendVerificationEmail { success in
+                    if success {
+                        let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                        
+                        self.present(alert, animated: true, completion: nil)
+                    } else {
+                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+                    }
+                }
+                
+            }))
+            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
         
         cameraView.pauseVideo()
         

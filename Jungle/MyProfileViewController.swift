@@ -28,6 +28,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     var uid:String!
     var statusBarShouldHide = false
     var status:FollowingStatus = .None
+    var tabHeader:ProfileTabHeader!
     
     override var prefersStatusBarHidden: Bool
         {
@@ -47,7 +48,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         screenWidth = screenSize.width
         screenHeight = screenSize.height
         
-        let tabHeader = UINib(nibName: "ProfileTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! ProfileTabHeader
+        tabHeader = UINib(nibName: "ProfileTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! ProfileTabHeader
         tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 44)
         
         self.view.addSubview(tabHeader)
@@ -95,6 +96,8 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         mainStore.subscribe(self)
         
+        
+        tabHeader.settingsButton.tintColor = UserService.isEmailVerified ? UIColor(white: 0.42, alpha: 1.0) : errorColor
     }
     
     override func viewDidAppear(_ animated: Bool) {

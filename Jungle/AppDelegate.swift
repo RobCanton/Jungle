@@ -45,13 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        
         //checkInternetConnection()
         
         connection_timer?.invalidate() // just in case this button is tapped multiple times
         // start the timer
         connection_timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(checkInternetConnection), userInfo: nil, repeats: true)
-        
         
         GMSPlacesClient.provideAPIKey(GMSAPIKEY)
         GMSServices.provideAPIKey(GMSAPIKEY)
@@ -62,6 +60,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         remoteConfig?.configSettings = remoteConfigSettings!
         remoteConfig?.setDefaults(fromPlist: "RemoteConfigDefaults")
         fetchConfig()
+        
+        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+            print("User State change")
+        }
+        
         
         if #available(iOS 10, *) {
             UITabBarItem.appearance().badgeColor = UIColor(red: 1.0, green: 117/255, blue: 125/255, alpha: 1.0)
@@ -114,15 +117,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func checkInternetConnection() {
         if Reachability.isConnectedToNetwork(){
             if no_connection_alerted {
-                print("Internet Connection Available!")
                 no_connection_alerted = false
             }
             alertWrapper.hideAll()
         }else{
             if !no_connection_alerted {
-                print("Internet Connection not Available!")
                 no_connection_alerted = true
-                //Alerts.showNoInternetConnectionAlert(inWrapper: alertWrapper)
+                Alerts.showNoInternetConnectionAlert(inWrapper: alertWrapper)
             }
         }
     }
@@ -183,6 +184,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillEnterForeground(_ application: UIApplication) {
 
+        if !UserService.isEmailVerified {
+            Auth.auth().currentUser?.reload(completion: nil)
+        }
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
     }
     

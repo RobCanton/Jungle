@@ -486,7 +486,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
+        view.frame = CGRect(x: 0, y: 16, width: width, height: view.frame.height)
         return view
     }()
     

@@ -190,37 +190,36 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             self.secondLabel.isHidden = true
         }
         
-        UploadService.retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
+        self.gradient?.removeFromSuperlayer()
+        
+        
+        //self.gradient!.drawsAsynchronously = true
+        //self.colorView.layer.drawsAsynchronously = true
+
+        
+        UploadService.retrieveImage(withCheck: self.check, key: post.key, url: post.downloadUrl) { _check, image, fromFile in
+
+                if self.check != _check { return }
+                
+                self.imageView.image = image
             
-            
-            self.imageView.image = image
-            if !fromFile {
-                self.imageView.alpha = 0.0
-                UIView.animate(withDuration: 0.25, animations: {
-                    self.imageView.alpha = 1.0
-                })
-            } else {
-                self.imageView.alpha = 1.0
-            }
-            
-            self.gradient?.removeFromSuperlayer()
-            if let color = post.getColor() {
-                self.gradient = CAGradientLayer()
-                self.gradient!.frame = self.colorView.bounds
-                self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.75).cgColor]
-                self.gradient!.locations = [0.0, 1.0]
-                self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-                self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-                self.gradient!.shouldRasterize = false
-                self.colorView.layer.shouldRasterize = false
-                self.gradient!.drawsAsynchronously = true
-                self.colorView.layer.drawsAsynchronously = true
-                self.colorView.layer.insertSublayer(self.gradient!, at: 0)
-                self.colorView.alpha = photoCellColorAlpha
-            }
-        })
+                if let color = post.getColor() {
+                    self.gradient = CAGradientLayer()
+                    self.gradient!.frame = self.colorView.bounds
+                    self.gradient!.locations = [0.0, 1.0]
+                    self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+                    self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+                    self.gradient!.shouldRasterize = false
+                    self.colorView.layer.shouldRasterize = false
+                    self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.75).cgColor]
+                    self.colorView.layer.insertSublayer(self.gradient!, at: 0)
+                    self.colorView.alpha = photoCellColorAlpha
+                }
+
+        }
         
     }
+    
     
     func setupUserCell (_ post:StoryItem) {
         

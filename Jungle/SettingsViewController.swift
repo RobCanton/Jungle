@@ -34,6 +34,7 @@ class SettingsContainerViewController: UIViewController {
 
 class SettingsViewController: UITableViewController {
 
+    @IBOutlet weak var emailCell: UITableViewCell!
     @IBOutlet weak var pushNotificationsSwitch: UISwitch!
     
     @IBOutlet weak var flaggedContentSwitch: UISwitch!
@@ -71,11 +72,27 @@ class SettingsViewController: UITableViewController {
         })
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let email = UserService.email {
+            emailCell.detailTextLabel?.text = email
+        } else {
+            emailCell.detailTextLabel?.text = "Missing!"
+        }
+        
+        emailCell.detailTextLabel?.textColor = UserService.isEmailVerified ? UIColor.lightGray : errorColor
+        emailCell.textLabel?.textColor = UserService.isEmailVerified ? UIColor.black : errorColor
+        
+    }
+    
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let cell = self.tableView.cellForRow(at: indexPath) else { return }
         
         switch cell {
         case blockedUsersCell:
+            
             break
         case privacyPolicyCell:
             break

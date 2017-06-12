@@ -110,8 +110,9 @@ class HomeStateController {
     
     fileprivate func fetchFollowing() {
         let uid = mainStore.state.userState.uid
+        followingRef?.removeAllObservers()
         followingRef = UserService.ref.child("social/following/\(uid)")
-        followingRef?.observeSingleEvent(of: .value, with: { snapshot in
+        followingRef?.observe(.value, with: { snapshot in
             var following:[String] = [uid] // Include current user id to pull my story
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
@@ -154,7 +155,7 @@ class HomeStateController {
         let uid = mainStore.state.userState.uid
         nearbyRef?.removeAllObservers()
         nearbyRef = UserService.ref.child("users/location/nearby/\(uid)/posts")
-        nearbyRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+        nearbyRef?.queryOrderedByValue().observe(.value, with: { snapshot in
             var posts = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
