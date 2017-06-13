@@ -108,7 +108,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.edgesForExtendedLayout = UIRectEdge.all
         self.extendedLayoutIncludesOpaqueBars = true
         self.automaticallyAdjustsScrollViewInsets = false
-        self.view.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
+        self.view.backgroundColor = UIColor.black
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -124,7 +124,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
         
         collectionView.register(PostViewController.self, forCellWithReuseIdentifier: "presented_cell")
-        collectionView.backgroundColor = UIColor.white
+        collectionView.backgroundColor = UIColor.black
         collectionView.bounces = false
         collectionView.delegate = self
         collectionView.dataSource = self

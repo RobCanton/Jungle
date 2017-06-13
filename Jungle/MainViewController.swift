@@ -69,6 +69,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var cameraView:CameraViewController!
     fileprivate var recordBtn:CameraButton!
+    fileprivate var recordBtnDummy:CameraButton!
     fileprivate var cameraBtnFrame:CGRect!
     fileprivate var cameraCenter:CGPoint!
     
@@ -190,7 +191,16 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         recordBtn.frame = cameraBtnFrame
         cameraCenter = recordBtn.center
         recordBtn.applyShadow(radius: 0.67, opacity: 0.67, height: 0.0, shouldRasterize: false)
-
+        
+        recordBtnDummy = CameraButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        recordBtnDummy.frame = cameraBtnFrame
+        recordBtnDummy.applyShadow(radius: 0.67, opacity: 0.67, height: 0.0, shouldRasterize: false)
+        recordBtnDummy.transform = CGAffineTransform(scaleX: 0.55, y: 0.55)
+        recordBtnDummy.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75)
+        recordBtnDummy.ring.layer.borderColor = accentColor.cgColor
+        recordBtnDummy.ring.backgroundColor = UIColor.white
+    
+        
         cameraView = CameraViewController()
         cameraView.recordBtnRef = recordBtn
         cameraView.delegate = self
@@ -432,6 +442,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         guard let nav = self.navigationController as? MasterNavigationController else { return }
         nav.activateNavbar(activate)
     }
+    
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         screenMode = .Transitioning
@@ -1043,7 +1054,7 @@ if !isPresenting {
     func dismissInteractionEnded(_ completed: Bool) {}
     
     func cameraButtonView() -> UIView {
-        return UIView()
+        return recordBtnDummy
     }
     
     func topView() -> UIView {

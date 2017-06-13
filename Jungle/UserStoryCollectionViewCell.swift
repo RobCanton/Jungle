@@ -106,12 +106,12 @@ class UserStoryCollectionViewCell: UICollectionViewCell, StoryProtocol {
         case .itemInfoLoaded:
             itemsLoaded()
             break
-//        case .loadingContent:
-//            loadingContent()
-//            break
-//        case .contentLoaded:
-//            contentLoaded()
-//            break
+        case .loadingContent:
+            
+            break
+        case .contentLoaded:
+            
+            break
         }
     }
     

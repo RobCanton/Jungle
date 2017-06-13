@@ -54,6 +54,11 @@ class StoryProgressIndicator: UIView {
         }
     }
 
+    func hideAll(_ hide:Bool) {
+        for bar in progressBars {
+            bar.isHidden = hide
+        }
+    }
     
     func activateIndicator(itemIndex:Int) {
         if itemIndex >= 0 && itemIndex < storyItems.count {

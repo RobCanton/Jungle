@@ -13,7 +13,8 @@ import Firebase
 import NVActivityIndicatorView
 
 
-public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate, ItemStateProtocol {
+public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate, ItemStateProtocol,
+    CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
 
     private(set) var viewIndex = 0
     var returnIndex:Int?
@@ -23,6 +24,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     weak var delegate:PopupProtocol?
     var activityView:NVActivityIndicatorView!
     
+    var progressBar:StoryProgressIndicator?
+    
     var playerLayer:AVPlayerLayer?
     var currentProgress:Double = 0.0
     var timer:Timer?
@@ -31,6 +34,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     var subscribedToPost = false
     var shouldAutoPause = true
     
+    var editCaptionMode = false
+    var keyboardUp = false
     var flagLabel:UILabel?
     
     var itemStateController:ItemStateController!
@@ -64,30 +69,13 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         videoContent.isHidden = true
         
         /* Activity view */
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballScaleRipple, color: UIColor.white, padding: 1.0)
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballBeat, color: UIColor.white, padding: 1.0)
         activityView.center = contentView.center
         contentView.addSubview(activityView)
         
         /* Item State Controller */
         itemStateController = ItemStateController()
         
-    }
-    
-    func showAuthor() {
-        guard let item = self.item else { return }
-        delegate?.showUser(item.authorId)
-    }
-    
-    func showPlace(_ location: Location) {
-        delegate?.showPlace(location)
-    }
-    
-    func dismiss() {
-        delegate?.dismissPopup(true)
-    }
-    
-    func handleFooterAction() {
-        delegate?.showComments()
     }
     
     func prepareStory(withLocation location:LocationStory, cellIndex: Int, atIndex index:Int?) {
@@ -98,14 +86,13 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.story = location
         self.story.delegate = self
         story.determineState()
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     func saveIndex() {
         returnIndex = viewIndex
-    }
-    
-    func showComments() {
-        
     }
     
     func prepareStory(withStory story:UserStory, cellIndex: Int,  atIndex index:Int?) {
@@ -116,6 +103,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.story = story
         self.story.delegate = self
         story.determineState()
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     func clearStoryView() {
@@ -134,32 +124,116 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         case .itemInfoLoaded:
             itemsLoaded()
             break
+        case .loadingContent:
+            break
+        case .contentLoaded:
+            itemsLoaded()
+            break
         }
     }
-    var animateInitiated = false
     
-    func animateIndicator() {
-        if !animateInitiated {
-            animateInitiated = true
-            DispatchQueue.main.async {
-                if self.item!.needsDownload() {
-                    self.activityView.startAnimating()
+    func sendComment(_ comment: String) {
+        
+        guard let item = self.item else { return }
+        commentBar.setBusyState(true)
+        if editCaptionMode {
+            
+            self.commentBar.textField.resignFirstResponder()
+            UploadService.editCaption(postKey: item.key, caption: comment) { success in
+                self.commentBar.setBusyState(false)
+                if success {
+                    item.editCaption(caption: comment)
                 }
+                self.setOverlays()
+            }
+        } else {
+            UploadService.addComment(post: item, comment: comment) { success in
+                self.commentBar.setBusyState(false)
             }
         }
+    }
+    
+    func toggleLike(_ like: Bool) {
+        guard let item = self.item else { return }
+        
+        if like {
+            UploadService.addLike(post: item)
+            item.addLike(mainStore.state.userState.uid)
+        } else {
+            UploadService.removeLike(post: item)
+            item.removeLike(mainStore.state.userState.uid)
+        }
+    }
+    
+    func showMore() {
+        delegate?.showMore()
+    }
+    
+    func editCaption() {
+        guard let item = self.item else { return }
+        editCaptionMode = true
+        commentBar.textField.placeholder = "Edit Caption"
+        commentBar.sendButton.setTitle("Set", for: .normal)
+        commentBar.textField.becomeFirstResponder()
+        commentBar.textField.text = item.caption
+    }
+    
+    func showAuthor() {
+        guard let item = self.item else { return }
+        delegate?.showUser(item.authorId)
+    }
+    
+    func showPlace(_ location: Location) {
+        delegate?.showPlace(location)
+    }
+    
+    func showUser(_ uid:String) {
+        delegate?.showUser(uid)
+    }
+    
+    func dismiss() {
+        delegate?.dismissPopup(true)
+    }
+    
+    func handleFooterAction() {
+        delegate?.showComments()
+    }
+    
+    func showComments() {
+        delegate?.showComments()
+    }
+    
+    func liked(_ liked:Bool) {
+        guard let item = self.item else { return }
+        if liked {
+            UploadService.addLike(post: item)
+        } else {
+            UploadService.removeLike(post: item)
+        }
+    }
+    
+    
+    func animateIndicator() {
+        self.content.alpha = 0.6
+        self.activityView.startAnimating()
     }
     
     func stopIndicator() {
-        if activityView.isAnimating {
-            DispatchQueue.main.async {
-                self.activityView.stopAnimating()
-                self.animateInitiated = false
-            }
-        }
+        self.content.alpha = 1.0
+        self.activityView.stopAnimating()
     }
     
     
     func itemsLoaded() {
+        
+        let screenWidth: CGFloat = (UIScreen.main.bounds.size.width)
+        let margin:CGFloat = 12.0
+        
+        progressBar?.removeFromSuperview()
+        progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
+        progressBar!.createProgressIndicator(_story: story)
+        contentView.addSubview(progressBar!)
+        
         for item in story.items! {
 
             totalTime += item.length
@@ -168,10 +242,13 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if viewIndex >= story.items!.count{
             viewIndex = 0
         }
+        
         self.setupItem()
+        
     }
     
     func setupItem() {
+        
         
         print("setupItem")
         
@@ -226,14 +303,14 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         infoView.frame = CGRect(x: 0, y: commentBar.frame.origin.y - size, width: frame.width, height: size)
         commentsView.frame = CGRect(x: 0, y: getCommentsViewOriginY(), width: commentsView.frame.width, height: commentsView.frame.height)
-        //commentsView.delegate = self
+        commentsView.delegate = self
         
         self.infoView.setInfo(item)
-        //self.infoView.delegate = self
+        self.infoView.delegate = self
         
         commentsView.setTableComments(comments: item.comments, animated: false)
-        //commentBar.textField.delegate = self
-        //commentBar.delegate = self
+        commentBar.textField.delegate = self
+        commentBar.delegate = self
         
         UploadService.addView(post: item)
         
@@ -269,11 +346,13 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             
             if item.contentType == .image {
                 stopIndicator()
+                setForPlay()
             }
             self.content.image = image
         } else {
             itemStateController.download()
         }
+        
         
         if item.contentType == .video {
             
@@ -310,8 +389,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             }
         }
         
+        progressBar?.activateIndicator(itemIndex: viewIndex)
+        
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
+        print("Set for play. shouldAutoPause: \(shouldAutoPause)")
         if shouldAutoPause {
             shouldAutoPause = false
             pause()
@@ -370,15 +452,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         content.image = nil
         destroyVideoPlayer()
         killTimer()
+        progressBar?.resetAllProgressBars()
+        progressBar?.removeFromSuperview()
         delegate = nil
-        animateInitiated = false
         item = nil
         returnIndex = nil
+        itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
-        
     }
     
     func reset() {
+        progressBar?.resetActiveIndicator()
         shouldAutoPause = true
         pause()
     }
@@ -399,34 +483,47 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         pauseVideo()
     }
     
+    var looping = false
     var paused = false
     var remainingTime:TimeInterval?
     
+    
     func pause() {
         if paused { return }
+        itemStateController.delegate = nil
         paused = true
         pauseVideo()
-        guard let timer = self.timer else { return }
+        progressBar?.pauseActiveIndicator()
+        guard let timer = self.timer else {
+            remainingTime = nil
+            return
+        }
         remainingTime = timer.fireDate.timeIntervalSinceNow
         timer.invalidate()
+        print("Pause")
     }
-    
-    var looping = false
 
     
     func resume() {
         if !paused { return }
         paused = false
-        guard let item = self.item else { return }
-        if remainingTime != nil {
-            timer = Timer.scheduledTimer(timeInterval: remainingTime!, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
-            remainingTime = nil
-        } else {
-            
+        progressBar?.hideAll(false)
+        progressBar?.resumeActiveIndicator()
+        guard let item = self.item else { return}
+        itemStateController.delegate = self
+        if item.needsDownload() {
+            print("Download")
+            itemStateController.download()
+        } else  {
+            if remainingTime != nil {
+                timer = Timer.scheduledTimer(timeInterval: remainingTime!, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
+                remainingTime = nil
+            }
+            if item.contentType == .video {
+                playVideo()
+            }
         }
-        if item.contentType == .video {
-            playVideo()
-        }
+        print("Resume")
         
     }
     
@@ -437,7 +534,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func prepareForTransition(isPresenting:Bool) {
-        
+        progressBar?.hideAll(true)
         if isPresenting {
             content.isHidden = false
             videoContent.isHidden = true
@@ -448,6 +545,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
 
     
     func tapped(gesture:UITapGestureRecognizer) {
+        if keyboardUp {
+            commentBar.textField.resignFirstResponder()
+            return
+        }
+        
         guard let _ = item else { return }
         let tappedPoint = gesture.location(in: self)
         let width = self.bounds.width
@@ -460,6 +562,78 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         } else {
             nextItem()
         }
+    }
+    
+    func keyboardWillAppear(notification: NSNotification){
+        keyboardUp = true
+        looping = true
+        delegate?.keyboardStateChange(keyboardUp)
+        let info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        
+        self.commentBar.likeButton.isUserInteractionEnabled = false
+        self.commentBar.moreButton.isUserInteractionEnabled = false
+        self.commentBar.sendButton.isUserInteractionEnabled = true
+        self.commentsView.showTimeLabels(visible: true)
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            let height = self.frame.height
+            let textViewFrame = self.commentBar.frame
+            let textViewY = height - keyboardFrame.height - textViewFrame.height
+            self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
+            
+            self.commentsView.frame = CGRect(x: 0,y: self.getCommentsViewOriginY(),width: self.commentsView.frame.width,height: self.commentsView.frame.height)
+            
+            let infoFrame = self.infoView.frame
+            let infoY = textViewY - infoFrame.height
+            self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
+            
+            self.commentBar.likeButton.alpha = 0.0
+            self.commentBar.moreButton.alpha = 0.0
+            self.commentBar.sendButton.alpha = 1.0
+            self.commentBar.activityIndicator.alpha = 1.0
+            self.commentBar.backgroundView.alpha = 1.0
+            self.headerView.alpha = 0.0
+            self.progressBar?.alpha = 0.0
+        })
+    }
+    
+    func keyboardWillDisappear(notification: NSNotification){
+        keyboardUp = false
+        looping = false
+        delegate?.keyboardStateChange(keyboardUp)
+        self.commentBar.likeButton.isUserInteractionEnabled = true
+        self.commentBar.moreButton.isUserInteractionEnabled = true
+        self.commentBar.sendButton.isUserInteractionEnabled = false
+        self.commentsView.showTimeLabels(visible: false)
+        
+        if editCaptionMode {
+            commentBar.textField.placeholder = "Comment"
+            commentBar.textField.text = ""
+            commentBar.sendButton.setTitle("Send", for: .normal)
+            editCaptionMode = false
+        }
+        UIView.animate(withDuration: 0.1, animations: { () -> Void in
+            
+            let height = self.frame.height
+            let textViewFrame = self.commentBar.frame
+            let textViewStart = height - textViewFrame.height
+            self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
+            
+            self.commentsView.frame = CGRect(x: 0,y: self.getCommentsViewOriginY(),width: self.commentsView.frame.width,height: self.commentsView.frame.height)
+            
+            let infoFrame = self.infoView.frame
+            let infoY = height - textViewFrame.height - infoFrame.height
+            self.infoView.frame = CGRect(x: infoFrame.origin.x,y: infoY, width: infoFrame.width, height: infoFrame.height)
+            
+            self.commentBar.likeButton.alpha = 1.0
+            self.commentBar.moreButton.alpha = 1.0
+            self.commentBar.sendButton.alpha = 0.0
+            self.commentBar.activityIndicator.alpha = 0.0
+            self.commentBar.backgroundView.alpha = 0.0
+            self.headerView.alpha = 1.0
+            self.progressBar?.alpha = 1.0
+        })
+        
     }
 
     func getCommentsViewOriginY() -> CGFloat {
@@ -566,6 +740,19 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         return view
     }()
 
+}
+
+extension StoryViewController: UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        return newLength <= 140 // Bool
+    }
 }
 
 class TouchScrollView: UIScrollView, UIGestureRecognizerDelegate {

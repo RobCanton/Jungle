@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 enum UserStoryState {
-    case notLoaded, loadingItemInfo, itemInfoLoaded
+    case notLoaded, loadingItemInfo, itemInfoLoaded, loadingContent, contentLoaded
 }
 
 protocol StoryProtocol: class {
@@ -92,10 +92,14 @@ class Story {
     
     func determineState() {
 
-        if items == nil {
-            state = .notLoaded
+        if let firstItem = firstItem {
+            if firstItem.needsDownload() {
+                return state = .itemInfoLoaded
+            } else {
+                state = .contentLoaded
+            }
         } else {
-            state = .itemInfoLoaded
+            state = .notLoaded
         }
     }
     
@@ -116,17 +120,39 @@ class Story {
                 self.items = items.sorted(by: {
                     return $0 < $1
                 })
-                if self.items!.count > 0 {
-                    UploadService.retrievePostImageVideo(post: self.items![0]) { post in
-                        self.state = .itemInfoLoaded
-                    }
-                } else {
-                    self.state = .itemInfoLoaded
-                }
-                //self.state = .itemInfoLoaded
+                
+                self.state = .itemInfoLoaded
 
             })
         }
+    }
+    
+    var firstItem:StoryItem? {
+        get {
+            if items != nil  && items!.count > 0{
+                return items![0]
+            }
+            return nil
+        }
+    }
+    
+    func needsDownload() -> Bool {
+        if let firstItem = firstItem {
+            return firstItem.needsDownload()
+        }
+        return true
+    }
+    
+    func downloadFirstItem() {
+        guard let firstItem = firstItem else {
+            downloadItems()
+            return
+        }
+        self.state = .loadingContent
+        UploadService.retrievePostImageVideo(post: firstItem, completion: { post in
+            if post.key != firstItem.key { return }
+            self.state = .contentLoaded
+        })
     }
 
     

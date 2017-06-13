@@ -13,6 +13,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     var activityView:NVActivityIndicatorView!
     
+    var editCaptionMode = false
     var keyboardUp = false
     var subscribedToPost = false
     
@@ -44,7 +45,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         videoContent.isHidden = true
         
         /* Activity view */
-        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballSpinFadeLoader, color: UIColor.white, padding: 1.0)
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
         activityView.center = contentView.center
         contentView.addSubview(activityView)
         
@@ -215,7 +216,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.showMore()
     }
     
-    var editCaptionMode = false
     func editCaption() {
         guard let item = self.storyItem else { return }
         editCaptionMode = true

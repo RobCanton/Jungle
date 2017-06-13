@@ -19,7 +19,7 @@ class ProgressIndicator: UIView {
         self.layer.cornerRadius = frame.height / 2
         self.clipsToBounds = true
         
-        backgroundColor = UIColor(white: 1.0, alpha: 0.10)
+        backgroundColor = UIColor(white: 1.0, alpha: 0.25)
         
         progress = UIView()
         resetProgress()
@@ -51,21 +51,16 @@ class ProgressIndicator: UIView {
     }
     
     func pauseAnimation() {
-        if !paused {
-            paused = true
-            print("layer paused: \(paused)")
-            let layer = progress.layer
-            let pausedTime = layer.convertTime(CACurrentMediaTime(), from: nil)
-            layer.speed = 0.0
-            layer.timeOffset = pausedTime
-        }
+        paused = true
+        let layer = progress.layer
+        let pausedTime = layer.convertTime(CACurrentMediaTime(), from: nil)
+        layer.speed = 0.0
+        layer.timeOffset = pausedTime
     }
     
     func resumeAnimation() {
-        if !paused { return }
         
         paused = false
-        print("layer paused: \(paused)")
         
         let layer = progress.layer
         let pausedTime = layer.timeOffset
@@ -74,11 +69,9 @@ class ProgressIndicator: UIView {
         layer.beginTime = 0.0
         let timeSincePause = layer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
         layer.beginTime = timeSincePause
-        print("layer beginTime \(layer.beginTime)")
     }
     
     func removeAnimation() {
-        print("layer removeAnimation")
         progress.layer.removeAnimation(forKey: "bounds")
     }
     
@@ -86,7 +79,6 @@ class ProgressIndicator: UIView {
         
         removeAnimation()
         completeProgress()
-        print("layer completeAnimation")
     }
     
     func completeProgress() {
@@ -95,7 +87,6 @@ class ProgressIndicator: UIView {
     
     func resetProgress() {
         paused = false
-        print("layer resetProgress")
         progress.layer.speed = 1.0
         progress.layer.timeOffset = 0.0
         progress.layer.beginTime = 0.0

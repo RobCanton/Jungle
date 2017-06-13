@@ -34,8 +34,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var tabHeader:PlacesTabHeader!
     
     var control:TwicketSegmentedControl!
+    var refreshButton:UIButton!
+    var refreshIndicator:UIActivityIndicatorView!
     
     var isFollowingMode = false
+    
     
     var topCollectionViewRef:UICollectionView?
     var midCollectionViewRef:UICollectionView?
@@ -105,17 +108,38 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         //self.view.addSubview(tabHeader)
         
         let titles = ["Nearby", "Popular", "Following"]
-        let frame = CGRect(x: 0, y: 44.0, width: tabHeader.frame.width, height: 44)
-        
-        
-        
         header = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 88))
+        
+        let titleLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tabHeader.frame.width, height: 44.0))
+        titleLabel.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightHeavy)
+        titleLabel.text = "Jungle"
+        titleLabel.textAlignment = .center
+        header.addSubview(titleLabel)
         
         control = TwicketSegmentedControl(frame: CGRect(x: 0, y: 44, width: header.frame.width, height: 44))
         control.setSegmentItems(titles)
         control.delegate = self
         control.sliderBackgroundColor = accentColor
         header.addSubview(control)
+        
+        refreshButton = UIButton(frame: CGRect(x: tabHeader.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
+        refreshButton.setImage(UIImage(named: "restart"), for: .normal)
+        refreshButton.tintColor = UIColor.black
+        refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
+        
+        refreshIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        refreshIndicator.frame = refreshButton.frame
+        refreshIndicator.hidesWhenStopped = true
+        
+        header.addSubview(refreshIndicator)
+        header.addSubview(refreshButton)
+        
+        let clearCacheButton = UIButton(frame: CGRect(x: 0, y: 0.0, width: 44.0, height: 44.0))
+        clearCacheButton.setImage(UIImage(named: "trash_2"), for: .normal)
+        clearCacheButton.tintColor = UIColor.black
+        clearCacheButton.addTarget(self, action: #selector(handleDelete), for: .touchUpInside)
+        header.addSubview(clearCacheButton)
+        
         view.addSubview(header)
         
         var distanceLabels = [String]()
@@ -173,15 +197,23 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     func update(_ mode:SortedBy?) {
         print("UPDATE !")
-        tabHeader.stopRefreshing()
+        refreshButton.isHidden = false
+        refreshIndicator.stopAnimating()
         
-        for post in state.popularPosts {
-            
-        }
         if mode == nil || mode! == self.sortMode{
-            print("RELOAD TABLE")
             return self.collectionView.reloadData()
         }
+    }
+    
+    func handleRefresh() {
+        refreshButton.isHidden = true
+        refreshIndicator.startAnimating()
+        state.fetchAll()
+    }
+    
+    func handleDelete() {
+        clearDirectory(name: "user_content")
+        print("Clear temp directory")
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -298,11 +330,12 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             break
         case .Recent:
             let story = state.followingStories[indexPath.row]
-            if story.state == .itemInfoLoaded {
+            story.determineState()
+            if story.state == .contentLoaded {
                 self.selectedIndexPath = indexPath
                 globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
-                story.downloadItems()
+                story.downloadFirstItem()
             }
             break
         }

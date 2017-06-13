@@ -49,11 +49,18 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         switch state {
         case .notLoaded:
             self.timeLabel.text = story.date.timeStringSinceNow()
+            story.downloadItems()
             break
         case .loadingItemInfo:
             timeLabel.text = "Loading..."
             break
         case .itemInfoLoaded:
+            self.timeLabel.text = story.date.timeStringSinceNow()
+            break
+        case .loadingContent:
+            timeLabel.text = "Loading..."
+            break
+        case .contentLoaded:
             self.timeLabel.text = story.date.timeStringSinceNow()
             break
         }

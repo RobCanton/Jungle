@@ -49,24 +49,24 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             break
         case .itemInfoLoaded:
             break
-//        case .loadingContent:
-//            timeLabel.text = "Loading..."
-//            
-//            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
-//                self.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
-//            }, completion: { _ in
-//            
-//            })
-//            break
-//        case .contentLoaded:
-//            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
-//                self.transform = CGAffineTransform.identity
-//            }, completion: { _ in
-//                
-//            })
-//            
-//            self.timeLabel.text = story.date.timeStringSinceNow()
-//            break
+        case .loadingContent:
+            timeLabel.text = "Loading..."
+            
+            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
+                self.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+            }, completion: { _ in
+            
+            })
+            break
+        case .contentLoaded:
+            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
+                self.transform = CGAffineTransform.identity
+            }, completion: { _ in
+                
+            })
+            
+            self.timeLabel.text = story.date.timeStringSinceNow()
+            break
         }
     }
 
