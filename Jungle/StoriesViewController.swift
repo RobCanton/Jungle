@@ -32,8 +32,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     var collectionContainerView:UIView!
     var collectionView:UICollectionView!
     
-    var longPressGR:UILongPressGestureRecognizer!
-    var tapGR:UITapGestureRecognizer!
+    var longPressGR:TimedLongPressGestureRecognizer!
     var firstCell = true
     
     var currentIndexPath:IndexPath?
@@ -71,6 +70,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             for gestureRecognizer in gestureRecognizers {
                 if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
                     panGestureRecognizer.delegate = self
+                    longPressGR.require(toFail: panGestureRecognizer)
+                    longPressGR.require(toFail: collectionView.panGestureRecognizer)
                 }
             }
         }
@@ -129,15 +130,12 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.reloadData()
         
         view.addSubview(collectionView)
-                longPressGR = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        longPressGR.minimumPressDuration = 0.33
+                longPressGR = TimedLongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        longPressGR.minimumPressDuration = 0.0
         
         longPressGR.delegate = self
-        self.view.addGestureRecognizer(longPressGR)
         
-        tapGR = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        tapGR.delegate = self
-        self.view.addGestureRecognizer(tapGR)
+        self.view.addGestureRecognizer(longPressGR)
         
     }
     
@@ -149,17 +147,47 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         getCurrentCell()?.setOverlays()
     }
     
-    func handleLongPress(gestureReconizer: UILongPressGestureRecognizer) {
+    func handleLongPress(gestureReconizer: TimedLongPressGestureRecognizer) {
+        
+        guard let cell = getCurrentCell() else { return }
+        let tappedPoint = gestureReconizer.location(in: view)
+        
+        let prevItem = tappedPoint.x < view.frame.width * 0.25
         if gestureReconizer.state == .began {
-
+            gestureReconizer.startTime = Date()
+            if prevItem {
+                cell.prevView.alpha = 1.0
+            } else {
+                
+            }
+        }
+        if gestureReconizer.state == .changed {
+             let duration = Date().timeIntervalSince(gestureReconizer.startTime!)
+            if duration >= 0.5 {
+                cell.focus(true)
+            }
         }
         if gestureReconizer.state == UIGestureRecognizerState.ended {
-
+            let duration = Date().timeIntervalSince(gestureReconizer.startTime!)
+            if prevItem {
+                UIView.animate(withDuration: 0.3, animations: {
+                    cell.prevView.alpha = 0.0
+                })
+            }
+            if duration < 0.5 {
+                if cell.keyboardUp {
+                    //cell.commentBar.textField.resignFirstResponder()
+                    return
+                }
+                if prevItem {
+                  cell.prevItem()
+                } else {
+                    cell.nextItem()
+                }
+            } else {
+                cell.focus(false)
+            }
         }
-    }
-    
-    func handleTap(gestureRecognizer: UITapGestureRecognizer) {
-        getCurrentCell()?.tapped(gesture: gestureRecognizer)
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -172,43 +200,39 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         let commentsTableHeight = cell.commentsView.getTableHeight()
         let commentsTopY = cell.infoView.frame.origin.y - commentsTableHeight
         
-        
-        
-        
         if keyboardUp {
             if point.y > commentsTopY {
                 return false
             }
         }
         
-        if let _ = gestureRecognizer as? UITapGestureRecognizer  {
-            return true
+        
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
+            
+            if keyboardUp {
+                if translate.y > 0 {
+                    cell.commentBar.textField.resignFirstResponder()
+                }
+                return false
+            } else {
+                if translate.y < 0 {
+                    cell.commentBar.textField.becomeFirstResponder()
+                }
+            }
+            
+            return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
         }
         
         if let _ = gestureRecognizer as? UILongPressGestureRecognizer  {
-            return true
+            if keyboardUp {
+                return false
+            }
+            let goodzone = point.y < commentsTopY && point.y > authorBottomY
+            return goodzone
         }
         
-        let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
-        let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
-
-        self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-        
-        let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
-        let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-        
-        if keyboardUp {
-            if translate.y > 0 {
-                cell.commentBar.textField.resignFirstResponder()
-            }
-            return false
-        } else {
-            if translate.y < 0 {
-                cell.commentBar.textField.becomeFirstResponder()
-            }
-        }
-        
-        return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
+        return false
         
     }
     
@@ -310,10 +334,6 @@ extension StoriesViewController: StoryCommentsProtocol {
 }
 
 extension StoriesViewController: PopupProtocol {
-    func showMore() {
-        
-    }
-    
     func editCaption() {
         
     }
@@ -350,6 +370,87 @@ extension StoriesViewController: PopupProtocol {
     func showUsersList(_ uids:[String], _ title:String) {}
     
     func showComments() {
+        
+    }
+    
+    func showMore() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        cell.pause()
+        
+        if item.authorId == mainStore.state.userState.uid {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let subscribed = cell.subscribedToPost
+            var message = "Recieve Notifications"
+            
+            if subscribed {
+                message = "Mute Notifications"
+            }
+            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+            }
+            actionSheet.addAction(notificationsAction)
+            
+            let deleteAction: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
+                UploadService.deleteItem(item: item) { success in
+                    if success {
+                        self.dismissPopup(true)
+                    }
+                }
+            }
+            actionSheet.addAction(deleteAction)
+            self.present(actionSheet, animated: true, completion: nil)
+        } else {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let subscribed = cell.subscribedToPost
+            var message = "Recieve Notifications"
+            
+            if subscribed {
+                message = "Mute Notifications"
+            }
+            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+            }
+            actionSheet.addAction(notificationsAction)
+            
+            let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
+                let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+                    cell.resume()
+                }
+                alertController.addAction(cancelAction)
+                
+                let OKAction = UIAlertAction(title: "It's Inappropriate", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Inappropriate, completion: { success in
+                    })
+                }
+                alertController.addAction(OKAction)
+                
+                let OKAction2 = UIAlertAction(title: "It's Spam", style: .destructive) { (action) in
+                    UploadService.reportItem(item: item, type: ReportType.Spam, completion: { success in
+                        
+                    })
+                }
+                alertController.addAction(OKAction2)
+                
+                self.present(alertController, animated: true, completion: nil)
+            }
+            actionSheet.addAction(OKAction)
+            
+            self.present(actionSheet, animated: true, completion: nil)
+        }
         
     }
 
@@ -398,6 +499,10 @@ extension StoriesViewController: View2ViewTransitionPresented {
     }
 }
 
+
+class TimedLongPressGestureRecognizer : UILongPressGestureRecognizer {
+    var startTime : Date?
+}
 
 
 

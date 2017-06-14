@@ -101,7 +101,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        commentsView.setTableComments(comments: item.comments, animated: false)
+        //commentsView.setTableComments(comments: item.comments, animated: false)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -118,6 +118,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func itemStateDidChange(comments: [Comment]) {
+        print("Num comments changed: \(comments.count)")
         self.headerView.setNumComments(comments.count)
         self.commentsView.setTableComments(comments: comments, animated: true)
     }
@@ -128,12 +129,10 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func itemDownloading() {
-        print("Item downloading")
         animateIndicator()
     }
     
     func itemDownloaded() {
-        print("Item downloaded")
         guard let item = storyItem else { return }
         if let image = UploadService.readImageFromFile(withKey: item.key) {
             
@@ -283,24 +282,21 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func pause() {
-        print("Pause")
-        itemStateController.delegate = nil
+        //itemStateController.delegate = nil
         paused = true
         pauseVideo()
     }
     
     func resume() {
-        print("Resume")
+        //itemStateController.delegate = self
         activityView.alpha = 1.0
         paused = false
         guard let item = self.storyItem else { return }
         
-        itemStateController.delegate = self
+        
         if item.needsDownload() {
-            print("Download")
             itemStateController.download()
         } else if item.contentType == .video {
-            print("Resumed!")
             if playerLayer == nil {
                 shouldAutoPause = false
                 itemDownloaded()
@@ -337,7 +333,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         headerView.delegate = nil
         infoView.delegate = nil
         commentBar.delegate = nil
-        itemStateController.removeAllObservers()
+        //itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
     }
     

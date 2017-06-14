@@ -62,7 +62,7 @@ class ItemStateController {
     }
     
     func removeAllObservers() {
-        item = nil
+        //item = nil
         likedRef?.removeAllObservers()
         numLikesRef?.removeAllObservers()
         commentsRef?.removeAllObservers()
@@ -116,6 +116,7 @@ class ItemStateController {
                     
                     let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                     item.addComment(comment)
+                    print("itemStateDidChange -> delegate?\(self.delegate != nil)")
                     self.delegate?.itemStateDidChange(comments: item.comments)
                 }
             })
@@ -128,6 +129,7 @@ class ItemStateController {
                 let timestamp = dict["timestamp"] as! Double
                 let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
                 item.addComment(comment)
+                print("itemStateDidChange -> delegate?\(self.delegate != nil)")
                 self.delegate?.itemStateDidChange(comments: item.comments)
             })
         }

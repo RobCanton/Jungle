@@ -27,9 +27,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var currentIndexPath:IndexPath?
     
-    var closeButton:UIButton!
-    var collectionTap:UITapGestureRecognizer!
-    
     deinit {
         print("Deinit >> GalleryViewController")
     }
@@ -137,17 +134,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionContainerView.applyShadow(radius: 5.0, opacity: 0.25, height: 0.0, shouldRasterize: false)
         
         self.view.addSubview(collectionContainerView)
-        closeButton = UIButton(frame: CGRect(x: view.frame.width - 50.0, y: 0, width: 50, height: 50))
-        closeButton.setImage(UIImage(named: "delete_thin"), for: .normal)
-        closeButton.setTitleColor(UIColor.black, for: .normal)
-        closeButton.tintColor = UIColor.black
-        closeButton.alpha = 0.0
-        
-        closeButton.addTarget(self, action: #selector(dismissComments), for: .touchUpInside)
-        self.view.addSubview(closeButton)
-        
-        collectionTap = UITapGestureRecognizer(target: self, action: #selector(dismissComments))
-        
+  
     }
     
     func appMovedToBackground() {
@@ -409,42 +396,16 @@ extension GalleryViewController: PopupProtocol {
     }
 }
 
-extension GalleryViewController: StoryCommentsProtocol {
-    func dismissComments() {
-        
-    }
-    
-    func dismissStory() {
-        dismissPopup(true)
-    }
-    
-    func replyToUser(_ username:String) {
-        if username == mainStore.state.userState.user?.username { return }
-        
-        //self.commentBar.textField.text = "@\(username) "
-        //self.commentBar.textField.becomeFirstResponder()
-    }
-}
-
-
-extension GalleryViewController: CommentBarProtocol {
-    func sendComment(_ text:String) {
-       /* guard let cell = getCurrentCell() else { return }
-        guard let item = cell.storyItem else { return }
-        commentBar.textField.text = ""
-        commentBar.sendLabelState(false)
-        UploadService.addComment(post: item, comment: text)
-        commentBar.textField.resignFirstResponder()
- */
-    }
-}
-
 
 
 extension GalleryViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        getCurrentCell()?.pause()
+        for cell in collectionView.visibleCells as! [PostViewController] {
+            cell.pause()
+        }
+        
+        //getCurrentCell()?.pause()
     }
     
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {

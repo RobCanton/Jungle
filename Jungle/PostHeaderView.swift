@@ -52,7 +52,7 @@ class PostHeaderView: UIView {
         
         setupLocation(locationKey: item.locationKey)
         setNumLikes(item.numLikes)
-        setNumComments(item.numViews)
+        setNumComments(item.numComments)
 
         clean()
         UserService.getUser(item.authorId, completion: { _user in
@@ -88,6 +88,7 @@ class PostHeaderView: UIView {
     }
     
     func setNumComments(_ numComments:Int) {
+        
         commentsLabel.text = getNumericShorthandString(numComments)
     }
     
@@ -117,15 +118,18 @@ class PostHeaderView: UIView {
         delegate?.showAuthor()
     }
     
+    var locationKey:String = ""
     weak var location:Location?
     
     func setupLocation(locationKey:String?) {
         
         if locationKey != nil {
+            self.locationKey = locationKey!
             timeLabel2.isHidden = true
             timeLabel.isHidden = false
             locationTitle.text = "Loading..."
-            LocationService.sharedInstance.getLocationInfo(locationKey!) { location in
+            LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, location in
+                if self.locationKey != key { return }
                 self.locationRetrieved(location)
             }
         } else {
@@ -137,6 +141,7 @@ class PostHeaderView: UIView {
     }
     
     func locationRetrieved(_ location:Location?) {
+        self.locationKey = ""
         self.location = location
         if location != nil {
             locationTitle.text = location!.name

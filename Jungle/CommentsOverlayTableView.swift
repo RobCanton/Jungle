@@ -21,6 +21,8 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     var divider:UIView!
     var hasCaption = false
     
+    var refreshControl: UIRefreshControl!
+    
     weak var delegate:CommentsTableProtocol?
     
     func cleanUp() {
@@ -66,6 +68,15 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         
         reloadTable()
         scrollBottom(animated: false)
+        
+        refreshControl = UIRefreshControl()
+        refreshControl.tintColor = UIColor.white
+        refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        tableView.addSubview(self.refreshControl)
+    }
+    
+    func handleRefresh() {
+        print("refresh")
     }
     
     func setTableComments(comments:[Comment], animated:Bool)
@@ -115,8 +126,8 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         let comment = comments[indexPath.row]
         let text = comment.text
         let width = tableView.frame.width - (10 + 8 + 10 + 32)
-        let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 26 + 4  // +8 for some bio padding
+        let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular))
+        let height2 = size.height + 26 + 4 + 1.5  // +8 for some bio padding
         return height2
     }
     

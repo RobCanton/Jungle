@@ -537,6 +537,7 @@
 				B093FFD41E79399C00011B43 /* StoryViewController.swift */,
 				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
 				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
+				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
 				B07169A81E83681B00AF6A41 /* PostViewController.swift */,
 				B0168B551EEE4649001069C4 /* ItemStateController.swift */,
 				B0DF82401EDFB36700461DD8 /* CommentItemBar.swift */,
@@ -614,7 +615,6 @@
 		B0F894941E7C521900E490C4 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
 				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,

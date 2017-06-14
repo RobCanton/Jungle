@@ -153,6 +153,7 @@ class NotificationTableViewCell: UITableViewCell {
     func setMessageLabel(username:String, message:String, date: Date) {
         let timeStr = " \(date.timeStringSinceNow())"
         let str = "\(username)\(message)\(timeStr)"
+        let msg = message.utf16
         let attributes: [String: AnyObject] = [
             NSFontAttributeName : UIFont.systemFont(ofSize: 14, weight: UIFontWeightRegular)
         ]
@@ -167,7 +168,7 @@ class NotificationTableViewCell: UITableViewCell {
         let a2: [String: AnyObject] = [
             NSForegroundColorAttributeName : UIColor(white: 0.67, alpha: 1.0)
             ]
-        title.addAttributes(a2, range: NSRange(location: username.characters.count + message.characters.count, length: timeStr.characters.count))
+        title.addAttributes(a2, range: NSRange(location: username.characters.count + msg.count, length: timeStr.characters.count))
         
         messageLabel.attributedText = title
         

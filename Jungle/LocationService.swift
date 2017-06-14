@@ -80,6 +80,12 @@ class LocationService: NSObject {
             })
         }
     }
+    
+    func getLocationInfo(withReturnKey locationKey:String, completion: @escaping (_ key:String, _ location:Location?)->()) {
+        getLocationInfo(locationKey) { location in
+            completion(locationKey, location)
+        }
+    }
 }
 
 extension Dictionary where Value: Comparable {

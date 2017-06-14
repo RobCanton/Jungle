@@ -196,7 +196,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     
     func update(_ mode:SortedBy?) {
-        print("UPDATE !")
         refreshButton.isHidden = false
         refreshIndicator.stopAnimating()
         
@@ -350,16 +349,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     }
     
     func getHeader() -> FollowingHeader? {
-        print("\n\n\nINDEX PATHS")
         for x in collectionView.indexPathsForVisibleSupplementaryElements(ofKind: UICollectionElementKindSectionHeader) {
             print(x)
         }
         if let header = collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? FollowingHeader {
             
-            print("HEADER\n\n\n")
             return header
         }
-        print("NO HEADER\n\n\n")
         return nil
     }
     

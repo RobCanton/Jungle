@@ -371,7 +371,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
     
     func newState(state: AppState) {
-        print("MainViewController: newState")
         if !state.userState.isAuth {
             places.state.clear()
             message_service.clear()
@@ -500,14 +499,11 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let height = UIScreen.main.bounds.height
         let y = scrollView.contentOffset.y
         if y >= height && y < 10.0 + height {
-            print("SET TO CAMERA MODE")
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
         } else if y >= height * 2.0 {
-            print("SET TO CAMERA HIDDEN")
             screenMode = .Main
         } else {
-            print("SET TO MAP")
             screenMode = .Map
         }
     }
@@ -938,7 +934,6 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
 extension MainViewController: View2ViewTransitionPresenting {
     
     func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
-        print("initialFrame")
         guard let indexPath: IndexPath = userInfo?["initialIndexPath"] as? IndexPath else {
             return CGRect.zero
         }
@@ -970,7 +965,6 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
-        print("initialView")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
         if storyType == .NearbyPost{
@@ -990,7 +984,6 @@ extension MainViewController: View2ViewTransitionPresenting {
             return cell.imageView
         } else if storyType == .NotificationPost {
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
-            print("YUH!")
             return cell.postImageView
         } else {
             return UIView()
@@ -999,7 +992,6 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
-        print("prepareInitialView")
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
 
 if !isPresenting {

@@ -325,6 +325,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func itemStateDidChange(comments: [Comment]) {
+        print("itemStateDidChange")
         self.headerView.setNumComments(comments.count)
         self.commentsView.setTableComments(comments: comments, animated: true)
     }
@@ -387,6 +388,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             if let currentItem = playerLayer?.player?.currentTime() {
                 itemLength -= currentItem.seconds
             }
+            print("ITEM LENGTH: \(itemLength)")
         }
         
         progressBar?.activateIndicator(itemIndex: viewIndex)
@@ -401,7 +403,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func nextItem() {
-        guard let items = story.items else { return }
+        guard let items = story?.items else { return }
         if !looping {
            viewIndex += 1
         }
@@ -556,7 +558,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         if tappedPoint.x < width * 0.25 {
             prevItem()
             prevView.alpha = 1.0
-            UIView.animate(withDuration: 0.25, animations: {
+            UIView.animate(withDuration: 0.3, animations: {
                 self.prevView.alpha = 0.0
             })
         } else {
@@ -566,7 +568,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func keyboardWillAppear(notification: NSNotification){
         keyboardUp = true
-        looping = true
+        //looping = true
+        pause()
+        itemStateController.delegate = self
         delegate?.keyboardStateChange(keyboardUp)
         let info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
@@ -599,7 +603,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func keyboardWillDisappear(notification: NSNotification){
         keyboardUp = false
-        looping = false
+        //looping = false
+        resume()
         delegate?.keyboardStateChange(keyboardUp)
         self.commentBar.likeButton.isUserInteractionEnabled = true
         self.commentBar.moreButton.isUserInteractionEnabled = true
@@ -661,6 +666,35 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.headerView.alpha = multiple
     }
     
+    private(set) var inFocus = false
+    func focus(_ inFocus:Bool) {
+        if self.inFocus == inFocus { return }
+        self.inFocus = inFocus
+        if self.inFocus {
+            self.headerView.isUserInteractionEnabled = false
+            self.commentBar.isUserInteractionEnabled = false
+            self.commentsView.isUserInteractionEnabled = false
+            self.progressBar?.isUserInteractionEnabled = false
+            UIView.animate(withDuration: 0.15, animations: {
+                self.headerView.alpha = 0.0
+                self.commentBar.alpha = 0.0
+                self.commentsView.alpha = 0.0
+                self.progressBar?.alpha = 0.0
+            })
+        } else {
+            self.headerView.isUserInteractionEnabled = true
+            self.commentBar.isUserInteractionEnabled = true
+            self.commentsView.isUserInteractionEnabled = true
+            self.progressBar?.isUserInteractionEnabled = true
+            UIView.animate(withDuration: 0.15, animations: {
+                self.headerView.alpha = 1.0
+                self.commentBar.alpha = 1.0
+                self.commentsView.alpha = 1.0
+                self.progressBar?.alpha = 1.0
+            })
+        }
+    }
+    
     public lazy var content: UIImageView = {
         let view: UIImageView = UIImageView(frame: self.contentView.bounds)
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -684,12 +718,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     
     public lazy var prevView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width * 0.4, height: self.bounds.height))
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width * 0.45, height: self.bounds.height))
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 1, y: 0)
-        let dark = UIColor(white: 0.0, alpha: 0.42)
+        let dark = UIColor(white: 0.0, alpha: 0.5)
         gradient.colors = [dark.cgColor, UIColor.clear.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
