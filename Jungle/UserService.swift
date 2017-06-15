@@ -56,7 +56,6 @@ class UserService {
         }
     }
 
-//    
     static func sendFCMToken() {
         if let token = InstanceID.instanceID().token() {
             if let user = mainStore.state.userState.user {
@@ -65,8 +64,9 @@ class UserService {
             }
         }
     }
-//
     
+    
+
     static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
         ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
 

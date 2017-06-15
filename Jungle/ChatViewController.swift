@@ -178,7 +178,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
                             
                         } else if let text = dict["text"] as? String {
                             let message = JSQMessage(senderId: senderId, senderDisplayName: "", date: date as Date!, text: text)
-                            self.messages.append(message!)
+                            //self.messages.append(message!)
                             messageBatch.append(message!)
                         }
                     }

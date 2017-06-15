@@ -10,6 +10,7 @@ import ReSwift
 
 struct AppState: StateType {
     var userState: UserState
+    var settingsState: SettingsState
     var socialState: SocialState
     var supportedVersion:Bool = false
     var viewed = [String]()
@@ -30,6 +31,7 @@ struct AppReducer: Reducer {
         
         return AppState(
             userState: UserStateReducer(action, state: state?.userState),
+            settingsState: SettingsReducer(action, state: state?.settingsState),
             socialState: SocialReducer(action: action, state: state?.socialState),
             supportedVersion: SupportedVersionReducer(action, state: state?.supportedVersion),
             viewed: ViewedReducer(action, state: state?.viewed)

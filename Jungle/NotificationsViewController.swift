@@ -18,6 +18,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     private let followCellIdentifier = "followCell"
     private var notifications = [Notification]()
     
+    var refreshIndicator:UIActivityIndicatorView!
     
     weak var notification_service:NotificationService?
     
@@ -35,6 +36,12 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         label.textAlignment = .center
         label.center = CGPoint(x: view.frame.width/2, y: 22)
         view.addSubview(label)
+        
+        refreshIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        refreshIndicator.frame = CGRect(x: view.frame.width - 44.0, y: 0, width: 44.0, height: 44.0)
+        refreshIndicator.hidesWhenStopped = true
+        
+        view.addSubview(refreshIndicator)
         
         tableView = UITableView(frame: CGRect(x: 0,y: 44,width: view.frame.width ,height: view.frame.height - 44))
         
@@ -75,7 +82,9 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         var tempNotifications = [Notification]()
         var count = 0
+        refreshIndicator.startAnimating()
         for (key, _) in notificationsDict {
+            
             service.getNotification(key, completion: { notification, seen in
                 if notification != nil {
                     tempNotifications.append(notification!)
@@ -85,6 +94,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
                     count = -1
                     self.notifications = tempNotifications.sorted(by: { $0 > $1 })
                     self.tableView.reloadData()
+                    self.refreshIndicator.stopAnimating()
                 }
             })
         }

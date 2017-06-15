@@ -23,12 +23,10 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
         state.uid = a.user.uid
         state.user = a.user
         break
-        
     case _ as UserIsUnauthenticated:
         Listeners.stopListeningToAll()
         state = UserState()
         break
-        
     case _ as UpdateUser:
         let a = action as! UpdateUser
         state.user = a.user
@@ -50,7 +48,6 @@ struct UserIsUnauthenticated: Action {}
 struct UpdateUser: Action {
     let user: User
 }
-
 
 
 struct SupportedVersion: Action {}

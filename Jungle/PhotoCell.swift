@@ -33,6 +33,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     weak var story:Story?
     weak var post:StoryItem?
 
+    @IBOutlet weak var guardView: UIView!
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -85,6 +86,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
         
+        
         getUser(withCheck: check, uid: story.uid, completion: { check, user in
             if self.check != check { return }
             if user != nil {
@@ -100,8 +102,9 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
         getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, item, image, fromFile in
             
-            if self.check != check { return }
             
+            if self.check != check { return }
+            self.guardView.isHidden = !item.shouldBlock
             self.imageView.image = image
             if !fromFile {
                 self.imageView.alpha = 0.0
@@ -199,6 +202,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         //self.gradient!.drawsAsynchronously = true
         //self.colorView.layer.drawsAsynchronously = true
 
+        guardView.isHidden = !post.shouldBlock
         
         UploadService.retrieveImage(withCheck: self.check, key: post.key, url: post.downloadUrl) { _check, image, fromFile in
 

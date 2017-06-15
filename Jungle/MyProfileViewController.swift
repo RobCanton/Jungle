@@ -259,11 +259,23 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
 extension MyProfileViewController: ProfileHeaderProtocol {
     
     func showFollowers() {
-       
+        guard let _user = user else { return }
+        guard let _uid = uid else { return }
+        if _user.followers == 0 { return }
+        let controller = UsersListViewController()
+        controller.type = .Followers
+        controller.uid = _uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func showFollowing() {
-       
+        guard let _user = user else { return }
+        guard let _uid = uid else { return }
+        if _user.following == 0 { return }
+        let controller = UsersListViewController()
+        controller.type = .Following
+        controller.uid = _uid
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func showConversation() {}

@@ -54,7 +54,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         contentView.addSubview(videoContent)
         contentView.addSubview(gradientView)
         contentView.addSubview(prevView)
-        contentView.addSubview(headerView)
         
         /* Info view */
         infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: 0)
@@ -67,6 +66,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         contentView.addSubview(commentsView)
         
         videoContent.isHidden = true
+        
+        contentView.addSubview(guardView)
+        
+        contentView.addSubview(headerView)
         
         /* Activity view */
         activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 44, height: 44), type: .ballBeat, color: UIColor.white, padding: 1.0)
@@ -195,14 +198,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.dismissPopup(true)
     }
     
-    func handleFooterAction() {
-        delegate?.showComments()
-    }
-    
-    func showComments() {
-        delegate?.showComments()
-    }
-    
     func liked(_ liked:Bool) {
         guard let item = self.item else { return }
         if liked {
@@ -212,6 +207,9 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         }
     }
     
+    func refreshPulled() {
+        itemStateController.retrievePreviousComments()
+    }
     
     func animateIndicator() {
         self.content.alpha = 0.6
@@ -263,6 +261,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         let item = items[viewIndex]
         self.item = item
 
+        guardView.isHidden = !item.shouldBlock
         content.image = UploadService.readImageFromFile(withKey: item.key)
         videoContent.isHidden = true
         
@@ -324,10 +323,18 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.headerView.setNumLikes(numLikes)
     }
     
+    func itemStateDidChange(numComments: Int) {
+        self.headerView.setNumComments(numComments)
+    }
+    
     func itemStateDidChange(comments: [Comment]) {
         print("itemStateDidChange")
         self.headerView.setNumComments(comments.count)
         self.commentsView.setTableComments(comments: comments, animated: true)
+    }
+    
+    func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {
+        
     }
     
     func itemStateDidChange(subscribed: Bool) {
@@ -771,6 +778,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
+        return view
+    }()
+    
+    lazy var guardView: UIView = {
+        var view: UIView = UINib(nibName: "GuardView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+        view.frame = self.bounds
         return view
     }()
 

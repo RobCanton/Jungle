@@ -349,9 +349,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     }
     
     func getHeader() -> FollowingHeader? {
-        for x in collectionView.indexPathsForVisibleSupplementaryElements(ofKind: UICollectionElementKindSectionHeader) {
-            print(x)
-        }
+
         if let header = collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? FollowingHeader {
             
             return header

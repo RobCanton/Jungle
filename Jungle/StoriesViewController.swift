@@ -11,9 +11,7 @@ import UIKit
 import View2ViewTransition
 
 protocol PopupProtocol: class {
-    func showComments()
     func showMore()
-    func editCaption()
     func showUser(_ uid:String)
     func showPlace(_ location:Location) 
     func dismissPopup(_ animated:Bool)
@@ -334,10 +332,6 @@ extension StoriesViewController: StoryCommentsProtocol {
 }
 
 extension StoriesViewController: PopupProtocol {
-    func editCaption() {
-        
-    }
-
 
     func dismissPopup(_ animated:Bool) {
         getCurrentCell()?.pause()
@@ -365,12 +359,6 @@ extension StoriesViewController: PopupProtocol {
     
     func showPlace(_ location:Location) {
     
-    }
-    
-    func showUsersList(_ uids:[String], _ title:String) {}
-    
-    func showComments() {
-        
     }
     
     func showMore() {

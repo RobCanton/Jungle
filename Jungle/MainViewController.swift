@@ -80,10 +80,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     fileprivate var notifications:NotificationsViewController!
     fileprivate var profile:MyProfileViewController!
     
-    
-    fileprivate var returningFollowingIndex:IndexPath?
-    fileprivate var returningPeopleIndex:IndexPath?
-    fileprivate var returningPlacesCell:PhotoCell?
     fileprivate var flashView:UIView!
     fileprivate var uploadCoordinate:CLLocation?
     
@@ -402,22 +398,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if let ri = returningFollowingIndex {
-            if let cell = places.topCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
-                cell.fadeInInfo(animated: true)
-            }
-        }
-        returningFollowingIndex = nil
-        
-        if let ri = returningPeopleIndex {
-            if let cell = places.midCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
-                cell.fadeInInfo(animated: true)
-            }
-        }
-        returningPeopleIndex = nil
-        
-        returningPlacesCell?.fadeInInfo(animated: true)
-        returningPlacesCell = nil
+
         if self.navigationController?.delegate === transitionController {
             self.navigationController?.delegate = nil
             recordBtn.isUserInteractionEnabled = true
@@ -971,7 +952,7 @@ extension MainViewController: View2ViewTransitionPresenting {
             guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
-            return cell.imageView
+            return cell
         } else if storyType == .UserStory {
             guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
                 return UIView()
@@ -994,26 +975,6 @@ extension MainViewController: View2ViewTransitionPresenting {
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
 
-if !isPresenting {
-            if storyType == .NearbyPost {
-                if let cell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell {
-                    
-                    returningPlacesCell?.fadeInInfo(animated: false)
-                    returningPlacesCell = cell
-                    returningPlacesCell!.fadeOutInfo()
-                }
-            } else if storyType == .UserStory {
-                if let ri = returningFollowingIndex {
-                    if let oldCell = places.topCollectionViewRef?.cellForItem(at: ri) as? FollowingPhotoCell {
-                        oldCell.fadeInInfo(animated: false)
-                    }
-                }
-                if let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell {
-                    returningFollowingIndex = indexPath
-                    cell.fadeOutInfo()
-                }
-            }
-        }
        
         
         if storyType == .UserStory {

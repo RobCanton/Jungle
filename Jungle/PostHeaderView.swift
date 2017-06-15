@@ -12,7 +12,6 @@ protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
     func dismiss()
-    func showComments()
 }
 
 class PostHeaderView: UIView {
@@ -95,7 +94,6 @@ class PostHeaderView: UIView {
     @IBOutlet weak var timeLabel2: UILabel!
     
     func commentsTapped() {
-        delegate?.showComments()
     }
     
     func clean() {

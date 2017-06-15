@@ -56,6 +56,8 @@
 		B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */; };
 		B07313C31EA69FCA00405F06 /* SortOptionsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B07313C21EA69FCA00405F06 /* SortOptionsView.xib */; };
 		B07313C51EA69FDE00405F06 /* SortOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07313C41EA69FDE00405F06 /* SortOptionsView.swift */; };
+		B08FBE021EF24C8C00F29DF4 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08FBE011EF24C8C00F29DF4 /* AuthService.swift */; };
+		B08FBE041EF24DEB00F29DF4 /* SettingsReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08FBE031EF24DEB00F29DF4 /* SettingsReducer.swift */; };
 		B091B6071ECC22DA0031B057 /* GapCollectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B091B6051ECC22DA0031B057 /* GapCollectionHeader.swift */; };
 		B091B6081ECC22DA0031B057 /* GapCollectionHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B091B6061ECC22DA0031B057 /* GapCollectionHeader.xib */; };
 		B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B093FF9A1E790CD500011B43 /* Main.storyboard */; };
@@ -101,6 +103,7 @@
 		B0AE229C1E7A509E00141709 /* PostHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AE229A1E7A509E00141709 /* PostHeaderView.swift */; };
 		B0AE229D1E7A509E00141709 /* PostHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AE229B1E7A509E00141709 /* PostHeaderView.xib */; };
 		B0B0E3BE1EC24EC7005DC0C1 /* HomeStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */; };
+		B0C867831EF26D0C00BE7F14 /* GuardView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C867821EF26D0C00BE7F14 /* GuardView.xib */; };
 		B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D301E7FC6B40067E004 /* Listeners.swift */; };
 		B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D321E805DC50067E004 /* ChatViewController.swift */; };
 		B0C86D361E8078190067E004 /* MessagesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D351E8078190067E004 /* MessagesTableViewController.swift */; };
@@ -216,6 +219,8 @@
 		B07169B11E83B4EB00AF6A41 /* ProfileTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileTabHeader.xib; sourceTree = "<group>"; };
 		B07313C21EA69FCA00405F06 /* SortOptionsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SortOptionsView.xib; sourceTree = "<group>"; };
 		B07313C41EA69FDE00405F06 /* SortOptionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortOptionsView.swift; sourceTree = "<group>"; };
+		B08FBE011EF24C8C00F29DF4 /* AuthService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		B08FBE031EF24DEB00F29DF4 /* SettingsReducer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsReducer.swift; sourceTree = "<group>"; };
 		B091B6051ECC22DA0031B057 /* GapCollectionHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GapCollectionHeader.swift; sourceTree = "<group>"; };
 		B091B6061ECC22DA0031B057 /* GapCollectionHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GapCollectionHeader.xib; sourceTree = "<group>"; };
 		B093FF931E790CD500011B43 /* Jungle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jungle.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -263,6 +268,7 @@
 		B0AE229A1E7A509E00141709 /* PostHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHeaderView.swift; sourceTree = "<group>"; };
 		B0AE229B1E7A509E00141709 /* PostHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostHeaderView.xib; sourceTree = "<group>"; };
 		B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeStateController.swift; sourceTree = "<group>"; };
+		B0C867821EF26D0C00BE7F14 /* GuardView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GuardView.xib; sourceTree = "<group>"; };
 		B0C86D301E7FC6B40067E004 /* Listeners.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Listeners.swift; sourceTree = "<group>"; };
 		B0C86D321E805DC50067E004 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		B0C86D351E8078190067E004 /* MessagesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesTableViewController.swift; sourceTree = "<group>"; };
@@ -522,6 +528,7 @@
 				B0C86D301E7FC6B40067E004 /* Listeners.swift */,
 				B093FFAD1E790D5E00011B43 /* LocationService.swift */,
 				B06BFD721ED2D4360052EC08 /* MessageService.swift */,
+				B08FBE011EF24C8C00F29DF4 /* AuthService.swift */,
 				B04DFB581E94C8300016FE5D /* NotificationService.swift */,
 				B05091B71EB936CB001B84B1 /* Reachability.swift */,
 				B093FFB51E790D5E00011B43 /* UploadService.swift */,
@@ -539,6 +546,7 @@
 				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
 				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
 				B07169A81E83681B00AF6A41 /* PostViewController.swift */,
+				B0C867821EF26D0C00BE7F14 /* GuardView.xib */,
 				B0168B551EEE4649001069C4 /* ItemStateController.swift */,
 				B0DF82401EDFB36700461DD8 /* CommentItemBar.swift */,
 				B0DF823E1EDFB34500461DD8 /* CommentItemBar.xib */,
@@ -607,6 +615,7 @@
 			children = (
 				B0F894881E7BD52C00E490C4 /* AppState.swift */,
 				B0F8948E1E7BD60900E490C4 /* UserReducer.swift */,
+				B08FBE031EF24DEB00F29DF4 /* SettingsReducer.swift */,
 				B0F894921E7BD68800E490C4 /* SocialReducer.swift */,
 			);
 			name = State;
@@ -751,6 +760,7 @@
 				B0550DAB1E91EE25007DAAAC /* UserViewCell.xib in Resources */,
 				B0C86D3C1E807B9C0067E004 /* ConversationViewCell.xib in Resources */,
 				B0550D991E8E21C4007DAAAC /* Info.plist in Resources */,
+				B0C867831EF26D0C00BE7F14 /* GuardView.xib in Resources */,
 				B0550D891E8E17A2007DAAAC /* NotificationTableViewCell.xib in Resources */,
 				B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */,
 				B0A6FCDD1EC45AB4009933F8 /* EmptyCollectionHeader.xib in Resources */,
@@ -845,6 +855,7 @@
 				B0C86D361E8078190067E004 /* MessagesTableViewController.swift in Sources */,
 				B0F894761E7BAED100E490C4 /* CommentsHeaderView.swift in Sources */,
 				B0F894991E7C717F00E490C4 /* ProfileHeaderView.swift in Sources */,
+				B08FBE041EF24DEB00F29DF4 /* SettingsReducer.swift in Sources */,
 				B0F8946A1E7B7E1500E490C4 /* CommentsViewController.swift in Sources */,
 				B0DF823D1EDFB0CB00461DD8 /* CommentsOverlayTableView.swift in Sources */,
 				B0F894841E7BD41400E490C4 /* CreateAccountViewController.swift in Sources */,
@@ -930,6 +941,7 @@
 				B07169B01E83B4D600AF6A41 /* ProfileTabHeader.swift in Sources */,
 				B0550D9D1E8E21C4007DAAAC /* MadokaTextField.swift in Sources */,
 				B0F894A61E7F250F00E490C4 /* MainTabBarController.swift in Sources */,
+				B08FBE021EF24C8C00F29DF4 /* AuthService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

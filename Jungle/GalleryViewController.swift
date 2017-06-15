@@ -153,11 +153,9 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         let commentsTopY = cell.infoView.frame.origin.y - commentsTableHeight
         
         
-        if keyboardUp {
-            if point.y > commentsTopY {
+            if point.y > commentsTopY || point.y < authorBottomY {
                 return false
             }
-        }
         
         let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
         let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
@@ -175,9 +173,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             }
             return false
         } else {
-            if translate.y < 0 {
-                cell.commentBar.textField.becomeFirstResponder()
+            if let item = cell.storyItem {
+                if translate.y < 0 && !item.shouldBlock {
+                    cell.commentBar.textField.becomeFirstResponder()
+                }
             }
+
         }
         
         return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
@@ -295,16 +296,6 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    
-    func showOptions() {
-    }
-    
-    func showComments() {
-        //globalMainInterfaceProtocol?.navigationPush(withController: commentsViewController, animated: true)
-    }
-    
-    func editCaption() {}
-    
     func showMore() {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else {
@@ -387,13 +378,6 @@ extension GalleryViewController: PopupProtocol {
         
     }
     
-    func handleDismiss() {
-        
-    }
-    
-    func showDeleteOptions() {
-        
-    }
 }
 
 

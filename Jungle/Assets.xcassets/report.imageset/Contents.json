@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "Attention_32.png",
+      "filename" : "icons8-Attention_32.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Attention_50.png",
+      "filename" : "icons8-Attention_50.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Attention_100.png",
+      "filename" : "icons8-Attention_100.png",
       "scale" : "3x"
     }
   ],

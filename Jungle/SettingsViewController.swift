@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import ReSwift
 
 class SettingsContainerViewController: UIViewController {
     
@@ -32,7 +33,7 @@ class SettingsContainerViewController: UIViewController {
     
 }
 
-class SettingsViewController: UITableViewController {
+class SettingsViewController: UITableViewController, StoreSubscriber {
 
     @IBOutlet weak var emailCell: UITableViewCell!
     @IBOutlet weak var pushNotificationsSwitch: UISwitch!
@@ -74,7 +75,7 @@ class SettingsViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        mainStore.subscribe(self)
         if let email = UserService.email {
             emailCell.detailTextLabel?.text = email
         } else {
@@ -83,7 +84,15 @@ class SettingsViewController: UITableViewController {
         
         emailCell.detailTextLabel?.textColor = UserService.isEmailVerified ? UIColor.lightGray : errorColor
         emailCell.textLabel?.textColor = UserService.isEmailVerified ? UIColor.black : errorColor
-        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        mainStore.unsubscribe(self)
+    }
+    
+    func newState(state: AppState) {
+        flaggedContentSwitch.isOn = state.settingsState.allowFlaggedContent
     }
     
     
@@ -117,6 +126,13 @@ class SettingsViewController: UITableViewController {
     }
     
     @IBAction func flaggedContentSwitched(_ sender: UISwitch) {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("users/settings/\(uid)/allows_flagged_content")
+        if sender.isOn {
+            ref.setValue(true)
+        } else {
+            ref.removeValue()
+        }
         
     }
     

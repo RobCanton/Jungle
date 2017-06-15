@@ -42,7 +42,7 @@ class StoryItem: NSObject, NSCoding {
     }
     private(set) var numViews:Int
     
-    var flagged:Bool
+    private(set) var numReports:Int
 
     
     var viewers:[String:Double]
@@ -57,7 +57,7 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  flagged:Bool, colorHexcode:String?)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  numReports:Int, colorHexcode:String?)
     {
         
         self.key          = key
@@ -72,12 +72,12 @@ class StoryItem: NSObject, NSCoding {
         self.viewers      = viewers
         self.likes        = likes
         self.comments     = comments
-        self.flagged      = flagged
         self.numViews     = numViews
         self.numLikes     = numLikes
         self.numComments  = numComments
         self.numCommenters = numCommenters
         self.popularity   = popularity
+        self.numReports   = numReports
         self.colorHexcode = colorHexcode
         
     }
@@ -99,6 +99,7 @@ class StoryItem: NSObject, NSCoding {
         let numComments = decoder.decodeObject(forKey: "numComments") as! Int
         let numCommenters = decoder.decodeObject(forKey: "numCommenters") as! Int
         let popularity      = decoder.decodeObject(forKey: "popularity") as! Double
+        let numReports = decoder.decodeObject(forKey: "numReports") as! Int
         let colorHexcode    = decoder.decodeObject(forKey: "color") as? String
         var viewers = [String:Double]()
         if let _viewers = decoder.decodeObject(forKey: "viewers") as? [String:Double] {
@@ -127,7 +128,7 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, flagged: flagged, colorHexcode: colorHexcode)
+        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, numReports: numReports, colorHexcode: colorHexcode)
     }
     
     
@@ -151,10 +152,11 @@ class StoryItem: NSObject, NSCoding {
         if videoURL != nil {
             coder.encode(videoURL!, forKey: "videoURL")
         }
-        coder.encode(flagged, forKey: "flagged")
+        
         coder.encode(numComments, forKey: "numComments")
         coder.encode(numViews, forKey: "numViews")
         coder.encode(numLikes, forKey: "numLikes")
+        coder.encode(numReports, forKey: "numReports")
         coder.encode(popularity, forKey: "popularity")
         coder.encode(colorHexcode, forKey: "colorHexcode")
     }
@@ -261,6 +263,14 @@ class StoryItem: NSObject, NSCoding {
         dataCache.removeObject(forKey: "upload-\(key)" as NSString)
         dataCache.setObject(self, forKey: "upload-\(key)" as NSString)
     }
+    
+    var shouldBlock:Bool {
+        get {
+            print("\(numReports) : \(mainStore.state.settingsState.allowFlaggedContent)")
+            return numReports > 0 && !mainStore.state.settingsState.allowFlaggedContent
+        }
+    }
+    
 }
 
 func < (lhs: StoryItem, rhs: StoryItem) -> Bool {

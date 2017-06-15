@@ -18,13 +18,13 @@ class Listeners {
     fileprivate static var listeningToFollowers = false
     fileprivate static var listeningToFollowing = false
     fileprivate static var listeningToViewed = false
-    
     fileprivate static var listenForForcedRefersh = false
     
     static func stopListeningToAll() {
 
         stopListeningToFollowers()
         stopListeningToFollowing()
+        stopListeningToSettings()
         stopListeningToViewed()
         stopListeningForForcedRefresh()
     }
@@ -34,7 +34,6 @@ class Listeners {
         let refreshRef = ref.child("operational/refresh/\(uid)")
         refreshRef.observe(.value, with: { snapshot in
             if snapshot.exists() {
-                print("Force refresh")
                 globalMainInterfaceProtocol?.fetchAllStories()
                 refreshRef.removeValue()
             }
@@ -49,7 +48,6 @@ class Listeners {
     
    
     static func startListeningToFollowers() {
-        print("START LISTENING TO FOLLOWERS")
         if !listeningToFollowers {
             listeningToFollowers = true
             let current_uid = mainStore.state.userState.uid
@@ -77,7 +75,6 @@ class Listeners {
     }
     
     static func startListeningToFollowing() {
-        print("START LISTENING TO FOLLOWING")
         if !listeningToFollowing {
             listeningToFollowing = true
             let current_uid = mainStore.state.userState.uid
@@ -87,7 +84,6 @@ class Listeners {
              Listen for a Following Added
              */
             followingRef.observe(.childAdded, with: { snapshot in
-                print("\n\nFAMMM!!\n\n")
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(AddFollowing(uid: snapshot.key))
@@ -107,7 +103,6 @@ class Listeners {
                     }
                 }
             })
-            
         }
     }
     
@@ -115,14 +110,35 @@ class Listeners {
         let current_uid = mainStore.state.userState.uid
         ref.child("social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowers = false
-        print("STOP LISTENING TO FOLLOWERS")
     }
     
     static func stopListeningToFollowing() {
         let current_uid = mainStore.state.userState.uid
         ref.child("social/followers/\(current_uid)").removeAllObservers()
         listeningToFollowing = false
-        print("STOP LISTENING TO FOLLOWERING")
+    }
+    
+    static func startListeningToSettings() {
+        let current_uid = mainStore.state.userState.uid
+        let settingsRef = ref.child("users/settings/\(current_uid)")
+        
+        settingsRef.child("allows_flagged_content").observe(.value, with: { snapshot in
+            if let value = snapshot.value as? Bool {
+                if value {
+                    mainStore.dispatch(AllowFlaggedContent())
+                    return
+                }
+            }
+            
+            mainStore.dispatch(BlockFlaggedContent())
+            
+        }, withCancel: nil)
+    }
+    
+    static func stopListeningToSettings() {
+        let current_uid = mainStore.state.userState.uid
+        let settingsRef = ref.child("users/settings/\(current_uid)")
+        settingsRef.child("allows_flagged_content").removeAllObservers()
     }
     
     static func startListeningToViewed() {

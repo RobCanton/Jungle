@@ -43,7 +43,6 @@ class UploadService {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).jpg")
         let exists = FileManager.default.fileExists(atPath: dataPath.path)
-        print("Image exists: \(exists)")
         return exists
     }
     
@@ -51,7 +50,6 @@ class UploadService {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_video-\(key).mp4")
         let exists = FileManager.default.fileExists(atPath: dataPath.path)
-        print("Video exists: \(exists)")
         return exists
     }
     
@@ -492,7 +490,6 @@ class UploadService {
                     let viewers = [String:Double]()
                     let likes = [String:Double]()
                     let comments = [Comment]()
-                    let flagged = false
                     
                     var numViews = 0
                     if let _views = dict["views"] as? Int {
@@ -519,12 +516,17 @@ class UploadService {
                         popularity = _popularity
                     }
                     
+                    var numReports = 0
+                    if let _numReports = dict["reports"] as? Int {
+                        numReports = _numReports
+                    }
+                    
                     var color:String?
                     if let hex = dict["color"] as? String {
                         color = hex
                     }
                     
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers,likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, flagged: flagged, colorHexcode: color)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color)
                     dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -677,10 +679,8 @@ class UploadService {
     static func reportItem(item:StoryItem, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
-        let reportRef = ref.child("reports/\(uid):\(item.key)")
+        let reportRef = ref.child("reports/posts/\(item.key)/\(uid)")
         let value: [String: Any] = [
-            "sender": uid,
-            "itemKey": item.key,
             "type": type.rawValue,
             "timestamp": [".sv": "timestamp"]
         ]

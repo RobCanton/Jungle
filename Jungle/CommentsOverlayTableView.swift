@@ -11,6 +11,7 @@ import UIKit
 
 protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
+    func refreshPulled()
 }
 
 class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSource, CommentCellProtocol {
@@ -36,6 +37,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         delegate?.showUser(uid)
     }
     
+    var header:UIView!
     func setup() {
         self.clipsToBounds = true
         let gradient = CAGradientLayer()
@@ -55,9 +57,14 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         tableView.separatorColor = UIColor(white: 0.1, alpha: 0)
         tableView.separatorInset = UIEdgeInsets.zero
         tableView.backgroundColor = UIColor.clear//(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
+        header = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 0))
+        header.backgroundColor = UIColor.green
+
+        
         tableView.tableHeaderView = UIView()
         tableView.showsVerticalScrollIndicator = false
         tableView.tableFooterView = UIView()
+        
 
         self.addSubview(tableView)
         
@@ -71,12 +78,17 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         
         refreshControl = UIRefreshControl()
         refreshControl.tintColor = UIColor.white
+        refreshControl.backgroundColor = UIColor.clear
+
         refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
         tableView.addSubview(self.refreshControl)
     }
     
+    var lastKey:String?
     func handleRefresh() {
-        print("refresh")
+        delegate?.refreshPulled()
+        let firstComment = comments[0]
+        lastKey = firstComment.key
     }
     
     func setTableComments(comments:[Comment], animated:Bool)
@@ -87,8 +99,41 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         scrollBottom(animated: animated)
     }
     
+    func endRefreshing(comments: [Comment], didRetrievePreviousComments: Bool) {
+        
+        self.refreshControl.endRefreshing()
+        if didRetrievePreviousComments {
+            self.comments = comments
+            divider.isHidden = hasCaption || comments.count == 0
+            reloadTable()
+            if lastKey != nil {
+                var scrollToIndex:IndexPath?
+                for i in 0..<comments.count {
+                    if comments[i].key == lastKey {
+                        scrollToIndex = IndexPath(row: i, section: 0)
+                        break
+                    }
+                }
+                if scrollToIndex != nil {
+                    tableView.scrollToRow(at: scrollToIndex!, at: .middle, animated: false)
+                    lastKey = nil
+                    scrollToIndex = nil
+                }
+                
+            }
+        } else {
+            self.refreshControl.isEnabled = false
+            self.refreshControl.removeFromSuperview()
+        }
+    }
     
     func reloadTable() {
+        
+        if comments.count >= 6 {
+            header.frame = CGRect(x: 0, y: 0, width: header.frame.width, height: 30)
+        } else {
+            header.frame = CGRect(x: 0, y: 0, width: header.frame.width, height:0)
+        }
         
         tableView.reloadData()
         
@@ -127,7 +172,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         let text = comment.text
         let width = tableView.frame.width - (10 + 8 + 10 + 32)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 26 + 4 + 1.5  // +8 for some bio padding
+        let height2 = size.height + 26 + 3   // +8 for some bio padding
         return height2
     }
     

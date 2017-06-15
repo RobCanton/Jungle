@@ -30,7 +30,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
         contentView.addSubview(gradientView)
-        contentView.addSubview(headerView)
         
         /* Info view */
         infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: 0)
@@ -42,12 +41,17 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
         contentView.addSubview(commentsView)
         
+        contentView.addSubview(guardView)
+        
+        contentView.addSubview(headerView)
+        
         videoContent.isHidden = true
         
         /* Activity view */
         activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
         activityView.center = contentView.center
         contentView.addSubview(activityView)
+        
         
         /* Item State Controller */
         itemStateController = ItemStateController()
@@ -62,6 +66,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         videoContent.isHidden = true
         storyItem.delegate = self
         
+        guardView.isHidden = !post.shouldBlock
         content.image = UploadService.readImageFromFile(withKey: post.key)
 
         itemStateController.removeAllObservers()
@@ -72,11 +77,13 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        
     }
     
     func setOverlays() {
         guard let item = storyItem else { return }
-        
+
         commentBar.setup(item.authorId == mainStore.state.userState.uid)
         
         self.headerView.setup(item)
@@ -101,7 +108,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        //commentsView.setTableComments(comments: item.comments, animated: false)
+        commentsView.setTableComments(comments: item.comments, animated: false)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -117,10 +124,16 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.headerView.setNumLikes(numLikes)
     }
     
+    func itemStateDidChange(numComments: Int) {
+        self.headerView.setNumComments(numComments)
+    }
+    
     func itemStateDidChange(comments: [Comment]) {
-        print("Num comments changed: \(comments.count)")
-        self.headerView.setNumComments(comments.count)
         self.commentsView.setTableComments(comments: comments, animated: true)
+    }
+    
+    func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {
+        commentsView.endRefreshing(comments: comments, didRetrievePreviousComments: didRetrievePreviousComments)
     }
     
     func itemStateDidChange(subscribed: Bool) {
@@ -134,6 +147,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func itemDownloaded() {
         guard let item = storyItem else { return }
+
         if let image = UploadService.readImageFromFile(withKey: item.key) {
             
             if item.contentType == .image {
@@ -241,13 +255,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.dismissPopup(true)
     }
 
-    func handleFooterAction() {
-        delegate?.showComments()
-    }
-    
-    func showComments() {
-        delegate?.showComments()
-    }
     
     func liked(_ liked:Bool) {
         guard let item = self.storyItem else { return }
@@ -256,6 +263,10 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         } else {
             UploadService.removeLike(post: item)
         }
+    }
+    
+    func refreshPulled() {
+        itemStateController.retrievePreviousComments()
     }
 
     func animateIndicator() {
@@ -307,6 +318,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func playVideo() {
+        guard let item = self.storyItem else { return }
+        if item.shouldBlock { return }
         self.playerLayer?.player?.play()
     }
     
@@ -510,6 +523,12 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
+        return view
+    }()
+    
+    lazy var guardView: UIView = {
+        var view: UIView = UINib(nibName: "GuardView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+        view.frame = self.bounds
         return view
     }()
 
