@@ -81,24 +81,11 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
     }
     
-    func prepareStory(withLocation location:LocationStory, cellIndex: Int, atIndex index:Int?) {
-        clearStoryView()
-        shouldAutoPause = true
-        self.cellIndex = cellIndex
-        viewIndex = index ?? 0
-        self.story = location
-        self.story.delegate = self
-        story.determineState()
-        
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-    }
-    
     func saveIndex() {
         returnIndex = viewIndex
     }
     
-    func prepareStory(withStory story:UserStory, cellIndex: Int,  atIndex index:Int?) {
+    func prepareStory(withStory story:Story, cellIndex: Int,  atIndex index:Int?) {
         clearStoryView()
         shouldAutoPause = true
         self.cellIndex = cellIndex
@@ -269,7 +256,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         itemStateController.delegate = self
         itemStateController.setupItem(item)
         
-        self.headerView.setupLocation(locationKey: item.locationKey)
         
         setOverlays()
         

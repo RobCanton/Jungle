@@ -29,21 +29,13 @@ class UserStory:Story {
 
 
 class LocationStory:Story {
-    fileprivate var locationKey:String
-    fileprivate var distance:Double
+    private(set) var locationKey:String
+    private(set) var distance:Double
     
     init(postKeys:[(String,Double)], locationKey:String, distance:Double) {
         self.locationKey = locationKey
         self.distance = distance
         super.init(postKeys: postKeys)
-    }
-    
-    func getLocationKey() -> String {
-        return locationKey
-    }
-    
-    func getDistance() -> Double {
-        return distance
     }
     
     

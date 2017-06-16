@@ -25,6 +25,7 @@ protocol MainInterfaceProtocol {
     func fetchAllStories()
     func statusBar(hide: Bool, animated:Bool)
     func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentBannerStory(stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath )
     func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
@@ -94,6 +95,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     fileprivate var screenMode:ScreenMode = .Main
     
     fileprivate var storyType:StoryType = .UserStory
+    
+    fileprivate var presentationType:PresentationType = .homeCollection
     
     fileprivate lazy var cancelButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
@@ -556,7 +559,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
-        storyType = .NearbyPost
+        presentationType = .homeCollection
+        
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
@@ -568,13 +572,30 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
-    func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+    func presentBannerStory(stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath ) {
         guard let nav = self.navigationController else { return }
-        storyType = .NearbyPost
+        presentationType = .homeHeader
         
         let storiesViewController: StoriesViewController = StoriesViewController()
-        storiesViewController.storyType = .UserStory
-        storiesViewController.userStories = userStories
+        storiesViewController.stories = stories
+        
+        transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
+                                         "initialIndexPath": initialIndexPath as AnyObject]
+        transitionController.cornerRadius = 4.5
+        storiesViewController.transitionController = transitionController
+        
+        nav.delegate = transitionController
+        recordBtn.isUserInteractionEnabled = false
+        scrollView.isScrollEnabled = false
+        transitionController.push(viewController: storiesViewController, on: self, attached: storiesViewController)
+    }
+    
+    func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+        guard let nav = self.navigationController else { return }
+        presentationType = .homeCollection
+        
+        let storiesViewController: StoriesViewController = StoriesViewController()
+        storiesViewController.stories = userStories
         
         transitionController.userInfo = ["destinationIndexPath": destinationIndexPath as AnyObject,
                                          "initialIndexPath": initialIndexPath as AnyObject]
@@ -591,7 +612,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
-        storyType = .ProfileStory
+        presentationType = .profileCollection
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.posts = posts
         galleryViewController.transitionController = self.transitionController
@@ -605,7 +626,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
-        storyType = .NotificationPost
+        presentationType = .notificationTable
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.showCommentsOnAppear = true
         galleryViewController.isSingleItem = true
@@ -920,86 +941,83 @@ extension MainViewController: View2ViewTransitionPresenting {
         }
         
         let i =  IndexPath(row: indexPath.item, section: 0)
-        if storyType == .NearbyPost {
+        switch presentationType {
+        case .homeCollection:
             let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
-        } else if storyType == .UserStory {
+        case .homeHeader:
             guard let headerCollectionView = places.topCollectionViewRef else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
-            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
-            return convertedFrame//view.convert(rect, to: view)
-        } else if storyType == .ProfileStory {
-            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
-            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
-        } else if storyType == .NotificationPost {
+        case .notificationTable:
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: i)! as! NotificationTableViewCell
             let image_frame = cell.postImageView.frame
             let navHeight = self.navigationController!.navigationBar.frame.height + 20.0
             let y = cell.frame.origin.y + image_frame.origin.y + navHeight - notifications.tableView.contentOffset.y//+ navHeight
             let rect = CGRect(x: image_frame.origin.x, y: y, width: image_frame.width, height: image_frame.height)// CGRectMake(x,y,image_height, image_height)
             return view.convert(rect, to: view)
-        } else {
-            return CGRect.zero
+        case .profileCollection:
+            let cell: PhotoCell = profile.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return convertedFrame
         }
+
     }
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
         let i = IndexPath(row: indexPath.item, section: 0)
-        if storyType == .NearbyPost{
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else {
-                return UIView()
-            }
+        switch presentationType {
+        case .homeCollection:
+            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else { return UIView() }
             return cell
-        } else if storyType == .UserStory {
-            guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else {
-                return UIView()
-            }
-            return cell.imageView
-        } else if storyType == .ProfileStory{
+        case .homeHeader:
+            guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+            return cell.container
+        case .notificationTable:
+            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
+            return cell.postImageView
+        case .profileCollection:
             guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
                 return UIView()
             }
-            return cell.imageView
-        } else if storyType == .NotificationPost {
-            let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
-            return cell.postImageView
-        } else {
-            return UIView()
+            return cell
         }
         
     }
     
     func prepareInitialView(_ userInfo: [String : AnyObject]?, isPresenting: Bool) {
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-
-       
         
-        if storyType == .UserStory {
-            if !isPresenting, let c = places.topCollectionViewRef {
-                if !c.indexPathsForVisibleItems.contains(indexPath) {
-                    c.reloadData()
-                    c.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-                    c.layoutIfNeeded()
+        if !isPresenting {
+            switch presentationType {
+            case .homeCollection:
+                if !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                    places.collectionView!.reloadData()
+                    places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                    places.collectionView!.layoutIfNeeded()
                 }
-            }
-        }
-      
-        if storyType == .NearbyPost {
-            if !isPresenting && !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                places.collectionView!.reloadData()
-                places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
-                places.collectionView!.layoutIfNeeded()
-            }
-        }
-        
-        if storyType == .ProfileStory {
-            if !isPresenting && !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                profile.collectionView!.reloadData()
-                profile.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
-                profile.collectionView!.layoutIfNeeded()
+                break
+            case .homeHeader:
+                if let bannerCollectionView = places.topCollectionViewRef {
+                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
+                        bannerCollectionView.reloadData()
+                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+                        bannerCollectionView.layoutIfNeeded()
+                    }
+                }
+                break
+            case .notificationTable:
+                break
+            case .profileCollection:
+                if !profile.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                    profile.collectionView!.reloadData()
+                    profile.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                    profile.collectionView!.layoutIfNeeded()
+                }
+                break
             }
         }
     }
@@ -1011,7 +1029,7 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func topView() -> UIView {
-        if storyType == .NearbyPost || storyType == .UserStory {
+        if presentationType == .homeCollection {
             if let view = places.header.snapshotImageTransparent() {
                 let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 88.0 + 20.0))
                 topView.backgroundColor = UIColor.black
@@ -1061,4 +1079,8 @@ enum ScreenMode {
 
 enum StoryType {
     case NearbyPost, UserStory, ProfileStory, NotificationPost
+}
+
+enum PresentationType {
+    case homeCollection, homeHeader, profileCollection, notificationTable
 }

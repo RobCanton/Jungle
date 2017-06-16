@@ -246,7 +246,10 @@ class UploadService {
                             for type in place.types {
                                 updateValues["places/info/\(place.placeID)/types/\(type)"] = true
                             }
+                            updateValues["places/coords/\(placeId)/lat"] = place.coordinate.latitude
+                            updateValues["places/coords/\(placeId)/lon"] = place.coordinate.longitude
                             updateValues["places/posts/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
+                            updateValues["places/story/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
                         }
                     }
 

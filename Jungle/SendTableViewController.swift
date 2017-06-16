@@ -262,7 +262,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 cell.lockState()
             } else if indexPath.row == 1 {
                 cell.label.text = "Your Story"
-                cell.subtitle.text = "Share with your followers"
+                cell.subtitle.text = "Share with your followers for 24 hours"
                 cell.toggleSelection(upload.toStory)
             } else if indexPath.row == 2 {
                 cell.label.text = "Nearby"

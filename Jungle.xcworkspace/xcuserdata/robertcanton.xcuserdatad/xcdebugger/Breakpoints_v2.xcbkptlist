@@ -230,11 +230,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/FollowingPhotoCell.swift"
-            timestampString = "516775412.01708"
+            timestampString = "519291533.712425"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
+            startingLineNumber = "26"
+            endingLineNumber = "26"
             landmarkName = "awakeFromNib()"
             landmarkType = "7">
          </BreakpointContent>
@@ -246,11 +246,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoryViewController.swift"
-            timestampString = "519211772.671017"
+            timestampString = "519294372.775836"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "704"
-            endingLineNumber = "704"
+            startingLineNumber = "690"
+            endingLineNumber = "690"
             landmarkName = "StoryViewController"
             landmarkType = "3">
          </BreakpointContent>
@@ -310,11 +310,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoriesViewController.swift"
-            timestampString = "519162402.603388"
+            timestampString = "519290063.350551"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "70"
-            endingLineNumber = "70"
+            startingLineNumber = "67"
+            endingLineNumber = "67"
             landmarkName = "viewDidAppear(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -450,11 +450,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/Story.swift"
-            timestampString = "518945565.69101"
+            timestampString = "519296260.150838"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
+            startingLineNumber = "79"
+            endingLineNumber = "79"
             landmarkName = "Story"
             landmarkType = "3">
          </BreakpointContent>
@@ -498,11 +498,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/MainViewController.swift"
-            timestampString = "519202554.713139"
+            timestampString = "519290811.566114"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "334"
-            endingLineNumber = "334"
+            startingLineNumber = "337"
+            endingLineNumber = "337"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -656,11 +656,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoriesViewController.swift"
-            timestampString = "519162402.603388"
+            timestampString = "519290063.350551"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "279"
-            endingLineNumber = "279"
+            startingLineNumber = "270"
+            endingLineNumber = "270"
             landmarkName = "scrollViewDidEndDecelerating(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -672,11 +672,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/MainViewController.swift"
-            timestampString = "519202554.713139"
+            timestampString = "519290811.566114"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "176"
-            endingLineNumber = "176"
+            startingLineNumber = "179"
+            endingLineNumber = "179"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -704,11 +704,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "519207621.239359"
+            timestampString = "519253689.503989"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "732"
-            endingLineNumber = "732"
+            startingLineNumber = "735"
+            endingLineNumber = "735"
             landmarkName = "reportComment(itemKey:commentKey:type:completion:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -720,11 +720,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/UploadService.swift"
-            timestampString = "519207621.239359"
+            timestampString = "519253689.503989"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "733"
-            endingLineNumber = "733"
+            startingLineNumber = "736"
+            endingLineNumber = "736"
             landmarkName = "reportComment(itemKey:commentKey:type:completion:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -784,11 +784,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Jungle/StoryViewController.swift"
-            timestampString = "519211772.671017"
+            timestampString = "519294372.775836"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "281"
-            endingLineNumber = "281"
+            startingLineNumber = "267"
+            endingLineNumber = "267"
             landmarkName = "setupItem()"
             landmarkType = "7">
          </BreakpointContent>

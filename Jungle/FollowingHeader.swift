@@ -20,11 +20,8 @@ let distances = [1, 5, 10, 25, 50, 100, 200]
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
     @IBOutlet weak var collectionViewFollowing: UICollectionView!
-    @IBOutlet weak var collectionViewPeople: UICollectionView!
     
     let cellIdentifier = "userPhotoCell"
-    var collectionView:UICollectionView!
-    var collectionView2:UICollectionView!
     var itemSideLength:CGFloat!
     
     @IBOutlet weak var stackView: UIStackView!
@@ -34,11 +31,8 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     @IBOutlet weak var followingBanner: UIView!
     @IBOutlet weak var storiesBanner: UIView!
-    @IBOutlet weak var placesBanner: UIView!
-    
-    var myStory:UserStory!
-    var topStories = [UserStory]()
-    var bottomStories = [UserStory]()
+
+    var topStories = [Story]()
     
     weak var stateRef:HomeStateController?
     var mode:SortedBy = .Popular
@@ -61,7 +55,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
-        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.75
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.78
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -98,23 +92,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         layout2.minimumLineSpacing = 0.0
         layout2.scrollDirection = .horizontal
         
-        collectionViewPeople.setCollectionViewLayout(layout2, animated: false)
-        //let nib = UINib(nibName: "FollowingPhotoCell", bundle: nil)
-        collectionViewPeople.register(nib, forCellWithReuseIdentifier: cellIdentifier)
-        
-        let headerNib2 = UINib(nibName: "EmptyCollectionHeader", bundle: nil)
-        
-        collectionViewPeople.register(headerNib2, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView")
-        
-        collectionViewPeople.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
-        collectionViewPeople.backgroundColor = UIColor.clear
-        collectionViewPeople.dataSource = self
-        collectionViewPeople.delegate = self
-        collectionViewPeople.reloadData()
-        collectionViewPeople.showsHorizontalScrollIndicator = false
-        //collectionViewPeople.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        print("LOADED YO")
-        
         //resetStack()
     }
     
@@ -129,15 +106,11 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         stackView.addArrangedSubview(followingBanner)
         stackView.addArrangedSubview(collectionViewFollowing)
         stackView.addArrangedSubview(storiesBanner)
-        stackView.addArrangedSubview(collectionViewPeople)
-        stackView.addArrangedSubview(placesBanner)
         
         settingsView.isHidden = false
         followingBanner.isHidden = false
         collectionViewFollowing.isHidden = false
         storiesBanner.isHidden = false
-        collectionViewPeople.isHidden = false
-        placesBanner.isHidden = false
     }
     
     func removeStackView(view:UIView) {
@@ -159,104 +132,49 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             removeStackView(view: followingBanner)
             removeStackView(view: collectionViewFollowing)
             removeStackView(view: storiesBanner)
-            removeStackView(view: collectionViewPeople)
-            removeStackView(view: placesBanner)
             break
         case .Nearby:
+            topStories = state.nearbyPlaceStories
+            if topStories.count == 0 {
+                removeStackView(view: storiesBanner)
+                removeStackView(view: followingBanner)
+                removeStackView(view: collectionViewFollowing)
+            }
             removeStackView(view: followingBanner)
-            removeStackView(view: collectionViewFollowing)
-            removeStackView(view: storiesBanner)
-            removeStackView(view: collectionViewPeople)
-            removeStackView(view: placesBanner)
             break
         case .Recent:
             removeStackView(view: settingsView)
             removeStackView(view: followingBanner)
             removeStackView(view: collectionViewFollowing)
             removeStackView(view: storiesBanner)
-            removeStackView(view: collectionViewPeople)
-            removeStackView(view: placesBanner)
             break
         }
 
+        
+    
+        
         collectionViewFollowing.reloadData()
-        collectionViewPeople.reloadData()
     }
     
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        if kind == UICollectionElementKindSectionHeader {
-            if indexPath.section == 0 && myStory.count == 0 {
-                let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView", for: indexPath as IndexPath) as! EmptyCollectionHeader
-                return view
-            } else if indexPath.section == 1 && myStory.count > 0 {
-                let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView", for: indexPath as IndexPath) as! GapCollectionHeader
-                return view
-            }
-        }
-        
-        return UICollectionReusableView()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        switch collectionView {
-        case collectionViewFollowing:
-            if section == 0 {
-                return getItemSize()
-            } else if section == 1 && myStory.count > 0 && topStories.count > 0 {
-                return CGSize(width: 12.0, height: itemSideLength * 1.3333)
-            }
-            return CGSize.zero
-        default:
-            return CGSize.zero
-        }
-    }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        var sections = 0
-        switch collectionView {
-        case collectionViewFollowing:
-            break
-        case collectionViewPeople:
-            sections = 1
-            break
-        default:
-            break
-        }
-        return sections
+        return 1
     }
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        var count = 0
-        switch collectionView {
-        case collectionViewFollowing:
-            break
-        case collectionViewPeople:
-            count = bottomStories.count
-            break
-        default:
-            break
-        }
-        return count
+        return topStories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        if collectionView == collectionViewFollowing {
-            var story:UserStory!
-            if indexPath.section == 0 && myStory.count > 0 {
-            } else {
-                story = topStories[indexPath.row]
-            }
 
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
-            cell.setupFollowingCell(story, showDot: true)
-            return cell
-        } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
-            cell.setupFollowingCell(bottomStories[indexPath.row], showDot: false)
-            return cell
+        let story = topStories[indexPath.row]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
+        if let locationStory = story as? LocationStory {
+            cell.setupCell(withPlaceStory: locationStory, showDot: false)
         }
+        //cell.setupFollowingCell(story, showDot: true)
+        return cell
+
     }
     
 
@@ -267,27 +185,13 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let destinationPath = IndexPath(item: indexPath.item, section: 0)
-        switch collectionView {
-        case collectionViewFollowing:
-            var story:UserStory!
-            var stories:[UserStory]!
-            
-            if indexPath.section == 0 {
-                story = myStory
-                stories = [myStory]
-            } else {
-                story = topStories[indexPath.row]
-                stories = topStories
-            }
-            
-            break
-        case collectionViewPeople:
-            let story = bottomStories[indexPath.row]
-            
-            break
-        default:
-            break
+        let story = topStories[indexPath.row]
+        story.determineState()
+        if story.state == .contentLoaded {
+            //globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            globalMainInterfaceProtocol?.presentBannerStory(stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        } else {
+            story.downloadFirstItem()
         }
         collectionView.deselectItem(at: indexPath, animated: true)
 
@@ -316,7 +220,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         let value = Int(sender.value)
         sliderLabels?.value = UInt(value)
         let distance = distances[value]
-        print("DISTANCE SELECTED: \(distance)")
         LocationService.sharedInstance.radius = distance
         LocationService.sharedInstance.requestNearbyLocations()
         animateShow = false

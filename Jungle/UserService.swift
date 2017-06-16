@@ -217,15 +217,20 @@ class UserService {
     
     static func getUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
         
-        let storyRef = ref.child("users/story/\(uid)")
+        let storyRef = ref.child("users/story/\(uid)/posts")
         
         storyRef.observeSingleEvent(of: .value, with: { snapshot in
+            
             var story:UserStory?
-            if let dict = snapshot.value as? [String:AnyObject], let _postsKeys = dict["posts"]  as? [String:Double] {
-                let postKeys:[(String,Double)] = _postsKeys.valueKeySorted
-                story = UserStory(postKeys: postKeys, uid: uid)
-
+            var postKeys = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                postKeys.append((childSnap.key, childSnap.value as! Double))
             }
+            if postKeys.count > 0 {
+                story = UserStory(postKeys: postKeys, uid: uid)
+            }
+            
             completion(story)
         
         }, withCancel: { error in

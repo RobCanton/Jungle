@@ -21,11 +21,8 @@ protocol PopupProtocol: class {
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
     weak var transitionController: TransitionController!
-    var storyType:StoryType = .UserStory
     
-    var locationStories = [LocationStory]()
     var stories:[Story]!
-    var userStories = [UserStory]()
     
     var collectionContainerView:UIView!
     var collectionView:UICollectionView!
@@ -244,10 +241,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if storyType == .UserStory {
-            return userStories.count
-        }
-        return locationStories.count
+        return stories.count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -257,12 +251,9 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: StoryViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! StoryViewController
         cell.delegate = self
-        if storyType == .UserStory {
-            
-            cell.prepareStory(withStory: userStories[indexPath.item], cellIndex: indexPath.item, atIndex: startIndex)
-        } else {
-            cell.prepareStory(withLocation: locationStories[indexPath.item], cellIndex: indexPath.item,  atIndex: startIndex)
-        }
+        
+        cell.prepareStory(withStory: stories[indexPath.item], cellIndex: indexPath.item, atIndex: startIndex)
+        
         if firstCell {
             firstCell = false
         }
@@ -358,7 +349,12 @@ extension StoriesViewController: PopupProtocol {
     }
     
     func showPlace(_ location:Location) {
-    
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PlaceViewController()
+        controller.place = location
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func showMore() {

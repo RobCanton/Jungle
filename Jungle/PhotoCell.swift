@@ -100,6 +100,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             }
         })
         
+        
+        
         getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, item, image, fromFile in
             
             

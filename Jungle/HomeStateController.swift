@@ -83,6 +83,7 @@ class HomeStateController {
     }
     
     func fetchAll() {
+        observeNearbyPlaces()
         observeNearbyPosts()
         observePopularPosts()
         fetchFollowing()
@@ -141,7 +142,6 @@ class HomeStateController {
                     let uid = mainStore.state.userState.uid
                     self.followingStories = stories.sorted(by: { return $0 > $1 })
                     
-                    print("stories: \(self.followingStories.count)")
                     DispatchQueue.main.async {
                         self.delegate?.update(.Recent)
                     }
@@ -193,6 +193,50 @@ class HomeStateController {
                 }
                 
             })
+        }
+    }
+    
+    fileprivate func observeNearbyPlaces() {
+        let uid = mainStore.state.userState.uid
+        nearbyPlacesRef?.removeAllObservers()
+        nearbyPlacesRef = UserService.ref.child("users/location/nearby/\(uid)/places")
+        nearbyPlacesRef?.queryOrderedByValue().observe(.value, with: { snapshot in
+            var places = [String:Double]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                let key = childSnap.key
+                if let distance = childSnap.value as? Double {
+                    places[key] = distance
+                }
+            }
+            self.downloadNearbyPlacesStories(places)
+        })
+    }
+    
+    fileprivate func downloadNearbyPlacesStories(_ places:[String:Double]) {
+        var placesStories = [LocationStory]()
+        if places.count == 0 {
+            self.nearbyPlaceStories = placesStories
+            delegate?.update(.Nearby)
+            return
+        }
+        var count = 0
+        for (key, distance) in places {
+            LocationService.sharedInstance.getLocationStory(key, withDistance: distance) { story in
+                if story != nil {
+                    placesStories.append(story!)
+                }
+                count += 1
+                if count >= places.count {
+                    count = -1
+                    let uid = mainStore.state.userState.uid
+                    self.nearbyPlaceStories = placesStories.sorted(by: { return $0 > $1 })
+                    
+                    DispatchQueue.main.async {
+                        self.delegate?.update(.Nearby)
+                    }
+                }
+            }
         }
     }
     

@@ -49,11 +49,12 @@ class PostHeaderView: UIView {
     
     func setup(_ item:StoryItem) {
         
+        clean()
+        
         setupLocation(locationKey: item.locationKey)
         setNumLikes(item.numLikes)
         setNumComments(item.numComments)
-
-        clean()
+        
         UserService.getUser(item.authorId, completion: { _user in
             guard let user = _user else { return }
             self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
@@ -126,9 +127,9 @@ class PostHeaderView: UIView {
             timeLabel2.isHidden = true
             timeLabel.isHidden = false
             locationTitle.text = "Loading..."
-            LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, location in
+            LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, _location in
                 if self.locationKey != key { return }
-                self.locationRetrieved(location)
+                self.locationRetrieved(_location)
             }
         } else {
             timeLabel2.isHidden = false
@@ -141,6 +142,7 @@ class PostHeaderView: UIView {
     func locationRetrieved(_ location:Location?) {
         self.locationKey = ""
         self.location = location
+        
         if location != nil {
             locationTitle.text = location!.name
             locationIcon.isHidden = false

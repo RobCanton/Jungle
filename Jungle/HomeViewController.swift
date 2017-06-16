@@ -220,7 +220,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
             topCollectionViewRef = view.collectionViewFollowing
-            midCollectionViewRef = view.collectionViewPeople
             view.setupStories(mode: sortMode, state: state)
             view.sliderLabels = self.sliderLabels
             view.segmentedControl = self.control
@@ -233,13 +232,17 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
+        let bannerHeight:CGFloat = 32
+        let collectionViewHeight:CGFloat = getItemSize().height * 0.78
+        
         var verticalHeight:CGFloat = 0
         
         switch sortMode {
-        case .Popular:
-            break
         case .Nearby:
             verticalHeight += 48
+            verticalHeight += state.nearbyPlaceStories.count > 0 ? collectionViewHeight + bannerHeight : 0
+            break
+        case .Popular:
             break
         case .Recent:
             break

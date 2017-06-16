@@ -86,6 +86,36 @@ class LocationService: NSObject {
             completion(locationKey, location)
         }
     }
+    
+    func getLocationInfo(withCheck check:Int, locationKey:String, completion: @escaping (_ check:Int, _ location:Location?)->()) {
+        getLocationInfo(locationKey) { location in
+            completion(check, location)
+        }
+    }
+    func getLocationStory(_ key:String, withDistance distance:Double, completion: @escaping ((_ story:LocationStory?)->())) {
+        
+        let storyRef = Database.database().reference().child("places/story/\(key)")
+        
+        storyRef.queryOrderedByValue().observeSingleEvent(of: .value, with: { snapshot in
+            var story:LocationStory?
+            var postKeys = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                postKeys.append((childSnap.key, childSnap.value as! Double))
+            }
+
+            if postKeys.count > 0 {
+                story = LocationStory(postKeys: postKeys, locationKey: key, distance: distance)
+            }
+            
+            completion(story)
+            
+        }, withCancel: { error in
+            completion(nil)
+        })
+    }
+    
+
 }
 
 extension Dictionary where Value: Comparable {

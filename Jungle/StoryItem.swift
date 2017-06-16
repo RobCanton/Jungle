@@ -266,7 +266,6 @@ class StoryItem: NSObject, NSCoding {
     
     var shouldBlock:Bool {
         get {
-            print("\(numReports) : \(mainStore.state.settingsState.allowFlaggedContent)")
             return numReports > 0 && !mainStore.state.settingsState.allowFlaggedContent
         }
     }
