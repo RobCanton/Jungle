@@ -14,6 +14,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var colorView: UIView!
+    @IBOutlet weak var timeLabel: UILabel!
     
     var check:Int = 0
     var gradient:CAGradientLayer?
@@ -41,7 +42,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         case .itemInfoLoaded:
             break
         case .loadingContent:
-            
+            timeLabel.text = "Loading..."
             UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
                 self.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
             }, completion: { _ in
@@ -49,18 +50,19 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             })
             break
         case .contentLoaded:
+            self.timeLabel.text = story.date.timeStringSinceNow()
             UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
                 self.transform = CGAffineTransform.identity
             }, completion: { _ in
                 
             })
-
+            
             break
         }
     }
 
     
-    func setupFollowingCell (_ story:UserStory, showDot: Bool) {
+    func setupCell(withUserStory story:UserStory, showDot: Bool) {
         
 
         self.story = story
@@ -70,6 +72,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         check += 1
         self.imageView.image = nil
         self.nameLabel.text = ""
+        self.timeLabel.text = ""
         self.colorView.alpha = 0.0
 
         
@@ -80,13 +83,13 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                     self.nameLabel.text = "Me"
                     self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightBold)
                 } else {
-                    self.nameLabel.text = user!.username
+                    self.nameLabel.text = user!.fullname
                     self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
                 }
             }
         })
         
-
+        self.timeLabel.text = story.date.timeStringSinceNow()
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
@@ -120,6 +123,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             }
             
             self.nameLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
             
         })
     }
@@ -134,6 +138,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         check += 1
         self.imageView.image = nil
         self.nameLabel.text = ""
+        self.timeLabel.text = ""
         self.colorView.alpha = 0.0
         
         LocationService.sharedInstance.getLocationInfo(withCheck: check, locationKey: story.locationKey) { check, location in
@@ -144,15 +149,13 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             }
         }
         
+        self.timeLabel.text = story.date.timeStringSinceNow()
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
-        print("Upload key: \(story.lastPostKey)")
-        
         getUploadImage(withCheck: check, key: story.lastPostKey, completion: { check, item, image, fromFile in
-            print("got it")
             if self.check != check { return }
-            print("Set dat image yo")
+            
             self.imageView.image = image
             if !fromFile {
                 self.imageView.alpha = 0.0
@@ -179,7 +182,8 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                 self.colorView.alpha = photoCellColorAlpha
             }
             
-            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.6, height: 1.0, shouldRasterize: true)
+            self.nameLabel.applyShadow(radius: 2.5, opacity: 0.5, height: 1.0, shouldRasterize: true)
+            self.timeLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
         })
     }
     

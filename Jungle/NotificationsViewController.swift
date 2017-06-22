@@ -80,6 +80,12 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     func notificationsUpdated(_ notificationsDict: [String : Bool]) {
         guard let service = notification_service else { return }
         
+        if notificationsDict.count == 0 {
+            self.tableView.reloadData()
+            self.refreshIndicator.stopAnimating()
+            return
+        }
+        
         var tempNotifications = [Notification]()
         var count = 0
         refreshIndicator.startAnimating()

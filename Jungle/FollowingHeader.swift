@@ -8,8 +8,6 @@
 
 import UIKit
 
-import TGPControls
-import TwicketSegmentedControl
 func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
     
 }
@@ -19,43 +17,40 @@ let distances = [1, 5, 10, 25, 50, 100, 200]
 
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
-    @IBOutlet weak var collectionViewFollowing: UICollectionView!
+    @IBOutlet weak var collectionView: UICollectionView!
     
     let cellIdentifier = "userPhotoCell"
     var itemSideLength:CGFloat!
     
     @IBOutlet weak var stackView: UIStackView!
-    @IBOutlet weak var settingsView: UIView!
 
-    @IBOutlet weak var slider: TGPDiscreteSlider!
-    
-    @IBOutlet weak var followingBanner: UIView!
-    @IBOutlet weak var storiesBanner: UIView!
+    @IBOutlet weak var topBanner: UIView!
+    @IBOutlet weak var topLabel: UILabel!
+    @IBOutlet weak var bottomHeader: UIView!
+    @IBOutlet weak var bottomLabel: UILabel!
 
+    @IBOutlet weak var longDivider: UIView!
     var topStories = [Story]()
     
     weak var stateRef:HomeStateController?
-    var mode:SortedBy = .Popular
+
     
-    weak var sliderLabels:TGPCamelLabels?
-    weak var segmentedControl:TwicketSegmentedControl?
-    
+    @IBOutlet weak var stackTopAnchor: NSLayoutConstraint!
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        var distanceLabels = [String]()
-        for distance in distances {
-            distanceLabels.append("\(distance) km")
-        }
-        slider.addTarget(self,
-                         action: #selector(valueChanged(_:event:)),
-                         for: .valueChanged)
+//        var distanceLabels = [String]()
+//        for distance in distances {
+//            distanceLabels.append("\(distance) km")
+//        }
+//        slider.addTarget(self,
+//                         action: #selector(valueChanged(_:event:)),
+//                         for: .valueChanged)
+//        
+//        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
+//        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
-        slider.addTarget(self, action: #selector(down), for: .touchDown)
-        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
-        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
-        
-        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.78
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.72
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -64,25 +59,21 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         layout.minimumLineSpacing = 0.0
         layout.scrollDirection = .horizontal
         
-        collectionViewFollowing.setCollectionViewLayout(layout, animated: false)
+        collectionView.setCollectionViewLayout(layout, animated: false)
         
         let nib = UINib(nibName: "FollowingPhotoCell", bundle: nil)
-        collectionViewFollowing.register(nib, forCellWithReuseIdentifier: cellIdentifier)
+        collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
          let headerNib = UINib(nibName: "EmptyCollectionHeader", bundle: nil)
         
-        collectionViewFollowing.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView")
+        collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView")
         
-        let headerNib3 = UINib(nibName: "GapCollectionHeader", bundle: nil)
-        
-        collectionViewFollowing.register(headerNib3, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView")
-        
-        collectionViewFollowing.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
-        collectionViewFollowing.backgroundColor = UIColor.clear
-        collectionViewFollowing.dataSource = self
-        collectionViewFollowing.delegate = self
-        collectionViewFollowing.reloadData()
-        collectionViewFollowing.showsHorizontalScrollIndicator = false
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
+        collectionView.backgroundColor = UIColor.clear
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.reloadData()
+        collectionView.showsHorizontalScrollIndicator = false
         //collectionViewFollowing.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         let layout2 = UICollectionViewFlowLayout()
@@ -96,21 +87,24 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     var discoverLabel:UILabel?
+    var section:Int = 0
     
     func resetStack() {
         for view in stackView.arrangedSubviews {
             stackView.removeArrangedSubview(view)
         }
+        //stackView.addArrangedSubview(gapView)
+
+        stackView.addArrangedSubview(topBanner)
+        stackView.addArrangedSubview(collectionView)
+        stackView.addArrangedSubview(bottomHeader)
         
-        stackView.addArrangedSubview(settingsView)
-        stackView.addArrangedSubview(followingBanner)
-        stackView.addArrangedSubview(collectionViewFollowing)
-        stackView.addArrangedSubview(storiesBanner)
+    
+        topBanner.isHidden = false
+        collectionView.isHidden = false
+        bottomHeader.isHidden = false
         
-        settingsView.isHidden = false
-        followingBanner.isHidden = false
-        collectionViewFollowing.isHidden = false
-        storiesBanner.isHidden = false
+        longDivider.isHidden = true
     }
     
     func removeStackView(view:UIView) {
@@ -120,40 +114,43 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         view.isHidden = true
     }
     
-    func setupStories(mode:SortedBy, state: HomeStateController) {
-        self.mode = mode
+    func setupStories(state: HomeStateController, section:Int) {
+        self.section = section
         self.stateRef = state
         
         resetStack()
-        
-        switch mode {
-        case .Popular:
-            removeStackView(view: settingsView)
-            removeStackView(view: followingBanner)
-            removeStackView(view: collectionViewFollowing)
-            removeStackView(view: storiesBanner)
-            break
-        case .Nearby:
-            topStories = state.nearbyPlaceStories
+
+        switch section {
+        case 0:
+            //removeStackView(view: topBanner)
+            topStories = state.followingStories
+            topLabel.text = "FOLLOWING"
+            bottomLabel.text = "POPULAR"
+            
             if topStories.count == 0 {
-                removeStackView(view: storiesBanner)
-                removeStackView(view: followingBanner)
-                removeStackView(view: collectionViewFollowing)
+                removeStackView(view: topBanner)
+                removeStackView(view: collectionView)
             }
-            removeStackView(view: followingBanner)
+            
+            if state.popularPosts.count == 0 {
+                removeStackView(view: bottomHeader)
+            }
             break
-        case .Recent:
-            removeStackView(view: settingsView)
-            removeStackView(view: followingBanner)
-            removeStackView(view: collectionViewFollowing)
-            removeStackView(view: storiesBanner)
+        case 1:
+            topStories = state.nearbyPlaceStories
+            topLabel.text = "NEARBY"
+            bottomLabel.text = ""
+            longDivider.isHidden = false
+            break
+        default:
             break
         }
 
         
-    
         
-        collectionViewFollowing.reloadData()
+        
+        
+        collectionView.reloadData()
     }
     
     
@@ -171,8 +168,10 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
         if let locationStory = story as? LocationStory {
             cell.setupCell(withPlaceStory: locationStory, showDot: false)
+        } else if let userStory = story as? UserStory {
+            cell.setupCell(withUserStory: userStory, showDot: false)
         }
-        //cell.setupFollowingCell(story, showDot: true)
+        
         return cell
 
     }
@@ -189,7 +188,11 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         story.determineState()
         if story.state == .contentLoaded {
             //globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            globalMainInterfaceProtocol?.presentBannerStory(stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            if section == 0 {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeHeader, stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            } else {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            }
         } else {
             story.downloadFirstItem()
         }
@@ -198,46 +201,21 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func getItemSize() -> CGSize {
-        return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
+        return CGSize(width: itemSideLength, height: itemSideLength * 1.25)
     }
     
-    var animateShow = false
-    
-    func down() {
-        animateShow = true
-        UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
-            self.segmentedControl?.alpha = 0.0
-        }) { _ in
-            if self.animateShow {
-                UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseIn, animations: {
-                    self.sliderLabels?.alpha = 1.0
-                })
-            }
-        }
-    }
-    
-    func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
-        let value = Int(sender.value)
-        sliderLabels?.value = UInt(value)
-        let distance = distances[value]
-        LocationService.sharedInstance.radius = distance
-        LocationService.sharedInstance.requestNearbyLocations()
-        animateShow = false
-        UIView.animate(withDuration: 0.15, delay: 0.5, options: .curveEaseIn, animations: {
-            self.sliderLabels?.alpha = 0.0
-        }) { _ in
-            if !self.animateShow {
-                UIView.animate(withDuration: 0.15, delay: 0.0, options: .curveEaseOut, animations: {
-                    self.segmentedControl?.alpha = 1.0
-                })
-            }
-        }
-        
-    }
-    
-    func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
-        sliderLabels?.value = UInt(sender.value)
-    }
+//    func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
+//        let value = Int(sender.value)
+//        sliderLabels?.value = UInt(value)
+//        let distance = distances[value]
+//        LocationService.sharedInstance.radius = distance
+//        LocationService.sharedInstance.requestNearbyLocations()
+//        
+//    }
+//    
+//    func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
+//        sliderLabels?.value = UInt(sender.value)
+//    }
     
     
 }

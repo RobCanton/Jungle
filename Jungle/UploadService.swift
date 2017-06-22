@@ -223,10 +223,20 @@ class UploadService {
                         obj["caption"] = caption
                     }
                     
+                
+                    
                     var updateValues: [String : Any] = [
                         "uploads/meta/\(postKey)": obj,
                         "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
                     ]
+                    
+                    if upload.toStory || upload.toNearby {
+                        updateValues["uploads/live/\(postKey)/t"] = [".sv": "timestamp"]
+                        updateValues["uploads/live/\(postKey)/a"] = uid
+                        if let place = upload.place {
+                            updateValues["uploads/live/\(postKey)/p"] = place.placeID
+                        }
+                    }
 
                     
                     if upload.toStory {
@@ -249,7 +259,8 @@ class UploadService {
                             updateValues["places/coords/\(placeId)/lat"] = place.coordinate.latitude
                             updateValues["places/coords/\(placeId)/lon"] = place.coordinate.longitude
                             updateValues["places/posts/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
-                            updateValues["places/story/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
+                            updateValues["places/story/\(placeId)/\(postKey)/t"] = [".sv": "timestamp"]
+                            updateValues["places/story/\(placeId)/\(postKey)/u"] = uid
                         }
                     }
 
@@ -373,7 +384,11 @@ class UploadService {
                                     for type in place.types {
                                         updateValues["places/info/\(place.placeID)/types/\(type)"] = true
                                     }
+                                    updateValues["places/coords/\(placeId)/lat"] = place.coordinate.latitude
+                                    updateValues["places/coords/\(placeId)/lon"] = place.coordinate.longitude
                                     updateValues["places/posts/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
+                                    updateValues["places/story/\(placeId)/\(postKey)/t"] = [".sv": "timestamp"]
+                                    updateValues["places/story/\(placeId)/\(postKey)/u"] = uid
                                 }
                             }
                             
@@ -608,7 +623,7 @@ class UploadService {
         post.addView(uid)
         
         let updateObject = [
-            "users/viewed/\(uid)/\(post.key)": true,
+            "users/viewed/\(uid)/\(post.key)": [".sv":"timestamp"],
             "uploads/views/\(post.key)/\(uid)": [".sv":"timestamp"]
         ] as [String : Any]
         
@@ -665,8 +680,9 @@ class UploadService {
     
     static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
         let ref = Database.database().reference()
+
         let postRef = ref.child("uploads/meta/\(item.key)")
-        postRef.removeValue(completionBlock: { error, ref in
+        postRef.removeValue { error, ref in
             if error == nil {
                 dataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
                 globalMainInterfaceProtocol?.fetchAllStories()
@@ -676,7 +692,7 @@ class UploadService {
                 Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete.")
                 return completion(false)
             }
-        })
+        }
     }
     
     static func reportItem(item:StoryItem, type:ReportType, completion:@escaping ((_ success:Bool)->())) {

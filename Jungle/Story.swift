@@ -42,8 +42,8 @@ class LocationStory:Story {
 }
 
 class Story {
-    fileprivate var postKeys:[(String,Double)]
-    fileprivate var posts:[String]
+    private(set)  var postKeys:[(String,Double)]
+    private(set)  var posts:[String]
     
     private(set) var lastPostKey:String
     private(set) var date:Date

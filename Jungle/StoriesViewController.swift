@@ -203,6 +203,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
+            let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! IndexPath
+            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
+            self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
             let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
             
             if keyboardUp {

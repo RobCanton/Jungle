@@ -117,7 +117,7 @@ class ItemStateController {
             if let _count = snapshot.value as? Int {
                 count = _count
             }
-            item.numLikes = count
+            item.numComments = count
             self.delegate?.itemStateDidChange(numComments: count)
             
         })

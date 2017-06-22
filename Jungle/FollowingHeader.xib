@@ -17,43 +17,8 @@
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="WKj-t0-SfA">
                     <rect key="frame" x="0.0" y="0.0" width="545" height="424"/>
                     <subviews>
-                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v3w-RE-au9">
-                            <rect key="frame" x="0.0" y="0.0" width="545" height="48"/>
-                            <subviews>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WQD-66-Rpe" customClass="TGPDiscreteSlider" customModule="TGPControls">
-                                    <rect key="frame" x="8" y="8" width="529" height="28"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="tintColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
-                                    <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="number" keyPath="tickCount">
-                                            <integer key="value" value="7"/>
-                                        </userDefinedRuntimeAttribute>
-                                        <userDefinedRuntimeAttribute type="number" keyPath="minimumValue">
-                                            <real key="value" value="0.0"/>
-                                        </userDefinedRuntimeAttribute>
-                                        <userDefinedRuntimeAttribute type="number" keyPath="value">
-                                            <real key="value" value="3"/>
-                                        </userDefinedRuntimeAttribute>
-                                        <userDefinedRuntimeAttribute type="number" keyPath="incrementValue">
-                                            <integer key="value" value="1"/>
-                                        </userDefinedRuntimeAttribute>
-                                        <userDefinedRuntimeAttribute type="size" keyPath="tickSize">
-                                            <size key="value" width="2" height="6"/>
-                                        </userDefinedRuntimeAttribute>
-                                    </userDefinedRuntimeAttributes>
-                                </view>
-                            </subviews>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            <constraints>
-                                <constraint firstAttribute="trailing" secondItem="WQD-66-Rpe" secondAttribute="trailing" constant="8" id="86o-VE-oRY"/>
-                                <constraint firstAttribute="height" constant="48" id="P5q-RQ-hw9"/>
-                                <constraint firstItem="WQD-66-Rpe" firstAttribute="leading" secondItem="v3w-RE-au9" secondAttribute="leading" constant="8" id="fhk-gc-23D"/>
-                                <constraint firstItem="WQD-66-Rpe" firstAttribute="top" secondItem="v3w-RE-au9" secondAttribute="top" constant="8" id="hIU-9j-r78"/>
-                                <constraint firstAttribute="bottom" secondItem="WQD-66-Rpe" secondAttribute="bottom" constant="12" id="vW0-5T-lln"/>
-                            </constraints>
-                        </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KWK-GF-U6d">
-                            <rect key="frame" x="0.0" y="48" width="545" height="32"/>
+                            <rect key="frame" x="0.0" y="0.0" width="545" height="32"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sMP-Fe-wPj">
                                     <rect key="frame" x="320.5" y="16" width="212.5" height="1"/>
@@ -90,10 +55,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X0T-yk-bxx">
-                            <rect key="frame" x="0.0" y="80" width="545" height="312"/>
+                            <rect key="frame" x="0.0" y="32" width="545" height="360"/>
                             <subviews>
                                 <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="4St-8H-0fB">
-                                    <rect key="frame" x="0.0" y="0.0" width="545" height="312"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="545" height="360"/>
                                     <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ipK-Vn-adu">
                                         <size key="itemSize" width="50" height="50"/>
                                         <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -112,26 +77,33 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uhQ-AP-VeA">
                             <rect key="frame" x="0.0" y="392" width="545" height="32"/>
                             <subviews>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2kL-Av-7lu">
-                                    <rect key="frame" x="309" y="16" width="224" height="1"/>
-                                    <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
-                                    <constraints>
-                                        <constraint firstAttribute="height" constant="1" id="9PE-qo-Eic"/>
-                                    </constraints>
-                                </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3D2-gu-ED6">
-                                    <rect key="frame" x="12" y="16" width="225" height="1"/>
+                                    <rect key="frame" x="12" y="16" width="220.5" height="1"/>
                                     <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="1" id="7vn-vx-Uk3"/>
                                     </constraints>
                                 </view>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="RECENT" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SNN-Rf-sUI">
-                                    <rect key="frame" x="249" y="9" width="48" height="14.5"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="POPULAR" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SNN-Rf-sUI">
+                                    <rect key="frame" x="244.5" y="9" width="57.5" height="14.5"/>
                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                                     <color key="textColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2kL-Av-7lu">
+                                    <rect key="frame" x="314" y="16" width="219" height="1"/>
+                                    <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="1" id="9PE-qo-Eic"/>
+                                    </constraints>
+                                </view>
+                                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SbF-WP-Jol">
+                                    <rect key="frame" x="12" y="15" width="521" height="1"/>
+                                    <color key="backgroundColor" white="0.94854567310000004" alpha="1" colorSpace="calibratedWhite"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="1" id="KkX-ru-cWP"/>
+                                    </constraints>
+                                </view>
                             </subviews>
                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
@@ -140,10 +112,13 @@
                                 <constraint firstAttribute="trailing" secondItem="2kL-Av-7lu" secondAttribute="trailing" constant="12" id="4Y8-eG-Rsc"/>
                                 <constraint firstItem="3D2-gu-ED6" firstAttribute="leading" secondItem="uhQ-AP-VeA" secondAttribute="leading" constant="12" id="5G2-VC-sgP"/>
                                 <constraint firstItem="2kL-Av-7lu" firstAttribute="leading" secondItem="SNN-Rf-sUI" secondAttribute="trailing" constant="12" id="7gH-ev-oQq"/>
+                                <constraint firstItem="SbF-WP-Jol" firstAttribute="leading" secondItem="uhQ-AP-VeA" secondAttribute="leading" constant="12" id="9pa-b3-aGf"/>
                                 <constraint firstItem="SNN-Rf-sUI" firstAttribute="centerY" secondItem="uhQ-AP-VeA" secondAttribute="centerY" id="PYi-uT-V46"/>
+                                <constraint firstItem="SbF-WP-Jol" firstAttribute="centerY" secondItem="uhQ-AP-VeA" secondAttribute="centerY" id="ehj-MY-pGW"/>
                                 <constraint firstItem="SNN-Rf-sUI" firstAttribute="centerX" secondItem="uhQ-AP-VeA" secondAttribute="centerX" id="fst-8U-MVV"/>
                                 <constraint firstItem="2kL-Av-7lu" firstAttribute="centerY" secondItem="uhQ-AP-VeA" secondAttribute="centerY" id="idq-8g-z51"/>
                                 <constraint firstItem="3D2-gu-ED6" firstAttribute="centerY" secondItem="uhQ-AP-VeA" secondAttribute="centerY" id="oMw-3y-5Id"/>
+                                <constraint firstAttribute="trailing" secondItem="SbF-WP-Jol" secondAttribute="trailing" constant="12" id="pZh-Ns-I6u"/>
                             </constraints>
                         </view>
                     </subviews>
@@ -158,12 +133,14 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
-                <outlet property="collectionViewFollowing" destination="4St-8H-0fB" id="NWh-cz-6hg"/>
-                <outlet property="followingBanner" destination="KWK-GF-U6d" id="Tlk-eX-6LH"/>
-                <outlet property="settingsView" destination="v3w-RE-au9" id="ZPw-fZ-wJt"/>
-                <outlet property="slider" destination="WQD-66-Rpe" id="gVu-ZG-em9"/>
+                <outlet property="bottomHeader" destination="uhQ-AP-VeA" id="ylR-yu-nie"/>
+                <outlet property="bottomLabel" destination="SNN-Rf-sUI" id="jrw-OP-LFu"/>
+                <outlet property="collectionView" destination="4St-8H-0fB" id="bm9-ff-H4A"/>
+                <outlet property="longDivider" destination="SbF-WP-Jol" id="1OC-iB-9He"/>
+                <outlet property="stackTopAnchor" destination="dje-mz-fnY" id="3eN-vD-LoK"/>
                 <outlet property="stackView" destination="WKj-t0-SfA" id="ezO-fH-NHt"/>
-                <outlet property="storiesBanner" destination="uhQ-AP-VeA" id="oym-TA-Ocx"/>
+                <outlet property="topBanner" destination="KWK-GF-U6d" id="1q0-v4-0lz"/>
+                <outlet property="topLabel" destination="9Eh-33-kfI" id="Hvf-eJ-clE"/>
             </connections>
             <point key="canvasLocation" x="-39.5" y="14"/>
         </view>

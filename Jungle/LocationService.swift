@@ -98,13 +98,20 @@ class LocationService: NSObject {
         
         storyRef.queryOrderedByValue().observeSingleEvent(of: .value, with: { snapshot in
             var story:LocationStory?
+            var contributers = [String:Bool]()
             var postKeys = [(String,Double)]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
-                postKeys.append((childSnap.key, childSnap.value as! Double))
+                if let dict = childSnap.value as? [String:Any] {
+                    let timestamp = dict["t"] as! Double
+                    let uid = dict["u"] as! String
+                    contributers[uid] = true
+                    postKeys.append((childSnap.key, timestamp))
+
+                }
             }
 
-            if postKeys.count > 0 {
+            if postKeys.count > 0 && contributers.count > 1 {
                 story = LocationStory(postKeys: postKeys, locationKey: key, distance: distance)
             }
             

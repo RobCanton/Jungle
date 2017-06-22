@@ -25,7 +25,7 @@ protocol MainInterfaceProtocol {
     func fetchAllStories()
     func statusBar(hide: Bool, animated:Bool)
     func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
-    func presentBannerStory(stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath )
+    func presentBannerStory(presentationType:PresentationType, stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath )
     func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentNotificationPost(post:StoryItem, destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
@@ -169,6 +169,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }()
     
     fileprivate var textViewPanGesture:UIPanGestureRecognizer?
+    fileprivate var textViewTapGesture:UITapGestureRecognizer!
     
     deinit {
         print("Deinit >> MainViewController")
@@ -182,6 +183,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         view.backgroundColor = UIColor.black
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        
+        textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
         
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         cameraBtnFrame = recordBtn.frame
@@ -342,6 +345,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
 
         }
         mainStore.subscribe(self)
+        
+        
         
     }
     
@@ -572,9 +577,9 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         transitionController.push(viewController: galleryViewController, on: self, attached: galleryViewController)
     }
     
-    func presentBannerStory(stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath ) {
+    func presentBannerStory(presentationType:PresentationType, stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath ) {
         guard let nav = self.navigationController else { return }
-        presentationType = .homeHeader
+        self.presentationType = presentationType
         
         let storiesViewController: StoriesViewController = StoriesViewController()
         storiesViewController.stories = stories
@@ -693,9 +698,11 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         textView.text = ""
         textView.delegate = self
         textView.backgroundColor = UIColor.clear
-        textView.textAlignment = .center
-        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height * 0.75)
+        textView.textAlignment = .left
+        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height - textView.frame.height/2 - sendButton.frame.height - 32.0)
         textView.center = textViewCenter
+        self.view.addGestureRecognizer(textViewTapGesture)
+        
         self.view.addSubview(textView)
  
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
@@ -709,18 +716,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         uploadLikelihoods = gps_service.getLikelihoods()
         
     }
-    
-    func dragTextView(pan: UIPanGestureRecognizer) {
-        if textView.text == "" { return }
-        if pan.state == .began || pan.state == .changed {
-            
-            let translation = pan.translation(in: self.view)
-            // note: 'view' is optional and need to be unwrapped
-            pan.view!.center = CGPoint(x: pan.view!.center.x, y: pan.view!.center.y + translation.y)
-            self.textViewCenter = pan.view!.center
-            pan.setTranslation(CGPoint.zero, in: self.view)
-        }
-    }
+
     
     func hideEditOptions() {
         cancelButton.removeFromSuperview()
@@ -728,7 +724,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         captionButton.removeFromSuperview()
         //locationButton.removeFromSuperview()
         textView.removeFromSuperview()
-    
+        self.view.removeGestureRecognizer(textViewTapGesture)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -738,6 +734,14 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         uploadLikelihoods = []
         statusBarShouldHide = false
         self.setNeedsStatusBarAppearanceUpdate()
+    }
+    
+    func editCaptionTapped() {
+        if textView.isFirstResponder {
+            textView.resignFirstResponder()
+        } else {
+            textView.becomeFirstResponder()
+        }
     }
     
     func recordButtonTapped() {
@@ -943,11 +947,16 @@ extension MainViewController: View2ViewTransitionPresenting {
         let i =  IndexPath(row: indexPath.item, section: 0)
         switch presentationType {
         case .homeCollection:
-            let cell: PhotoCell = places.collectionView!.cellForItem(at: i)! as! PhotoCell
+            let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
         case .homeHeader:
             guard let headerCollectionView = places.topCollectionViewRef else { return CGRect.zero }
+            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
+            let convertedFrame = cell.convert(cell.container.frame, to: self.view)
+            return convertedFrame
+        case .homeNearbyHeader:
+            guard let headerCollectionView = places.midCollectionViewRef else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
@@ -971,10 +980,13 @@ extension MainViewController: View2ViewTransitionPresenting {
         let i = IndexPath(row: indexPath.item, section: 0)
         switch presentationType {
         case .homeCollection:
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: i) as? PhotoCell else { return UIView() }
+            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
             return cell
         case .homeHeader:
             guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+            return cell.container
+        case .homeNearbyHeader:
+            guard let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
             return cell.container
         case .notificationTable:
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
@@ -1009,6 +1021,15 @@ extension MainViewController: View2ViewTransitionPresenting {
                     }
                 }
                 break
+            case .homeNearbyHeader:
+                if let bannerCollectionView = places.midCollectionViewRef {
+                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
+                        bannerCollectionView.reloadData()
+                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+                        bannerCollectionView.layoutIfNeeded()
+                    }
+                }
+                break
             case .notificationTable:
                 break
             case .profileCollection:
@@ -1031,15 +1052,19 @@ extension MainViewController: View2ViewTransitionPresenting {
     func topView() -> UIView {
         if presentationType == .homeCollection {
             if let view = places.header.snapshotImageTransparent() {
-                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 88.0 + 20.0))
+                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
                 topView.backgroundColor = UIColor.black
                 
-                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 88.0))
+                let bottomEdge = UIView(frame: CGRect(x: 0, y: topView.frame.height - 32.0, width: topView.frame.width, height: 32.0))
+                bottomEdge.backgroundColor = UIColor.white
+                
+                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
                 white.backgroundColor = UIColor.white
                 white.layer.cornerRadius = 16.0
                 white.clipsToBounds = true
-                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 88.0))
+                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
                 t.image = view
+                topView.addSubview(bottomEdge)
                 topView.addSubview(white)
                 topView.addSubview(t)
                 return topView
@@ -1082,5 +1107,5 @@ enum StoryType {
 }
 
 enum PresentationType {
-    case homeCollection, homeHeader, profileCollection, notificationTable
+    case homeCollection, homeHeader, homeNearbyHeader, profileCollection, notificationTable
 }

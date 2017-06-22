@@ -12,13 +12,13 @@ import Firebase
 import ReSwift
 import MapKit
 import TGPControls
-import TwicketSegmentedControl
+import SwiftMessages
 
 enum SortedBy {
     case Popular, Nearby, Recent
 }
 
-class HomeViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, StoreSubscriber, TwicketSegmentedControlDelegate, HomeProtocol {
+class HomeViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, StoreSubscriber, HomeProtocol {
     var state:HomeStateController!
     
     let cellIdentifier = "photoCell"
@@ -28,64 +28,19 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var collectionView:UICollectionView!
     
     var masterNav:UINavigationController?
-    var sortMode:SortedBy = .Nearby
     weak var gps_service:GPSService!
     
     var tabHeader:PlacesTabHeader!
     
-    var control:TwicketSegmentedControl!
     var refreshButton:UIButton!
     var refreshIndicator:UIActivityIndicatorView!
     
     var isFollowingMode = false
     
+    var sortOptionsHidden = true
     
     var topCollectionViewRef:UICollectionView?
     var midCollectionViewRef:UICollectionView?
-    
-    func didSelect(_ segmentIndex: Int) {
-        var selectedMode:SortedBy = .Nearby
-        switch segmentIndex {
-        case 1:
-            selectedMode = .Popular
-            break
-        case 2:
-            selectedMode = .Recent
-            break
-        default:
-            break
-        }
-        
-        if selectedMode == sortMode { return }
-        
-        UIView.animate(withDuration: 0.12, delay: 0.0, options: .curveEaseOut, animations: {
-            self.collectionView.alpha = 0.0
-        }, completion: { _ in
-            
-            DispatchQueue.global(qos: .background).async {
-                // Go back to the main thread to update the UI
-                self.sortMode = selectedMode
-                switch self.sortMode {
-                case .Popular:
-                    break
-                case .Nearby:
-                    break
-                case .Recent:
-                    self.state.sortFollowingByDate()
-                    break
-                }
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                    UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseIn, animations: {
-                        self.collectionView.alpha = 1.0
-                    }, completion: { _ in
-                        
-                    })
-                }
-            }
-        })
-        
-    }
     
     var sliderLabels:TGPCamelLabels!
     
@@ -98,31 +53,15 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         self.automaticallyAdjustsScrollViewInsets = true
         //navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
+        header = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44.0))
         
-        tabHeader = UINib(nibName: "PlacesTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PlacesTabHeader
-        tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 88)
-        
-        tabHeader.refreshHandler = refreshData
-        //tabHeader.sortHandler = showSortingOptions
-        
-        //self.view.addSubview(tabHeader)
-        
-        let titles = ["Nearby", "Popular", "Following"]
-        header = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 88))
-        
-        let titleLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tabHeader.frame.width, height: 44.0))
+        let titleLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44.0))
         titleLabel.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightHeavy)
         titleLabel.text = "Jungle"
         titleLabel.textAlignment = .center
         header.addSubview(titleLabel)
         
-        control = TwicketSegmentedControl(frame: CGRect(x: 0, y: 44, width: header.frame.width, height: 44))
-        control.setSegmentItems(titles)
-        control.delegate = self
-        control.sliderBackgroundColor = accentColor
-        header.addSubview(control)
-        
-        refreshButton = UIButton(frame: CGRect(x: tabHeader.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
+        refreshButton = UIButton(frame: CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
         refreshButton.setImage(UIImage(named: "restart"), for: .normal)
         refreshButton.tintColor = UIColor.black
         refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
@@ -135,9 +74,9 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         header.addSubview(refreshButton)
         
         let clearCacheButton = UIButton(frame: CGRect(x: 0, y: 0.0, width: 44.0, height: 44.0))
-        clearCacheButton.setImage(UIImage(named: "trash_2"), for: .normal)
+        clearCacheButton.setImage(UIImage(named: "sorting"), for: .normal)
         clearCacheButton.tintColor = UIColor.black
-        clearCacheButton.addTarget(self, action: #selector(handleDelete), for: .touchUpInside)
+        clearCacheButton.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
         header.addSubview(clearCacheButton)
         
         view.addSubview(header)
@@ -161,12 +100,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         screenHeight = screenSize.height
         
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         layout.itemSize = getItemSize()
         layout.minimumInteritemSpacing = 1.5
         layout.minimumLineSpacing = 1.5
         
-        collectionView = UICollectionView(frame: CGRect(x: 0,y: 88.0 ,width: view.frame.width ,height: view.frame.height - 44), collectionViewLayout: layout)
+        
+        collectionView = UICollectionView(frame: CGRect(x: 0,y: 44.0 ,width: view.frame.width ,height: view.frame.height - 44), collectionViewLayout: layout)
         
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
@@ -174,8 +114,17 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         let headerNib = UINib(nibName: "FollowingHeader", bundle: nil)
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
+     
+        let headerNib2 = UINib(nibName: "CollectionDividerView", bundle: nil)
         
-        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+        self.collectionView.register(headerNib2, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "dividerView")
+        
+        let footerNib = UINib(nibName: "CollectionFooter", bundle: nil)
+        
+        self.collectionView.register(footerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "footerView")
+        
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 140.0, right: 0.0)
+        
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.bounces = true
@@ -189,19 +138,18 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
 
         self.collectionView.reloadData()
         
+        refreshButton.isHidden = true
+        refreshIndicator.startAnimating()
+        
         state = HomeStateController(delegate:self)
-        tabHeader.startRefreshing()
-
     }
     
     
     func update(_ mode:SortedBy?) {
         refreshButton.isHidden = false
         refreshIndicator.stopAnimating()
-        
-        if mode == nil || mode! == self.sortMode{
-            return self.collectionView.reloadData()
-        }
+
+        return self.collectionView.reloadData()
     }
     
     func handleRefresh() {
@@ -210,46 +158,78 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         state.fetchAll()
     }
     
-    func handleDelete() {
-        clearDirectory(name: "user_content")
-        print("Clear temp directory")
+    func handleOptions() {
+        let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
+        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 190.0)
+        let messageView = BaseView(frame: f)
+        messageView.installContentView(sortOptionsView)
+        messageView.preferredHeight = 190.0
+        messageView.configureDropShadow()
+        var config = SwiftMessages.defaultConfig
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        config.duration = .forever
+        config.presentationStyle = .bottom
+        config.dimMode = .gray(interactive: true)
+        config.interactiveHide = false
+        SwiftMessages.show(config: config, view: messageView)
+        
     }
+    
+    
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
-            topCollectionViewRef = view.collectionViewFollowing
-            view.setupStories(mode: sortMode, state: state)
-            view.sliderLabels = self.sliderLabels
-            view.segmentedControl = self.control
-            view.slider.ticksListener = self.sliderLabels
+            
+            switch indexPath.section {
+            case 0:
+                topCollectionViewRef = view.collectionView
+                break
+            case 1:
+                midCollectionViewRef = view.collectionView
+                break
+            default:
+                break
+            }
+            
+            view.setupStories(state: state, section: indexPath.section)
+
             return view
         }
+        
+        
         
         return UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
+        
         let bannerHeight:CGFloat = 32
-        let collectionViewHeight:CGFloat = getItemSize().height * 0.78
+        let collectionViewHeight:CGFloat = getItemSize().height * 0.72
         
         var verticalHeight:CGFloat = 0
         
-        switch sortMode {
-        case .Nearby:
-            verticalHeight += 48
-            verticalHeight += state.nearbyPlaceStories.count > 0 ? collectionViewHeight + bannerHeight : 0
+        switch section {
+        case 0:
+            verticalHeight += state.followingStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
             break
-        case .Popular:
+        case 1:
+            ///verticalHeight += 48
+            verticalHeight += state.nearbyPlaceStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
             break
-        case .Recent:
+        default:
             break
         }
+        
         return CGSize(width: collectionView.frame.size.width, height: verticalHeight)
     }
-
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeFooterInSection section: Int) -> CGSize {
+        return CGSize.zero
+    }
+    
     func refreshData() {
     
     }
@@ -264,13 +244,14 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //globalMainInterfaceProtocol?.fetchAllStories()
-        
+        state.observeViewed()
         
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         //print("Home: viewDidDisappear")
+        state.stopObservingViewed()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -282,30 +263,39 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func newState(state: AppState) {
         
     }
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch sortMode {
-        case .Popular:
-            return state.popularPosts.count
-        case .Nearby:
+        
+        switch section {
+        case 0:
+            return state.popularPosts.count >= 6 ? 6 : state.popularPosts.count
+        case 1:
             return state.nearbyPosts.count
-        case .Recent:
-            return state.followingStories.count//recentPlaceStories.count
+        default:
+            return 0
         }
+        
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        switch sortMode {
-        case .Popular:
+        
+        switch indexPath.section {
+        case 0:
+            print("row: \(indexPath.row) p: \(state.popularPosts[indexPath.row].popularity)")
+            cell.setCrownStatus(isKing: indexPath.row == 0)
             cell.setupCell(withPost: state.popularPosts[indexPath.row])
             break
-        case .Nearby:
+        case 1:
+            cell.setCrownStatus(isKing: false)
             cell.setupCell(withPost: state.nearbyPosts[indexPath.row])
             break
-        case .Recent:
-            cell.setupCell(withUserStory: state.followingStories[indexPath.row])
+        default:
             break
         }
         
@@ -323,24 +313,47 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
         
-        switch sortMode {
-        case .Popular:
-            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        let dest = IndexPath(item: indexPath.item, section: 0)
+        
+        switch indexPath.section {
+        case 0:
+            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
             break
-        case .Nearby:
-            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        case 1:
+            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
             break
-        case .Recent:
-            let story = state.followingStories[indexPath.row]
-            story.determineState()
-            if story.state == .contentLoaded {
-                self.selectedIndexPath = indexPath
-                globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            } else {
-                story.downloadFirstItem()
-            }
+        default:
             break
         }
+        
+//        let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
+//        
+//        switch sortMode {
+//        case .Popular:
+//            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+//            break
+//        case .Nearby:
+//            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+//            break
+//        case .Recent:
+//            var stories:[UserStory]!
+//            
+//            let dest = IndexPath(item: indexPath.item, section: 0)
+//            if indexPath.section == 0 {
+//                stories = state.unseenFollowingStories
+//            } else {
+//                stories = state.watchedFollowingStories
+//            }
+//            let story = stories[indexPath.item]
+//            story.determineState()
+//            if story.state == .contentLoaded {
+//                self.selectedIndexPath = indexPath
+//                globalMainInterfaceProtocol?.presentUserStory(userStories: stories, destinationIndexPath: dest, initialIndexPath: indexPath)
+//            } else {
+//                story.downloadFirstItem()
+//            }
+//            break
+//        }
         
         
         collectionView.deselectItem(at: indexPath, animated: true)
@@ -348,7 +361,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
-        return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
+        return CGSize(width: itemSideLength, height: itemSideLength * 1.25)
     }
     
     func getHeader() -> FollowingHeader? {

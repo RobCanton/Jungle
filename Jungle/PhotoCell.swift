@@ -23,6 +23,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     
     @IBOutlet weak var secondIcon: UIImageView!
     @IBOutlet weak var secondLabel: UILabel!
+    @IBOutlet weak var crown: UIImageView!
+    @IBOutlet weak var crownLabel: UILabel!
     
     @IBOutlet weak var overlay: UIView!
     var location:Location!
@@ -65,6 +67,11 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             self.timeLabel.text = story.date.timeStringSinceNow()
             break
         }
+    }
+    
+    func setCrownStatus(isKing:Bool) {
+        crown.isHidden = !isKing
+        crownLabel.isHidden = true//!isKing
     }
     
     func setupCell (withUserStory story: UserStory) {
@@ -160,6 +167,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
         let numLikes = post.numLikes
         let numComments = post.numComments
+        
         let likesImage = UIImage(named: "liked")
         let commentsImage = UIImage(named: "comments_filled")
         if numLikes > 0 {

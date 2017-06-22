@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "icons8-Crown Filled_32.png",
+      "filename" : "crown@1x-1.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icons8-Crown Filled_50.png",
+      "filename" : "crown@2x.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icons8-Crown Filled_100.png",
+      "filename" : "crown@3x.png",
       "scale" : "3x"
     }
   ],

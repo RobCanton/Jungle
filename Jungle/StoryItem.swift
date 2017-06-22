@@ -33,16 +33,32 @@ class StoryItem: NSObject, NSCoding {
     private(set) var length: Double
     private(set) var popularity:Double
     
-    private(set) var numComments:Int
-    private(set) var numCommenters:Int
+    var numComments:Int {
+        didSet {
+            cache()
+        }
+    }
+    var numCommenters:Int  {
+        didSet {
+            cache()
+        }
+    }
     var numLikes:Int {
         didSet {
             cache()
         }
     }
-    private(set) var numViews:Int
+    private(set) var numViews:Int {
+        didSet {
+            cache()
+        }
+    }
     
-    private(set) var numReports:Int
+    private(set) var numReports:Int  {
+        didSet {
+            cache()
+        }
+    }
 
     
     var viewers:[String:Double]
@@ -93,7 +109,6 @@ class StoryItem: NSObject, NSCoding {
         let dateCreated = decoder.decodeObject(forKey: "dateCreated") as! Double
         let length      = decoder.decodeObject(forKey: "length") as! Double
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
-        let flagged     = decoder.decodeObject(forKey: "flagged") as! Bool
         let numViews    = decoder.decodeObject(forKey: "numViews") as! Int
         let numLikes    = decoder.decodeObject(forKey: "numLikes") as! Int
         let numComments = decoder.decodeObject(forKey: "numComments") as! Int
@@ -210,7 +225,6 @@ class StoryItem: NSObject, NSCoding {
         
         self.comments.append(comment)
         self.numComments = self.comments.count
-        cache()
     }
     
     func removeComment(key:String) {
@@ -227,8 +241,6 @@ class StoryItem: NSObject, NSCoding {
         }
         
         self.numComments = self.comments.count
-        
-        cache()
     }
     
     func addLike(_ uid:String) {

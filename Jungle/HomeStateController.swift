@@ -23,6 +23,9 @@ class HomeStateController {
     fileprivate var popularRef:DatabaseReference?
     
     private(set) var followingStories = [UserStory]()
+    private(set) var unseenFollowingStories = [UserStory]()
+    private(set) var watchedFollowingStories = [UserStory]()
+    
     private(set) var nearbyFollowingStories = [UserStory]()
     private(set) var popularUserStories = [UserStory]()
     private(set) var nearbyUserStories = [UserStory]()
@@ -43,6 +46,8 @@ class HomeStateController {
     fileprivate var popularPlacesRef:DatabaseReference?
     fileprivate var nearbyPlacesRef:DatabaseReference?
     fileprivate var recentPlacesRef:DatabaseReference?
+    
+    private(set) var viewedPosts = [String:Double]()
     
     init(delegate:HomeProtocol)
     {
@@ -80,6 +85,9 @@ class HomeStateController {
         popularPlacesRef = nil
         nearbyPlacesRef = nil
         recentPlacesRef = nil
+        
+        stopObservingViewed()
+        viewedPosts = [:]
     }
     
     func fetchAll() {
@@ -87,8 +95,40 @@ class HomeStateController {
         observeNearbyPosts()
         observePopularPosts()
         fetchFollowing()
+        observeViewed()
     }
-
+    
+    func observeViewed() {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("users/viewed/\(uid)")
+        
+        let now = Date()
+        let tempCalendar = Calendar.current
+        let alteredDate = tempCalendar.date(byAdding: .day, value: -1, to: now)!
+        let oneDayAgoTimestamp = alteredDate.timeIntervalSince1970 * 1000
+        
+        ref.queryOrderedByValue().queryStarting(atValue: oneDayAgoTimestamp).observe(.childAdded, with: { snapshot in
+            self.viewedPosts[snapshot.key] = snapshot.value as! Double
+            self.sortFollowingStories()
+        })
+        
+    }
+    
+    func stopObservingViewed() {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("users/viewed/\(uid)")
+        ref.removeAllObservers()
+    }
+    
+    func hasViewedStory(_ story: Story) -> Bool {
+        for post in story.posts {
+            if viewedPosts[post] == nil {
+                return false
+            }
+        }
+        return true
+    }
+    
     
     func sortFollowingByDate() {
         followingStories.sort(by: { $0 > $1})
@@ -109,6 +149,8 @@ class HomeStateController {
     }
     
     
+    
+    
     fileprivate func fetchFollowing() {
         let uid = mainStore.state.userState.uid
         followingRef?.removeAllObservers()
@@ -126,7 +168,9 @@ class HomeStateController {
     
     fileprivate func downloadFollowingStories(_ following:[String]) {
         var stories = [UserStory]()
+        
         if following.count == 0 {
+            self.followingStories = stories
             delegate?.update(.Recent)
             return
         }
@@ -139,14 +183,32 @@ class HomeStateController {
                 count += 1
                 if count >= following.count {
                     count = -1
-                    let uid = mainStore.state.userState.uid
-                    self.followingStories = stories.sorted(by: { return $0 > $1 })
                     
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Recent)
-                    }
+                    self.followingStories = stories
+                    self.sortFollowingStories()
                 }
             })
+        }
+    }
+    
+    
+    func sortFollowingStories() {
+        var unseenStories = [UserStory]()
+        var watchedStories = [UserStory]()
+        
+        for story in followingStories {
+            if story.hasViewed() {
+                watchedStories.append(story)
+            } else {
+                unseenStories.append(story)
+            }
+        }
+        
+        self.unseenFollowingStories = unseenStories.sorted(by: { return $0 > $1 })
+        self.watchedFollowingStories = watchedStories.sorted(by: { return $0 > $1 })
+        
+        DispatchQueue.main.async {
+            self.delegate?.update(.Recent)
         }
     }
     
