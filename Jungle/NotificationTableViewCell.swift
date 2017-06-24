@@ -146,7 +146,11 @@ class NotificationTableViewCell: UITableViewCell {
             
             setMessageLabel(username: user.username, message: " \(prefix)liked your post.", date: notification.date)
         } else if type == .mention {
-            setMessageLabel(username: user.username, message: " mentioned you in a comment.", date: notification.date)
+            var suffix = "."
+            if let text = notification.text {
+                suffix = ": \"\(text)\""
+            }
+            setMessageLabel(username: user.username, message: " mentioned you in a comment\(suffix)", date: notification.date)
         }
     }
     

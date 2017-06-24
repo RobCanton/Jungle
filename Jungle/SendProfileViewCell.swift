@@ -25,15 +25,24 @@ class SendProfileViewCell: UITableViewCell {
         
     }
 
+    @IBOutlet weak var publicSwitch: UISwitch!
     
-    func lockState() {
-        bgView.backgroundColor = UIColor.white
-        circleButton.setImage(UIImage(named: "check_2"), for: .normal)
-        circleButton.layer.cornerRadius = circleButton.frame.width / 2
-        circleButton.clipsToBounds = true
-        circleButton.layer.borderColor = UIColor.clear.cgColor
-        label.textColor = UIColor.lightGray
-        circleButton.backgroundColor = UIColor.lightGray
+    func lockState(_ locked:Bool) {
+        if locked {
+            bgView.backgroundColor = UIColor.white
+            circleButton.setImage(UIImage(named: "check_2"), for: .normal)
+            circleButton.layer.cornerRadius = circleButton.frame.width / 2
+            circleButton.clipsToBounds = true
+            circleButton.layer.borderColor = UIColor.clear.cgColor
+            label.textColor = UIColor.lightGray
+            circleButton.backgroundColor = UIColor.lightGray
+            
+            circleButton.isHidden = true
+            circleButton.isEnabled = false
+
+        } else {
+            publicSwitch.removeFromSuperview()
+        }
     }
     override func setSelected(_ selected: Bool, animated: Bool) {
         if(selected)  {

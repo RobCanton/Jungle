@@ -31,7 +31,11 @@ class StoryItem: NSObject, NSCoding {
     private(set) var contentType:ContentType
     private(set) var dateCreated: Date
     private(set) var length: Double
-    private(set) var popularity:Double
+    var popularity:Double {
+        didSet {
+            cache()
+        }
+    }
     
     var numComments:Int {
         didSet {
@@ -272,8 +276,8 @@ class StoryItem: NSObject, NSCoding {
     }
     
     func cache() {
-        dataCache.removeObject(forKey: "upload-\(key)" as NSString)
-        dataCache.setObject(self, forKey: "upload-\(key)" as NSString)
+        uploadDataCache.removeObject(forKey: "upload-\(key)" as NSString)
+        uploadDataCache.setObject(self, forKey: "upload-\(key)" as NSString)
     }
     
     var shouldBlock:Bool {

@@ -101,7 +101,10 @@ class SettingsViewController: UITableViewController, StoreSubscriber {
         
         switch cell {
         case blockedUsersCell:
-            
+            let controller = UsersListViewController()
+            controller.uid = mainStore.state.userState.uid
+            controller.type = .Blocked
+            globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
             break
         case privacyPolicyCell:
             break

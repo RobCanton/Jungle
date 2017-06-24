@@ -90,6 +90,15 @@ class GPSService: Service, CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer // The accuracy of the location data
         locationManager.distanceFilter = 50.0 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
         locationManager.delegate = self
+        
+    }
+    
+    func setAccurateGPS(_ accurate:Bool) {
+        if accurate {
+            locationManager?.desiredAccuracy = kCLLocationAccuracyBest
+        } else {
+            locationManager?.desiredAccuracy = kCLLocationAccuracyKilometer
+        }
     }
     
     internal override func subscribe(_ name: String, subscriber: ServiceProtocol) {

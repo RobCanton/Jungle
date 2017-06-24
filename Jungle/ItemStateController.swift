@@ -33,7 +33,7 @@ class ItemStateController {
     var subscribedRef:DatabaseReference?
     
 
-    var limit:UInt = 6
+    var limit:UInt = 16
     
     func setupItem(_ item:StoryItem) {
         self.item = item
@@ -90,6 +90,7 @@ class ItemStateController {
         })
         
     }
+    
     
     func observeNumLikes() {
         guard let item = self.item else { return }

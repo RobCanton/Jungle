@@ -106,6 +106,7 @@
 		B0AB4E281EFA6C30008E875A /* CollectionFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AB4E261EFA6C30008E875A /* CollectionFooter.xib */; };
 		B0AB4E2B1EFBB808008E875A /* TacoDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AB4E291EFBB808008E875A /* TacoDialogView.swift */; };
 		B0AB4E2C1EFBB808008E875A /* TacoDialogView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AB4E2A1EFBB808008E875A /* TacoDialogView.xib */; };
+		B0AB4E2E1EFC6C09008E875A /* PostMetaTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */; };
 		B0AE229C1E7A509E00141709 /* PostHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AE229A1E7A509E00141709 /* PostHeaderView.swift */; };
 		B0AE229D1E7A509E00141709 /* PostHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AE229B1E7A509E00141709 /* PostHeaderView.xib */; };
 		B0B0E3BE1EC24EC7005DC0C1 /* HomeStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */; };
@@ -277,6 +278,7 @@
 		B0AB4E261EFA6C30008E875A /* CollectionFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CollectionFooter.xib; sourceTree = "<group>"; };
 		B0AB4E291EFBB808008E875A /* TacoDialogView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TacoDialogView.swift; sourceTree = "<group>"; };
 		B0AB4E2A1EFBB808008E875A /* TacoDialogView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TacoDialogView.xib; sourceTree = "<group>"; };
+		B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMetaTableViewController.swift; sourceTree = "<group>"; };
 		B0AE229A1E7A509E00141709 /* PostHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostHeaderView.swift; sourceTree = "<group>"; };
 		B0AE229B1E7A509E00141709 /* PostHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostHeaderView.xib; sourceTree = "<group>"; };
 		B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeStateController.swift; sourceTree = "<group>"; };
@@ -558,6 +560,7 @@
 		B0F894671E7B435500E490C4 /* Stories */ = {
 			isa = PBXGroup;
 			children = (
+				B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */,
 				B093FFD01E79399C00011B43 /* StoriesViewController.swift */,
 				B093FFD41E79399C00011B43 /* StoryViewController.swift */,
 				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
@@ -940,6 +943,7 @@
 				B05091B81EB936CB001B84B1 /* Reachability.swift in Sources */,
 				B0C86D4A1E80B9440067E004 /* UserStoryCollectionViewCell.swift in Sources */,
 				B0550D881E8E17A2007DAAAC /* NotificationTableViewCell.swift in Sources */,
+				B0AB4E2E1EFC6C09008E875A /* PostMetaTableViewController.swift in Sources */,
 				B0F894A21E7F17AE00E490C4 /* MainViewController.swift in Sources */,
 				B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */,
 				B0CBE0571EAE8D4100D6FF06 /* FollowingPhotoCell.swift in Sources */,

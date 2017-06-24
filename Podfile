@@ -25,4 +25,5 @@ pod 'TwicketSegmentedControl'
 pod 'SnapTimer'
 pod 'ActiveLabel'
 pod 'SwiftMessages'
+pod 'Segmentio', '2.1'
 end

@@ -8,9 +8,12 @@
 
 import UIKit
 
+
 protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
+    func showMetaLikes()
+    func showMetaComments()
     func dismiss()
 }
 
@@ -29,7 +32,9 @@ class PostHeaderView: UIView {
     
     @IBOutlet weak var likesLabel: UILabel!
     @IBOutlet weak var commentsLabel: UILabel!
+    
     var commentsTap:UITapGestureRecognizer?
+    var likesTap:UITapGestureRecognizer?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -71,6 +76,11 @@ class PostHeaderView: UIView {
         tap2 = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2!)
+        
+        likesTap = UITapGestureRecognizer(target: self, action: #selector(self.likesTapped))
+        self.likesView.isUserInteractionEnabled = true
+        self.likesView.addGestureRecognizer(likesTap!)
+        
         commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
         self.commentsView.isUserInteractionEnabled = true
         self.commentsView.addGestureRecognizer(commentsTap!)
@@ -94,8 +104,14 @@ class PostHeaderView: UIView {
     
     @IBOutlet weak var timeLabel2: UILabel!
     
-    func commentsTapped() {
+    
+    func likesTapped() {
+        delegate?.showMetaLikes()
     }
+    func commentsTapped() {
+        delegate?.showMetaComments()
+    }
+    
     
     func clean() {
         self.userImageView.image = nil

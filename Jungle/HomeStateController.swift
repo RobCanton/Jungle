@@ -8,12 +8,13 @@
 
 import Foundation
 import Firebase
+import ReSwift
 
 protocol HomeProtocol: class {
-    func update(_ mode: SortedBy?)
+    func update(_ section: HomeSection?)
 }
 
-class HomeStateController {
+class HomeStateController: StoreSubscriber {
     weak var delegate:HomeProtocol?
     
     private(set) var nearbyPosts = [StoryItem]()
@@ -56,7 +57,12 @@ class HomeStateController {
         fetchAll()
     }
     
+    func newState(state: AppState) {
+        downloadFollowingStories()
+    }
+    
     func clear() {
+        
         
         followingStories = [UserStory]()
         nearbyFollowingStories = [UserStory]()
@@ -69,7 +75,6 @@ class HomeStateController {
         nearbyPlaceStories = [LocationStory]()
         
         myStoryRef?.removeAllObservers()
-        followingRef?.removeAllObservers()
         nearbyFollowingRef?.removeAllObservers()
         popularUsersRef?.removeAllObservers()
         recentUsersRef?.removeAllObservers()
@@ -88,13 +93,14 @@ class HomeStateController {
         
         stopObservingViewed()
         viewedPosts = [:]
+        
     }
     
     func fetchAll() {
+        mainStore.subscribe(self)
         observeNearbyPlaces()
         observeNearbyPosts()
         observePopularPosts()
-        fetchFollowing()
         observeViewed()
     }
     
@@ -148,32 +154,11 @@ class HomeStateController {
         }
     }
     
-    
-    
-    
-    fileprivate func fetchFollowing() {
-        let uid = mainStore.state.userState.uid
-        followingRef?.removeAllObservers()
-        followingRef = UserService.ref.child("social/following/\(uid)")
-        followingRef?.observe(.value, with: { snapshot in
-            var following:[String] = [uid] // Include current user id to pull my story
-            for child in snapshot.children {
-                let childSnap = child as! DataSnapshot
-                following.append(childSnap.key)
-            }
-            
-            self.downloadFollowingStories(following)
-        })
-    }
-    
-    fileprivate func downloadFollowingStories(_ following:[String]) {
+    fileprivate func downloadFollowingStories() {
         var stories = [UserStory]()
+        var following = mainStore.state.socialState.following.sorted()
+        following.insert(mainStore.state.userState.uid, at: 0)
         
-        if following.count == 0 {
-            self.followingStories = stories
-            delegate?.update(.Recent)
-            return
-        }
         var count = 0
         for uid in following {
             UserService.getUserStory(uid, completion: { story in
@@ -186,6 +171,9 @@ class HomeStateController {
                     
                     self.followingStories = stories
                     self.sortFollowingStories()
+                   // DispatchQueue.main.async {
+                        //self.delegate?.update(.following)
+                    //}
                 }
             })
         }
@@ -208,7 +196,7 @@ class HomeStateController {
         self.watchedFollowingStories = watchedStories.sorted(by: { return $0 > $1 })
         
         DispatchQueue.main.async {
-            self.delegate?.update(.Recent)
+            self.delegate?.update(.following)
         }
     }
     
@@ -233,7 +221,7 @@ class HomeStateController {
     fileprivate func downloadPosts(_ posts:[String]) {
         var nearbyPosts = [StoryItem]()
         if posts.count == 0 {
-            delegate?.update(.Nearby)
+            delegate?.update(.nearby)
             return
         }
         
@@ -249,9 +237,9 @@ class HomeStateController {
                     count = -1
                     
                     self.nearbyPosts = nearbyPosts.sorted(by: { return $0 > $1 })
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Nearby)
-                    }
+                    //DispatchQueue.main.async {
+                        self.delegate?.update(.nearby)
+                    //}
                 }
                 
             })
@@ -279,7 +267,7 @@ class HomeStateController {
         var placesStories = [LocationStory]()
         if places.count == 0 {
             self.nearbyPlaceStories = placesStories
-            delegate?.update(.Nearby)
+            delegate?.update(.places)
             return
         }
         var count = 0
@@ -294,9 +282,9 @@ class HomeStateController {
                     let uid = mainStore.state.userState.uid
                     self.nearbyPlaceStories = placesStories.sorted(by: { return $0 > $1 })
                     
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Nearby)
-                    }
+                   // DispatchQueue.main.async {
+                        self.delegate?.update(.places)
+                   // }
                 }
             }
         }
@@ -306,12 +294,12 @@ class HomeStateController {
         popularRef?.removeAllObservers()
         popularRef = UserService.ref.child("uploads/popular/")
         popularRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
-            var posts = [String]()
+            var posts = [String:Double]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 let key = childSnap.key
                 if let d = childSnap.value as? Double {
-                    posts.append(key)
+                    posts[key] = d
                 }
             }
         
@@ -319,19 +307,20 @@ class HomeStateController {
         })
     }
     
-    fileprivate func downloadPopularPosts(_ posts:[String]) {
+    fileprivate func downloadPopularPosts(_ posts:[String:Double]) {
         var popularPosts = [StoryItem]()
         
         if posts.count == 0 {
-            delegate?.update(.Popular)
+            delegate?.update(.popular)
             return
         }
         
         var count = 0
-        for key in posts {
+        for (key, _) in posts {
             UploadService.getUpload(key: key, completion: { item in
                 if item != nil {
                     popularPosts.append(item!)
+                    //item?.popularity = pop
                 }
                 
                 count += 1
@@ -339,9 +328,9 @@ class HomeStateController {
                     count = -1
                     
                     self.popularPosts = popularPosts.sorted(by: { return $0.popularity > $1.popularity })
-                    DispatchQueue.main.async {
-                        self.delegate?.update(.Popular)
-                    }
+                   // DispatchQueue.main.async {
+                        self.delegate?.update(.popular)
+                    //}
                 }
                 
             })

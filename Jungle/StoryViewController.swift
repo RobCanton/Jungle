@@ -185,6 +185,14 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.dismissPopup(true)
     }
     
+    func showMetaLikes() {
+        delegate?.showMetaLikes()
+    }
+    
+    func showMetaComments() {
+        delegate?.showMetaComments()
+    }
+    
     func liked(_ liked:Bool) {
         guard let item = self.item else { return }
         if liked {
@@ -233,10 +241,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func setupItem() {
-        
-        
-        print("setupItem")
-        
+
         killTimer()
         pauseVideo()
         self.content.image = nil
@@ -314,7 +319,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func itemStateDidChange(comments: [Comment]) {
-        print("itemStateDidChange")
         self.headerView.setNumComments(comments.count)
         self.commentsView.setTableComments(comments: comments, animated: true)
     }
@@ -329,12 +333,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func itemDownloading() {
-        print("Item Downloading...")
         animateIndicator()
     }
     
     func itemDownloaded() {
-        print("Item Downloaded!")
         guard let item = item else { return }
         if let image = UploadService.readImageFromFile(withKey: item.key) {
             
@@ -381,14 +383,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             if let currentItem = playerLayer?.player?.currentTime() {
                 itemLength -= currentItem.seconds
             }
-            print("ITEM LENGTH: \(itemLength)")
         }
         
         progressBar?.activateIndicator(itemIndex: viewIndex)
         
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
-        print("Set for play. shouldAutoPause: \(shouldAutoPause)")
         if shouldAutoPause {
             shouldAutoPause = false
             pause()
@@ -495,7 +495,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         }
         remainingTime = timer.fireDate.timeIntervalSinceNow
         timer.invalidate()
-        print("Pause")
     }
 
     
@@ -507,7 +506,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         guard let item = self.item else { return}
         itemStateController.delegate = self
         if item.needsDownload() {
-            print("Download")
             itemStateController.download()
         } else  {
             if remainingTime != nil {
@@ -518,7 +516,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
                 playVideo()
             }
         }
-        print("Resume")
         
     }
     

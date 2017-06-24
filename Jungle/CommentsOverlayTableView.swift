@@ -194,19 +194,19 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath) as! CommentCell
-        if let username = cell.authorLabel.text  {
-            let text = comments[indexPath.row].text
-            let sheet = UIAlertController(title: username, message: text, preferredStyle: .actionSheet)
-            sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            sheet.addAction(UIAlertAction(title: "Reply", style: .default, handler: nil))
-            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: nil))
-            globalMainInterfaceProtocol?.presentPopover(withController: sheet, animated: true)
-        }
-        
-        tableView.deselectRow(at: indexPath, animated: false)
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let cell = tableView.cellForRow(at: indexPath) as! CommentCell
+//        if let username = cell.authorLabel.text  {
+//            let text = comments[indexPath.row].text
+//            let sheet = UIAlertController(title: username, message: text, preferredStyle: .actionSheet)
+//            sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+//            sheet.addAction(UIAlertAction(title: "Reply", style: .default, handler: nil))
+//            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: nil))
+//            globalMainInterfaceProtocol?.presentPopover(withController: sheet, animated: true)
+//        }
+//        
+//        tableView.deselectRow(at: indexPath, animated: false)
+//    }
     
     func scrollBottom(animated:Bool) {
         if comments.count > 0 {

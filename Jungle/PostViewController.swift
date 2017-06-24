@@ -254,6 +254,14 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func dismiss() {
         delegate?.dismissPopup(true)
     }
+    
+    func showMetaLikes() {
+        delegate?.showMetaLikes()
+    }
+    
+    func showMetaComments() {
+        delegate?.showMetaComments()
+    }
 
     
     func liked(_ liked:Bool) {

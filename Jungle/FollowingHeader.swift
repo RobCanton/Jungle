@@ -68,6 +68,11 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         
         collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeaderView")
         
+        let headerNib3 = UINib(nibName: "GapCollectionHeader", bundle: nil)
+        
+        collectionView.register(headerNib3, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView")
+
+        
         collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
         collectionView.backgroundColor = UIColor.clear
         collectionView.dataSource = self
@@ -141,35 +146,77 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             topLabel.text = "NEARBY"
             bottomLabel.text = ""
             longDivider.isHidden = false
+            
+            if state.nearbyPlaceStories.count == 0  {
+                removeStackView(view: bottomHeader)
+                if state.nearbyPosts.count == 0 {
+                    removeStackView(view: topBanner)
+                }
+            }
             break
         default:
             break
         }
 
-        
-        
-        
-        
+ 
         collectionView.reloadData()
     }
     
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        
+        if kind == UICollectionElementKindSectionHeader {
+            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView", for: indexPath as IndexPath) as! GapCollectionHeader
+            return view
+        }
+        
+        return UICollectionReusableView()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+
+        if section == 1 && stateRef!.watchedFollowingStories.count > 0 && stateRef!.unseenFollowingStories.count > 0 {
+            return CGSize(width: 12.0, height: itemSideLength * 1.25)
+        }
+        return CGSize.zero
+
+    }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
+        if section == 0 {
+            return 2
+        }
         return 1
     }
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return topStories.count
+        guard let state = self.stateRef else { return 0 }
+        if self.section == 0 {
+            if section == 0 {
+                return state.unseenFollowingStories.count
+            } else {
+                return state.watchedFollowingStories.count
+            }
+        } else if self.section == 1 {
+            return state.nearbyPlaceStories.count
+        }
+        return 0
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-
-        let story = topStories[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
-        if let locationStory = story as? LocationStory {
-            cell.setupCell(withPlaceStory: locationStory, showDot: false)
-        } else if let userStory = story as? UserStory {
-            cell.setupCell(withUserStory: userStory, showDot: false)
+        if self.section == 0 {
+            if indexPath.section == 0 {
+                let story = stateRef!.unseenFollowingStories[indexPath.item]
+                cell.setupCell(withUserStory: story, showDot: false)
+            } else {
+                let story = stateRef!.watchedFollowingStories[indexPath.item]
+                cell.setupCell(withUserStory: story, showDot: false)
+            }
+        } else{
+            
+            let story = stateRef!.nearbyPlaceStories[indexPath.item]
+            cell.setupCell(withPlaceStory: story, showDot: false)
         }
         
         return cell
@@ -184,38 +231,41 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let story = topStories[indexPath.row]
-        story.determineState()
-        if story.state == .contentLoaded {
-            //globalMainInterfaceProtocol?.presentUserStory(userStories: state.followingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-            if section == 0 {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeHeader, stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+        
+        if self.section == 0 {
+            if indexPath.section == 0 {
+                let story = stateRef!.unseenFollowingStories[indexPath.row]
+                story.determineState()
+                
+                if story.state == .contentLoaded {
+                    globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeHeader, stories: stateRef!.unseenFollowingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                } else {
+                    story.downloadFirstItem()
+                }
             } else {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: topStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                let story = stateRef!.watchedFollowingStories[indexPath.row]
+                story.determineState()
+                if story.state == .contentLoaded {
+                    let dest = IndexPath(item: indexPath.item, section: 0)
+                    globalMainInterfaceProtocol?.presentBannerStory( presentationType: .homeHeader, stories: stateRef!.watchedFollowingStories, destinationIndexPath: dest, initialIndexPath: indexPath)
+                } else {
+                    story.downloadFirstItem()
+                }
             }
         } else {
-            story.downloadFirstItem()
+            let story = stateRef!.nearbyPlaceStories[indexPath.row]
+            story.determineState()
+            if story.state == .contentLoaded {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: stateRef!.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            } else {
+                story.downloadFirstItem()
+            }
         }
-        collectionView.deselectItem(at: indexPath, animated: true)
-
+        
     }
     
     func getItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.25)
     }
-    
-//    func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
-//        let value = Int(sender.value)
-//        sliderLabels?.value = UInt(value)
-//        let distance = distances[value]
-//        LocationService.sharedInstance.radius = distance
-//        LocationService.sharedInstance.requestNearbyLocations()
-//        
-//    }
-//    
-//    func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
-//        sliderLabels?.value = UInt(sender.value)
-//    }
-    
     
 }

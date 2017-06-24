@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import NVActivityIndicatorView
 
 class FirstViewController:UIViewController {
     
@@ -32,12 +33,24 @@ class FirstViewController:UIViewController {
 
 class FirstAuthViewController: FirstViewController {
     
+    var activityView:NVActivityIndicatorView!
+    
+    override func viewDidLoad() {
+         super.viewDidLoad()
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
+        activityView.center = CGPoint(x: view.center.x, y: view.frame.height - 80 - 20.0)
+        view.addSubview(activityView)
+        
+        activityView.startAnimating()
+    }
     
     var authFetched = false
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         if let user = Auth.auth().currentUser {
+            
             UserService.getUser(user.uid, completion: { user in
                 self.authFetched = true
                 if user != nil {
@@ -57,6 +70,7 @@ class FirstAuthViewController: FirstViewController {
         }
     }
     
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -72,8 +86,22 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
 
     var gradientView:UIView!
     var gradient:CAGradientLayer?
+    
+    
+    @IBOutlet weak var loginButton: UIButton!
+    
+    @IBOutlet weak var signupButton: UIButton!
+    
+    
+    var activityView:NVActivityIndicatorView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        /* Activity view */
+        activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
+        activityView.center = CGPoint(x: view.center.x, y: view.frame.height - 80 - 20.0)
+        view.addSubview(activityView)
     }
     
     @IBAction func unwindToMenu(segue: UIStoryboardSegue) {
@@ -84,7 +112,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         super.viewDidAppear(animated)
         
         if let user = Auth.auth().currentUser {
+            isLoading(true)
             UserService.getUser(user.uid, completion: { user in
+                self.isLoading(false)
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
                     UserService.sendFCMToken()
@@ -96,9 +126,26 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     self.performSegue(withIdentifier: "login", sender: self)
                 }
             })
+        } else {
+            isLoading(false)
         }
     }
 
+    func isLoading(_ loading:Bool) {
+        if loading {
+            activityView.startAnimating()
+            loginButton.isHidden = true
+            loginButton.isEnabled = false
+            signupButton.isHidden = true
+            signupButton.isEnabled = false
+        } else {
+            activityView.stopAnimating()
+            loginButton.isHidden = false
+            loginButton.isEnabled = true
+            signupButton.isHidden = false
+            signupButton.isEnabled = true
+        }
+    }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

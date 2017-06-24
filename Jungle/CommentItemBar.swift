@@ -72,6 +72,37 @@ class CommentItemBar: UIView {
     }
     
     
+    func darkMode() {
+        activityIndicator.tintColor = UIColor.gray
+        sendButton.tintColor = UIColor.black
+        sendButton.setTitleColor(UIColor.black, for: .normal)
+        sendButton.alpha = 0.5
+        textField.keyboardAppearance = .light
+        textField.textColor = UIColor.black
+        textField.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: false)
+        textField.attributedPlaceholder =
+            NSAttributedString(string: "Comment", attributes: [NSForegroundColorAttributeName : UIColor.gray])
+        sendButton.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: false)
+        
+        let bar = UIView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: 1))
+        bar.backgroundColor = UIColor(white: 0.90, alpha: 1.0)
+        addSubview(bar)
+        likeButton.isHidden = true
+        likeButton.isEnabled = false
+        moreButton.isHidden = true
+        moreButton.isEnabled = false
+
+        
+        backgroundView.alpha = 1.0
+        backgroundView.backgroundColor =  UIColor.clear
+        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+        blur.frame = backgroundView.bounds
+        backgroundView.addSubview(blur)
+        
+        
+        
+    }
+    
     
     func setLikedStatus(_ _liked:Bool, animated: Bool) {
         if currentUserMode { return }

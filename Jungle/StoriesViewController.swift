@@ -16,6 +16,9 @@ protocol PopupProtocol: class {
     func showPlace(_ location:Location) 
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
+    
+    func showMetaLikes()
+    func showMetaComments()
 }
 
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
@@ -358,6 +361,32 @@ extension StoriesViewController: PopupProtocol {
         }
         let controller = PlaceViewController()
         controller.place = location
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showMetaLikes() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PostMetaTableViewController()
+        controller.itemStateController = cell.itemStateController
+        controller.item = item
+        controller.mode = .likes
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showMetaComments() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PostMetaTableViewController()
+        controller.itemStateController = cell.itemStateController
+        controller.item = item
+        controller.mode = .comments
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

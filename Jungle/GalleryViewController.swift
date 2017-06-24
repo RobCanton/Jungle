@@ -296,6 +296,32 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
+    func showMetaLikes() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PostMetaTableViewController()
+        controller.itemStateController = cell.itemStateController
+        controller.item = item
+        controller.mode = .likes
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showMetaComments() {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PostMetaTableViewController()
+        controller.itemStateController = cell.itemStateController
+        controller.item = item
+        controller.mode = .comments
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
     func showMore() {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else {

@@ -75,9 +75,16 @@ class ProfileHeaderView: UICollectionReusableView {
         self.user = _user
         setUserStatus(status: checkFollowingStatus(uid: user.uid))
         
-        setPostsCount(user.posts)
-        setFollowersCount(user.followers)
-        setFollowingCount(user.following)
+        if status != .CurrentUser {
+            setPostsCount(user.posts)
+            setFollowersCount(user.followers)
+            setFollowingCount(user.following)
+        } else {
+            setPostsCount(user.posts)
+            setFollowersCount(mainStore.state.socialState.followers.count)
+            setFollowingCount(mainStore.state.socialState.following.count)
+        }
+        
         usernameLabel.text = user.fullname
         
         bioLabel.text = user.bio

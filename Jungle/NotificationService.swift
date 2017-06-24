@@ -110,9 +110,12 @@ class NotificationService: Service {
                 let count           = dict["count"] as? Int
                 notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
                 self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
+            } else {
+                print("Notification doesn't exist")
             }
             return completion(notification, false)
         }, withCancel: { error in
+            print("Notification canceled")
             return completion(nil, false)
         })
         

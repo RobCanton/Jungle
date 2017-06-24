@@ -39,24 +39,29 @@
                 <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="BNQ-9e-xhl">
                     <rect key="frame" x="342" y="21" width="20" height="20"/>
                 </activityIndicatorView>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vi8-yM-kQW">
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vi8-yM-kQW">
                     <rect key="frame" x="328" y="0.0" width="64" height="64"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="vi8-yM-kQW" secondAttribute="height" multiplier="1:1" id="DlD-un-8yb"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="8" maxY="0.0"/>
-                    <state key="normal" image="more"/>
+                    <state key="normal" image="more">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
                     <connections>
                         <action selector="moreTapped:" destination="g8v-2R-i5l" eventType="touchUpInside" id="krE-4M-8Zg"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5W8-GV-yg8">
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5W8-GV-yg8">
                     <rect key="frame" x="265" y="0.0" width="63" height="63"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="5W8-GV-yg8" secondAttribute="height" multiplier="1:1" id="37J-ar-qSM"/>
                     </constraints>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <state key="normal">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
                     <connections>
                         <action selector="likeTapped:" destination="g8v-2R-i5l" eventType="touchUpInside" id="BZy-Qa-onF"/>
                     </connections>

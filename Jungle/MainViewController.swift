@@ -181,7 +181,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         
         let screenBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
-        
+        navigationController?.navigationBar.tintColor = UIColor.black
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
         textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
@@ -490,9 +490,12 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         if y >= height && y < 10.0 + height {
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
+            gps_service.setAccurateGPS(true)
         } else if y >= height * 2.0 {
+            gps_service.setAccurateGPS(false)
             screenMode = .Main
         } else {
+            gps_service.setAccurateGPS(true)
             screenMode = .Map
         }
     }
@@ -1050,7 +1053,7 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func topView() -> UIView {
-        if presentationType == .homeCollection {
+        if presentationType == .homeCollection || presentationType == .homeHeader || presentationType == .homeNearbyHeader {
             if let view = places.header.snapshotImageTransparent() {
                 let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
                 topView.backgroundColor = UIColor.black

@@ -10,6 +10,10 @@ import Foundation
 import UIKit
 import TGPControls
 
+protocol SortOptionsProtocol:class {
+    func dismissSortOptions()
+}
+
 class SortOptionsView: UIView {
     
     
@@ -18,12 +22,27 @@ class SortOptionsView: UIView {
     @IBOutlet weak var sliderLabels: TGPCamelLabels!
     
     @IBOutlet weak var setButton: UIButton!
+    
+    
+    weak var delegate:SortOptionsProtocol?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         var distanceLabels = [String]()
+        let selectedDistance = LocationService.sharedInstance.radius
+        
+        var selectedIndex = 4
+        var count = 0
         for distance in distances {
             distanceLabels.append("\(distance) km")
+            if distance == selectedDistance {
+                selectedIndex = count
+            }
+            count += 1
         }
+        
+        sliderLabels?.value = UInt(selectedIndex)
+        slider.value = CGFloat(selectedIndex)
         
         sliderLabels.names = distanceLabels
         slider.ticksListener = sliderLabels
@@ -39,7 +58,9 @@ class SortOptionsView: UIView {
         
         setButton.layer.cornerRadius = 6.0
         setButton.clipsToBounds = true
+        
     }
+    
     
     
     func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
@@ -48,7 +69,19 @@ class SortOptionsView: UIView {
     }
 
     func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
+        let value = Int(slider.value)
         sliderLabels?.value = UInt(sender.value)
+        activateSetButtton(distances[value] != LocationService.sharedInstance.radius)
+    }
+    
+    func activateSetButtton(_ activate:Bool) {
+        if activate {
+            setButton.backgroundColor = accentColor
+            setButton.isEnabled = true
+        } else {
+            setButton.backgroundColor = UIColor.lightGray
+            setButton.isEnabled = false
+        }
     }
     
     
@@ -58,8 +91,13 @@ class SortOptionsView: UIView {
         let distance = distances[value]
         LocationService.sharedInstance.radius = distance
         LocationService.sharedInstance.requestNearbyLocations()
+        
+        delegate?.dismissSortOptions()
     }
 
+    @IBAction func handleDismiss(_ sender: Any) {
+        delegate?.dismissSortOptions()
+    }
 }
 
 /*public func tgpTicksDistanceChanged(_ ticksDistance: CGFloat, sender: Any!)

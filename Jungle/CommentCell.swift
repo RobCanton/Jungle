@@ -63,6 +63,8 @@ class CommentCell: UITableViewCell {
     
     fileprivate var check:Int = 0
     
+    var shadow = true
+    
     func setContent(comment:Comment) {
         
         self.authorLabel.text = ""
@@ -82,16 +84,25 @@ class CommentCell: UITableViewCell {
         UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
                 self.authorLabel.text = user!.username
-                self.commentLabel.text = comment.text
-                self.commentLabel.sizeToFit()
+                self.authorLabel.alpha = 1.0
                 self.userImage.loadImageAsync(user!.imageURL, completion: nil)
                 self.timeLabel.text = comment.date.timeStringSinceNow()
+            } else {
+                self.authorLabel.text = "Unknown"
+                self.authorLabel.alpha = 0.5
             }
             
+            self.commentLabel.text = comment.text
+            self.commentLabel.sizeToFit()
+            self.timeLabel.text = comment.date.timeStringSinceNow()
         })
-        
-        authorLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
-        commentLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
+        if shadow {
+            authorLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
+            commentLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
+        } else {
+            authorLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
+            commentLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
+        }
         
     }
     

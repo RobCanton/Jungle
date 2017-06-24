@@ -68,6 +68,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.tintColor = UIColor.black
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
         itemSideLength = (UIScreen.main.bounds.width - 3.0) / 3.0
         self.automaticallyAdjustsScrollViewInsets = false
@@ -76,6 +77,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.addNavigationBarBackdrop()
         
         self.view.backgroundColor = UIColor.white
+        self.navigationItem.titleView = nil
         self.title = "Profile"
         screenSize = self.view.frame
         screenWidth = screenSize.width
@@ -120,12 +122,15 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     }
     
     func uidRetrieved(uid: String) {
+        self.uid = uid
         self.status = checkFollowingStatus(uid: uid)
         UserService.observeUser(uid, completion: { user in
             if user != nil {
                 self.title = user!.username
                 self.user = user
                 self.collectionView.reloadData()
+            } else {
+                self.title = "User not found"
             }
         })
         
@@ -142,6 +147,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         blockedRef?.observe(.value, with: { snapshot in
             self.isBlocked = snapshot.exists()
         })
+        
+        listenToPosts()
     }
     
     

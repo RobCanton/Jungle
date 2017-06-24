@@ -85,6 +85,8 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
             }
         })
 
+        getHeaderView()?.setFollowersCount(mainStore.state.socialState.followers.count)
+        getHeaderView()?.setFollowingCount(mainStore.state.socialState.following.count)
         
         
         listenToPosts()
@@ -95,7 +97,6 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         mainStore.subscribe(self)
-        
         
         tabHeader.settingsButton.tintColor = UserService.isEmailVerified ? UIColor(white: 0.42, alpha: 1.0) : errorColor
     }
@@ -116,9 +117,9 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     }
     
     func newState(state: AppState) {
-        let status = checkFollowingStatus(uid: uid)
-        getHeaderView()?.setUserStatus(status: status)
-
+        getHeaderView()?.setUserStatus(status: .CurrentUser)
+        getHeaderView()?.setFollowersCount(state.socialState.followers.count)
+        getHeaderView()?.setFollowingCount(state.socialState.following.count)
     }
     
     
@@ -152,7 +153,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
             UploadService.downloadStory(postKeys: postKeys, completion: { story in
                 
                 self.posts = story.sorted(by: { return $0 > $1 })
-                
+                self.getHeaderView()?.setPostsCount(self.posts.count)
                 self.collectionView!.reloadData()
             })
         } else {
@@ -186,7 +187,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
-            view.setupHeader(_user:self.user, status: status, delegate: self)
+            view.setupHeader(_user:self.user, status: .CurrentUser, delegate: self)
             return view
         }
         

@@ -11,7 +11,7 @@ import ReSwift
 import UIKit
 
 enum UsersListType {
-    case Followers, Following, None
+    case Followers, Following, None, Blocked
 }
 
 protocol UserCellProtocol:class {
@@ -53,7 +53,6 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
     }
     
     func newState(state: AppState) {
-        
         tableView.reloadData()
     }
     
@@ -104,6 +103,21 @@ class UsersListViewController: UIViewController, UITableViewDelegate, UITableVie
         } else if type == .Following && uid != nil {
             title = "Following"
             let ref = Database.database().reference().child("social/following/\(uid!)")
+            ref.observeSingleEvent(of: .value, with: { snapshot in
+                var tempIds = [String]()
+                for child in snapshot.children {
+                    let childSnap = child as! DataSnapshot
+                    tempIds.append(childSnap.key)
+                }
+                self.userIds = tempIds
+                self.tableView.reloadData()
+                
+            }, withCancel: { error in
+                print("Unable to retrieve followers")
+            })
+        } else if type == .Blocked && uid != nil {
+            title = "Blocked"
+            let ref = Database.database().reference().child("social/blocked/\(uid!)")
             ref.observeSingleEvent(of: .value, with: { snapshot in
                 var tempIds = [String]()
                 for child in snapshot.children {

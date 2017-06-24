@@ -195,7 +195,6 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
     
     func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ item:StoryItem, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
-            print("ITEM: \(item)")
             if item != nil {
                 
                 UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in

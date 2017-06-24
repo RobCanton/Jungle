@@ -55,6 +55,7 @@ class Listeners {
             
             /** Listen for a Follower Added */
             followersRef.observe(.childAdded, with: { snapshot in
+                
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(AddFollower(uid: snapshot.key))
@@ -65,6 +66,7 @@ class Listeners {
             
             /** Listen for a Follower Removed */
             followersRef.observe(.childRemoved, with: { snapshot in
+                
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(RemoveFollower(uid: snapshot.key))
@@ -84,6 +86,7 @@ class Listeners {
              Listen for a Following Added
              */
             followingRef.observe(.childAdded, with: { snapshot in
+                print("Follow added")
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(AddFollowing(uid: snapshot.key))
@@ -97,6 +100,7 @@ class Listeners {
              Listen for a Following Removed
              */
             followingRef.observe(.childRemoved, with: { snapshot in
+                print("Follow removed")
                 if snapshot.exists() {
                     if snapshot.value! is Bool {
                         mainStore.dispatch(RemoveFollowing(uid: snapshot.key))
@@ -133,12 +137,23 @@ class Listeners {
             mainStore.dispatch(BlockFlaggedContent())
             
         }, withCancel: nil)
+        
+        settingsRef.child("upload_warning_shown").observe(.value, with: { snapshot in
+            if let value = snapshot.value as? Bool {
+                if value {
+                    mainStore.dispatch(UploadWarningShown())
+                    return
+                }
+            }
+            
+        }, withCancel: nil)
     }
     
     static func stopListeningToSettings() {
         let current_uid = mainStore.state.userState.uid
         let settingsRef = ref.child("users/settings/\(current_uid)")
         settingsRef.child("allows_flagged_content").removeAllObservers()
+        settingsRef.child("upload_warning_shown").removeAllObservers()
     }
     
     static func startListeningToViewed() {

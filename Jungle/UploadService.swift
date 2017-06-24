@@ -16,7 +16,7 @@ import SwiftMessages
 
 
 let dataCache = NSCache<NSString, AnyObject>()
-
+let uploadDataCache = NSCache<NSString, AnyObject>()
 class UploadService {
     
     fileprivate static let sm = SwiftMessages()
@@ -227,26 +227,14 @@ class UploadService {
                     
                     var updateValues: [String : Any] = [
                         "uploads/meta/\(postKey)": obj,
-                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
+                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
+                        "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
                     ]
                     
-                    if upload.toStory || upload.toNearby {
-                        updateValues["uploads/live/\(postKey)/t"] = [".sv": "timestamp"]
-                        updateValues["uploads/live/\(postKey)/a"] = uid
-                        if let place = upload.place {
-                            updateValues["uploads/live/\(postKey)/p"] = place.placeID
-                        }
-                    }
-
-                    
-                    if upload.toStory {
-                        updateValues["users/story/\(uid)/posts/\(postKey)"] = [".sv": "timestamp"]
-                    }
-                    
-                    if let coordinates = upload.coordinates, upload.toNearby {
+                    if let coordinates = upload.coordinates {
                         updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
                         updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
-                        
+                        updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]
                         if let place = upload.place {
                             let placeId = place.placeID
                             updateValues["places/info/\(placeId)/name"] = place.name
@@ -263,17 +251,6 @@ class UploadService {
                             updateValues["places/story/\(placeId)/\(postKey)/u"] = uid
                         }
                     }
-
-//                    for (recipientId, _) in upload.recipients {
-//                        let conversationKey = createUserIdPairKey(uid1: uid, uid2: recipientId)
-//                        let convoRef = Database.database().reference().child("conversations/\(conversationKey)/messages").childByAutoId()
-//                        let path = "conversations/\(conversationKey)/messages/\(convoRef.key)"
-//                        updateValues["\(path)/recipientId"] = recipientId
-//                        updateValues["\(path)/senderId"] = uid as AnyObject
-//                        updateValues["\(path)/uploadKey"] = postKey
-//                        updateValues["\(path)/uploadURL"] = downloadURL!.absoluteString
-//                        updateValues["\(path)/timestamp"] = [".sv":"timestamp"]
-//                    }
                     
                     ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
@@ -363,17 +340,14 @@ class UploadService {
                             
                             var updateValues: [String : Any] = [
                                 "uploads/meta/\(postKey)": obj,
-                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"]
+                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
+                                "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
                             ]
                             
-                            
-                            if upload.toStory {
-                                updateValues["users/story/\(uid)/posts/\(postKey)"] = [".sv": "timestamp"]
-                            }
-                            
-                            if let coordinates = upload.coordinates, upload.toNearby {
+                            if let coordinates = upload.coordinates {
                                 updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
                                 updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
+                                updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]
                                 
                                 if let place = upload.place {
                                     let placeId = place.placeID
@@ -467,7 +441,7 @@ class UploadService {
     
     static func getUpload(key:String, completion: @escaping (_ item:StoryItem?)->()) {
         
-        if let cachedUpload = dataCache.object(forKey: "upload-\(key)" as NSString) as? StoryItem {
+        if let cachedUpload = uploadDataCache.object(forKey: "upload-\(key)" as NSString) as? StoryItem {
             return completion(cachedUpload)
         }
         
@@ -545,7 +519,7 @@ class UploadService {
                     }
                     
                     item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color)
-                    dataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
+                    uploadDataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
             return completion(item)
@@ -583,7 +557,6 @@ class UploadService {
         ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
             
             if error != nil {
-                print("LIKE YUH!")
                 print("ERROR: \(error)")
                 completion(false)
                 return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
@@ -684,7 +657,7 @@ class UploadService {
         let postRef = ref.child("uploads/meta/\(item.key)")
         postRef.removeValue { error, ref in
             if error == nil {
-                dataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
+                uploadDataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
                 globalMainInterfaceProtocol?.fetchAllStories()
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
                 return completion(true)
@@ -737,7 +710,7 @@ class UploadService {
     static func reportComment(itemKey: String, commentKey:String, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
-        let reportRef = ref.child("reports/\(uid):\(itemKey):\(commentKey)")
+        let reportRef = ref.child("reports/comments/\(commentKey)/\(uid)")
         let value: [String: Any] = [
             "sender": uid,
             "itemKey": itemKey,

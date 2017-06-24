@@ -11,6 +11,7 @@ import ReSwift
 
 struct SettingsState {
     var allowFlaggedContent = false
+    var uploadWarningShown = false
 }
 
 func SettingsReducer(_ action: Action, state: SettingsState?) -> SettingsState {
@@ -22,6 +23,8 @@ func SettingsReducer(_ action: Action, state: SettingsState?) -> SettingsState {
     case _ as BlockFlaggedContent:
         state.allowFlaggedContent = false
         break
+    case _ as UploadWarningShown:
+        state.uploadWarningShown = true
     case _ as ResetSettings:
         state = SettingsState()
         break
@@ -38,3 +41,5 @@ struct AllowFlaggedContent: Action {}
 struct BlockFlaggedContent: Action {}
 
 struct ResetSettings: Action {}
+
+struct UploadWarningShown: Action {}

@@ -71,7 +71,6 @@ class UserService {
         ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
 
             if let dict = snapshot.value as? [String:String], let first = dict.first {
-                print("DICT: \(dict)")
                 completion(first.key)
             } else {
                 completion(nil)
@@ -123,6 +122,8 @@ class UserService {
                 }
                 
                 completion(user)
+            }, withCancel: { _ in
+                completion(nil)
             })
         }
     }
@@ -138,7 +139,6 @@ class UserService {
     static func observeUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
         ref.child("users/profile/\(uid)").observe(.value, with: { snapshot in
             var user:User?
-            print("PROFILE CHANGED TINGS!")
             if snapshot.exists() {
                 let dict = snapshot.value as! [String:AnyObject]
                 guard let username = dict["username"] as? String else { return completion(user) }
@@ -170,6 +170,8 @@ class UserService {
             }
             
             completion(user)
+        }, withCancel: { _ in
+            completion(nil)
         })
     }
     
@@ -211,6 +213,8 @@ class UserService {
                 }
                 
                 completion(user, check)
+            }, withCancel: { _ in
+                completion(nil, check)
             })
         }
     }
@@ -398,10 +402,8 @@ class UserService {
     static func reportUser(user:User, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
         let ref = Database.database().reference()
         let uid = mainStore.state.userState.uid
-        let reportRef = ref.child("reports/\(uid):\(user.uid)")
+        let reportRef = ref.child("reports/users/\(user.uid)/\(uid)")
         let value: [String: Any] = [
-            "sender": uid,
-            "userId": user.uid,
             "type": type.rawValue,
             "timestamp": [".sv": "timestamp"]
         ]

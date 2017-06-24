@@ -18,8 +18,13 @@ enum SortedBy {
     case Popular, Nearby, Recent
 }
 
+enum HomeSection {
+    case following, popular, places, nearby
+}
+
 class HomeViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, StoreSubscriber, HomeProtocol {
     var state:HomeStateController!
+    
     
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
@@ -45,6 +50,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var sliderLabels:TGPCamelLabels!
     
     var header:UIView!
+    
+    var messageWrapper:SwiftMessages!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -142,17 +149,40 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         refreshIndicator.startAnimating()
         
         state = HomeStateController(delegate:self)
+        
+        messageWrapper = SwiftMessages()
     }
     
     
-    func update(_ mode:SortedBy?) {
+    func update(_ section:HomeSection?) {
         refreshButton.isHidden = false
         refreshIndicator.stopAnimating()
-
-        return self.collectionView.reloadData()
+        if let section = section {
+            switch section {
+            case .following:
+                followingHeader?.setupStories(state: state, section: 0)
+                break
+            case .popular:
+                followingHeader?.setupStories(state: state, section: 0)
+                let indexSet = IndexSet(integer: 0)
+                self.collectionView.reloadSections(indexSet)
+                break
+            case .places:
+                placesHeader?.setupStories(state: state, section: 1)
+                break
+            case .nearby:
+                placesHeader?.setupStories(state: state, section: 1)
+                let indexSet = IndexSet(integer: 1)
+                self.collectionView.reloadSections(indexSet)
+                break
+            }
+        } else {
+            return self.collectionView.reloadData()
+        }
     }
     
     func handleRefresh() {
+        uploadDataCache.removeAllObjects()
         refreshButton.isHidden = true
         refreshIndicator.startAnimating()
         state.fetchAll()
@@ -160,6 +190,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     func handleOptions() {
         let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
+        sortOptionsView.delegate = self
         let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 190.0)
         let messageView = BaseView(frame: f)
         messageView.installContentView(sortOptionsView)
@@ -171,10 +202,12 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         config.presentationStyle = .bottom
         config.dimMode = .gray(interactive: true)
         config.interactiveHide = false
-        SwiftMessages.show(config: config, view: messageView)
+        messageWrapper.show(config: config, view: messageView)
         
     }
     
+    var followingHeader:FollowingHeader?
+    var placesHeader:FollowingHeader?
     
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -184,9 +217,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             
             switch indexPath.section {
             case 0:
+                followingHeader = view
                 topCollectionViewRef = view.collectionView
                 break
             case 1:
+                placesHeader = view
                 midCollectionViewRef = view.collectionView
                 break
             default:
@@ -244,14 +279,17 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //globalMainInterfaceProtocol?.fetchAllStories()
-        state.observeViewed()
+        //state.observeViewed()
+        state.delegate = self
+        update(.following)
         
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         //print("Home: viewDidDisappear")
-        state.stopObservingViewed()
+        //state.stopObservingViewed()
+        state.delegate = nil
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -272,7 +310,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch section {
         case 0:
-            return state.popularPosts.count >= 6 ? 6 : state.popularPosts.count
+            return state.popularPosts.count >= popularPostsLimit ? popularPostsLimit : state.popularPosts.count
         case 1:
             return state.nearbyPosts.count
         default:
@@ -287,12 +325,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch indexPath.section {
         case 0:
-            print("row: \(indexPath.row) p: \(state.popularPosts[indexPath.row].popularity)")
             cell.setCrownStatus(isKing: indexPath.row == 0)
             cell.setupCell(withPost: state.popularPosts[indexPath.row])
+            cell.viewMore(indexPath.row == popularPostsLimit - 1 && state.popularPosts.count > popularPostsLimit)
             break
         case 1:
             cell.setCrownStatus(isKing: false)
+            cell.viewMore(false)
             cell.setupCell(withPost: state.nearbyPosts[indexPath.row])
             break
         default:
@@ -308,6 +347,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         return getItemSize()
     }
     
+    var popularPostsLimit = 6
     var selectedIndexPath: IndexPath = IndexPath(item: 0, section: 0)
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -317,7 +357,12 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch indexPath.section {
         case 0:
-            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
+            if indexPath.row == popularPostsLimit - 1 && state.popularPosts.count > popularPostsLimit {
+                popularPostsLimit += 6
+                update(.popular)
+            } else {
+               globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
+            }
             break
         case 1:
             globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
@@ -376,4 +421,9 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
 }
 
+extension HomeViewController: SortOptionsProtocol {
+    func dismissSortOptions() {
+        messageWrapper.hideAll()
+    }
+}
 

@@ -48,7 +48,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     
     func stateChange(_ state:UserStoryState) {
         guard let story = self.story else { return }
-       print("STATE: \(state)")
         switch state {
         case .notLoaded:
             self.timeLabel.text = story.date.timeStringSinceNow()
@@ -72,6 +71,44 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     func setCrownStatus(isKing:Bool) {
         crown.isHidden = !isKing
         crownLabel.isHidden = true//!isKing
+    }
+    
+    var viewMoreView:UIView?
+    var viewMoreLabel:UILabel?
+    
+    
+    func viewMore(_ isMoreCell:Bool) {
+        viewMoreView?.removeFromSuperview()
+        viewMoreLabel?.removeFromSuperview()
+        viewMoreView = nil
+        viewMoreLabel = nil
+        
+        self.overlay.isHidden = isMoreCell
+        if isMoreCell {
+            let margin:CGFloat = 8.0
+            
+            viewMoreView = UIView(frame: CGRect(x: margin, y: margin + self.bounds.height * 0.6 , width: self.bounds.width - margin * 2.0, height: self.bounds.height * 0.4 - margin * 2.0))
+            viewMoreView!.backgroundColor = UIColor.clear
+            
+            
+            let blur = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+            blur.frame = viewMoreView!.bounds
+            viewMoreView!.addSubview(blur)
+            
+            viewMoreView!.layer.cornerRadius = 4.0
+            viewMoreView!.clipsToBounds = true
+            
+            viewMoreLabel = UILabel(frame: viewMoreView!.bounds)
+            viewMoreLabel!.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightSemibold)
+            viewMoreLabel!.textAlignment = .center
+            viewMoreLabel!.textColor = UIColor.white
+            viewMoreLabel!.numberOfLines = 0
+            viewMoreLabel!.text = "View More"
+            
+            self.addSubview(viewMoreView!)
+            viewMoreView!.addSubview(viewMoreLabel!)
+        }
+        
     }
     
     func setupCell (withUserStory story: UserStory) {
@@ -264,13 +301,11 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     func getUploadImage(withCheck check: Int, key: String, completion: @escaping ((_ check:Int, _ item:StoryItem, _ image:UIImage?, _ fromFile:Bool)->())) {
         UploadService.getUpload(key: key, completion: { item in
             if item != nil {
-                print("GOT ITEM")
                 UploadService.retrieveImage(byKey: item!.key, withUrl: item!.downloadUrl, completion: { image, fromFile in
                     self.colorView.alpha = photoCellColorAlpha
                     completion(check, item!, image, fromFile)
                 })
             } else {
-                print("NO ITEM")
             }
         })
     }
