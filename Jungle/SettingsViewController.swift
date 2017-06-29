@@ -107,8 +107,18 @@ class SettingsViewController: UITableViewController, StoreSubscriber {
             globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
             break
         case privacyPolicyCell:
+            let web = WebViewController()
+            web.shouldAddBackdrop = true
+            web.title = "Privacy Policy"
+            web.urlString = "https://jungleapp.info/privacypolicy.html"
+            globalMainInterfaceProtocol?.navigationPush(withController: web, animated: true)
             break
         case termsCell:
+            let web = WebViewController()
+            web.shouldAddBackdrop = true
+            web.title = "Terms of Use"
+            web.urlString = "https://jungleapp.info/terms.html"
+            globalMainInterfaceProtocol?.navigationPush(withController: web, animated: true)
             break
         case logoutCell:
             showLogoutView()

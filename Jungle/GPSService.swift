@@ -7,7 +7,7 @@ import GooglePlaces
 protocol ServiceProtocol {}
 
 
-let minimumAcceptedLikelihood = 0.05
+let minimumAcceptedLikelihood = 0.0
 let excludedTypes:[String] = [
 //    //"street_address",
 //    "bus_station",
@@ -48,6 +48,7 @@ protocol GPSServiceProtocol:ServiceProtocol {
     func tracingLocationDidFailWithError(_ error: NSError)
     func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood])
     func horizontalAccuracyUpdated(_ accuracy:Double?)
+    func authorizationDidChange()
 }
 
 
@@ -174,12 +175,14 @@ class GPSService: Service, CLLocationManagerDelegate {
     
     internal func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         
+        print("Location failed: \(error.localizedDescription)")
         // do on error
         updateLocationDidFailWithError(error as NSError)
     }
     
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        //delegate?.authorizationChange()
+        guard let subscribers = getSubscribers() else { return }
+         subscribers.forEach { $0.value.authorizationDidChange()}
     }
     
     internal func updateLocationDidFailWithError(_ error: NSError) {

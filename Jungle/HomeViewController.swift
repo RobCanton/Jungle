@@ -121,6 +121,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         let headerNib = UINib(nibName: "FollowingHeader", bundle: nil)
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
+        
+        self.collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader")
      
         let headerNib2 = UINib(nibName: "CollectionDividerView", bundle: nil)
         
@@ -157,6 +159,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func update(_ section:HomeSection?) {
         refreshButton.isHidden = false
         refreshIndicator.stopAnimating()
+        return self.collectionView.reloadData()
         if let section = section {
             switch section {
             case .following:
@@ -164,17 +167,15 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                 break
             case .popular:
                 followingHeader?.setupStories(state: state, section: 0)
-                let indexSet = IndexSet(integer: 0)
-                self.collectionView.reloadSections(indexSet)
-                break
+                return self.collectionView.reloadData()
+                
             case .places:
                 placesHeader?.setupStories(state: state, section: 1)
                 break
             case .nearby:
                 placesHeader?.setupStories(state: state, section: 1)
-                let indexSet = IndexSet(integer: 1)
-                self.collectionView.reloadSections(indexSet)
-                break
+                return self.collectionView.reloadData()
+                
             }
         } else {
             return self.collectionView.reloadData()
@@ -213,24 +214,35 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
         if kind == UICollectionElementKindSectionHeader {
-            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
-            
             switch indexPath.section {
             case 0:
-                followingHeader = view
-                topCollectionViewRef = view.collectionView
+                if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
+                    return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
+                } else {
+                    let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
+                    followingHeader = view
+                    topCollectionViewRef = view.collectionView
+                    view.setupStories(state: state, section: indexPath.section)
+                    return view+
+                }
+                
                 break
             case 1:
-                placesHeader = view
-                midCollectionViewRef = view.collectionView
+                if state.nearbyPlaceStories.count == 0 {
+                    return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
+                } else {
+                    let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
+                    placesHeader = view
+                    midCollectionViewRef = view.collectionView
+                    view.setupStories(state: state, section: indexPath.section)
+                    return view
+                }
                 break
             default:
                 break
             }
             
-            view.setupStories(state: state, section: indexPath.section)
-
-            return view
+            
         }
         
         
@@ -248,7 +260,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch section {
         case 0:
-            verticalHeight += state.followingStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
+            verticalHeight += state.visiblePopularPosts.count > 0 ? bannerHeight: 0
+            verticalHeight += state.unseenFollowingStories.count > 0 || state.watchedFollowingStories.count > 0 ? collectionViewHeight + bannerHeight : 0
             break
         case 1:
             ///verticalHeight += 48
@@ -273,6 +286,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         super.viewWillAppear(animated)
         //print("Home: viewWillAppear")
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        
     }
     
     var shouldDelayLoad = false
@@ -281,7 +295,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         //globalMainInterfaceProtocol?.fetchAllStories()
         //state.observeViewed()
         state.delegate = self
-        update(.following)
+        update(nil)
         
     }
     
@@ -310,7 +324,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch section {
         case 0:
-            return state.popularPosts.count >= popularPostsLimit ? popularPostsLimit : state.popularPosts.count
+            return state.visiblePopularPosts.count
         case 1:
             return state.nearbyPosts.count
         default:
@@ -326,8 +340,8 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         switch indexPath.section {
         case 0:
             cell.setCrownStatus(isKing: indexPath.row == 0)
-            cell.setupCell(withPost: state.popularPosts[indexPath.row])
-            cell.viewMore(indexPath.row == popularPostsLimit - 1 && state.popularPosts.count > popularPostsLimit)
+            cell.setupCell(withPost: state.visiblePopularPosts[indexPath.row])
+            cell.viewMore(indexPath.row == state.visiblePopularPosts.count - 1 && state.popularPosts.count > state.visiblePopularPosts.count)
             break
         case 1:
             cell.setCrownStatus(isKing: false)
@@ -347,7 +361,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         return getItemSize()
     }
     
-    var popularPostsLimit = 6
     var selectedIndexPath: IndexPath = IndexPath(item: 0, section: 0)
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -357,11 +370,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch indexPath.section {
         case 0:
-            if indexPath.row == popularPostsLimit - 1 && state.popularPosts.count > popularPostsLimit {
-                popularPostsLimit += 6
-                update(.popular)
+            if indexPath.row == state.visiblePopularPosts.count - 1 && state.popularPosts.count > state.visiblePopularPosts.count {
+                state.popularPostsLimit += 6
+                state.sortPopularPosts()
+                self.collectionView.reloadSections(IndexSet(integer: 0))
             } else {
-               globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
+               
+               globalMainInterfaceProtocol?.presentNearbyPost(posts: state.visiblePopularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
             }
             break
         case 1:
@@ -370,36 +385,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         default:
             break
         }
-        
-//        let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
-//        
-//        switch sortMode {
-//        case .Popular:
-//            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.popularPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-//            break
-//        case .Nearby:
-//            globalMainInterfaceProtocol?.presentNearbyPost(posts: state.nearbyPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-//            break
-//        case .Recent:
-//            var stories:[UserStory]!
-//            
-//            let dest = IndexPath(item: indexPath.item, section: 0)
-//            if indexPath.section == 0 {
-//                stories = state.unseenFollowingStories
-//            } else {
-//                stories = state.watchedFollowingStories
-//            }
-//            let story = stories[indexPath.item]
-//            story.determineState()
-//            if story.state == .contentLoaded {
-//                self.selectedIndexPath = indexPath
-//                globalMainInterfaceProtocol?.presentUserStory(userStories: stories, destinationIndexPath: dest, initialIndexPath: indexPath)
-//            } else {
-//                story.downloadFirstItem()
-//            }
-//            break
-//        }
-        
         
         collectionView.deselectItem(at: indexPath, animated: true)
     }

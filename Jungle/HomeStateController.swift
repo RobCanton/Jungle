@@ -17,8 +17,13 @@ protocol HomeProtocol: class {
 class HomeStateController: StoreSubscriber {
     weak var delegate:HomeProtocol?
     
+    private(set) var myStory:UserStory?
+    
+    var popularPostsLimit = 6
+    
     private(set) var nearbyPosts = [StoryItem]()
     private(set) var popularPosts = [StoryItem]()
+    private(set) var visiblePopularPosts = [StoryItem]()
     
     fileprivate var nearbyRef:DatabaseReference?
     fileprivate var popularRef:DatabaseReference?
@@ -63,6 +68,10 @@ class HomeStateController: StoreSubscriber {
     
     func clear() {
         
+        myStory = nil
+        UserService.stopObservingUserStory(mainStore.state.userState.uid)
+        popularPosts = [StoryItem]()
+        visiblePopularPosts = [StoryItem]()
         
         followingStories = [UserStory]()
         nearbyFollowingStories = [UserStory]()
@@ -98,6 +107,7 @@ class HomeStateController: StoreSubscriber {
     
     func fetchAll() {
         mainStore.subscribe(self)
+        observeMyStory()
         observeNearbyPlaces()
         observeNearbyPosts()
         observePopularPosts()
@@ -136,6 +146,13 @@ class HomeStateController: StoreSubscriber {
     }
     
     
+    fileprivate func observeMyStory() {
+        UserService.observeUserStory(mainStore.state.userState.uid) { story in
+            self.myStory = story
+            self.sortFollowingStories()
+        }
+    }
+    
     func sortFollowingByDate() {
         followingStories.sort(by: { $0 > $1})
         let uid = mainStore.state.userState.uid
@@ -154,13 +171,15 @@ class HomeStateController: StoreSubscriber {
         }
     }
     
+    
     fileprivate func downloadFollowingStories() {
         var stories = [UserStory]()
         var following = mainStore.state.socialState.following.sorted()
-        following.insert(mainStore.state.userState.uid, at: 0)
         
         var count = 0
         for uid in following {
+            
+            
             UserService.getUserStory(uid, completion: { story in
                 if story != nil {
                     stories.append(story!)
@@ -194,6 +213,10 @@ class HomeStateController: StoreSubscriber {
         
         self.unseenFollowingStories = unseenStories.sorted(by: { return $0 > $1 })
         self.watchedFollowingStories = watchedStories.sorted(by: { return $0 > $1 })
+        
+        if myStory != nil {
+            self.unseenFollowingStories.insert(myStory!, at: 0)
+        }
         
         DispatchQueue.main.async {
             self.delegate?.update(.following)
@@ -246,6 +269,7 @@ class HomeStateController: StoreSubscriber {
         }
     }
     
+    
     fileprivate func observeNearbyPlaces() {
         let uid = mainStore.state.userState.uid
         nearbyPlacesRef?.removeAllObservers()
@@ -279,7 +303,6 @@ class HomeStateController: StoreSubscriber {
                 count += 1
                 if count >= places.count {
                     count = -1
-                    let uid = mainStore.state.userState.uid
                     self.nearbyPlaceStories = placesStories.sorted(by: { return $0 > $1 })
                     
                    // DispatchQueue.main.async {
@@ -311,7 +334,8 @@ class HomeStateController: StoreSubscriber {
         var popularPosts = [StoryItem]()
         
         if posts.count == 0 {
-            delegate?.update(.popular)
+            self.popularPosts = popularPosts
+            self.sortPopularPosts()
             return
         }
         
@@ -320,7 +344,6 @@ class HomeStateController: StoreSubscriber {
             UploadService.getUpload(key: key, completion: { item in
                 if item != nil {
                     popularPosts.append(item!)
-                    //item?.popularity = pop
                 }
                 
                 count += 1
@@ -328,12 +351,22 @@ class HomeStateController: StoreSubscriber {
                     count = -1
                     
                     self.popularPosts = popularPosts.sorted(by: { return $0.popularity > $1.popularity })
-                   // DispatchQueue.main.async {
-                        self.delegate?.update(.popular)
-                    //}
+                   self.sortPopularPosts()
                 }
                 
             })
         }
+    }
+    
+    func sortPopularPosts() {
+        
+        let numVisiblePosts = min(popularPostsLimit, self.popularPosts.count)
+        var tempPosts = [StoryItem]()
+        for i in 0..<numVisiblePosts {
+            tempPosts.append(popularPosts[i])
+        }
+        
+        self.visiblePopularPosts = tempPosts
+        self.delegate?.update(.popular)
     }
 }

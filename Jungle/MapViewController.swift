@@ -11,8 +11,11 @@ import UIKit
 import CoreLocation
 import GoogleMaps
 import GooglePlaces
+import SwiftMessages
 
 class MapViewController: UIViewController {
+    
+    var messageWrapper:SwiftMessages!
     
     let subscriberName = "MapViewController"
     @IBOutlet weak var accuracyLabel: UILabel!
@@ -30,7 +33,7 @@ class MapViewController: UIViewController {
     @IBOutlet weak var nearbyLocationsLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        messageWrapper = SwiftMessages()
         blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         blurView.frame = view.bounds
         view.insertSubview(blurView, at: 0)
@@ -48,10 +51,17 @@ class MapViewController: UIViewController {
            // labelSuperview.layer.borderWidth = 2.0
         }
     }
+    
+    var didHideLocationAlert = false
 }
 
 extension MapViewController: GPSServiceProtocol {
+    func authorizationDidChange() {
+        
+    }
+
     func tracingLocation(_ currentLocation: CLLocation) {
+        messageWrapper.hideAll()
         //LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
         // singleton for get last location
         if mapView == nil {
@@ -87,6 +97,7 @@ extension MapViewController: GPSServiceProtocol {
     }
     
     func significantLocationUpdate(_ location: CLLocation) {
+        messageWrapper.hideAll()
         LocationService.sharedInstance.requestNearbyLocations()
     }
     
@@ -113,8 +124,17 @@ extension MapViewController: GPSServiceProtocol {
     }
     
     func tracingLocationDidFailWithError(_ error: NSError) {
-        print(error.code)
         
+        if !didHideLocationAlert {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(alertTapped))
+            Alerts.showNoLocationServicesAlert(inWrapper: messageWrapper, tap: tap)
+        }
+        
+    }
+    
+    func alertTapped() {
+        didHideLocationAlert = true
+        messageWrapper.hideAll()
     }
     
     func horizontalAccuracyUpdated(_ accuracy: Double?) {

@@ -242,6 +242,34 @@ class UserService {
         })
     }
     
+    static func observeUserStory(_ uid:String, completion: @escaping ((_ story:UserStory?)->())) {
+        
+        let storyRef = ref.child("users/story/\(uid)/posts")
+        
+        storyRef.observe(.value, with: { snapshot in
+            
+            var story:UserStory?
+            var postKeys = [(String,Double)]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                postKeys.append((childSnap.key, childSnap.value as! Double))
+            }
+            if postKeys.count > 0 {
+                story = UserStory(postKeys: postKeys, uid: uid)
+            }
+            
+            completion(story)
+            
+        }, withCancel: { error in
+            completion(nil)
+        })
+    }
+    
+    static func stopObservingUserStory(_ uid:String) {
+        let storyRef = ref.child("users/story/\(uid)/posts")
+        storyRef.removeAllObservers()
+    }
+    
     
     static func getPlaceStory(_ placeId:String, completion: @escaping ((_ story:LocationStory?)->())) {
         completion(nil)

@@ -31,6 +31,8 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
         let a = action as! UpdateUser
         state.user = a.user
         break
+    case _ as FIRUserUpdated:
+        break
     default:
         break
     }
@@ -38,6 +40,7 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
     return state
 }
 
+struct FIRUserUpdated: Action {}
 
 struct UserIsAuthenticated: Action {
     let user: User

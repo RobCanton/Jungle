@@ -79,7 +79,32 @@ struct Alerts {
         }
         
     }
-
+    
+    static func showNoLocationServicesAlert(inWrapper wrapper: SwiftMessages?, tap:UITapGestureRecognizer) {
+        
+        
+        let alert = MessageView.viewFromNib(layout: .StatusLine)
+        alert.backgroundView.backgroundColor = errorColor
+        alert.bodyLabel?.textColor = UIColor.white
+        alert.configureContent(body: "Unable to retrieve your location.")
+        
+        alert.addGestureRecognizer(tap)
+        alert.isUserInteractionEnabled = true
+        
+        var config = SwiftMessages.defaultConfig
+        config.duration = SwiftMessages.Duration.forever
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        config.interactiveHide = true
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+        
+    }
+    
     
     static func showStatusWarningAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
         

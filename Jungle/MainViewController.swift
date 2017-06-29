@@ -14,6 +14,7 @@ import GoogleMaps
 import GooglePlaces
 import ReSwift
 import JSQMessagesViewController
+import SwiftMessages
 
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
@@ -98,6 +99,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var presentationType:PresentationType = .homeCollection
     
+    fileprivate var messageWrapper:SwiftMessages!
+    
     fileprivate lazy var cancelButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
@@ -178,6 +181,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         globalMainInterfaceProtocol = self
+        
+        messageWrapper = SwiftMessages()
         
         let screenBounds = UIScreen.main.bounds
         view.backgroundColor = UIColor.black
@@ -321,11 +326,14 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         zoomGesture.delegate = self
         
         if gps_service == nil {
-            gps_service = GPSService(["MapViewController":mapViewController])
+            gps_service = GPSService(["MapViewController":mapViewController, "MainViewController":self])
             gps_service.startUpdatingLocation()
             
             places.gps_service = gps_service
             LocationService.sharedInstance.gps_service = gps_service
+            
+            authorizationDidChange()
+           
         }
         
         if message_service == nil {
@@ -334,6 +342,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
             mainTabBar.message_service = message_service
 
             message_service.startListeningToConversations()
+            
+            
         }
         
         if notification_service == nil {
@@ -1086,6 +1096,17 @@ extension MainViewController: View2ViewTransitionPresenting {
         return UIView()
     }
     
+}
+
+extension MainViewController: GPSServiceProtocol {
+    func tracingLocation(_ currentLocation: CLLocation) {}
+    func significantLocationUpdate( _ location: CLLocation) {}
+    func tracingLocationDidFailWithError(_ error: NSError) {}
+    func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood]) {}
+    func horizontalAccuracyUpdated(_ accuracy:Double?) {}
+    func authorizationDidChange() {
+        
+    }
 }
 
 

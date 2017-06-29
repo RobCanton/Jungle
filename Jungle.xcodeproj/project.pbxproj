@@ -15,6 +15,7 @@
 		B0168B561EEE464A001069C4 /* ItemStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0168B551EEE4649001069C4 /* ItemStateController.swift */; };
 		B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */; };
 		B03012781EEC89A90012F340 /* EmailSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */; };
+		B03A25BC1F01BEE700A5FA08 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
 		B04DFB551E938D3B0016FE5D /* PlacesTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */; };
 		B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */; };
@@ -79,7 +80,7 @@
 		B093FFC31E790D5E00011B43 /* StoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFB41E790D5E00011B43 /* StoryItem.swift */; };
 		B093FFC41E790D5E00011B43 /* UploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFB51E790D5E00011B43 /* UploadService.swift */; };
 		B093FFC51E790D5E00011B43 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B093FFB61E790D5E00011B43 /* User.swift */; };
-		B093FFC71E790F6800011B43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B093FFC61E790F6800011B43 /* GoogleService-Info.plist */; };
+		B093FFC71E790F6800011B43 /* GoogleService-Info(OLD).plist in Resources */ = {isa = PBXBuildFile; fileRef = B093FFC61E790F6800011B43 /* GoogleService-Info(OLD).plist */; };
 		B093FFC91E7910B100011B43 /* mapStyle.json in Resources */ = {isa = PBXBuildFile; fileRef = B093FFC81E7910B100011B43 /* mapStyle.json */; };
 		B093FFCB1E7910E700011B43 /* SendProfileViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B093FFCA1E7910E700011B43 /* SendProfileViewCell.xib */; };
 		B093FFCD1E79135A00011B43 /* PhotoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B093FFCC1E79135A00011B43 /* PhotoCell.xib */; };
@@ -138,6 +139,8 @@
 		B0DF82411EDFB36700461DD8 /* CommentItemBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DF82401EDFB36700461DD8 /* CommentItemBar.swift */; };
 		B0DF82441EDFC7EB00461DD8 /* StoryInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DF82421EDFC7EA00461DD8 /* StoryInfoView.swift */; };
 		B0DF82451EDFC7EB00461DD8 /* StoryInfoView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */; };
+		B0E100381F04E285005C4827 /* PlacesFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E100361F04E283005C4827 /* PlacesFooter.swift */; };
+		B0E100391F04E285005C4827 /* PlacesFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0E100371F04E283005C4827 /* PlacesFooter.xib */; };
 		B0F2A17E1EE7589B004857CA /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A17D1EE7589B004857CA /* BannerView.swift */; };
 		B0F2A1801EE758A7004857CA /* BannerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F2A17F1EE758A7004857CA /* BannerView.xib */; };
 		B0F2A1821EE788FB004857CA /* Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A1811EE788FB004857CA /* Upload.swift */; };
@@ -183,6 +186,7 @@
 		B0168B551EEE4649001069C4 /* ItemStateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemStateController.swift; sourceTree = "<group>"; };
 		B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordRecoveryViewController.swift; sourceTree = "<group>"; };
 		B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSettingsViewController.swift; sourceTree = "<group>"; };
+		B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		B04DFB541E938D3B0016FE5D /* PlacesTabHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesTabHeader.swift; sourceTree = "<group>"; };
 		B04DFB561E938D4C0016FE5D /* PlacesTabHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesTabHeader.xib; sourceTree = "<group>"; };
@@ -251,7 +255,7 @@
 		B093FFB41E790D5E00011B43 /* StoryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryItem.swift; sourceTree = "<group>"; };
 		B093FFB51E790D5E00011B43 /* UploadService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadService.swift; sourceTree = "<group>"; };
 		B093FFB61E790D5E00011B43 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		B093FFC61E790F6800011B43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		B093FFC61E790F6800011B43 /* GoogleService-Info(OLD).plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info(OLD).plist"; sourceTree = "<group>"; };
 		B093FFC81E7910B100011B43 /* mapStyle.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = mapStyle.json; sourceTree = "<group>"; };
 		B093FFCA1E7910E700011B43 /* SendProfileViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SendProfileViewCell.xib; sourceTree = "<group>"; };
 		B093FFCC1E79135A00011B43 /* PhotoCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhotoCell.xib; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 		B0DF82401EDFB36700461DD8 /* CommentItemBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentItemBar.swift; sourceTree = "<group>"; };
 		B0DF82421EDFC7EA00461DD8 /* StoryInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryInfoView.swift; sourceTree = "<group>"; };
 		B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StoryInfoView.xib; sourceTree = "<group>"; };
+		B0E100361F04E283005C4827 /* PlacesFooter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesFooter.swift; sourceTree = "<group>"; };
+		B0E100371F04E283005C4827 /* PlacesFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesFooter.xib; sourceTree = "<group>"; };
 		B0F2A17D1EE7589B004857CA /* BannerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
 		B0F2A17F1EE758A7004857CA /* BannerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BannerView.xib; sourceTree = "<group>"; };
 		B0F2A1811EE788FB004857CA /* Upload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Upload.swift; sourceTree = "<group>"; };
@@ -455,7 +461,8 @@
 			children = (
 				B04DFB5A1E961F890016FE5D /* Jungle.entitlements */,
 				B093FF9A1E790CD500011B43 /* Main.storyboard */,
-				B093FFC61E790F6800011B43 /* GoogleService-Info.plist */,
+				B093FFC61E790F6800011B43 /* GoogleService-Info(OLD).plist */,
+				B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */,
 				B093FF9D1E790CD500011B43 /* Assets.xcassets */,
 				B0DF822C1EDCAEEC00461DD8 /* countryCodes.json */,
 				B093FF9F1E790CD500011B43 /* LaunchScreen.storyboard */,
@@ -506,6 +513,8 @@
 				B0AB4E261EFA6C30008E875A /* CollectionFooter.xib */,
 				B0C86D441E80B7E00067E004 /* FollowingHeader.swift */,
 				B0C86D461E80B7F90067E004 /* FollowingHeader.xib */,
+				B0E100361F04E283005C4827 /* PlacesFooter.swift */,
+				B0E100371F04E283005C4827 /* PlacesFooter.xib */,
 				B0A6FCCE1EC2E066009933F8 /* HorizontalCollectionView.swift */,
 				B0A6FCCC1EC2E057009933F8 /* HorizontalCollectionView.xib */,
 				B093FFAF1E790D5E00011B43 /* PhotoCell.swift */,
@@ -750,6 +759,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0DF823F1EDFB34500461DD8 /* CommentItemBar.xib in Resources */,
+				B03A25BC1F01BEE700A5FA08 /* GoogleService-Info.plist in Resources */,
 				B093FFA11E790CD500011B43 /* LaunchScreen.storyboard in Resources */,
 				B0AB4E281EFA6C30008E875A /* CollectionFooter.xib in Resources */,
 				B0AB4E2C1EFBB808008E875A /* TacoDialogView.xib in Resources */,
@@ -760,7 +770,7 @@
 				B0DF823B1EDFB0BA00461DD8 /* CommentsOverlayTableView.xib in Resources */,
 				B0F2A1861EE7AC00004857CA /* SendTableHeaderView.xib in Resources */,
 				B0F2A18A1EE7C9D1004857CA /* SendSingleLineTableViewCell.xib in Resources */,
-				B093FFC71E790F6800011B43 /* GoogleService-Info.plist in Resources */,
+				B093FFC71E790F6800011B43 /* GoogleService-Info(OLD).plist in Resources */,
 				B0DF82451EDFC7EB00461DD8 /* StoryInfoView.xib in Resources */,
 				B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */,
 				B0DF822D1EDCAEEC00461DD8 /* countryCodes.json in Resources */,
@@ -772,6 +782,7 @@
 				B0C86D4B1E80B9440067E004 /* UserStoryCollectionViewCell.xib in Resources */,
 				B0F894741E7BAC5800E490C4 /* CommentsHeaderView.xib in Resources */,
 				B0550D7C1E8A1499007DAAAC /* LocationHeaderView.xib in Resources */,
+				B0E100391F04E285005C4827 /* PlacesFooter.xib in Resources */,
 				B093FF9E1E790CD500011B43 /* Assets.xcassets in Resources */,
 				B093FF9C1E790CD500011B43 /* Main.storyboard in Resources */,
 				B0F8949A1E7C717F00E490C4 /* ProfileHeaderView.xib in Resources */,
@@ -957,6 +968,7 @@
 				B0F894891E7BD52C00E490C4 /* AppState.swift in Sources */,
 				B0550D851E8E16A4007DAAAC /* NotificationsViewController.swift in Sources */,
 				B003D7E41ED6C32200256FBB /* CommentViewCell.swift in Sources */,
+				B0E100381F04E285005C4827 /* PlacesFooter.swift in Sources */,
 				B093FFBB1E790D5E00011B43 /* Location.swift in Sources */,
 				B05091B61EB915C1001B84B1 /* AlertBuilders.swift in Sources */,
 				B007328A1ED7EC10007D6C5F /* SignInViewController.swift in Sources */,

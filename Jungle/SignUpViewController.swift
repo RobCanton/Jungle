@@ -103,7 +103,7 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
             print("Custom type tapped: \(element)")
             let web = WebViewController()
             web.title = "Terms of Use"
-            web.urlString = "https://getlit.site/terms.html"
+            web.urlString = "https://jungleapp.info/terms.html"
             let nav = UINavigationController(rootViewController: web)
             self.present(nav, animated: true, completion: nil)
         }
@@ -115,7 +115,7 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
             print("Custom type tapped: \(element)")
             let web = WebViewController()
             web.title = "Privacy Policy"
-            web.urlString = "https://getlit.site/privacypolicy.html"
+            web.urlString = "https://jungleapp.info/privacypolicy.html"
             let nav = UINavigationController(rootViewController: web)
             self.present(nav, animated: true, completion: nil)
         }

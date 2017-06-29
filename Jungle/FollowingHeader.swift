@@ -30,7 +30,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     @IBOutlet weak var bottomLabel: UILabel!
 
     @IBOutlet weak var longDivider: UIView!
-    var topStories = [Story]()
     
     weak var stateRef:HomeStateController?
 
@@ -38,17 +37,6 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     @IBOutlet weak var stackTopAnchor: NSLayoutConstraint!
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-//        var distanceLabels = [String]()
-//        for distance in distances {
-//            distanceLabels.append("\(distance) km")
-//        }
-//        slider.addTarget(self,
-//                         action: #selector(valueChanged(_:event:)),
-//                         for: .valueChanged)
-//        
-//        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
-//        slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
         itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.72
         
@@ -92,7 +80,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     var discoverLabel:UILabel?
-    var section:Int = 0
+    var sectionRef:Int = 0
     
     func resetStack() {
         for view in stackView.arrangedSubviews {
@@ -120,19 +108,21 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func setupStories(state: HomeStateController, section:Int) {
-        self.section = section
+        print("Self: \(self.sectionRef) Section: \(section)")
+        
+        self.sectionRef = section
         self.stateRef = state
+        
         
         resetStack()
 
-        switch section {
+        switch sectionRef {
         case 0:
             //removeStackView(view: topBanner)
-            topStories = state.followingStories
             topLabel.text = "FOLLOWING"
             bottomLabel.text = "POPULAR"
             
-            if topStories.count == 0 {
+            if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
                 removeStackView(view: topBanner)
                 removeStackView(view: collectionView)
             }
@@ -142,13 +132,14 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             }
             break
         case 1:
-            topStories = state.nearbyPlaceStories
+
             topLabel.text = "NEARBY"
             bottomLabel.text = ""
             longDivider.isHidden = false
             
             if state.nearbyPlaceStories.count == 0  {
                 removeStackView(view: bottomHeader)
+                removeStackView(view: collectionView)
                 if state.nearbyPosts.count == 0 {
                     removeStackView(view: topBanner)
                 }
@@ -174,7 +165,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
 
-        if section == 1 && stateRef!.watchedFollowingStories.count > 0 && stateRef!.unseenFollowingStories.count > 0 {
+        if sectionRef == 0 && section == 1 && stateRef!.watchedFollowingStories.count > 0 && stateRef!.unseenFollowingStories.count > 0 {
             return CGSize(width: 12.0, height: itemSideLength * 1.25)
         }
         return CGSize.zero
@@ -182,21 +173,25 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        if section == 0 {
+        if sectionRef == 0 {
             return 2
         }
         return 1
     }
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let state = self.stateRef else { return 0 }
-        if self.section == 0 {
+        guard let state = self.stateRef else {
+            print("No state: \(sectionRef)")
+            
+            return 0 }
+        if self.sectionRef == 0 {
             if section == 0 {
                 return state.unseenFollowingStories.count
             } else {
                 return state.watchedFollowingStories.count
             }
-        } else if self.section == 1 {
+        } else if self.sectionRef == 1 {
+            print("state.nearbyPlaceStories.count \(state.nearbyPlaceStories.count)")
             return state.nearbyPlaceStories.count
         }
         return 0
@@ -205,7 +200,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! FollowingPhotoCell
-        if self.section == 0 {
+        if self.sectionRef == 0 {
             if indexPath.section == 0 {
                 let story = stateRef!.unseenFollowingStories[indexPath.item]
                 cell.setupCell(withUserStory: story, showDot: false)
@@ -232,7 +227,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        if self.section == 0 {
+        if self.sectionRef == 0 {
             if indexPath.section == 0 {
                 let story = stateRef!.unseenFollowingStories[indexPath.row]
                 story.determineState()

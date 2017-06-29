@@ -238,6 +238,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
 }
 
 extension SendViewController: GPSServiceProtocol {
+    func authorizationDidChange() {
+        
+    }
+
     func tracingLocation(_ currentLocation: CLLocation) {
         //LocationService.sharedInstance.requestNearbyLocations(currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude)
         // singleton for get last location

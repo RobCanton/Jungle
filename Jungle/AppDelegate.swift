@@ -17,8 +17,8 @@ import SwiftMessages
 //UIColor(red: 15/255, green: 226/255, blue: 117/255, alpha: 1.0) //#0fe275
 //let lightAccentColor = UIColor(red: 220/266, green: 227/255, blue: 91/255, alpha: 1.0)
 //let darkAccentColor = UIColor(red: 69/266, green: 182/255, blue: 73/255, alpha: 1.0)
-let lightAccentColor = UIColor(red: 140/266, green: 216/255, blue: 86/255, alpha: 1.0)
-let darkAccentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)
+let lightAccentColor = UIColor(red: 140/266, green: 216/255, blue: 86/255, alpha: 1.0) // #8CD856
+let darkAccentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0) // #02D957
 let photoCellColorAlpha:CGFloat = 1.0
 
 let accentColor = UIColor(red: 2/255, green: 217/255, blue: 87/255, alpha: 1.0)//UIColor(red: 0/255, green: 224/255, blue: 108/255, alpha: 1.0) //#0fe275
@@ -185,7 +185,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillEnterForeground(_ application: UIApplication) {
 
         if !UserService.isEmailVerified {
-            Auth.auth().currentUser?.reload(completion: nil)
+            Auth.auth().currentUser?.reload() { error in
+                if error == nil {
+                    mainStore.dispatch(FIRUserUpdated())
+                }
+            }
+            
+            
         }
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
     }

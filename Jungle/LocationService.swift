@@ -111,7 +111,7 @@ class LocationService: NSObject {
                 }
             }
 
-            if postKeys.count > 0 && contributers.count > 1 {
+            if postKeys.count > 0 { //&& contributers.count > 1 {
                 story = LocationStory(postKeys: postKeys, locationKey: key, distance: distance)
             }
             
