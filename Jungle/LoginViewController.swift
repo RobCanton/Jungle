@@ -48,37 +48,86 @@ class FirstAuthViewController: FirstViewController {
     var authFetched = false
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        if let user = Auth.auth().currentUser {
+        checkVersionSupport { supported in
             
-            UserService.getUser(user.uid, completion: { user in
-                self.authFetched = true
-                if user != nil {
-                    mainStore.dispatch(UserIsAuthenticated(user: user!))
-                    UserService.sendFCMToken()
-                    Listeners.startListeningToFollowers()
-                    Listeners.startListeningToFollowing()
-                    Listeners.startListeningToViewed()
-                    Listeners.startListeningToSettings()
-                    self.performSegue(withIdentifier: "login", sender: self)
-                } else {
-                    self.performSegue(withIdentifier: "toLoginScreen", sender: self)
-                }
-            })
-        } else {
-            authFetched = true
+            if !supported {
+                let alert = UIAlertController(title: "This version is no longer supported.", message: "Please update Jungle on the Appstore.", preferredStyle: .alert)
+                
+                let update = UIAlertAction(title: "Okay", style: .default, handler: nil)
+                alert.addAction(update)
+                
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                self.checkUserAuthState()
+            }
         }
     }
+    
+    func checkUserAuthState() {
+        if let user = Auth.auth().currentUser {
+
+            print("YUH")
+            checkUserAgainstDatabase { success in
+                print("checkUserAgainstDatabase: \(success)")
+                if !success {
+                    UserService.logout()
+                    self.performSegue(withIdentifier: "toLoginScreen", sender: self)
+                } else {
+                    
+                    UserService.getUser(user.uid, completion: { user in
+                        
+                        self.authFetched = true
+                        if user != nil {
+                            mainStore.dispatch(UserIsAuthenticated(user: user!))
+                            UserService.sendFCMToken()
+                            Listeners.startListeningToFollowers()
+                            Listeners.startListeningToFollowing()
+                            Listeners.startListeningToViewed()
+                            Listeners.startListeningToSettings()
+                            self.performSegue(withIdentifier: "login", sender: self)
+                        } else {
+                            UserService.logout()
+                            self.performSegue(withIdentifier: "toLoginScreen", sender: self)
+                        }
+                    })
+                }
+            }
+            
+        } else {
+            UserService.logout()
+            self.performSegue(withIdentifier: "toLoginScreen", sender: self)
+        }
+    }
+    
+    
     
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         if authFetched && Auth.auth().currentUser == nil {
+            UserService.logout()
             self.performSegue(withIdentifier: "toLoginScreen", sender: self)
         }
+    }
+    
+
+    
+    func checkVersionSupport(_ completion: @escaping ((_ supported:Bool)->())) {
+
+        let infoDictionary = Bundle.main.infoDictionary!
+        let appId = infoDictionary["CFBundleShortVersionString"] as! String
         
+        let currentVersion = Int(appId.replacingOccurrences(of: ".", with: ""))!
         
+        let versionRef = UserService.ref.child("config/client/minimum_supported_version")
+        
+        versionRef.observeSingleEvent(of: .value, with: { snapshot in
+            
+            let versionString = snapshot.value as! String
+            let minimum_supported_version = Int(versionString.replacingOccurrences(of: ".", with: ""))!
+            completion(currentVersion >= minimum_supported_version)
+        })
     }
 }
 
@@ -264,5 +313,13 @@ class InsetTextField: UITextField {
         return bounds.insetBy(dx: 10 , dy: 0)
     }
 
+}
+
+func checkUserAgainstDatabase(_ completion: @escaping (_ success:Bool) -> Void) {
+    guard let currentUser = Auth.auth().currentUser else { return completion(false) }
+    currentUser.getIDTokenForcingRefresh(true) {(token, error) in
+        completion(error == nil)
+    }
+    
 }
 

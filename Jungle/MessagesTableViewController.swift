@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import ReSwift
 
-class MessagesViewController: RoundedViewController, UITableViewDelegate, UITableViewDataSource, MessageServiceProtocol {
+class MessagesViewController: RoundedViewController, StoreSubscriber, UITableViewDelegate, UITableViewDataSource, MessageServiceProtocol {
 
     let identifier = "MessagesViewController"
     let cellIdentifier = "conversationCell"
@@ -18,6 +19,12 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
     fileprivate var conversations = [Conversation]()
     
     private(set) var tableView:UITableView!
+    
+    var searchBar:UISearchBar!
+    var cancelButton:UIButton!
+    var searchMode = false
+    
+    var userSearchResults = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,10 +37,13 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
         label.text = "Messages"
         label.textAlignment = .center
         label.center = CGPoint(x: view.frame.width/2, y: 22)
-        view.addSubview(label)
+        //view.addSubview(label)
         
         
         tableView = UITableView(frame: CGRect(x: 0,y: 44,width: view.frame.width ,height: view.frame.height - 44))
+        
+        let nib2 = UINib(nibName: "UserViewCell", bundle: nil)
+        tableView.register(nib2, forCellReuseIdentifier: "userCell")
         
         let nib = UINib(nibName: "ConversationViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: cellIdentifier)
@@ -47,17 +57,50 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
         view.addSubview(tableView)
         
         tableView.reloadData()
+        
+        cancelButton = UIButton(frame: CGRect(x: 0, y: 0.0, width: 44.0, height: 44.0))
+        cancelButton.setImage(UIImage(named: "navback"), for: .normal)
+        cancelButton.tintColor = UIColor.gray
+        cancelButton.addTarget(self, action: #selector(cancelSearch), for: .touchUpInside)
+        cancelButton.isHidden = true
+        view.addSubview(cancelButton)
+        
+        
+        searchBar = UISearchBar(frame:CGRect(x: 44, y: 0, width: view.frame.width - 88, height: 44))
+        searchBar.searchBarStyle = .minimal
+        searchBar.delegate = self
+        view.addSubview(searchBar)
+        
+        //refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        mainStore.subscribe(self)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         message_service?.subscribe(identifier, subscriber: self)
+        observeSearchResponse()
+        
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        mainStore.unsubscribe(self)
         message_service?.unsubscribe(identifier)
+        
+        NotificationCenter.default.removeObserver(self)
+        
+    }
+    
+    func newState(state: AppState) {
+        self.tableView.reloadData()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        stopObservingSearchResponse()
     }
     
     func conversationsUpdated(_ conversations: [Conversation]) {
@@ -72,14 +115,30 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if searchMode {
+            return 60
+        }
         return 68
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searchMode {
+            return userSearchResults.count
+        }
         return conversations.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        if searchMode {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "userCell", for: indexPath) as! UserViewCell
+            cell.setupUser(uid: userSearchResults[indexPath.row])
+            cell.delegate = self
+            let labelX = cell.usernameLabel.frame.origin.x
+            cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            return cell
+        }
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! ConversationViewCell
         
         cell.conversation = conversations[indexPath.item]
@@ -89,36 +148,120 @@ class MessagesViewController: RoundedViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath) as! ConversationViewCell
-        if let user = cell.user, let image = cell.userImageView.image {
-            let controller = ChatViewController()
-            controller.partnerImage = image
-            controller.partner = user
+        
+        if searchMode {
+            let controller = UserProfileViewController()
+            controller.uid = userSearchResults[indexPath.row]
             globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+        } else {
+            let cell = tableView.cellForRow(at: indexPath) as! ConversationViewCell
+            if let user = cell.user, let image = cell.userImageView.image {
+                let controller = ChatViewController()
+                controller.partnerImage = image
+                controller.partner = user
+                globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+            }
         }
+
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete {
-//            let cell = tableView.cellForRow(at: indexPath) as! ConversationViewCell
-//            let name = cell.usernameLabel.text!
-//            
-//            let actionSheet = UIAlertController(title: "Delete conversation with \(name)?", message: "Further messages from \(name) will be muted until you reply.", preferredStyle: .alert)
-//            
-//            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-//            }
-//            
-//            actionSheet.addAction(cancelActionButton)
-//            
-//            let saveActionButton: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive)
-//            { action -> Void in
-//                UserService.muteConversation(conversation: self.conversations[indexPath.row])
-//            }
-//            actionSheet.addAction(saveActionButton)
-//            
-//            self.present(actionSheet, animated: true, completion: nil)
-//        }
-//    }
+    func keyboardWillAppear() {
+        globalMainInterfaceProtocol?.setScrollState(false)
+    }
+    
+    func keyboardWillDisappear() {
+        globalMainInterfaceProtocol?.setScrollState(true)
+    }
     
 }
+
+extension MessagesViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        let text = searchText.lowercased()
+        searchBar.text = text
+        
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("api/requests/user_search/\(uid)")
+        ref.setValue(searchBar.text)
+    }
+    
+    func observeSearchResponse() {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("api/responses/user_search/\(uid)")
+        ref.observe(.value, with: { snapshot in
+            var uids = [String]()
+            if let dict = snapshot.value as? [String:String] {
+                for (userId,_) in dict {
+                    if mainStore.state.socialState.followers.contains(userId) || mainStore.state.socialState.following.contains(userId) {
+                        uids.insert(userId, at: 0)
+                    } else {
+                        uids.append(userId)
+                    }
+                }
+            }
+            
+            self.userSearchResults = uids
+            if self.searchMode {
+                self.tableView.reloadData()
+            }
+        })
+    }
+    
+    func stopObservingSearchResponse() {
+        let uid = mainStore.state.userState.uid
+        let ref = UserService.ref.child("api/responses/user_search/\(uid)")
+        ref.removeAllObservers()
+    }
+    
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.tableView?.reloadData()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        self.searchBar.resignFirstResponder()
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        print("Bang!")
+        searchMode = true
+        cancelButton.isHidden = false
+        self.tableView.reloadData()
+        
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        print("Boom!")
+        
+    }
+    
+    func cancelSearch() {
+        self.searchBar.resignFirstResponder()
+        searchMode = false
+        cancelButton.isHidden = true
+        self.tableView.reloadData()
+    }
+}
+
+extension MessagesViewController: UserCellProtocol {
+    func unfollowHandler(_ user:User) {
+        let actionSheet = UIAlertController(title: nil, message: "Unfollow \(user.username)?", preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let saveActionButton: UIAlertAction = UIAlertAction(title: "Unfollow", style: .destructive)
+        { action -> Void in
+            
+            UserService.unfollowUser(uid: user.uid)
+        }
+        actionSheet.addAction(saveActionButton)
+        
+        self.present(actionSheet, animated: true, completion: nil)
+    }
+    
+}
+

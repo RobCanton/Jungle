@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -19,12 +19,6 @@
                     <rect key="frame" x="0.0" y="0.0" width="392" height="64"/>
                     <color key="backgroundColor" white="0.0" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
-                <label hidden="YES" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Comment" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NzT-bC-66D">
-                    <rect key="frame" x="8" y="22" width="73" height="20"/>
-                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <nil key="highlightedColor"/>
-                </label>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Comment" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hnU-lj-oSe">
                     <rect key="frame" x="8" y="0.0" width="313" height="64"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -84,7 +78,6 @@
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="jxW-Vb-FFh" secondAttribute="bottom" constant="1" id="0ev-54-wEf"/>
                 <constraint firstItem="BNQ-9e-xhl" firstAttribute="centerX" secondItem="jxW-Vb-FFh" secondAttribute="centerX" id="50t-q9-Lkt"/>
-                <constraint firstItem="NzT-bC-66D" firstAttribute="centerY" secondItem="g8v-2R-i5l" secondAttribute="centerY" id="EMH-cM-mG2"/>
                 <constraint firstItem="vi8-yM-kQW" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="HNX-7e-Hpy"/>
                 <constraint firstAttribute="trailing" secondItem="pzn-Zl-6vY" secondAttribute="trailing" id="POh-39-hhU"/>
                 <constraint firstAttribute="bottom" secondItem="5W8-GV-yg8" secondAttribute="bottom" constant="1" id="RAv-lI-c4h"/>
@@ -93,7 +86,6 @@
                 <constraint firstAttribute="trailing" secondItem="jxW-Vb-FFh" secondAttribute="trailing" constant="8" id="cHl-rK-oMh"/>
                 <constraint firstAttribute="bottom" secondItem="hnU-lj-oSe" secondAttribute="bottom" id="evB-l2-r6e"/>
                 <constraint firstItem="pzn-Zl-6vY" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" id="f9n-cA-rIZ"/>
-                <constraint firstItem="NzT-bC-66D" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" constant="8" id="fBx-Hg-Mw7"/>
                 <constraint firstItem="5W8-GV-yg8" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="fPI-tk-mts"/>
                 <constraint firstAttribute="trailing" secondItem="vi8-yM-kQW" secondAttribute="trailing" id="hZX-Lf-SKt"/>
                 <constraint firstAttribute="bottom" secondItem="vi8-yM-kQW" secondAttribute="bottom" id="iIL-IW-1iC"/>
@@ -108,7 +100,6 @@
             <connections>
                 <outlet property="activityIndicator" destination="BNQ-9e-xhl" id="iUJ-HH-ZIh"/>
                 <outlet property="backgroundView" destination="pzn-Zl-6vY" id="Nol-JH-NkA"/>
-                <outlet property="commentPlaceHolder" destination="NzT-bC-66D" id="v51-E0-mo2"/>
                 <outlet property="likeButton" destination="5W8-GV-yg8" id="2W3-NI-Dxn"/>
                 <outlet property="moreButton" destination="vi8-yM-kQW" id="HUW-mW-yWj"/>
                 <outlet property="sendButton" destination="jxW-Vb-FFh" id="YDb-Qt-vbP"/>

@@ -53,6 +53,9 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var messageWrapper:SwiftMessages!
     
+    var followingHeader:FollowingHeader?
+    var placesHeader:FollowingHeader?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -122,6 +125,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
         
+        let headerNib3 = UINib(nibName: "CollectionBannerView", bundle: nil)
+        
+        self.collectionView.register(headerNib3, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "bannerView")
+        
         self.collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader")
      
         let headerNib2 = UINib(nibName: "CollectionDividerView", bundle: nil)
@@ -159,7 +166,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func update(_ section:HomeSection?) {
         refreshButton.isHidden = false
         refreshIndicator.stopAnimating()
-        return self.collectionView.reloadData()
+        
         if let section = section {
             switch section {
             case .following:
@@ -207,9 +214,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
     }
     
-    var followingHeader:FollowingHeader?
-    var placesHeader:FollowingHeader?
-    
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
@@ -217,18 +221,26 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             switch indexPath.section {
             case 0:
                 if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
+                    followingHeader = nil
+                    topCollectionViewRef = nil
+                    if state.popularPosts.count > 0 {
+                        let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "bannerView", for: indexPath as IndexPath) as! CollectionBannerView
+                        view.label.text = "POPULAR"
+                        return view
+                    }
                     return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
                 } else {
                     let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
                     followingHeader = view
                     topCollectionViewRef = view.collectionView
                     view.setupStories(state: state, section: indexPath.section)
-                    return view+
+                    return view
                 }
-                
-                break
+
             case 1:
                 if state.nearbyPlaceStories.count == 0 {
+                    placesHeader = nil
+                    midCollectionViewRef = nil
                     return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
                 } else {
                     let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
@@ -237,17 +249,15 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                     view.setupStories(state: state, section: indexPath.section)
                     return view
                 }
-                break
             default:
                 break
             }
-            
-            
+
         }
         
         
         
-        return UICollectionReusableView()
+        return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
@@ -262,6 +272,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         case 0:
             verticalHeight += state.visiblePopularPosts.count > 0 ? bannerHeight: 0
             verticalHeight += state.unseenFollowingStories.count > 0 || state.watchedFollowingStories.count > 0 ? collectionViewHeight + bannerHeight : 0
+            print("VerticalHeight: \(verticalHeight)")
             break
         case 1:
             ///verticalHeight += 48

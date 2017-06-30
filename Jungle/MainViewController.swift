@@ -19,6 +19,7 @@ import SwiftMessages
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
 protocol MainInterfaceProtocol {
+    func setScrollState(_ enabled:Bool)
     func navigationPush(withController controller: UIViewController, animated: Bool)
     func presentPopover(withController controller: UIViewController, animated: Bool)
     func presentHomeScreen(animated: Bool)
@@ -33,6 +34,11 @@ protocol MainInterfaceProtocol {
 }
 
 extension MainViewController: MainInterfaceProtocol {
+    
+    func setScrollState(_ enabled: Bool) {
+        self.scrollView.isScrollEnabled = enabled
+    }
+    
     func navigationPush(withController controller: UIViewController, animated: Bool) {
         navigationController?.delegate = nil
         activateNavbar(true)
@@ -433,6 +439,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         textView.resignFirstResponder()
+        NotificationCenter.default.removeObserver(self)
     }
     
     

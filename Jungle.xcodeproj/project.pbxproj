@@ -141,6 +141,9 @@
 		B0DF82451EDFC7EB00461DD8 /* StoryInfoView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */; };
 		B0E100381F04E285005C4827 /* PlacesFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E100361F04E283005C4827 /* PlacesFooter.swift */; };
 		B0E100391F04E285005C4827 /* PlacesFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0E100371F04E283005C4827 /* PlacesFooter.xib */; };
+		B0EB324D1F05AF6D00CBCCF7 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EB324C1F05AF6D00CBCCF7 /* Comment.swift */; };
+		B0EB32501F05CB5B00CBCCF7 /* CollectionBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EB324E1F05CB5B00CBCCF7 /* CollectionBannerView.swift */; };
+		B0EB32511F05CB5B00CBCCF7 /* CollectionBannerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0EB324F1F05CB5B00CBCCF7 /* CollectionBannerView.xib */; };
 		B0F2A17E1EE7589B004857CA /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A17D1EE7589B004857CA /* BannerView.swift */; };
 		B0F2A1801EE758A7004857CA /* BannerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F2A17F1EE758A7004857CA /* BannerView.xib */; };
 		B0F2A1821EE788FB004857CA /* Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A1811EE788FB004857CA /* Upload.swift */; };
@@ -316,6 +319,9 @@
 		B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StoryInfoView.xib; sourceTree = "<group>"; };
 		B0E100361F04E283005C4827 /* PlacesFooter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlacesFooter.swift; sourceTree = "<group>"; };
 		B0E100371F04E283005C4827 /* PlacesFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlacesFooter.xib; sourceTree = "<group>"; };
+		B0EB324C1F05AF6D00CBCCF7 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
+		B0EB324E1F05CB5B00CBCCF7 /* CollectionBannerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionBannerView.swift; sourceTree = "<group>"; };
+		B0EB324F1F05CB5B00CBCCF7 /* CollectionBannerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CollectionBannerView.xib; sourceTree = "<group>"; };
 		B0F2A17D1EE7589B004857CA /* BannerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
 		B0F2A17F1EE758A7004857CA /* BannerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BannerView.xib; sourceTree = "<group>"; };
 		B0F2A1811EE788FB004857CA /* Upload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Upload.swift; sourceTree = "<group>"; };
@@ -536,6 +542,8 @@
 				B05F13F61EF46D8F008C5B34 /* CollectionDividerView.xib */,
 				B0AB4E291EFBB808008E875A /* TacoDialogView.swift */,
 				B0AB4E2A1EFBB808008E875A /* TacoDialogView.xib */,
+				B0EB324E1F05CB5B00CBCCF7 /* CollectionBannerView.swift */,
+				B0EB324F1F05CB5B00CBCCF7 /* CollectionBannerView.xib */,
 			);
 			name = Home;
 			sourceTree = "<group>";
@@ -613,6 +621,7 @@
 				B0F8948A1E7BD55A00E490C4 /* Tree.swift */,
 				B0F2A1811EE788FB004857CA /* Upload.swift */,
 				B093FFB61E790D5E00011B43 /* User.swift */,
+				B0EB324C1F05AF6D00CBCCF7 /* Comment.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -790,6 +799,7 @@
 				B04DFB571E938D4C0016FE5D /* PlacesTabHeader.xib in Resources */,
 				B0F2A1911EE8A90F004857CA /* PlaceHeaderView.xib in Resources */,
 				B0C86D401E80831F0067E004 /* ConversationCell.xib in Resources */,
+				B0EB32511F05CB5B00CBCCF7 /* CollectionBannerView.xib in Resources */,
 				B0F8946E1E7B9D5A00E490C4 /* CommentCell.xib in Resources */,
 				B05091B21EB82E4A001B84B1 /* RemoteConfigDefaults.plist in Resources */,
 				B0550DAB1E91EE25007DAAAC /* UserViewCell.xib in Resources */,
@@ -906,6 +916,7 @@
 				B093FFD51E79399C00011B43 /* StoriesViewController.swift in Sources */,
 				B0550D981E8E21C4007DAAAC /* HoshiTextField.swift in Sources */,
 				B05F13F91EF46DAC008C5B34 /* CollectionDividerView.swift in Sources */,
+				B0EB32501F05CB5B00CBCCF7 /* CollectionBannerView.swift in Sources */,
 				B0550DA91E91EE25007DAAAC /* UsersListViewController.swift in Sources */,
 				B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */,
 				B093FFCF1E791F4E00011B43 /* Extensions.swift in Sources */,
@@ -937,6 +948,7 @@
 				B0550D9E1E8E21C4007DAAAC /* MinoruTextField.swift in Sources */,
 				B0DF82351EDD1B6500461DD8 /* SignUpProfilePictureViewController.swift in Sources */,
 				B0F2A1891EE7C9D1004857CA /* SendSingleLineTableViewCell.swift in Sources */,
+				B0EB324D1F05AF6D00CBCCF7 /* Comment.swift in Sources */,
 				B093FFC01E790D5E00011B43 /* SendProfileViewCell.swift in Sources */,
 				B093FFC21E790D5E00011B43 /* Story.swift in Sources */,
 				B0DF82331EDD13E100461DD8 /* SignUpEmailViewController.swift in Sources */,

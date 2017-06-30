@@ -135,14 +135,19 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             let alert = UIAlertController(title: "Heads up!", message: "All posts on Jungle are public and can be seen by anyone (except for users you have blocked). Don't post anything too personal.", preferredStyle: .alert)
             
             alert.addAction(UIAlertAction(title: "Nevermind", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: { _ in
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { _ in
                 mainStore.dispatch(UploadWarningShown())
                 UserService.ref.child("users/settings/\(mainStore.state.userState.uid)/upload_warning_shown").setValue(true)
+                self.uploadPost()
             }))
             
             self.present(alert, animated: true, completion: nil)
             return
         }
+        uploadPost()
+    }
+    
+    func uploadPost() {
         let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
         activityIndicator.startAnimating()
         activityIndicator.center = sendView.center

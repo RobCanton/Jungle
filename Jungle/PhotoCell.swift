@@ -206,7 +206,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         let numComments = post.numComments
         
         let likesImage = UIImage(named: "liked")
-        let commentsImage = UIImage(named: "comments_filled")
+        let commentsImage = UIImage(named: "comments2")
         if numLikes > 0 {
             self.firstLabel.text = getNumericShortesthandString(numLikes)
             self.firstIcon.image = likesImage

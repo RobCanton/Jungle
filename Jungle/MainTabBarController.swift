@@ -36,7 +36,7 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
         tabBarItem1.selectedImage = UIImage(named: "home_filled")
         tabBarItem2.selectedImage = UIImage(named: "message_filled")
         tabBarItem4.selectedImage = UIImage(named: "notifications_filled")
-        tabBarItem5.selectedImage = UIImage(named: "user_filled")
+        tabBarItem5.selectedImage = UIImage(named: "profile_filled")
 
         let halfGap = view.frame.width / 10
         let yPos = view.frame.height - 27.5

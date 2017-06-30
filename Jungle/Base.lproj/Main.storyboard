@@ -673,7 +673,7 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="t8b-El-Jei" customClass="MainNavigationController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
-                    <tabBarItem key="tabBarItem" title="" image="user" id="XCY-XT-rRl">
+                    <tabBarItem key="tabBarItem" title="" image="profile" id="XCY-XT-rRl">
                         <inset key="imageInsets" minX="0.0" minY="4" maxX="0.0" maxY="-4"/>
                     </tabBarItem>
                     <toolbarItems/>
@@ -2265,7 +2265,7 @@
         <image name="nearby" width="25" height="25"/>
         <image name="notifications" width="32" height="32"/>
         <image name="pineapple" width="1422" height="1422"/>
-        <image name="user" width="32" height="32"/>
+        <image name="profile" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="mtz-34-6DA"/>

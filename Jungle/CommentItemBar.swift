@@ -19,7 +19,6 @@ protocol CommentItemBarProtocol {
 class CommentItemBar: UIView {
     @IBOutlet weak var textField: UITextField!
     
-    @IBOutlet weak var commentPlaceHolder: UILabel!
     
     @IBOutlet weak var moreButton: UIButton!
     
