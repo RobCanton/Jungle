@@ -16,6 +16,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     
     private let cellIdentifier = "notificationCell"
     private let followCellIdentifier = "followCell"
+    private let badgeCellIdentifier = "badgeCell"
     private var notifications = [Notification]()
     
     var refreshIndicator:UIActivityIndicatorView!
@@ -50,6 +51,9 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         let nib2 = UINib(nibName: "NotificationFollowCell", bundle: nil)
         tableView.register(nib2, forCellReuseIdentifier: followCellIdentifier)
+        
+        let nib3 = UINib(nibName: "NotificationBadgeCell", bundle: nil)
+        tableView.register(nib3, forCellReuseIdentifier: badgeCellIdentifier)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -134,11 +138,25 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
             cell.userTappedHandler = showUser
             return cell
-        } else {
+        } else if type == .follow {
             let cell = tableView.dequeueReusableCell(withIdentifier: followCellIdentifier, for: indexPath) as! NotificationFollowCell
             cell.setup(withNotification: notifications[indexPath.row])
             cell.unfollowHandler = unfollowHandler
             let labelX = cell.messageLabel.frame.origin.x
+            cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: badgeCellIdentifier, for: indexPath) as! NotificationBadgeCell
+            cell.iconLabel.text = ""
+            if let badgeID = notifications[indexPath.row].text {
+                for badge in badges {
+                    if badge.key == badgeID {
+                        cell.iconLabel.text = badge.icon
+                    }
+                }
+            }
+            
+            let labelX = cell.label.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
             return cell
         }
@@ -157,6 +175,10 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
             }
         } else if type == .follow {
             showUser(notification.sender)
+        } else if type == .badge {
+            let controller = UIStoryboard(name: "EditProfileViewController", bundle: nil)
+                .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
+            globalMainInterfaceProtocol?.presentPopover(withController: controller, animated: true)
         }
         
         tableView.deselectRow(at: indexPath, animated: true)

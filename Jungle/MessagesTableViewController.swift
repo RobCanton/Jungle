@@ -21,10 +21,13 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
     private(set) var tableView:UITableView!
     
     var searchBar:UISearchBar!
+    var refreshIndicator:UIActivityIndicatorView!
     var cancelButton:UIButton!
     var searchMode = false
     
     var userSearchResults = [String]()
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,8 +71,15 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         
         searchBar = UISearchBar(frame:CGRect(x: 44, y: 0, width: view.frame.width - 88, height: 44))
         searchBar.searchBarStyle = .minimal
+        searchBar.placeholder = "Search"
         searchBar.delegate = self
         view.addSubview(searchBar)
+        
+        refreshIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        refreshIndicator.frame = CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0)
+        refreshIndicator.hidesWhenStopped = true
+        
+        view.addSubview(refreshIndicator)
         
         //refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
     }
@@ -79,7 +89,6 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         mainStore.subscribe(self)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         message_service?.subscribe(identifier, subscriber: self)
-        observeSearchResponse()
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -100,7 +109,6 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        stopObservingSearchResponse()
     }
     
     func conversationsUpdated(_ conversations: [Conversation]) {
@@ -181,16 +189,18 @@ extension MessagesViewController: UISearchBarDelegate {
         
         let text = searchText.lowercased()
         searchBar.text = text
-        
+        refreshIndicator.startAnimating()
         let uid = mainStore.state.userState.uid
         let ref = UserService.ref.child("api/requests/user_search/\(uid)")
         ref.setValue(searchBar.text)
+        
     }
     
     func observeSearchResponse() {
         let uid = mainStore.state.userState.uid
         let ref = UserService.ref.child("api/responses/user_search/\(uid)")
         ref.observe(.value, with: { snapshot in
+            
             var uids = [String]()
             if let dict = snapshot.value as? [String:String] {
                 for (userId,_) in dict {
@@ -201,7 +211,7 @@ extension MessagesViewController: UISearchBarDelegate {
                     }
                 }
             }
-            
+            self.refreshIndicator.stopAnimating()
             self.userSearchResults = uids
             if self.searchMode {
                 self.tableView.reloadData()
@@ -212,6 +222,7 @@ extension MessagesViewController: UISearchBarDelegate {
     func stopObservingSearchResponse() {
         let uid = mainStore.state.userState.uid
         let ref = UserService.ref.child("api/responses/user_search/\(uid)")
+        ref.removeAllObservers()
         ref.removeAllObservers()
     }
     
@@ -225,15 +236,14 @@ extension MessagesViewController: UISearchBarDelegate {
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        print("Bang!")
         searchMode = true
+        observeSearchResponse()
         cancelButton.isHidden = false
         self.tableView.reloadData()
         
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        print("Boom!")
         
     }
     
@@ -241,7 +251,9 @@ extension MessagesViewController: UISearchBarDelegate {
         self.searchBar.resignFirstResponder()
         searchMode = false
         cancelButton.isHidden = true
+        self.refreshIndicator.stopAnimating()
         self.tableView.reloadData()
+        stopObservingSearchResponse()
     }
 }
 

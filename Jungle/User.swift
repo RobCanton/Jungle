@@ -8,7 +8,11 @@
 
 import Foundation
 
-
+enum UserBadge:Int {
+    case none  = 0
+    case panda = 1
+    case bear  = 2
+}
 
 class User:NSObject, NSCoding {
     private(set) var uid: String
@@ -20,6 +24,17 @@ class User:NSObject, NSCoding {
     private(set) var posts:Int
     private(set) var followers:Int
     private(set) var following:Int
+    private(set) var verified:Bool
+    private(set) var badge:String
+    
+    var usernameWithBadge:String {
+        get {
+            if badge == "" {
+                return username
+            }
+            return "\(username) \(badge)"
+        }
+    }
     
     var fullname:String {
         get {
@@ -31,7 +46,7 @@ class User:NSObject, NSCoding {
         }
     }
     
-    init(uid:String, username:String, firstname:String, lastname:String, imageURL:String, bio:String, posts:Int, followers:Int, following:Int)
+    init(uid:String, username:String, firstname:String, lastname:String, imageURL:String, bio:String, posts:Int, followers:Int, following:Int, verified:Bool, badge:String)
     {
         self.uid       = uid
         self.username  = username
@@ -42,6 +57,9 @@ class User:NSObject, NSCoding {
         self.posts     = posts
         self.followers = followers
         self.following = following
+        self.verified  = verified
+        self.badge     = badge
+        
     }
     
     required convenience init(coder decoder: NSCoder) {
@@ -55,7 +73,9 @@ class User:NSObject, NSCoding {
         let posts = decoder.decodeObject(forKey: "posts") as! Int
         let followers = decoder.decodeObject(forKey: "followers") as! Int
         let following = decoder.decodeObject(forKey: "following") as! Int
-        self.init(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
+        let verified = decoder.decodeObject(forKey: "verified") as! Bool
+        let badge = decoder.decodeObject(forKey: "badge") as! String
+        self.init(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following, verified: verified, badge: badge)
 
     }
 
@@ -69,8 +89,8 @@ class User:NSObject, NSCoding {
         coder.encode(posts, forKey: "posts")
         coder.encode(followers, forKey: "followers")
         coder.encode(following, forKey: "following")
+        coder.encode(verified, forKey: "verified")
+        coder.encode(badge, forKey: "badge")
     }
     
-    
-
 }

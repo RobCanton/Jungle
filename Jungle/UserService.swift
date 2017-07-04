@@ -18,8 +18,11 @@ import Foundation
 import Firebase
 import SwiftMessages
 
+var badges = [Badge]()
+var availableBadgeKeys = [String]()
 
 class UserService {
+    
     
     fileprivate static let sm = SwiftMessages()
     static let ref = Database.database().reference()
@@ -27,6 +30,8 @@ class UserService {
     static var allowContent = false
     
     static func logout() {
+        let uid = mainStore.state.userState.uid
+        ref.child("users/badges/\(uid)").removeAllObservers()
         Listeners.stopListeningToAll()
         mainStore.dispatch(ClearSocialState())
         mainStore.dispatch(UserIsUnauthenticated())
@@ -65,7 +70,46 @@ class UserService {
         }
     }
     
+    static func getAllBadges() {
+        let badgesRef = ref.child("badges")
+        badgesRef.observeSingleEvent(of: .value, with: { snapshot in
+            var _badges = [Badge]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                let key = childSnap.key
+                let dict = childSnap.value as! [String:Any]
+                
+                let icon  = dict["icon"] as! String
+                let title = dict["title"] as! String
+                let desc  = dict["desc"] as! String
+                
+                let badge = Badge(key: key, icon: icon, title: title, desc: desc)
+                _badges.append(badge)
+            }
+            
+            badges = _badges
+            self.observeUserBadges()
+        })
+        
+    }
     
+    static func observeUserBadges() {
+        let uid = mainStore.state.userState.uid
+        let badgesRef = ref.child("users/badges/\(uid)")
+        badgesRef.observe(.value, with: { snapshot in
+            var keys = [String:Bool]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                keys[childSnap.key] = true
+            }
+            
+            print("KEYS: \(keys)")
+            for badge in badges {
+                badge.isAvailable = keys[badge.key] != nil
+            }
+        })
+        
+    }
 
     static func getUserId(byUsername username: String, completion: @escaping ((_ uid:String?)->())) {
         ref.child("users/lookup/username").queryOrderedByValue().queryEqual(toValue: username).observeSingleEvent(of: .value, with: { snapshot in
@@ -84,6 +128,8 @@ class UserService {
             completion(username, !snapshot.exists())
         })
     }
+    
+    
 
     static func getUser(_ uid:String, completion: @escaping (_ user:User?) -> Void) {
         if let cachedUser = dataCache.object(forKey: "user-\(uid)" as NSString as NSString) as? User {
@@ -117,7 +163,18 @@ class UserService {
                         following = _following
                     }
                     
-                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts,followers: followers, following: following)
+                    var verified = false
+                    if let _ = dict["verified"] as? Bool {
+                        verified = true
+                    }
+                    
+                    
+                    var badge:String = ""
+                    if let _badge = dict["badge"] as? String {
+                        badge = _badge
+                    }
+                    
+                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts,followers: followers, following: following, verified: verified, badge: badge)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 
@@ -165,7 +222,17 @@ class UserService {
                     following = _following
                 }
                 
-                user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
+                var verified = false
+                if let _ = dict["verified"] as? Bool {
+                    verified = true
+                }
+                
+                var badge:String = ""
+                if let _badge = dict["badge"] as? String {
+                    badge = _badge
+                }
+                
+                user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following, verified: verified, badge: badge)
                 dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
             }
             
@@ -208,7 +275,17 @@ class UserService {
                         following = _following
                     }
                     
-                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following)
+                    var verified = false
+                    if let _ = dict["verified"] as? Bool {
+                        verified = true
+                    }
+                    
+                    var badge:String = ""
+                    if let _badge = dict["badge"] as? String {
+                        badge = _badge
+                    }
+                    
+                    user = User(uid: uid, username: username, firstname: firstname, lastname: lastname, imageURL: imageURL, bio: bio, posts: posts, followers: followers, following: following, verified: verified, badge: badge)
                     dataCache.setObject(user!, forKey: "user-\(uid)" as NSString)
                 }
                 

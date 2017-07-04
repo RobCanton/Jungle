@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -113,14 +113,24 @@
                                 <constraint firstAttribute="trailing" secondItem="ocT-nK-zfU" secondAttribute="trailing" id="xNe-JP-HTb"/>
                             </constraints>
                         </view>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="em7-Y7-fMb">
+                            <rect key="frame" x="217.5" y="87" width="18" height="18"/>
+                            <color key="tintColor" red="0.11372549019607843" green="0.792156862745098" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="18" id="aHH-Nw-jHj"/>
+                                <constraint firstAttribute="height" constant="18" id="cnQ-en-IkC"/>
+                            </constraints>
+                        </imageView>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstItem="mVn-dM-fV3" firstAttribute="centerX" secondItem="d90-gc-ib3" secondAttribute="centerX" id="18i-2K-dpD"/>
+                        <constraint firstItem="em7-Y7-fMb" firstAttribute="leading" secondItem="wQM-Op-mo3" secondAttribute="trailing" constant="4" id="2ka-mh-7lV"/>
                         <constraint firstItem="wQM-Op-mo3" firstAttribute="centerX" secondItem="d90-gc-ib3" secondAttribute="centerX" id="BP9-en-maA"/>
                         <constraint firstItem="wQM-Op-mo3" firstAttribute="top" secondItem="mVn-dM-fV3" secondAttribute="bottom" constant="12" id="EDj-3G-4vC"/>
                         <constraint firstItem="SV0-dK-eXQ" firstAttribute="centerX" secondItem="d90-gc-ib3" secondAttribute="centerX" id="FDh-Af-iGY"/>
                         <constraint firstItem="tVe-VZ-1lP" firstAttribute="leading" secondItem="d90-gc-ib3" secondAttribute="leading" constant="12" id="UDe-4d-lug"/>
+                        <constraint firstItem="em7-Y7-fMb" firstAttribute="centerY" secondItem="wQM-Op-mo3" secondAttribute="centerY" id="bjv-yg-XVQ"/>
                         <constraint firstItem="tVe-VZ-1lP" firstAttribute="top" secondItem="wQM-Op-mo3" secondAttribute="bottom" constant="8" symbolic="YES" id="cNb-DK-1fq"/>
                         <constraint firstItem="mVn-dM-fV3" firstAttribute="top" secondItem="d90-gc-ib3" secondAttribute="top" constant="12" id="lpl-85-WEk"/>
                         <constraint firstAttribute="bottom" secondItem="SV0-dK-eXQ" secondAttribute="bottom" id="t95-Rb-ElY"/>
@@ -180,6 +190,7 @@
                 <constraint firstItem="d90-gc-ib3" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" id="n9d-J8-QX5"/>
             </constraints>
             <connections>
+                <outlet property="badgeView" destination="em7-Y7-fMb" id="a9a-KG-J6F"/>
                 <outlet property="bioLabel" destination="tVe-VZ-1lP" id="ovX-cp-X1j"/>
                 <outlet property="editProfileButton" destination="IRi-6i-jg5" id="pey-2B-dhh"/>
                 <outlet property="followButton" destination="oPm-jg-59w" id="Qna-vu-IiI"/>

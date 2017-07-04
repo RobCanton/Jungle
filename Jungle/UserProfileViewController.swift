@@ -126,7 +126,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         self.status = checkFollowingStatus(uid: uid)
         UserService.observeUser(uid, completion: { user in
             if user != nil {
-                self.title = user!.username
+                self.title = user!.usernameWithBadge
                 self.user = user
                 self.collectionView.reloadData()
             } else {
@@ -411,7 +411,7 @@ extension UserProfileViewController: ProfileHeaderProtocol {
                 .instantiateViewController(withIdentifier: "EditProfileNavigationController") as! UINavigationController
             let c = controller.viewControllers[0] as! EditProfileViewController
             c.delegate = self
-            self.present(controller, animated: true, completion: nil)
+            globalMainInterfaceProtocol?.presentPopover(withController: controller, animated: true)
         }
     }
     

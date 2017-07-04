@@ -76,6 +76,7 @@ PODS:
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - NVActivityIndicatorView (3.6.1)
+  - Popover (1.0.5)
   - Protobuf (3.3.0)
   - ReSwift (3.0.0)
   - Segmentio (2.1)
@@ -98,6 +99,7 @@ DEPENDENCIES:
   - GooglePlaces
   - JSQMessagesViewController
   - NVActivityIndicatorView
+  - Popover
   - ReSwift (= 3.0.0)
   - Segmentio (= 2.1)
   - SnapTimer
@@ -125,6 +127,7 @@ SPEC CHECKSUMS:
   JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   NVActivityIndicatorView: 9f52a7f84bf5c6a798722c450fe3c198e01c56ed
+  Popover: f31b0ef6f43192256e6fcf13a0ce10f01c803159
   Protobuf: d582fecf68201eac3d79ed61369ef45734394b9c
   ReSwift: f0255f4b4f2dacd12c5d97d34d13fc5dad6d6371
   Segmentio: ec9451dde6e5668f4b6a88c901a035faf08f8612
@@ -134,6 +137,6 @@ SPEC CHECKSUMS:
   TwicketSegmentedControl: 6d7a4cf243657e0ac3f00d06d873a25334c04042
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: e768c47d43b373a6345e8a7038a87a43761e911a
+PODFILE CHECKSUM: 72c3ed59d2dec4b98bd9eb09fc42ee0043ec2278
 
 COCOAPODS: 1.2.0

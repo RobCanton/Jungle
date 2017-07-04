@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -16,7 +16,7 @@
             <rect key="frame" x="0.0" y="0.0" width="407" height="60"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="407" height="59"/>
+                <rect key="frame" x="0.0" y="0.0" width="407" height="59.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fLb-U7-gsg">
@@ -50,44 +50,42 @@
                             <action selector="handleFollowTapWithSender:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="zdJ-91-keP"/>
                         </connections>
                     </button>
-                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="verified" translatesAutoresizingMaskIntoConstraints="NO" id="CXZ-5C-cA8">
-                        <rect key="frame" x="67" y="22" width="16" height="16"/>
-                        <constraints>
-                            <constraint firstAttribute="width" secondItem="CXZ-5C-cA8" secondAttribute="height" multiplier="1:1" id="CXX-lQ-VJr"/>
-                            <constraint firstAttribute="width" constant="16" id="cn3-s6-Z4p"/>
-                        </constraints>
-                    </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cj3-Qp-d3T">
                         <rect key="frame" x="61" y="30" width="0.0" height="0.0"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="5Mu-bU-Eve">
+                        <rect key="frame" x="65" y="22" width="16" height="16"/>
+                        <color key="tintColor" red="0.1137254902" green="0.79215686269999996" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="16" id="Tby-wU-eZl"/>
+                            <constraint firstAttribute="width" constant="16" id="xul-Sj-47O"/>
+                        </constraints>
+                    </imageView>
                 </subviews>
                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                 <constraints>
                     <constraint firstItem="Cj3-Qp-d3T" firstAttribute="leading" secondItem="fLb-U7-gsg" secondAttribute="trailing" constant="10" id="1VB-qS-Lj6"/>
                     <constraint firstAttribute="bottomMargin" secondItem="fLb-U7-gsg" secondAttribute="bottom" id="E9q-EV-w94"/>
-                    <constraint firstItem="CXZ-5C-cA8" firstAttribute="leading" secondItem="Cj3-Qp-d3T" secondAttribute="trailing" constant="6" id="aw4-FB-543"/>
+                    <constraint firstItem="5Mu-bU-Eve" firstAttribute="centerY" secondItem="Cj3-Qp-d3T" secondAttribute="centerY" id="Kfq-j8-i5t"/>
                     <constraint firstAttribute="leadingMargin" secondItem="fLb-U7-gsg" secondAttribute="leading" id="dcw-GK-8Pz"/>
                     <constraint firstItem="F86-Mh-lUL" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="hqa-Xu-8Eg"/>
                     <constraint firstAttribute="trailingMargin" secondItem="F86-Mh-lUL" secondAttribute="trailing" id="mZa-yx-urD"/>
                     <constraint firstItem="Cj3-Qp-d3T" firstAttribute="centerY" secondItem="fLb-U7-gsg" secondAttribute="centerY" id="r9w-sG-WFh"/>
-                    <constraint firstItem="CXZ-5C-cA8" firstAttribute="centerY" secondItem="Cj3-Qp-d3T" secondAttribute="centerY" id="yRg-P7-mv6"/>
+                    <constraint firstItem="5Mu-bU-Eve" firstAttribute="leading" secondItem="Cj3-Qp-d3T" secondAttribute="trailing" constant="4" id="w4W-oi-u2P"/>
                     <constraint firstAttribute="topMargin" secondItem="fLb-U7-gsg" secondAttribute="top" id="zaY-uR-zcf"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
+                <outlet property="badgeView" destination="5Mu-bU-Eve" id="0MG-Qs-L90"/>
                 <outlet property="contentImageView" destination="LVT-xh-M9P" id="L6s-Rf-yNN"/>
                 <outlet property="followButton" destination="F86-Mh-lUL" id="FDX-bl-QtH"/>
                 <outlet property="imageContainer" destination="fLb-U7-gsg" id="N7i-ne-jxt"/>
                 <outlet property="usernameLabel" destination="Cj3-Qp-d3T" id="oI0-8l-VMm"/>
-                <outlet property="verifiedBadge" destination="CXZ-5C-cA8" id="aqz-nU-wGZ"/>
             </connections>
             <point key="canvasLocation" x="325.5" y="342"/>
         </tableViewCell>
     </objects>
-    <resources>
-        <image name="verified" width="16" height="16"/>
-    </resources>
 </document>

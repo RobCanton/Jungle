@@ -32,6 +32,7 @@ class PostHeaderView: UIView {
     
     @IBOutlet weak var likesLabel: UILabel!
     @IBOutlet weak var commentsLabel: UILabel!
+    @IBOutlet weak var badgeView: UIImageView!
     
     var commentsTap:UITapGestureRecognizer?
     var likesTap:UITapGestureRecognizer?
@@ -41,6 +42,7 @@ class PostHeaderView: UIView {
         self.userImageView.cropToCircle()
         
     }
+    @IBOutlet weak var timeLabelLeadingConstraint: NSLayoutConstraint!
     
     @IBAction func handleClose(_ sender: Any) {
             delegate?.dismiss()
@@ -63,10 +65,18 @@ class PostHeaderView: UIView {
         UserService.getUser(item.authorId, completion: { _user in
             guard let user = _user else { return }
             self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
-            self.usernameLabel.text = user.username
+            self.usernameLabel.setUsernameWithBadge(username: user.username, badge: user.badge, fontSize: 16.0, fontWeight: UIFontWeightSemibold)
 
             self.timeLabel.text = item.dateCreated.timeStringSinceNow()
             self.timeLabel2.text = self.timeLabel.text
+            
+            if user.verified {
+                self.badgeView.image = UIImage(named: "verified_white")
+                self.timeLabelLeadingConstraint.constant = 28
+            } else {
+                self.badgeView.image = nil
+                self.timeLabelLeadingConstraint.constant = 8
+            }
             
         })
         

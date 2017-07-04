@@ -119,6 +119,9 @@
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LJk-ao-zXT">
                     <rect key="frame" x="50" y="27.5" width="0.0" height="0.0"/>
+                    <constraints>
+                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="160" id="uQC-x7-4gJ"/>
+                    </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
@@ -132,14 +135,24 @@
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <state key="normal" image="disclosure_indicator"/>
                 </button>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="01k-Er-wTO">
+                    <rect key="frame" x="129.5" y="10" width="16" height="16"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="16" id="ePR-0E-OE9"/>
+                        <constraint firstAttribute="width" constant="16" id="mRG-2H-YHy"/>
+                    </constraints>
+                </imageView>
             </subviews>
             <constraints>
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="centerY" secondItem="VPf-iq-W5C" secondAttribute="centerY" id="1Zt-df-R4M"/>
+                <constraint firstItem="01k-Er-wTO" firstAttribute="leading" secondItem="YyZ-bC-fc4" secondAttribute="trailing" constant="4" id="3un-Tq-7Tj"/>
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="leading" secondItem="KFe-EG-hp3" secondAttribute="trailing" constant="8" id="8KY-iH-GrP"/>
                 <constraint firstItem="KFe-EG-hp3" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="10" id="ErG-bn-zMh"/>
                 <constraint firstItem="YyZ-bC-fc4" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="8.5" id="G7e-vB-yMd"/>
                 <constraint firstItem="LJk-ao-zXT" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="0.5" id="GYm-NH-TNV"/>
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="leading" secondItem="6nJ-kD-aa6" secondAttribute="trailing" constant="8" id="HBb-iq-m6C"/>
+                <constraint firstItem="01k-Er-wTO" firstAttribute="centerY" secondItem="YyZ-bC-fc4" secondAttribute="centerY" id="KIU-52-4Ca"/>
                 <constraint firstItem="Xny-id-Zlz" firstAttribute="centerY" secondItem="LJk-ao-zXT" secondAttribute="centerY" constant="0.5" id="MLk-aX-ove"/>
                 <constraint firstItem="0gs-KU-pJi" firstAttribute="top" secondItem="gtv-pI-kcX" secondAttribute="top" constant="10" id="P0B-ZS-OhF"/>
                 <constraint firstItem="dj6-Gf-N8G" firstAttribute="top" secondItem="YyZ-bC-fc4" secondAttribute="bottom" constant="0.5" id="RG5-gP-qVr"/>
@@ -155,6 +168,7 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="badgeView" destination="01k-Er-wTO" id="fpN-9m-6g5"/>
                 <outlet property="closeButton" destination="VPf-iq-W5C" id="TBU-7f-NNP"/>
                 <outlet property="commentsLabel" destination="eTW-Fx-vUC" id="iGz-ju-fP3"/>
                 <outlet property="commentsView" destination="0gs-KU-pJi" id="eTU-rt-CLV"/>
@@ -164,6 +178,7 @@
                 <outlet property="locationTitle" destination="LJk-ao-zXT" id="8CL-oL-P4L"/>
                 <outlet property="timeLabel" destination="E7o-DA-g2z" id="a7Z-MK-R9K"/>
                 <outlet property="timeLabel2" destination="dj6-Gf-N8G" id="esr-Bz-cHu"/>
+                <outlet property="timeLabelLeadingConstraint" destination="e7H-2Y-EZ3" id="voM-wn-q2m"/>
                 <outlet property="userImageView" destination="KFe-EG-hp3" id="zT3-qc-cY4"/>
                 <outlet property="usernameLabel" destination="YyZ-bC-fc4" id="W0L-Vp-veF"/>
             </connections>

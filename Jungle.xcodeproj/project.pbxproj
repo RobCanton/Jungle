@@ -14,6 +14,10 @@
 		B012177B1EB0407F00F13F64 /* PostFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012177A1EB0407F00F13F64 /* PostFooterView.swift */; };
 		B0168B561EEE464A001069C4 /* ItemStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0168B551EEE4649001069C4 /* ItemStateController.swift */; };
 		B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */; };
+		B01D4EDB1F073EEE00A0FBFA /* BadgeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01D4ED91F073EEE00A0FBFA /* BadgeCell.swift */; };
+		B01D4EDC1F073EEE00A0FBFA /* BadgeCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */; };
+		B01D4EDF1F0B68FD00A0FBFA /* NotificationBadgeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01D4EDD1F0B68F800A0FBFA /* NotificationBadgeCell.swift */; };
+		B01D4EE01F0B68FD00A0FBFA /* NotificationBadgeCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B01D4EDE1F0B68F800A0FBFA /* NotificationBadgeCell.xib */; };
 		B03012781EEC89A90012F340 /* EmailSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */; };
 		B03A25BC1F01BEE700A5FA08 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
@@ -188,6 +192,10 @@
 		B012177A1EB0407F00F13F64 /* PostFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostFooterView.swift; sourceTree = "<group>"; };
 		B0168B551EEE4649001069C4 /* ItemStateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemStateController.swift; sourceTree = "<group>"; };
 		B019E8E21ECE388100402D06 /* PasswordRecoveryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordRecoveryViewController.swift; sourceTree = "<group>"; };
+		B01D4ED91F073EEE00A0FBFA /* BadgeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BadgeCell.swift; sourceTree = "<group>"; };
+		B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BadgeCell.xib; sourceTree = "<group>"; };
+		B01D4EDD1F0B68F800A0FBFA /* NotificationBadgeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationBadgeCell.swift; sourceTree = "<group>"; };
+		B01D4EDE1F0B68F800A0FBFA /* NotificationBadgeCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotificationBadgeCell.xib; sourceTree = "<group>"; };
 		B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSettingsViewController.swift; sourceTree = "<group>"; };
 		B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -421,6 +429,8 @@
 				B0550D871E8E17A2007DAAAC /* NotificationTableViewCell.xib */,
 				B0550DA21E90A608007DAAAC /* NotificationFollowCell.swift */,
 				B0550DA31E90A608007DAAAC /* NotificationFollowCell.xib */,
+				B01D4EDD1F0B68F800A0FBFA /* NotificationBadgeCell.swift */,
+				B01D4EDE1F0B68F800A0FBFA /* NotificationBadgeCell.xib */,
 			);
 			name = Notifications;
 			sourceTree = "<group>";
@@ -666,8 +676,10 @@
 				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
-				B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */,
+				B01D4ED91F073EEE00A0FBFA /* BadgeCell.swift */,
+				B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */,
 				B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */,
+				B07169AB1E838C6400AF6A41 /* EditProfileViewController.storyboard */,
 				B0F8949D1E7E3E8500E490C4 /* MyProfileViewController.swift */,
 				B0F8949F1E7E3E9B00E490C4 /* MyProfileViewController.storyboard */,
 				B07169AF1E83B4D600AF6A41 /* ProfileTabHeader.swift */,
@@ -814,6 +826,8 @@
 				B093FFCD1E79135A00011B43 /* PhotoCell.xib in Resources */,
 				B07169AD1E838C6400AF6A41 /* EditProfileViewController.storyboard in Resources */,
 				B0F894721E7BA68A00E490C4 /* CommentBar.xib in Resources */,
+				B01D4EE01F0B68FD00A0FBFA /* NotificationBadgeCell.xib in Resources */,
+				B01D4EDC1F073EEE00A0FBFA /* BadgeCell.xib in Resources */,
 				B0A6FCCD1EC2E057009933F8 /* HorizontalCollectionView.xib in Resources */,
 				B0A053E61EAACC3000922AAC /* PostFooterView.xib in Resources */,
 			);
@@ -977,10 +991,12 @@
 				B07169AA1E83681B00AF6A41 /* PostViewController.swift in Sources */,
 				B0550D9A1E8E21C4007DAAAC /* IsaoTextField.swift in Sources */,
 				B093FFC11E790D5E00011B43 /* SendTableViewController.swift in Sources */,
+				B01D4EDB1F073EEE00A0FBFA /* BadgeCell.swift in Sources */,
 				B0F894891E7BD52C00E490C4 /* AppState.swift in Sources */,
 				B0550D851E8E16A4007DAAAC /* NotificationsViewController.swift in Sources */,
 				B003D7E41ED6C32200256FBB /* CommentViewCell.swift in Sources */,
 				B0E100381F04E285005C4827 /* PlacesFooter.swift in Sources */,
+				B01D4EDF1F0B68FD00A0FBFA /* NotificationBadgeCell.swift in Sources */,
 				B093FFBB1E790D5E00011B43 /* Location.swift in Sources */,
 				B05091B61EB915C1001B84B1 /* AlertBuilders.swift in Sources */,
 				B007328A1ED7EC10007D6C5F /* SignInViewController.swift in Sources */,

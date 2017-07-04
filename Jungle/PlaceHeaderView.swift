@@ -36,17 +36,17 @@ class PlaceHeaderView: UICollectionReusableView {
             let marker = GMSMarker(position: location.coordinates.coordinate)
             marker.map = mapView
             
-            
-            do {
-                // Set the map style by passing the URL of the local file.
-                if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
-                    mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-                } else {
-                    NSLog("Unable to find style.json")
-                }
-            } catch {
-                NSLog("One or more of the map styles failed to load. \(error)")
-            }
+//            
+//            do {
+//                // Set the map style by passing the URL of the local file.
+//                if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
+//                    mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+//                } else {
+//                    NSLog("Unable to find style.json")
+//                }
+//            } catch {
+//                NSLog("One or more of the map styles failed to load. \(error)")
+//            }
             
         } else{
             mapView!.animate(toLocation: location.coordinates.coordinate)

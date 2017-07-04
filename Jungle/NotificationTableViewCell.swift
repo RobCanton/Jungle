@@ -183,3 +183,4 @@ class NotificationTableViewCell: UITableViewCell {
         userTappedHandler?(notification.sender)
     }
 }
+

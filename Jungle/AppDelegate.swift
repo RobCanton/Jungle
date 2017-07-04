@@ -35,7 +35,7 @@ var remoteConfig: RemoteConfig?
 
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     var window: UIWindow?
     var connection_timer:Timer?
@@ -94,6 +94,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         if #available(iOS 10.0, *) {
+            // For iOS 10 display notification (sent via APNS)
+            UNUserNotificationCenter.current().delegate = self
+            
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]){
                 (granted,error) in
                 if granted{

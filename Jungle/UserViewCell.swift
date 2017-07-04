@@ -18,7 +18,7 @@ class UserViewCell: UITableViewCell {
     
     @IBOutlet weak var followButton: UIButton!
     
-    @IBOutlet weak var verifiedBadge: UIImageView!
+    @IBOutlet weak var badgeView: UIImageView!
     
     var followButtonColor = UIColor.black
     
@@ -51,7 +51,14 @@ class UserViewCell: UITableViewCell {
             if user != nil {
                 self.user = user!
                 self.contentImageView.loadImageAsync(user!.imageURL, completion: nil)
-                self.usernameLabel.text = user!.username
+                self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 16.0, fontWeight: UIFontWeightMedium)
+                
+                if self.user!.verified {
+                    self.badgeView.image = UIImage(named: "verified_white")
+                } else {
+                    self.badgeView.image = nil
+                }
+                
             }
         })
         

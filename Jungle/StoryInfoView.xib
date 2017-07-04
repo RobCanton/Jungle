@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -40,6 +40,14 @@
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Fz5-Or-RDp">
+                            <rect key="frame" x="52" y="0.0" width="12" height="12"/>
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="12" id="e5u-Fe-Vbx"/>
+                                <constraint firstAttribute="width" constant="12" id="egX-MJ-BEf"/>
+                            </constraints>
+                        </imageView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sun-ei-4Y9" customClass="ActiveLabel" customModule="ActiveLabel">
                             <rect key="frame" x="50" y="26" width="352" height="29"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -69,12 +77,14 @@
                         <constraint firstItem="PCI-Ix-gyj" firstAttribute="leading" secondItem="U7g-vC-OIO" secondAttribute="trailing" constant="8" id="98c-NA-d4D"/>
                         <constraint firstItem="U7g-vC-OIO" firstAttribute="top" secondItem="W2P-Ky-YyN" secondAttribute="top" constant="8" id="CP4-X4-iLB"/>
                         <constraint firstItem="EEe-C7-3oX" firstAttribute="top" secondItem="W2P-Ky-YyN" secondAttribute="top" constant="6" id="L8J-rw-KmK"/>
+                        <constraint firstItem="Fz5-Or-RDp" firstAttribute="centerY" secondItem="PCI-Ix-gyj" secondAttribute="centerY" id="Lr7-nE-4pk"/>
                         <constraint firstAttribute="trailing" secondItem="EEe-C7-3oX" secondAttribute="trailing" constant="6" id="Wrv-TW-1TP"/>
                         <constraint firstAttribute="bottom" secondItem="Sun-ei-4Y9" secondAttribute="bottom" constant="8" id="XA1-xl-TMI"/>
                         <constraint firstAttribute="trailing" secondItem="Sun-ei-4Y9" secondAttribute="trailing" constant="8" id="bSc-h9-ZRW"/>
                         <constraint firstItem="Sun-ei-4Y9" firstAttribute="top" secondItem="W2P-Ky-YyN" secondAttribute="top" constant="26" id="c6z-FQ-meN"/>
                         <constraint firstItem="U7g-vC-OIO" firstAttribute="leading" secondItem="W2P-Ky-YyN" secondAttribute="leading" constant="10" id="cYP-Vq-Vvt"/>
                         <constraint firstItem="PCI-Ix-gyj" firstAttribute="top" secondItem="W2P-Ky-YyN" secondAttribute="top" constant="6" id="k8q-ZX-Nhq"/>
+                        <constraint firstItem="Fz5-Or-RDp" firstAttribute="leading" secondItem="PCI-Ix-gyj" secondAttribute="trailing" constant="2" id="uVU-PD-D6C"/>
                     </constraints>
                 </view>
             </subviews>
@@ -96,6 +106,7 @@
                 <outlet property="userImageView" destination="U7g-vC-OIO" id="1pq-7H-uKD"/>
                 <outlet property="usernameLabel" destination="PCI-Ix-gyj" id="p2l-Mg-W6d"/>
                 <outlet property="usernameTopConstraint" destination="k8q-ZX-Nhq" id="qLU-1m-hm0"/>
+                <outlet property="verifiedBadge" destination="Fz5-Or-RDp" id="gaO-rW-pam"/>
             </connections>
             <point key="canvasLocation" x="-43" y="-85.5"/>
         </view>

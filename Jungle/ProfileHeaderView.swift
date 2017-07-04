@@ -26,6 +26,7 @@ class ProfileHeaderView: UICollectionReusableView {
     @IBOutlet weak var bioLabel: UILabel!
     @IBOutlet weak var followButton: UIButton!
     
+    @IBOutlet weak var badgeView: UIImageView!
     weak var delegate:ProfileHeaderProtocol?
     
     
@@ -74,6 +75,12 @@ class ProfileHeaderView: UICollectionReusableView {
         guard let user = _user else {return}
         self.user = _user
         setUserStatus(status: checkFollowingStatus(uid: user.uid))
+        
+        if user.verified {
+            self.badgeView.image = UIImage(named: "verified_white")
+        } else {
+            self.badgeView.image = nil
+        }
         
         if status != .CurrentUser {
             setPostsCount(user.posts)

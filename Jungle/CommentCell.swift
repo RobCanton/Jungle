@@ -15,6 +15,7 @@ class CommentCell: UITableViewCell {
     @IBOutlet weak var commentLabel: ActiveLabel!
     @IBOutlet weak var userImage: UIImageView!
     @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var verifiedBadge: UIImageView!
     
     var tap:UITapGestureRecognizer!
     
@@ -64,6 +65,7 @@ class CommentCell: UITableViewCell {
     fileprivate var check:Int = 0
     
     var shadow = true
+    @IBOutlet weak var timeLabelLeadingConstraint: NSLayoutConstraint!
     
     func setContent(comment:Comment) {
         
@@ -80,13 +82,22 @@ class CommentCell: UITableViewCell {
         
         backgroundColor = UIColor.clear
         backgroundView = nil
-        
+        verifiedBadge.image = nil
+        timeLabelLeadingConstraint.constant = 8.0
         UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
-                self.authorLabel.text = user!.username
+                self.authorLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightSemibold)
                 self.authorLabel.alpha = 1.0
                 self.userImage.loadImageAsync(user!.imageURL, completion: nil)
                 self.timeLabel.text = comment.date.timeStringSinceNow()
+                
+                if user!.verified {
+                    self.verifiedBadge.image = UIImage(named: "verified_white")
+                    self.timeLabelLeadingConstraint.constant = 22.0
+                } else {
+                    self.verifiedBadge.image = nil
+                    self.timeLabelLeadingConstraint.constant = 8.0
+                }
             } else {
                 self.authorLabel.text = "Unknown"
                 self.authorLabel.alpha = 0.5

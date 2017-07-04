@@ -16,6 +16,7 @@ enum NotificationType:String {
     case follow  = "FOLLOW"
     case like    = "LIKE"
     case mention = "MENTION"
+    case badge = "BADGE"
     case none  = "NONE"
 }
 
@@ -51,6 +52,8 @@ class Notification: NSObject {
         case NotificationType.mention.rawValue:
             self.type = .mention
             break
+        case NotificationType.badge.rawValue:
+            self.type = .badge
         default:
             self.type = .none
             break

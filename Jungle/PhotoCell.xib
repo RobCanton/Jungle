@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -88,8 +88,9 @@
                             <constraint firstItem="hE6-iS-b7k" firstAttribute="leading" secondItem="Hed-VB-mXR" secondAttribute="leading" constant="6" id="z8j-Rd-aR8"/>
                         </constraints>
                     </view>
-                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="crown" translatesAutoresizingMaskIntoConstraints="NO" id="EiZ-pM-Kdf">
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="crown4" translatesAutoresizingMaskIntoConstraints="NO" id="EiZ-pM-Kdf">
                         <rect key="frame" x="141" y="4" width="18" height="18"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="18" id="Jk2-1b-4Ev"/>
                             <constraint firstAttribute="width" secondItem="EiZ-pM-Kdf" secondAttribute="height" multiplier="1:1" id="sIb-jn-MZt"/>
@@ -172,7 +173,7 @@
     </objects>
     <resources>
         <image name="comments_filled" width="25" height="25"/>
-        <image name="crown" width="25" height="25"/>
+        <image name="crown4" width="24" height="24"/>
         <image name="liked" width="25" height="25"/>
         <image name="report" width="25" height="25"/>
     </resources>

@@ -9,7 +9,7 @@ import UIKit
 import GoogleMaps
 import GooglePlaces
 
-class SendViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class SendViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, GMSMapViewDelegate {
     
     let subscriberName = "SendViewController"
     @IBOutlet weak var tableView: UITableView!
@@ -72,6 +72,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             setupMapView(withLocation: location)
         }
         
+        sendLabel.text = "My Location"
         self.tableView.reloadData()
         
     }
@@ -103,17 +104,18 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         mapView!.settings.tiltGestures = false
         mapView!.isBuildingsEnabled = true
         mapView!.isIndoorEnabled = true
+        mapView!.delegate = self
         
-        do {
-            // Set the map style by passing the URL of the local file.
-            if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
-                mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-            } else {
-                NSLog("Unable to find style.json")
-            }
-        } catch {
-            NSLog("One or more of the map styles failed to load. \(error)")
-        }
+//        do {
+//            // Set the map style by passing the URL of the local file.
+//            if let styleURL = Bundle.main.url(forResource: "mapStyle", withExtension: "json") {
+//                mapView!.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+//            } else {
+//                NSLog("Unable to find style.json")
+//            }
+//        } catch {
+//            NSLog("One or more of the map styles failed to load. \(error)")
+//        }
         
         for likelihood in self.likelihoods {
             let marker = GMSMarker(position: likelihood.place.coordinate)
@@ -121,6 +123,42 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             marker.map = mapView
         }
     }
+    
+    func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+        for i in 0..<self.likelihoods.count {
+            let likelihood = likelihoods[i]
+            if marker.title == likelihood.place.name {
+                let indexPath = IndexPath(row: i, section: 0)
+                let place = likelihoods[indexPath.row].place
+                
+                let currentCell = tableView.cellForRow(at: indexPath) as! SendProfileViewCell
+                if currentCell.isActive {
+                    currentCell.toggleSelection(false)
+                    selectedIndex =  nil
+                    upload.place = nil
+                    sendLabel.text = "My location"
+                    if let location = gps_service.getLastLocation() {
+                        mapView.animate(toLocation: location.coordinate)
+                    }
+                    return true
+                } else {
+                    if let oldPath = selectedIndex {
+                        let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
+                        oldCell.toggleSelection(false)
+                    }
+                    currentCell.toggleSelection(true)
+                    selectedIndex =  indexPath
+                    upload.place = place
+                    
+                    sendLabel.text = place.name
+                    mapView.animate(toLocation: place.coordinate)
+                }
+            }
+        }
+        
+        return false
+    }
+    
     
     func sent() {
         globalMainInterfaceProtocol?.presentHomeScreen(animated: true)
@@ -228,6 +266,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             currentCell.toggleSelection(false)
             selectedIndex =  nil
             upload.place = nil
+            sendLabel.text = "My location"
+            if let location = gps_service.getLastLocation() {
+                mapView?.animate(toLocation: location.coordinate)
+            }
         } else {
             if let oldPath = selectedIndex {
                 let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
@@ -236,6 +278,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             currentCell.toggleSelection(true)
             selectedIndex =  indexPath
             upload.place = place
+            sendLabel.text = place.name
+            mapView?.animate(toLocation: place.coordinate)
         }
         
     }

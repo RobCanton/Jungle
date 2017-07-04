@@ -303,7 +303,7 @@ class HomeStateController: StoreSubscriber {
                 count += 1
                 if count >= places.count {
                     count = -1
-                    self.nearbyPlaceStories = placesStories.sorted(by: { return $0 > $1 })
+                    self.nearbyPlaceStories = placesStories.sorted(by: { return $0.count > $1.count })
                     
                    // DispatchQueue.main.async {
                         self.delegate?.update(.places)

@@ -22,6 +22,7 @@ class StoryInfoView: UIView {
     @IBOutlet weak var backgroundBlur: UIVisualEffectView!
     @IBOutlet weak var usernameTopConstraint: NSLayoutConstraint!
     
+    @IBOutlet weak var verifiedBadge: UIImageView!
     
     @IBOutlet weak var pinImage: UIImageView!
     
@@ -51,12 +52,18 @@ class StoryInfoView: UIView {
         self.userImageView.cropToCircle()
         UserService.getUser(item.authorId, completion: { user in
             if user != nil {
-                self.usernameLabel.text = user!.username
+                self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 16.0, fontWeight: UIFontWeightMedium)
                 self.captionLabel.text = item.caption
                 if item.caption != "" {
                     self.usernameTopConstraint.constant = 8
                 } else {
                     self.usernameTopConstraint.constant = 16
+                }
+                
+                if user!.verified {
+                    self.verifiedBadge.image = UIImage(named:"verified_white")
+                } else {
+                    self.verifiedBadge.image = nil
                 }
                 self.userImageView.loadImageAsync(user!.imageURL, completion: nil)
                 
