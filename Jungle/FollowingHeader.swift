@@ -12,7 +12,6 @@ func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
     
 }
 
-let distances = [1, 5, 10, 25, 50, 100, 200]
 
 
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {

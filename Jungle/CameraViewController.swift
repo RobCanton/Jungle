@@ -57,7 +57,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         imageCaptureView = UIImageView(frame: view.bounds)
         view.addSubview(imageCaptureView)
 
-        cameraState = .Initiating
+        cameraState = .Off
         
     }
     
@@ -66,6 +66,14 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         didSet {
             switch cameraState {
             case .Off:
+                destroyCameraSession()
+                imageCaptureView.image  = nil
+                imageCaptureView.isHidden = true
+                
+                playerLayer?.player?.pause()
+                playerLayer?.removeFromSuperlayer()
+                playerLayer?.player = nil
+                playerLayer = nil
                 break
             case .Initiating:
                 reloadCamera()

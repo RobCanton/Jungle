@@ -117,7 +117,7 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
         var available = [Badge]()
         var unavailable = [Badge]()
         
-        for badge in badges {
+        for (key, badge) in badges {
             if badge.isAvailable {
                 available.append(badge)
             } else {
@@ -135,7 +135,7 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
         
         for i in 0..<_badges.count {
             let badge = _badges[i]
-            if badge.icon == mainStore.state.userState.user!.badge {
+            if badge.key == mainStore.state.userState.user!.badge {
                 selectedBadgeIndex = IndexPath(item: i, section: 0)
             }
         }
@@ -223,7 +223,7 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
         if let index = selectedBadgeIndex {
             let badge = _badges[index.item]
             
-            basicProfileObj["badge"] = badge.icon
+            basicProfileObj["badge"] = badge.key
         }
         
         let uid = mainStore.state.userState.uid

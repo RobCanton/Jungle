@@ -18,6 +18,7 @@
 		B01D4EDC1F073EEE00A0FBFA /* BadgeCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */; };
 		B01D4EDF1F0B68FD00A0FBFA /* NotificationBadgeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01D4EDD1F0B68F800A0FBFA /* NotificationBadgeCell.swift */; };
 		B01D4EE01F0B68FD00A0FBFA /* NotificationBadgeCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B01D4EDE1F0B68F800A0FBFA /* NotificationBadgeCell.xib */; };
+		B01D4EE21F0C16A100A0FBFA /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01D4EE11F0C16A100A0FBFA /* Config.swift */; };
 		B03012781EEC89A90012F340 /* EmailSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */; };
 		B03A25BC1F01BEE700A5FA08 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */; };
 		B045C4FF1E84AB24002AE547 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */; };
@@ -196,6 +197,7 @@
 		B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BadgeCell.xib; sourceTree = "<group>"; };
 		B01D4EDD1F0B68F800A0FBFA /* NotificationBadgeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationBadgeCell.swift; sourceTree = "<group>"; };
 		B01D4EDE1F0B68F800A0FBFA /* NotificationBadgeCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotificationBadgeCell.xib; sourceTree = "<group>"; };
+		B01D4EE11F0C16A100A0FBFA /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		B03012771EEC89A90012F340 /* EmailSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSettingsViewController.swift; sourceTree = "<group>"; };
 		B03A25BB1F01BEE700A5FA08 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B045C4FE1E84AB24002AE547 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -580,6 +582,7 @@
 				B05091B71EB936CB001B84B1 /* Reachability.swift */,
 				B093FFB51E790D5E00011B43 /* UploadService.swift */,
 				B0F8945C1E7B216500E490C4 /* UserService.swift */,
+				B01D4EE11F0C16A100A0FBFA /* Config.swift */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -893,6 +896,7 @@
 				B093FFBA1E790D5E00011B43 /* KDCircularProgress.swift in Sources */,
 				B093FFDB1E793AC100011B43 /* ProgressIndicator.swift in Sources */,
 				B0DF822B1EDCAA9200461DD8 /* SignUpPhoneCountryViewController.swift in Sources */,
+				B01D4EE21F0C16A100A0FBFA /* Config.swift in Sources */,
 				B0D790BE1E9828A000D8680E /* AppDelegate.swift in Sources */,
 				B07169AE1E838C6400AF6A41 /* EditProfileViewController.swift in Sources */,
 				B0550D9C1E8E21C4007DAAAC /* KaedeTextField.swift in Sources */,

@@ -584,6 +584,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             self.commentBar.likeButton.alpha = 0.0
             self.commentBar.moreButton.alpha = 0.0
             self.commentBar.sendButton.alpha = 1.0
+            self.commentBar.userImageView.alpha = 1.0
             self.commentBar.activityIndicator.alpha = 1.0
             self.commentBar.backgroundView.alpha = 1.0
             self.headerView.alpha = 0.0
@@ -623,6 +624,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             self.commentBar.likeButton.alpha = 1.0
             self.commentBar.moreButton.alpha = 1.0
             self.commentBar.sendButton.alpha = 0.0
+            self.commentBar.userImageView.alpha = 0.35
             self.commentBar.activityIndicator.alpha = 0.0
             self.commentBar.backgroundView.alpha = 0.0
             self.headerView.alpha = 1.0

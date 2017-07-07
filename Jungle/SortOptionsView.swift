@@ -33,14 +33,15 @@ class SortOptionsView: UIView {
         
         var selectedIndex = 4
         var count = 0
-        for distance in distances {
-            distanceLabels.append("\(distance) km")
-            if distance == selectedDistance {
+        for range in Config.ranges {
+            distanceLabels.append(range.label)
+            if range.distance == selectedDistance {
                 selectedIndex = count
             }
             count += 1
         }
         
+        slider.tickCount = Config.ranges.count
         sliderLabels?.value = UInt(selectedIndex)
         slider.value = CGFloat(selectedIndex)
         
@@ -71,7 +72,7 @@ class SortOptionsView: UIView {
     func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
         let value = Int(slider.value)
         sliderLabels?.value = UInt(sender.value)
-        activateSetButtton(distances[value] != LocationService.sharedInstance.radius)
+        activateSetButtton(Config.ranges[value].distance != LocationService.sharedInstance.radius)
     }
     
     func activateSetButtton(_ activate:Bool) {
@@ -88,9 +89,9 @@ class SortOptionsView: UIView {
     @IBAction func handleSet(_ sender: Any) {
         let value = Int(slider.value)
 
-        let distance = distances[value]
-        LocationService.sharedInstance.radius = distance
-        LocationService.sharedInstance.requestNearbyLocations()
+        let distance = Config.ranges[value].distance
+        LocationService.sharedInstance.setSearchRadius(distance)
+        
         
         delegate?.dismissSortOptions()
     }

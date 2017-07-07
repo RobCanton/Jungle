@@ -20,7 +20,7 @@
                     <color key="backgroundColor" white="0.0" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Comment" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hnU-lj-oSe">
-                    <rect key="frame" x="8" y="0.0" width="313" height="64"/>
+                    <rect key="frame" x="48" y="0.0" width="281" height="64"/>
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                     <textInputTraits key="textInputTraits" keyboardAppearance="alert"/>
@@ -30,8 +30,16 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </textField>
+                <imageView userInteractionEnabled="NO" alpha="0.34999999999999998" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="4pW-Nc-Qkk">
+                    <rect key="frame" x="8" y="16" width="32" height="32"/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.35382663219999999" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="4pW-Nc-Qkk" secondAttribute="height" multiplier="1:1" id="3zM-zX-Ptr"/>
+                        <constraint firstAttribute="width" constant="32" id="Hzd-BL-5r8"/>
+                    </constraints>
+                </imageView>
                 <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="BNQ-9e-xhl">
-                    <rect key="frame" x="342" y="21" width="20" height="20"/>
+                    <rect key="frame" x="350.5" y="21.5" width="20" height="20"/>
                 </activityIndicatorView>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vi8-yM-kQW">
                     <rect key="frame" x="328" y="0.0" width="64" height="64"/>
@@ -60,13 +68,13 @@
                         <action selector="likeTapped:" destination="g8v-2R-i5l" eventType="touchUpInside" id="BZy-Qa-onF"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jxW-Vb-FFh">
-                    <rect key="frame" x="321" y="0.0" width="63" height="63"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jxW-Vb-FFh">
+                    <rect key="frame" x="329" y="0.0" width="63" height="63"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="jxW-Vb-FFh" secondAttribute="height" multiplier="1:1" id="Z6p-91-Tp9"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                    <state key="normal" title="Send">
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <state key="normal" image="send">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
@@ -78,12 +86,16 @@
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="jxW-Vb-FFh" secondAttribute="bottom" constant="1" id="0ev-54-wEf"/>
                 <constraint firstItem="BNQ-9e-xhl" firstAttribute="centerX" secondItem="jxW-Vb-FFh" secondAttribute="centerX" id="50t-q9-Lkt"/>
+                <constraint firstItem="4pW-Nc-Qkk" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" constant="8" id="8tQ-mT-IJr"/>
+                <constraint firstItem="4pW-Nc-Qkk" firstAttribute="centerY" secondItem="g8v-2R-i5l" secondAttribute="centerY" id="CrO-d8-TQ5"/>
+                <constraint firstItem="hnU-lj-oSe" firstAttribute="leading" secondItem="4pW-Nc-Qkk" secondAttribute="trailing" constant="8" id="Ezs-82-DO1"/>
                 <constraint firstItem="vi8-yM-kQW" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="HNX-7e-Hpy"/>
+                <constraint firstItem="4pW-Nc-Qkk" firstAttribute="width" secondItem="4pW-Nc-Qkk" secondAttribute="height" multiplier="1:1" id="HX3-7l-ho5"/>
                 <constraint firstAttribute="trailing" secondItem="pzn-Zl-6vY" secondAttribute="trailing" id="POh-39-hhU"/>
                 <constraint firstAttribute="bottom" secondItem="5W8-GV-yg8" secondAttribute="bottom" constant="1" id="RAv-lI-c4h"/>
                 <constraint firstItem="jxW-Vb-FFh" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="UDQ-iu-4dA"/>
                 <constraint firstItem="vi8-yM-kQW" firstAttribute="leading" secondItem="5W8-GV-yg8" secondAttribute="trailing" id="c2J-hO-Gso"/>
-                <constraint firstAttribute="trailing" secondItem="jxW-Vb-FFh" secondAttribute="trailing" constant="8" id="cHl-rK-oMh"/>
+                <constraint firstAttribute="trailing" secondItem="jxW-Vb-FFh" secondAttribute="trailing" id="cHl-rK-oMh"/>
                 <constraint firstAttribute="bottom" secondItem="hnU-lj-oSe" secondAttribute="bottom" id="evB-l2-r6e"/>
                 <constraint firstItem="pzn-Zl-6vY" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" id="f9n-cA-rIZ"/>
                 <constraint firstItem="5W8-GV-yg8" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="fPI-tk-mts"/>
@@ -91,7 +103,6 @@
                 <constraint firstAttribute="bottom" secondItem="vi8-yM-kQW" secondAttribute="bottom" id="iIL-IW-1iC"/>
                 <constraint firstAttribute="bottom" secondItem="pzn-Zl-6vY" secondAttribute="bottom" id="nsa-XU-3ma"/>
                 <constraint firstItem="jxW-Vb-FFh" firstAttribute="leading" secondItem="hnU-lj-oSe" secondAttribute="trailing" id="orC-zf-JbQ"/>
-                <constraint firstItem="hnU-lj-oSe" firstAttribute="leading" secondItem="g8v-2R-i5l" secondAttribute="leading" constant="8" id="rXa-Zw-JXF"/>
                 <constraint firstItem="hnU-lj-oSe" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="roU-WA-k4A"/>
                 <constraint firstItem="BNQ-9e-xhl" firstAttribute="centerY" secondItem="jxW-Vb-FFh" secondAttribute="centerY" id="yX8-97-5RR"/>
                 <constraint firstItem="pzn-Zl-6vY" firstAttribute="top" secondItem="g8v-2R-i5l" secondAttribute="top" id="zvP-7a-dPy"/>
@@ -104,11 +115,13 @@
                 <outlet property="moreButton" destination="vi8-yM-kQW" id="HUW-mW-yWj"/>
                 <outlet property="sendButton" destination="jxW-Vb-FFh" id="YDb-Qt-vbP"/>
                 <outlet property="textField" destination="hnU-lj-oSe" id="ccV-Pt-SRv"/>
+                <outlet property="userImageView" destination="4pW-Nc-Qkk" id="mmm-IV-9O5"/>
             </connections>
             <point key="canvasLocation" x="74" y="-213"/>
         </view>
     </objects>
     <resources>
         <image name="more" width="16" height="16"/>
+        <image name="send" width="24" height="24"/>
     </resources>
 </document>

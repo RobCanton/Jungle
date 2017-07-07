@@ -55,23 +55,23 @@ class NotificationService: Service {
         let current_uid = mainStore.state.userState.uid
         let ref = Database.database().reference()
         let notificationsRef = ref.child("users/notifications/\(current_uid)")
-        notificationsRef.observe(.childAdded, with: { snapshot in
+        notificationsRef.queryOrdered(byChild: "timestamp").queryLimited(toLast: 50).observe(.childAdded, with: { snapshot in
             if snapshot.exists() {
-                guard let seen = snapshot.value as? Bool else { return }
-                self.notifications[snapshot.key] = seen
+                guard let dict = snapshot.value as? [String:Any] else { return }
+                self.notifications[snapshot.key] = dict["seen"] as! Bool
                 self.updateSubscribers()
             }
         })
         
-        notificationsRef.observe(.childChanged, with: { snapshot in
+        notificationsRef.queryOrdered(byChild: "timestamp").queryLimited(toLast: 50).observe(.childChanged, with: { snapshot in
             if snapshot.exists() {
-                guard let seen = snapshot.value as? Bool else { return }
-                self.notifications[snapshot.key] = seen
+                guard let dict = snapshot.value as? [String:Any] else { return }
+                self.notifications[snapshot.key] = dict["seen"] as! Bool
                 self.updateSubscribers()
             }
         })
         
-        notificationsRef.observe(.childRemoved, with: { snapshot in
+        notificationsRef.queryOrdered(byChild: "timestamp").queryLimited(toLast: 50).observe(.childRemoved, with: { snapshot in
             self.notifications[snapshot.key] = nil
             self.cache.removeObject(forKey: "notification-\(snapshot.key)" as NSString)
             self.updateSubscribers()
@@ -125,7 +125,7 @@ class NotificationService: Service {
     internal func markNotificationAsSeen(key:String) {
         let uid = mainStore.state.userState.uid
         let ref = Database.database().reference()
-        let notificationRef = ref.child("users/notifications/\(uid)/\(key)")
+        let notificationRef = ref.child("users/notifications/\(uid)/\(key)/seen")
         notificationRef.setValue(true)
     }
     

@@ -29,10 +29,10 @@ class User:NSObject, NSCoding {
     
     var usernameWithBadge:String {
         get {
-            if badge == "" {
-                return username
+            if let badge = badges[badge] {
+                return "\(username) \(badge.icon)"
             }
-            return "\(username) \(badge)"
+            return username
         }
     }
     

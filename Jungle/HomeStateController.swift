@@ -228,14 +228,12 @@ class HomeStateController: StoreSubscriber {
         let uid = mainStore.state.userState.uid
         nearbyRef?.removeAllObservers()
         nearbyRef = UserService.ref.child("users/location/nearby/\(uid)/posts")
-        nearbyRef?.queryOrderedByValue().observe(.value, with: { snapshot in
+        nearbyRef?.queryOrdered(byChild: "t").queryLimited(toLast: 100).observe(.value, with: { snapshot in
             var posts = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 let key = childSnap.key
-                if let _ = childSnap.value as? Double {
-                    posts.append(key)
-                }
+                posts.append(key)
             }
             self.downloadPosts(posts)
         })

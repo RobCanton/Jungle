@@ -66,7 +66,7 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
     }
     
     func makeDot() -> UIView {
-        let dot = UIView(frame: CGRect(x: 0, y: 0, width: 4, height: 4))
+        let dot = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 5))
         dot.backgroundColor = errorColor
         dot.layer.cornerRadius = dot.frame.width / 2
         dot.clipsToBounds = true

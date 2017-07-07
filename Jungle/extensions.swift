@@ -159,6 +159,31 @@ extension Date
 
 extension UILabel {
     
+    
+    func setUsernameWithBadge(username:String, badge:String, fontSize:CGFloat, fontWeight:CGFloat) {
+        
+        var str = ""
+        if let badgeIcon = badges[badge] {
+            str = "\(username) \(badgeIcon.icon)"
+        } else {
+            str = "\(username)"
+        }
+        
+        let attributes: [String: AnyObject] = [
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize - 3.0, weight: fontWeight)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        let a: [String: AnyObject] = [
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize, weight: fontWeight)
+            ]
+        title.addAttributes(a, range: NSRange(location: 0, length: username.characters.count))
+
+        
+        self.attributedText = title
+        
+    }
+
     public class func size(withText text: String, forWidth width: CGFloat, withFont font: UIFont) -> CGSize {
         let measurementLabel = UILabel()
         measurementLabel.font = font
@@ -290,4 +315,6 @@ func hexStringToUIColor (hex:String) -> UIColor {
         alpha: CGFloat(1.0)
     )
 }
+
+
 

@@ -114,6 +114,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         
         createDirectory("user_content")
+        
+        Config.getRanges()
         return true
     }
     

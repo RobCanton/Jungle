@@ -23,4 +23,23 @@ class NotificationBadgeCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    func setLabel( date: Date) {
+        let timeStr = " \(date.timeStringSinceNow())"
+        var message = "You've unlocked a new badge!"
+        
+        let str = "\(message)\(timeStr)"
+        let attributes: [String: AnyObject] = [
+            NSFontAttributeName : UIFont.systemFont(ofSize: 14, weight: UIFontWeightRegular)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+
+        
+        let a2: [String: AnyObject] = [
+            NSForegroundColorAttributeName : UIColor(white: 0.67, alpha: 1.0)
+        ]
+        title.addAttributes(a2, range: NSRange(location: message.characters.count, length: timeStr.characters.count))
+        
+        label.attributedText = title
+    }
 }

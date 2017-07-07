@@ -34,6 +34,26 @@ class LocationService: NSObject {
         super.init()
     }
     
+    func fetchRadius() {
+        let uid = mainStore.state.userState.uid
+        let radiusRef = ref.child("users/settings/\(uid)/radius")
+        radiusRef.observeSingleEvent(of: .value, with: { snapshot in
+            if let value = snapshot.value as? Int {
+                self.radius = value
+            }
+        })
+    }
+    
+    func setSearchRadius(_ newRadius: Int) {
+        radius = newRadius
+        let uid = mainStore.state.userState.uid
+        let radiusRef = ref.child("users/settings/\(uid)/radius")
+        radiusRef.setValue(radius) { error, ref in
+            
+        }
+        requestNearbyLocations()
+    }
+    
     func requestNearbyLocations() {
         
         guard let lastLocation = gps_service?.getLastLocation() else { return }

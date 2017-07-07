@@ -37,6 +37,7 @@ class FirstAuthViewController: FirstViewController {
     
     override func viewDidLoad() {
          super.viewDidLoad()
+        clearDirectory(name: "user_content")
         /* Activity view */
         activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
         activityView.center = CGPoint(x: view.center.x, y: view.frame.height - 80 - 20.0)
@@ -48,25 +49,30 @@ class FirstAuthViewController: FirstViewController {
     var authFetched = false
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        print("viewWillAppear")
+        
         checkVersionSupport { supported in
+                print("checkVersionSupport: \(supported)")
+                if !supported {
+                    let alert = UIAlertController(title: "This version is no longer supported.", message: "Please update Jungle on the Appstore.", preferredStyle: .alert)
+                    
+                    let update = UIAlertAction(title: "Okay", style: .default, handler: nil)
+                    alert.addAction(update)
+                    
+                    self.present(alert, animated: true, completion: nil)
+                } else {
+                    self.checkUserAuthState()
+                }
             
-            if !supported {
-                let alert = UIAlertController(title: "This version is no longer supported.", message: "Please update Jungle on the Appstore.", preferredStyle: .alert)
-                
-                let update = UIAlertAction(title: "Okay", style: .default, handler: nil)
-                alert.addAction(update)
-                
-                self.present(alert, animated: true, completion: nil)
-            } else {
-                self.checkUserAuthState()
-            }
+            
         }
     }
     
     func checkUserAuthState() {
+        print("checkUserAuthState")
         if let user = Auth.auth().currentUser {
 
-            print("YUH")
+            print("Auth user stored")
             checkUserAgainstDatabase { success in
                 print("checkUserAgainstDatabase: \(success)")
                 if !success {
@@ -81,6 +87,7 @@ class FirstAuthViewController: FirstViewController {
                             mainStore.dispatch(UserIsAuthenticated(user: user!))
                             UserService.sendFCMToken()
                             UserService.getAllBadges()
+                            LocationService.sharedInstance.fetchRadius()
                             Listeners.startListeningToFollowers()
                             Listeners.startListeningToFollowing()
                             Listeners.startListeningToViewed()
@@ -95,6 +102,7 @@ class FirstAuthViewController: FirstViewController {
             }
             
         } else {
+            print("No user")
             UserService.logout()
             self.performSegue(withIdentifier: "toLoginScreen", sender: self)
         }
@@ -132,6 +140,20 @@ class FirstAuthViewController: FirstViewController {
     }
 }
 
+class RoundWhiteButton:UIButton {
+    
+    override var isHighlighted: Bool {
+        didSet {
+            if isHighlighted {
+                backgroundColor = UIColor.white
+                
+            } else {
+                backgroundColor = UIColor.clear
+            }
+        }
+    }
+}
+
 class LoginViewController: UIViewController, UITextFieldDelegate {
 
     var gradientView:UIView!
@@ -147,6 +169,38 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        gradientView = UIView(frame: view.bounds)
+        self.view.insertSubview(gradientView, at: 0)
+        gradientView.backgroundColor = UIColor.white
+        
+        self.gradient?.removeFromSuperlayer()
+        self.gradient = CAGradientLayer()
+        self.gradient!.frame = self.gradientView.bounds
+        self.gradient!.colors = [
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
+        ]
+        self.gradient!.locations = [0.0, 1.0]
+        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+        self.gradientView.layer.insertSublayer(self.gradient!, at: 0)
+        
+        loginButton.layer.cornerRadius = loginButton.frame.height / 2
+        loginButton.clipsToBounds = true
+        
+        signupButton.layer.cornerRadius = signupButton.frame.height / 2
+        signupButton.clipsToBounds = true
+        
+        loginButton.layer.borderColor = UIColor.white.cgColor
+        loginButton.layer.borderWidth = 2.0
+        
+        signupButton.layer.borderColor = UIColor.white.cgColor
+        signupButton.layer.borderWidth = 2.0
+        
+        loginButton.setTitleColor(accentColor, for: .highlighted)
+        signupButton.setTitleColor(accentColor, for: .highlighted)
+        
         
         /* Activity view */
         activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 40, height: 40), type: .ballBeat, color: UIColor.white, padding: 1.0)
@@ -169,6 +223,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
                     UserService.sendFCMToken()
                     UserService.getAllBadges()
+                    LocationService.sharedInstance.fetchRadius()
                     Listeners.startListeningToFollowers()
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToViewed()

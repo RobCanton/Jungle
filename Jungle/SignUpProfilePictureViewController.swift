@@ -101,13 +101,12 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                                 "username": username,
                                 "imageURL": url,
                                 "bio":""
-                            ]
+                            ] as [String:Any]
                             if let lastname = newUser.lastname {
                                 userProfile["lastname"] = lastname
                             }
+                            userRef.updateChildValues(userProfile) { error, ref in
                             
-                            userRef.setValue(userProfile, withCompletionBlock: { error, ref in
-                                
                                 Auth.auth().currentUser?.sendEmailVerification { error in
                                     if error != nil {
                                         print("Error: \(error!.localizedDescription)")
@@ -122,7 +121,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                                     return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
                                 }
                                 
-                            })
+                            }
                             
                         } else {
                             print("Error: \(error!.localizedDescription)")

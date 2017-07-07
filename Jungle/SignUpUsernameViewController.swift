@@ -105,6 +105,7 @@ class SignUpUsernameViewController: UIViewController, UITextFieldDelegate {
     func textFieldChanged(_ target:UITextField) {
         switch target {
         case usernameField:
+            target.text = target.text?.lowercased()
             break
         default:
             break
@@ -239,20 +240,24 @@ class SignUpUsernameViewController: UIViewController, UITextFieldDelegate {
     let ACCEPTABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_."
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        //return newLength <= usernameLengthLimit
+        if newLength > usernameLengthLimit { return false }
         let cs = CharacterSet(charactersIn: ACCEPTABLE_CHARACTERS).inverted
         let filtered: String = (string.components(separatedBy: cs) as NSArray).componentsJoined(by: "")
         
         if let _ = string.characters.index(of: "."){
             
-            if let text = textField.text, text.contains(".") {
+            if text.contains(".") {
                 return false
-            } else if textField.text == nil || textField.text == "" {
+            } else if textField.text == "" {
                 return false
             }
         }
         
         if let _ = string.characters.index(of: "_"){
-            if let text = textField.text, text.contains("_") {
+            if text.contains("_") {
                 return false
             }
         }

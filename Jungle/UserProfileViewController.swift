@@ -10,6 +10,7 @@ import UIKit
 import ReSwift
 import View2ViewTransition
 import Firebase
+import Popover
 
 extension UIViewController {
     func addNavigationBarBackdrop() {
@@ -56,6 +57,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
     var partnerImage:UIImage?
     private(set) var isBlocked = false
     private(set) var blockedRef:DatabaseReference?
+    
+    var moreButton:UIBarButtonItem!
     
     var status:FollowingStatus = .None
     
@@ -136,7 +139,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         
         if uid != mainStore.state.userState.uid {
-            let moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: #selector(showOptions))
+            
+            moreButton = UIBarButtonItem(image: UIImage(named: "more"), style: .plain, target: self, action: #selector(showOptions))
             moreButton.tintColor = UIColor.black
             self.navigationItem.rightBarButtonItem = moreButton
         }
@@ -230,6 +234,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             self.navigationController?.delegate = nil
             listenToPosts()
         }
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {

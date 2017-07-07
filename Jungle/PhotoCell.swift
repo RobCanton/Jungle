@@ -199,6 +199,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.timeLabel.isHidden = true
         self.timeLabel.text = post.dateCreated.timeStringSinceNow()
         
+        self.backgroundColor = post.getColor()
         self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
         

@@ -18,7 +18,8 @@ import Foundation
 import Firebase
 import SwiftMessages
 
-var badges = [Badge]()
+
+var badges = [String:Badge]()
 var availableBadgeKeys = [String]()
 
 class UserService {
@@ -73,7 +74,7 @@ class UserService {
     static func getAllBadges() {
         let badgesRef = ref.child("badges")
         badgesRef.observeSingleEvent(of: .value, with: { snapshot in
-            var _badges = [Badge]()
+            var _badges = [String:Badge]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 let key = childSnap.key
@@ -84,7 +85,8 @@ class UserService {
                 let desc  = dict["desc"] as! String
                 
                 let badge = Badge(key: key, icon: icon, title: title, desc: desc)
-                _badges.append(badge)
+                badge.isAvailable = false
+                _badges[key] = badge
             }
             
             badges = _badges
@@ -101,12 +103,11 @@ class UserService {
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 keys[childSnap.key] = true
+                if let badge = badges[childSnap.key] {
+                    badge.isAvailable = true
+                }
             }
             
-            print("KEYS: \(keys)")
-            for badge in badges {
-                badge.isAvailable = keys[badge.key] != nil
-            }
         })
         
     }

@@ -11,7 +11,6 @@ import View2ViewTransition
 import Firebase
 import ReSwift
 import MapKit
-import TGPControls
 import SwiftMessages
 
 enum SortedBy {
@@ -47,7 +46,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var topCollectionViewRef:UICollectionView?
     var midCollectionViewRef:UICollectionView?
     
-    var sliderLabels:TGPCamelLabels!
     
     var header:UIView!
     
@@ -91,19 +89,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         view.addSubview(header)
         
-        var distanceLabels = [String]()
-        for distance in distances {
-            distanceLabels.append("\(distance) km")
-        }
-        
-        sliderLabels = TGPCamelLabels()
-        sliderLabels.frame = CGRect(x: 0, y: 52.0, width: view.frame.width, height: 36)
-        sliderLabels.names = distanceLabels
-        sliderLabels.upFontColor = UIColor.black
-        sliderLabels.downFontColor = UIColor.clear
-        sliderLabels.alpha = 0.0
-        
-        view.addSubview(sliderLabels)
+
         
         screenSize = self.view.frame
         screenWidth = screenSize.width

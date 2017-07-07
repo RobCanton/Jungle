@@ -498,6 +498,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
             flashButton.alpha = multiple
             switchButton.alpha = multiple
             //locationHeader.alpha = multiple
+            
+            if alpha < 0.98 && cameraView.cameraState == .Off{
+                cameraView.cameraState = .Initiating
+            }
         }
     }
     
@@ -507,10 +511,12 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         if y >= height && y < 10.0 + height {
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
+            
             gps_service.setAccurateGPS(true)
         } else if y >= height * 2.0 {
             gps_service.setAccurateGPS(false)
             screenMode = .Main
+            cameraView.cameraState = .Off
         } else {
             gps_service.setAccurateGPS(true)
             screenMode = .Map

@@ -170,7 +170,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         
         let comment = comments[indexPath.row]
         let text = comment.text
-        let width = tableView.frame.width - (10 + 8 + 10 + 32)
+        let width = tableView.frame.width - (8 + 8 + 10 + 32)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular))
         let height2 = size.height + 26 + 3   // +8 for some bio padding
         return height2

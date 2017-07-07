@@ -83,8 +83,10 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     
     func notificationsUpdated(_ notificationsDict: [String : Bool]) {
         guard let service = notification_service else { return }
-        
+        print("YUH")
+        print(notificationsDict)
         if notificationsDict.count == 0 {
+            print("HMM")
             self.tableView.reloadData()
             self.refreshIndicator.stopAnimating()
             return
@@ -94,8 +96,9 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         var count = 0
         refreshIndicator.startAnimating()
         for (key, _) in notificationsDict {
-            
+            print("NOT: \(key)")
             service.getNotification(key, completion: { notification, seen in
+                print("notification: \(notification?.key)")
                 if notification != nil {
                     tempNotifications.append(notification!)
                 }
@@ -148,11 +151,11 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: badgeCellIdentifier, for: indexPath) as! NotificationBadgeCell
             cell.iconLabel.text = ""
+            let notification = notifications[indexPath.row]
+            cell.setLabel(date: notification.date)
             if let badgeID = notifications[indexPath.row].text {
-                for badge in badges {
-                    if badge.key == badgeID {
-                        cell.iconLabel.text = badge.icon
-                    }
+                if let badge = badges[badgeID] {
+                    cell.iconLabel.text = badge.icon
                 }
             }
             

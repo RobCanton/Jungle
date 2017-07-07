@@ -232,6 +232,7 @@ class UploadService {
                     ]
                     
                     if let coordinates = upload.coordinates {
+                        updateValues["uploads/location/\(postKey)/u"] = uid
                         updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
                         updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
                         updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]
@@ -345,6 +346,7 @@ class UploadService {
                             ]
                             
                             if let coordinates = upload.coordinates {
+                                updateValues["uploads/location/\(postKey)/u"] = uid
                                 updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
                                 updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
                                 updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]

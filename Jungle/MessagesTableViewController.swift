@@ -255,6 +255,25 @@ extension MessagesViewController: UISearchBarDelegate {
         self.tableView.reloadData()
         stopObservingSearchResponse()
     }
+    
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        print("LIKE WHOA")
+        if let touch = touches.first {
+            if #available(iOS 9.0, *) {
+                if traitCollection.forceTouchCapability == UIForceTouchCapability.available {
+                    if touch.force >= touch.maximumPossibleForce {
+                        print("385+ grams")
+                    } else {
+                        let force = touch.force/touch.maximumPossibleForce
+                        let grams = force * 385
+                        let roundGrams = Int(grams)
+                        print("\(roundGrams) grams")
+                    }
+                }
+            }
+        }
+    }
 }
 
 extension MessagesViewController: UserCellProtocol {

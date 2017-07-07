@@ -19,6 +19,7 @@ protocol CommentItemBarProtocol {
 class CommentItemBar: UIView {
     @IBOutlet weak var textField: UITextField!
     
+    @IBOutlet weak var userImageView: UIImageView!
     
     @IBOutlet weak var moreButton: UIButton!
     
@@ -40,6 +41,7 @@ class CommentItemBar: UIView {
         textField.autocapitalizationType = .sentences
         textField.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
         sendButton.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
+        userImageView.cropToCircle()
     }
     
     
@@ -68,6 +70,14 @@ class CommentItemBar: UIView {
             self.likeButton.setImage(UIImage(named: "like"), for: .normal)
             self.likeButton.imageEdgeInsets = UIEdgeInsets.zero
         }
+        
+        guard let user = mainStore.state.userState.user else {
+            userImageView.image = nil
+            return
+        }
+        
+        userImageView.loadImageAsync(user.imageURL, completion: nil)
+        
     }
     
     
