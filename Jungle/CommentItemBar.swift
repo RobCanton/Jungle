@@ -32,16 +32,24 @@ class CommentItemBar: UIView {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var delegate:CommentItemBarProtocol?
     var liked = false
+    var isKeyboardUp = false
     
+    var userImageTap:UITapGestureRecognizer!
     
-    
+    var placeHolderString:String!
     override func awakeFromNib() {
         sendButton.alpha = 0.0
-        
+        placeHolderString = "Comment"
         textField.autocapitalizationType = .sentences
         textField.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
+        textField.placeholder = placeHolderString
         sendButton.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: false)
         userImageView.cropToCircle()
+        
+        userImageTap = UITapGestureRecognizer(target: self, action: #selector(switchAnonMode))
+        userImageView.addGestureRecognizer(userImageTap)
+        userImageView.isUserInteractionEnabled = true
+        showCurrentAnonMode()
     }
     
     
@@ -70,14 +78,31 @@ class CommentItemBar: UIView {
             self.likeButton.setImage(UIImage(named: "like"), for: .normal)
             self.likeButton.imageEdgeInsets = UIEdgeInsets.zero
         }
-        
-        guard let user = mainStore.state.userState.user else {
-            userImageView.image = nil
-            return
+    }
+    
+    func switchAnonMode() {
+        mainStore.dispatch(ToggleAnonMode())
+        showCurrentAnonMode()
+    }
+    
+    func showCurrentAnonMode() {
+        let isAnon = mainStore.state.userState.anonMode
+        if isAnon {
+            placeHolderString = "Comment anonymously"
+            userImageView.image = UIImage(named:"private2")
+        } else {
+            guard let user = mainStore.state.userState.user else {
+                userImageView.image = nil
+                return
+            }
+            placeHolderString = "Comment as @\(user.username)"
+            userImageView.loadImageAsync(user.imageURL, completion: nil)
         }
         
-        userImageView.loadImageAsync(user.imageURL, completion: nil)
-        
+        if isKeyboardUp {
+            userImageView.alpha = isAnon ? 0.6 : 1.0
+            textField.placeholder = placeHolderString
+        }
     }
     
     
@@ -160,6 +185,21 @@ class CommentItemBar: UIView {
             activityIndicator.stopAnimating()
             sendButton.isEnabled = true
             sendButton.isHidden = false
+        }
+    }
+
+    func setKeyboardUp(_ up:Bool) {
+        self.isKeyboardUp = up
+        if up {
+            likeButton.isUserInteractionEnabled = false
+            moreButton.isUserInteractionEnabled = false
+            sendButton.isUserInteractionEnabled = true
+            textField.placeholder = placeHolderString
+        } else {
+            likeButton.isUserInteractionEnabled = true
+            moreButton.isUserInteractionEnabled = true
+            sendButton.isUserInteractionEnabled = false
+            textField.placeholder = "Comment"
         }
     }
     

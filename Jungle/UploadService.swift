@@ -19,6 +19,7 @@ let dataCache = NSCache<NSString, AnyObject>()
 let uploadDataCache = NSCache<NSString, AnyObject>()
 class UploadService {
     
+    static var lastCommentTime:Date?
     fileprivate static let sm = SwiftMessages()
     
     static func writeImageToFile(withKey key:String, image:UIImage) {
@@ -533,7 +534,7 @@ class UploadService {
     }
     
     
-    
+    static var numConsequtiveComments = 0
     static func addComment(post:StoryItem, comment:String, completion: @escaping ((_ success:Bool)->())) {
         if comment == "" { return }
         let ref = Database.database().reference()
@@ -543,30 +544,74 @@ class UploadService {
             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
         }
         
-        let uid = mainStore.state.userState.uid
-        
-        let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
-        let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
-        
-        let updateObject = [
-            "\(path)/author" : uid,
-            "\(path)/text" : comment,
-            "\(path)/timestamp" : [".sv":"timestamp"],
-            "uploads/subscribers/\(post.key)/\(uid)": true
-        ] as [String:Any]
-        
-        
-        ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
-            
-            if error != nil {
-                print("ERROR: \(error)")
-                completion(false)
-                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+        let now = Date()
+        if let lastDate = lastCommentTime  {
+            let timeSinceLastComment = now.timeIntervalSince(lastDate)
+            print("Time since last comment: \(timeSinceLastComment)")
+            if timeSinceLastComment < 10.0 {
+                numConsequtiveComments += 1
+                
+                if numConsequtiveComments >= 3 {
+                    lastCommentTime = Date()
+                    completion(false)
+                    return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Whoa slow down there! 😉")
+                }
+                
             } else {
-                completion(true)
+                numConsequtiveComments = 0
             }
-        })
+        }
         
+        let uid = mainStore.state.userState.uid
+        if userState.anonMode, let aid = userState.anonID {
+            
+            let uploadRef = ref.child("api/requests/anon_comment/\(uid)/\(post.key)").childByAutoId()
+            let path = "api/requests/anon_comment/\(uid)/\(post.key)/\(uploadRef.key)"
+            
+            let updateObject = [
+                "\(path)/aid" : aid,
+                "\(path)/text" : comment,
+                "\(path)/timestamp" : [".sv":"timestamp"],
+                "uploads/subscribers/\(post.key)/\(uid)": true
+                ] as [String:Any]
+            
+            
+            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+                
+                if error != nil {
+                    print("ERROR: \(error)")
+                    completion(false)
+                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+                } else {
+                    lastCommentTime = Date()
+                    completion(true)
+                }
+            })
+            
+        } else {
+            let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
+            let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
+            
+            let updateObject = [
+                "\(path)/author" : uid,
+                "\(path)/text" : comment,
+                "\(path)/timestamp" : [".sv":"timestamp"],
+                "uploads/subscribers/\(post.key)/\(uid)": true
+                ] as [String:Any]
+            
+            
+            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+                
+                if error != nil {
+                    print("ERROR: \(error)")
+                    completion(false)
+                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+                } else {
+                    lastCommentTime = Date()
+                    completion(true)
+                }
+            })
+        }
         
     }
     

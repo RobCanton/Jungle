@@ -156,10 +156,20 @@ class ItemStateController {
                 let author = dict["author"] as! String
                 let text = dict["text"] as! String
                 let timestamp = dict["timestamp"] as! Double
-                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                item.addComment(comment)
-                //print("itemStateDidChange -> delegate?\(self.delegate != nil)")
-                self.delegate?.itemStateDidChange(comments: item.comments)
+                
+                if let anon = dict["anon"] as? [String:Any] {
+                    let adjective = anon["adjective"] as! String
+                    let animal = anon["animal"] as! String
+                    let color = anon["color"] as! String
+                    let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, adjective: adjective, animal: animal, colorHexcode: color)
+                    item.addComment(comment)
+                    self.delegate?.itemStateDidChange(comments: item.comments)
+                } else {
+                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                    item.addComment(comment)
+                    self.delegate?.itemStateDidChange(comments: item.comments)
+                }
+                
             })
         //}
     }
@@ -178,15 +188,28 @@ class ItemStateController {
                 for commentChild in snapshot.children {
                     let commentSnap = commentChild as! DataSnapshot
                     let dict = commentSnap.value as! [String:Any]
-                    
+                    let author = dict["author"] as! String
                     let timestamp = dict["timestamp"] as! Double
+                    let text = dict["text"] as! String
+                    
+
                     
                     if timestamp != endTimestamp {
                         let key = snapshot.key
-                        let author = dict["author"] as! String
-                        let text = dict["text"] as! String
-                        let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                        commentBatch.append(comment)
+                        
+                        if let anon = dict["anon"] as? [String:Any] {
+                            let aid = dict["aid"] as! String
+                            let adjective = anon["adjective"] as! String
+                            let animal = anon["animal"] as! String
+                            let color = anon["color"] as! String
+                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, adjective: adjective, animal: animal, colorHexcode: color)
+                            commentBatch.append(comment)
+                        } else {
+                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                            commentBatch.append(comment)
+                        }
+                        
+                        
                     }
                 }
                 

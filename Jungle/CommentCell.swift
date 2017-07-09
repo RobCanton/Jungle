@@ -17,6 +17,7 @@ class CommentCell: UITableViewCell {
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var verifiedBadge: UIImageView!
     
+    @IBOutlet weak var imageBackground: UIView!
     var tap:UITapGestureRecognizer!
     
     weak var comment:Comment?
@@ -67,7 +68,7 @@ class CommentCell: UITableViewCell {
     var shadow = true
     @IBOutlet weak var timeLabelLeadingConstraint: NSLayoutConstraint!
     
-    func setContent(comment:Comment) {
+    func setContent(comment:Comment, lightMode:Bool) {
         
         self.authorLabel.text = ""
         self.commentLabel.text = ""
@@ -79,16 +80,48 @@ class CommentCell: UITableViewCell {
         
         self.comment = comment
         userImage.cropToCircle()
+        imageBackground.cropToCircle()
         
         backgroundColor = UIColor.clear
         backgroundView = nil
         verifiedBadge.image = nil
         timeLabelLeadingConstraint.constant = 8.0
+        
+        if lightMode {
+            authorLabel.textColor = UIColor.white
+            commentLabel.textColor = UIColor.white
+            timeLabel.textColor = UIColor.white
+        } else {
+            authorLabel.textColor = UIColor.black
+            commentLabel.textColor = UIColor.black
+            timeLabel.textColor = UIColor.gray
+        }
+        
+        if shadow {
+            authorLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+            commentLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        } else {
+            authorLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
+            commentLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
+        }
+        
+        if let anonComment = comment as? AnonymousComment {
+            setupAnonymousComment(anonComment)
+            return
+        }
+        self.imageBackground.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
+        self.userImage.alpha = 1.0
+        
         UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
                 self.authorLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightSemibold)
                 self.authorLabel.alpha = 1.0
-                self.userImage.loadImageAsync(user!.imageURL, completion: nil)
+                
+                loadImageCheckingCache(withUrl: user!.imageURL, check: check) { image, fromFile, check in
+                    if check == self.check {
+                        self.userImage.image = image
+                    }
+                }
                 self.timeLabel.text = comment.date.timeStringSinceNow()
                 
                 if user!.verified {
@@ -107,13 +140,25 @@ class CommentCell: UITableViewCell {
             self.commentLabel.sizeToFit()
             self.timeLabel.text = comment.date.timeStringSinceNow()
         })
-        if shadow {
-            authorLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
-            commentLabel.applyShadow(radius: 0.25, opacity: 0.6, height: 0.25, shouldRasterize: true)
+        
+        
+    }
+    
+    func setupAnonymousComment(_ comment:AnonymousComment) {
+        self.userImage.image = UIImage(named:comment.animal)
+        self.userImage.alpha = 0.8
+        self.authorLabel.textColor = comment.color
+        self.imageBackground.backgroundColor = comment.color
+        if let anonID = userState.anonID, anonID == comment.author {
+            self.authorLabel.text = "\(comment.anonName) (YOU)"
         } else {
-            authorLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
-            commentLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
+            self.authorLabel.text = comment.anonName
         }
+        
+        self.authorLabel.alpha = 1.0
+        self.commentLabel.text = comment.text
+        self.commentLabel.sizeToFit()
+        self.timeLabel.text = comment.date.timeStringSinceNow()
         
     }
     

@@ -27,6 +27,32 @@ class Comment: NSObject {
     
 }
 
+class AnonymousComment: Comment {
+    
+    private(set) var adjective:String
+    private(set) var animal:String
+    private(set) var colorHexcode:String
+    var anonName:String {
+        get {
+            return "\(adjective)\(animal)"
+        }
+    }
+    
+    var color:UIColor {
+        get {
+            return hexStringToUIColor(hex: colorHexcode)
+        }
+    }
+    
+    init(key:String, author:String, text:String, timestamp:Double, adjective:String, animal:String, colorHexcode:String)
+    {
+        self.adjective = adjective
+        self.animal = animal
+        self.colorHexcode = colorHexcode
+        super.init(key: key, author: author, text: text, timestamp: timestamp)
+    }
+}
+
 func < (lhs: Comment, rhs: Comment) -> Bool {
     return lhs.date.compare(rhs.date) == .orderedAscending
 }

@@ -312,7 +312,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
             return cell
         case .Comments:
             let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
-            cell.setContent(comment: comments[indexPath.row])
+            cell.setContent(comment: comments[indexPath.row], lightMode: false)
             cell.delegate = self
             let labelX = cell.authorLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)

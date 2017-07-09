@@ -86,6 +86,7 @@ class FirstAuthViewController: FirstViewController {
                         if user != nil {
                             mainStore.dispatch(UserIsAuthenticated(user: user!))
                             UserService.sendFCMToken()
+                            UserService.getAnonID()
                             UserService.getAllBadges()
                             LocationService.sharedInstance.fetchRadius()
                             Listeners.startListeningToFollowers()
@@ -222,6 +223,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 if user != nil {
                     mainStore.dispatch(UserIsAuthenticated(user: user!))
                     UserService.sendFCMToken()
+                    UserService.getAnonID()
                     UserService.getAllBadges()
                     LocationService.sharedInstance.fetchRadius()
                     Listeners.startListeningToFollowers()

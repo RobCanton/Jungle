@@ -71,6 +71,16 @@ class UserService {
         }
     }
     
+    static func getAnonID() {
+        let uid = mainStore.state.userState.uid
+        let anonRef = ref.child("anon/aid/\(uid)")
+        anonRef.observeSingleEvent(of: .value, with: { snapshot in
+            if let anonID = snapshot.value as? String {
+                mainStore.dispatch(SetAnonID(id: anonID))
+            }
+        })
+    }
+    
     static func getAllBadges() {
         let badgesRef = ref.child("badges")
         badgesRef.observeSingleEvent(of: .value, with: { snapshot in

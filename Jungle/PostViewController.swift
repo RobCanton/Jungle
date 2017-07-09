@@ -195,6 +195,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func sendComment(_ comment: String) {
         
         guard let item = self.storyItem else { return }
+        if comment == "" { return }
         commentBar.setBusyState(true)
         if editCaptionMode {
             
@@ -243,6 +244,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.showUser(item.authorId)
     }
     
+    
     func showPlace(_ location: Location) {
         delegate?.showPlace(location)
     }
@@ -259,8 +261,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.showMetaLikes()
     }
     
-    func showMetaComments() {
-        delegate?.showMetaComments()
+    func showMetaComments(_ indexPath:IndexPath?) {
+        delegate?.showMetaComments(indexPath)
     }
 
     
@@ -396,10 +398,9 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         let info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
-        self.commentBar.likeButton.isUserInteractionEnabled = false
-        self.commentBar.moreButton.isUserInteractionEnabled = false
-        self.commentBar.sendButton.isUserInteractionEnabled = true
+        
         self.commentsView.showTimeLabels(visible: true)
+        self.commentBar.setKeyboardUp(true)
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.frame.height
             let textViewFrame = self.commentBar.frame
@@ -415,7 +416,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             self.commentBar.likeButton.alpha = 0.0
             self.commentBar.moreButton.alpha = 0.0
             self.commentBar.sendButton.alpha = 1.0
-            self.commentBar.userImageView.alpha = 1.0
+            self.commentBar.userImageView.alpha = userState.anonMode ? 0.6 : 1.0
             self.commentBar.activityIndicator.alpha = 1.0
             self.commentBar.backgroundView.alpha = 1.0
             self.headerView.alpha = 0.0
@@ -425,17 +426,15 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func keyboardWillDisappear(notification: NSNotification){
         keyboardUp = false
         delegate?.keyboardStateChange(keyboardUp)
-        self.commentBar.likeButton.isUserInteractionEnabled = true
-        self.commentBar.moreButton.isUserInteractionEnabled = true
-        self.commentBar.sendButton.isUserInteractionEnabled = false
-        self.commentsView.showTimeLabels(visible: false)
         
-        if editCaptionMode {
-            commentBar.textField.placeholder = "Comment"
-            commentBar.textField.text = ""
-            commentBar.sendButton.setTitle("Send", for: .normal)
-            editCaptionMode = false
-        }
+        self.commentsView.showTimeLabels(visible: false)
+        self.commentBar.setKeyboardUp(false)
+//        if editCaptionMode {
+//            commentBar.textField.placeholder = "Comment"
+//            commentBar.textField.text = ""
+//            commentBar.sendButton.setTitle("Send", for: .normal)
+//            editCaptionMode = false
+//        }
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             
             let height = self.frame.height

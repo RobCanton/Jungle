@@ -18,6 +18,10 @@
                 <rect key="frame" x="0.0" y="0.0" width="453" height="67.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4F2-ZD-rYz">
+                        <rect key="frame" x="12" y="12" width="32" height="32"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </view>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rAv-k9-1Ct">
                         <rect key="frame" x="12" y="12" width="32" height="32"/>
                         <color key="backgroundColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/>
@@ -62,22 +66,27 @@
                     </imageView>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="4F2-ZD-rYz" firstAttribute="centerX" secondItem="rAv-k9-1Ct" secondAttribute="centerX" id="69u-3p-EsX"/>
                     <constraint firstItem="rAv-k9-1Ct" firstAttribute="top" secondItem="2qe-gV-mIh" secondAttribute="top" constant="12" id="8k6-tH-NIb"/>
                     <constraint firstItem="KAD-gv-dcl" firstAttribute="leading" secondItem="VNl-EG-qvs" secondAttribute="trailing" constant="2" id="9rs-Oz-x3f"/>
                     <constraint firstItem="VNl-EG-qvs" firstAttribute="top" secondItem="rAv-k9-1Ct" secondAttribute="top" id="FCD-TD-12M"/>
                     <constraint firstAttribute="trailing" secondItem="pVz-Nf-C9K" secondAttribute="trailing" constant="12" id="HH7-Rz-dLs"/>
                     <constraint firstAttribute="bottom" secondItem="pVz-Nf-C9K" secondAttribute="bottom" constant="12" id="J1g-Hs-jyQ"/>
+                    <constraint firstItem="4F2-ZD-rYz" firstAttribute="width" secondItem="rAv-k9-1Ct" secondAttribute="width" id="QgL-16-G4D"/>
                     <constraint firstItem="cV0-yp-aLW" firstAttribute="baseline" secondItem="VNl-EG-qvs" secondAttribute="baseline" id="Qhh-a0-qGR"/>
                     <constraint firstItem="pVz-Nf-C9K" firstAttribute="leading" secondItem="rAv-k9-1Ct" secondAttribute="trailing" constant="8" id="Txe-Iy-vUF"/>
                     <constraint firstItem="KAD-gv-dcl" firstAttribute="centerY" secondItem="VNl-EG-qvs" secondAttribute="centerY" id="UYW-Mc-n2y"/>
                     <constraint firstItem="cV0-yp-aLW" firstAttribute="leading" secondItem="VNl-EG-qvs" secondAttribute="trailing" constant="8" id="bQe-V3-DGD"/>
                     <constraint firstItem="rAv-k9-1Ct" firstAttribute="leading" secondItem="2qe-gV-mIh" secondAttribute="leading" constant="12" id="fm7-y8-HbU"/>
                     <constraint firstItem="VNl-EG-qvs" firstAttribute="leading" secondItem="rAv-k9-1Ct" secondAttribute="trailing" constant="8" id="wCG-qI-PrW"/>
+                    <constraint firstItem="4F2-ZD-rYz" firstAttribute="centerY" secondItem="rAv-k9-1Ct" secondAttribute="centerY" id="yDJ-Si-rHL"/>
+                    <constraint firstItem="4F2-ZD-rYz" firstAttribute="height" secondItem="rAv-k9-1Ct" secondAttribute="height" id="zDG-Qr-4bv"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
                 <outlet property="authorLabel" destination="VNl-EG-qvs" id="O95-61-HsB"/>
                 <outlet property="commentLabel" destination="pVz-Nf-C9K" id="Qja-s6-y3r"/>
+                <outlet property="imageBackground" destination="4F2-ZD-rYz" id="6IJ-eK-S3F"/>
                 <outlet property="timeLabel" destination="cV0-yp-aLW" id="Smp-xJ-tf0"/>
                 <outlet property="timeLabelLeadingConstraint" destination="bQe-V3-DGD" id="F2L-G3-szS"/>
                 <outlet property="userImage" destination="rAv-k9-1Ct" id="3xB-9U-HTF"/>

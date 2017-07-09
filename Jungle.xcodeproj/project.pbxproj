@@ -590,7 +590,6 @@
 		B0F894671E7B435500E490C4 /* Stories */ = {
 			isa = PBXGroup;
 			children = (
-				B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */,
 				B093FFD01E79399C00011B43 /* StoriesViewController.swift */,
 				B093FFD41E79399C00011B43 /* StoryViewController.swift */,
 				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
@@ -605,7 +604,7 @@
 				B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */,
 				B0DF823C1EDFB0CB00461DD8 /* CommentsOverlayTableView.swift */,
 				B0DF823A1EDFB0BA00461DD8 /* CommentsOverlayTableView.xib */,
-				B0F894691E7B7E1400E490C4 /* CommentsViewController.swift */,
+				B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */,
 				B0F894751E7BAED000E490C4 /* CommentsHeaderView.swift */,
 				B0F894731E7BAC5800E490C4 /* CommentsHeaderView.xib */,
 				B003D7E21ED6C32100256FBB /* CommentViewCell.swift */,
@@ -618,6 +617,7 @@
 				B0A053E51EAACC3000922AAC /* PostFooterView.xib */,
 				B093FFD31E79399C00011B43 /* StoryProgressIndicator.swift */,
 				B093FFDA1E793AC100011B43 /* ProgressIndicator.swift */,
+				B0F894691E7B7E1400E490C4 /* CommentsViewController.swift */,
 			);
 			name = Stories;
 			sourceTree = "<group>";

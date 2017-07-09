@@ -12,6 +12,7 @@ import UIKit
 protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
     func refreshPulled()
+    func showMetaComments(_ indexPath:IndexPath?)
 }
 
 class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSource, CommentCellProtocol {
@@ -61,7 +62,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         header.backgroundColor = UIColor.green
 
         
-        tableView.tableHeaderView = UIView()
+        tableView.tableHeaderView = UIView(frame:CGRect(x:0,y:0,width:tableView.frame.width, height: 8.0))
         tableView.showsVerticalScrollIndicator = false
         tableView.tableFooterView = UIView()
         
@@ -172,17 +173,14 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         let text = comment.text
         let width = tableView.frame.width - (8 + 8 + 10 + 32)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 26 + 3   // +8 for some bio padding
+        let height2 = size.height + 26 + 2   // +8 for some bio padding
         return height2
     }
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
-        cell.setContent(comment: comments[indexPath.row])
-        cell.authorLabel.textColor = UIColor.white
-        cell.commentLabel.textColor = UIColor.white
-        cell.timeLabel.textColor = UIColor.white
+        cell.setContent(comment: comments[indexPath.row], lightMode: true)
         cell.delegate = self
         
         if showTimeStamps {
@@ -194,8 +192,8 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         return cell
     }
     
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let cell = tableView.cellForRow(at: indexPath) as! CommentCell
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath) as! CommentCell
 //        if let username = cell.authorLabel.text  {
 //            let text = comments[indexPath.row].text
 //            let sheet = UIAlertController(title: username, message: text, preferredStyle: .actionSheet)
@@ -204,9 +202,11 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
 //            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: nil))
 //            globalMainInterfaceProtocol?.presentPopover(withController: sheet, animated: true)
 //        }
-//        
-//        tableView.deselectRow(at: indexPath, animated: false)
-//    }
+        let comment = comments[indexPath.row]
+        delegate?.showMetaComments(indexPath)
+        
+        tableView.deselectRow(at: indexPath, animated: false)
+    }
     
     func scrollBottom(animated:Bool) {
         if comments.count > 0 {

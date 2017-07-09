@@ -13,7 +13,7 @@ protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
     func showMetaLikes()
-    func showMetaComments()
+    func showMetaComments(_ indexPath:IndexPath?)
     func dismiss()
 }
 
@@ -119,7 +119,7 @@ class PostHeaderView: UIView {
         delegate?.showMetaLikes()
     }
     func commentsTapped() {
-        delegate?.showMetaComments()
+        delegate?.showMetaComments(nil)
     }
     
     

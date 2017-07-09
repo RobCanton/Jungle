@@ -18,7 +18,7 @@ protocol PopupProtocol: class {
     func keyboardStateChange(_ up:Bool)
     
     func showMetaLikes()
-    func showMetaComments()
+    func showMetaComments(_ indexPath:IndexPath?)
 }
 
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
@@ -377,7 +377,7 @@ extension StoriesViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showMetaComments() {
+    func showMetaComments(_ indexPath:IndexPath?) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
         if let nav = self.navigationController {

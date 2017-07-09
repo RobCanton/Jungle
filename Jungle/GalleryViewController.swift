@@ -309,7 +309,7 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showMetaComments() {
+    func showMetaComments(_ indexPath:IndexPath?) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
         if let nav = self.navigationController {
@@ -319,6 +319,7 @@ extension GalleryViewController: PopupProtocol {
         controller.itemStateController = cell.itemStateController
         controller.item = item
         controller.mode = .comments
+        controller.initialIndex = indexPath
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

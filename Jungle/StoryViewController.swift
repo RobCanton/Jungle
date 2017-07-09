@@ -125,6 +125,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func sendComment(_ comment: String) {
         
         guard let item = self.item else { return }
+        if comment == "" { return }
         commentBar.setBusyState(true)
         if editCaptionMode {
             
@@ -189,8 +190,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.showMetaLikes()
     }
     
-    func showMetaComments() {
-        delegate?.showMetaComments()
+    func showMetaComments(_ indexPath:IndexPath?) {
+        delegate?.showMetaComments(indexPath)
     }
     
     func liked(_ liked:Bool) {

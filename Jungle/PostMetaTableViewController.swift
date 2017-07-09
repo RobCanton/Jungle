@@ -43,6 +43,9 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     var keyboardUp = false
     var subscribedToPost = false
     
+    
+    var initialIndex:IndexPath?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.addNavigationBarBackdrop()
@@ -77,7 +80,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 12))
         tableView.reloadData()
-        
+
         refreshControl = UIRefreshControl()
         refreshControl.tintColor = UIColor.gray
         refreshControl.backgroundColor = UIColor.clear
@@ -110,7 +113,18 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         self.comments = item.comments
         self.tableView.reloadData()
         
-        scrollBottom(animated: false)
+        
+        if let index = initialIndex {
+            print("has initial index")
+            print("initial: \(index.row) | tableRows: \(tableView.numberOfRows(inSection: 0))")
+            if index.row < tableView.numberOfRows(inSection: 0) {
+                print("scroll to initial index")
+                tableView.scrollToRow(at: index, at: .top, animated: false)
+            }
+            initialIndex = nil
+        } else{
+            scrollBottom(animated: false)
+        }
         
         
     }
@@ -318,7 +332,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
             cell.delegate = self
             cell.shadow = false
-            cell.setContent(comment: comments[indexPath.row])
+            cell.setContent(comment: comments[indexPath.row], lightMode: false)
             cell.authorLabel.textColor = UIColor.black
             cell.commentLabel.textColor = UIColor.black
             cell.timeLabel.textColor = UIColor.gray

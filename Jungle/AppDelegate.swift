@@ -31,6 +31,12 @@ let mainStore = Store<AppState>(
     state: nil
 )
 
+var userState:UserState {
+    get {
+        return mainStore.state.userState
+    }
+}
+
 var remoteConfig: RemoteConfig?
 
 

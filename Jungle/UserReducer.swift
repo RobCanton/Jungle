@@ -12,6 +12,8 @@ struct UserState {
     var isAuth: Bool = false
     var uid: String = ""
     var user:User?
+    var anonID:String?
+    var anonMode = false
 }
 
 func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
@@ -33,6 +35,19 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
         break
     case _ as FIRUserUpdated:
         break
+    case _ as SetAnonID:
+        let a = action as! SetAnonID
+        state.anonID = a.id
+        break
+    case _ as GoAnonymous:
+        state.anonMode = true
+        break
+    case _ as GoPublic:
+        state.anonMode = false
+        break
+    case _ as ToggleAnonMode:
+        state.anonMode = !state.anonMode
+        break
     default:
         break
     }
@@ -52,5 +67,13 @@ struct UpdateUser: Action {
     let user: User
 }
 
-
 struct SupportedVersion: Action {}
+
+struct SetAnonID: Action {
+    let id:String
+}
+
+struct GoPublic: Action {}
+struct GoAnonymous: Action {}
+
+struct ToggleAnonMode: Action {}

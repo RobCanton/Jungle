@@ -110,7 +110,7 @@ struct Alerts {
         
         
         let alert = MessageView.viewFromNib(layout: .StatusLine)
-        alert.backgroundView.backgroundColor = UIColor(red: 1.0, green: 232/255, blue: 61/255, alpha: 1.0)
+        alert.backgroundView.backgroundColor = UIColor(red: 242/255, green: 197/255, blue: 48/255, alpha: 1.0)
         alert.bodyLabel?.textColor = UIColor.white
         alert.configureContent(body: message)
         
