@@ -8,6 +8,7 @@
 
 
 import Foundation
+import UIKit
 
 enum NotificationType:String {
     case comment = "COMMENT"
@@ -20,6 +21,7 @@ enum NotificationType:String {
     case none  = "NONE"
 }
 
+
 class Notification: NSObject {
     
     private(set) var key:String                    // Key in database
@@ -29,6 +31,7 @@ class Notification: NSObject {
     private(set) var postKey:String?
     private(set) var text:String?
     private(set) var count:Int?
+    
     
     init(key:String, type:String, date:Date, sender:String, postKey:String?, text:String?, count:Int?)
     {
@@ -88,7 +91,7 @@ class Notification: NSObject {
         coder.encode(text, forKey: "text")
         coder.encode(count, forKey: "count")
     }
-    }
+}
 
 func < (lhs: Notification, rhs: Notification) -> Bool {
     return lhs.date.compare(rhs.date) == .orderedAscending
@@ -100,4 +103,59 @@ func > (lhs: Notification, rhs: Notification) -> Bool {
 
 func == (lhs: Notification, rhs: Notification) -> Bool {
     return lhs.date.compare(rhs.date) == .orderedSame
+}
+
+class AnonymousNotification: Notification {
+    
+    private(set) var adjective:String
+    private(set) var animal:String
+    private(set) var colorHexcode:String
+    var anonName:String {
+        get {
+            return "\(adjective)\(animal)"
+        }
+    }
+    
+    var color:UIColor {
+        get {
+            return hexStringToUIColor(hex: colorHexcode)
+        }
+    }
+    
+    init(key: String, type: String, date: Date, sender: String, postKey: String?, text: String?, count: Int?, adjective: String, animal:String, colorHexcode:String) {
+        self.adjective = adjective
+        self.animal = animal
+        self.colorHexcode = colorHexcode
+        super.init(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
+    }
+    
+    required convenience init(coder decoder: NSCoder) {
+        
+        let key = decoder.decodeObject(forKey: "key") as! String
+        let type = decoder.decodeObject(forKey: "type") as! String
+        let date = decoder.decodeObject(forKey: "date") as! Date
+        let sender = decoder.decodeObject(forKey: "sender") as! String
+        let postKey = decoder.decodeObject(forKey: "postKey") as? String
+        let text = decoder.decodeObject(forKey: "text") as? String
+        let count = decoder.decodeObject(forKey: "count") as? Int
+        let adjective = decoder.decodeObject(forKey: "adjective") as! String
+        let animal = decoder.decodeObject(forKey: "animal") as! String
+        let colorHexcode = decoder.decodeObject(forKey: "colorHexcode") as! String
+        self.init(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count, adjective: adjective, animal:animal, colorHexcode: colorHexcode)
+    }
+    
+    
+    override func encode(with coder: NSCoder) {
+        coder.encode(key, forKey: "key")
+        coder.encode(type.rawValue, forKey: "type")
+        coder.encode(date, forKey: "date")
+        coder.encode(sender, forKey: "sender")
+        coder.encode(postKey, forKey: "postKey")
+        coder.encode(text, forKey: "text")
+        coder.encode(count, forKey: "count")
+        coder.encode(adjective, forKey: "adjective")
+        coder.encode(animal, forKey: "animal")
+        coder.encode(colorHexcode, forKey: "colorHexcode")
+    }
+    
 }

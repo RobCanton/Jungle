@@ -241,7 +241,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func showAuthor() {
         guard let item = self.storyItem else { return }
-        delegate?.showUser(item.authorId)
+        if let _ = item.anon {
+            
+        } else {
+            delegate?.showUser(item.authorId)
+        }
     }
     
     

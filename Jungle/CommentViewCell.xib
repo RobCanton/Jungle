@@ -19,14 +19,14 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4F2-ZD-rYz">
-                        <rect key="frame" x="12" y="12" width="32" height="32"/>
+                        <rect key="frame" x="8" y="12" width="36" height="36"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </view>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rAv-k9-1Ct">
-                        <rect key="frame" x="12" y="12" width="32" height="32"/>
-                        <color key="backgroundColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/>
+                        <rect key="frame" x="8" y="12" width="36" height="36"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="32" id="Kat-fk-bdy"/>
+                            <constraint firstAttribute="height" constant="36" id="Kat-fk-bdy"/>
                             <constraint firstAttribute="width" secondItem="rAv-k9-1Ct" secondAttribute="height" multiplier="1:1" id="hAU-Kz-qc3"/>
                         </constraints>
                     </imageView>
@@ -77,7 +77,7 @@
                     <constraint firstItem="pVz-Nf-C9K" firstAttribute="leading" secondItem="rAv-k9-1Ct" secondAttribute="trailing" constant="8" id="Txe-Iy-vUF"/>
                     <constraint firstItem="KAD-gv-dcl" firstAttribute="centerY" secondItem="VNl-EG-qvs" secondAttribute="centerY" id="UYW-Mc-n2y"/>
                     <constraint firstItem="cV0-yp-aLW" firstAttribute="leading" secondItem="VNl-EG-qvs" secondAttribute="trailing" constant="8" id="bQe-V3-DGD"/>
-                    <constraint firstItem="rAv-k9-1Ct" firstAttribute="leading" secondItem="2qe-gV-mIh" secondAttribute="leading" constant="12" id="fm7-y8-HbU"/>
+                    <constraint firstItem="rAv-k9-1Ct" firstAttribute="leading" secondItem="2qe-gV-mIh" secondAttribute="leading" constant="8" id="fm7-y8-HbU"/>
                     <constraint firstItem="VNl-EG-qvs" firstAttribute="leading" secondItem="rAv-k9-1Ct" secondAttribute="trailing" constant="8" id="wCG-qI-PrW"/>
                     <constraint firstItem="4F2-ZD-rYz" firstAttribute="centerY" secondItem="rAv-k9-1Ct" secondAttribute="centerY" id="yDJ-Si-rHL"/>
                     <constraint firstItem="4F2-ZD-rYz" firstAttribute="height" secondItem="rAv-k9-1Ct" secondAttribute="height" id="zDG-Qr-4bv"/>

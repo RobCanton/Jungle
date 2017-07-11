@@ -108,7 +108,15 @@ class NotificationService: Service {
                 let date            = Date(timeIntervalSince1970: timestamp/1000)
                 let text            = dict["text"] as? String
                 let count           = dict["count"] as? Int
-                notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
+                
+                if let anon = dict["anon"] as? [String:Any] {
+                    let adjective = anon["adjective"] as! String
+                    let animal = anon["animal"] as! String
+                    let colorHexcode = anon["color"] as! String
+                    notification = AnonymousNotification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count, adjective: adjective, animal: animal, colorHexcode: colorHexcode)
+                } else {
+                    notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
+                }
                 self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             } else {
                 print("Notification doesn't exist")

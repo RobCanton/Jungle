@@ -16,6 +16,17 @@ struct UserState {
     var anonMode = false
 }
 
+func isCurrentUserId(id:String) -> Bool{
+    if id == userState.uid {
+        return true
+    } else if let anon = userState.anonID {
+        if id == anon {
+            return true
+        }
+    }
+    return false
+}
+
 func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
     var state = state ?? UserState()
     switch action {

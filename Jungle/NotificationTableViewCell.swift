@@ -43,11 +43,13 @@ class NotificationTableViewCell: UITableViewCell {
         
         guard let postKey = notification.postKey else { return }
         
-        getUser(withCheck: check, uid: notification.sender, completion: { check, user in
-            if self.check != check { return }
-            self.user = user
-            self.checkContentLoaded()
-        })
+        if !notification.isKind(of: AnonymousNotification.self) {
+            getUser(withCheck: check, uid: notification.sender, completion: { check, user in
+                if self.check != check { return }
+                self.user = user
+                self.checkContentLoaded()
+            })
+        }
         
         getPost(withCheck: check, key: postKey, completion: { check, item in
             if self.check != check { return }
@@ -75,7 +77,6 @@ class NotificationTableViewCell: UITableViewCell {
     
     func checkContentLoaded() {
         guard let notification = self.notification else { return }
-        guard let user = self.user else { return }
         guard let post = self.post else { return }
 
         self.userImageView.clipsToBounds = true
@@ -85,11 +86,20 @@ class NotificationTableViewCell: UITableViewCell {
         self.userImageView.isUserInteractionEnabled = true
         self.userImageView.addGestureRecognizer(userTap)
         
-        self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })
-        
         UploadService.retrieveImage(byKey: post.key, withUrl: post.downloadUrl, completion: { image, fromFile in
             self.postImageView.image = image
         })
+        
+        var username = "Someone"
+        if let anon = notification as? AnonymousNotification {
+            username = anon.anonName
+            self.userImageView.image = UIImage(named: anon.animal)
+            self.userImageView.backgroundColor = anon.color
+        } else if let user = self.user {
+            username = user.username
+            self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })
+            self.userImageView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+        }
         
         let type = notification.type
         if type == .comment {
@@ -105,7 +115,7 @@ class NotificationTableViewCell: UITableViewCell {
             if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.username, message: " \(prefix)commented on your post\(suffix)", date: notification.date)
+            setMessageLabel(username: username, message: " \(prefix)commented on your post\(suffix)", date: notification.date)
         } else if type == .comment_also {
             var prefix = ""
             if let numCommenters = notification.count {
@@ -119,7 +129,7 @@ class NotificationTableViewCell: UITableViewCell {
             if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.username, message: " \(prefix)also commented\(suffix)", date: notification.date)
+            setMessageLabel(username: username, message: " \(prefix)also commented\(suffix)", date: notification.date)
         } else if type == .comment_to_sub {
             var prefix = ""
             if let numCommenters = notification.count {
@@ -133,7 +143,7 @@ class NotificationTableViewCell: UITableViewCell {
             if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.username, message: " \(prefix)commented on a post you are following\(suffix)", date: notification.date)
+            setMessageLabel(username: username, message: " \(prefix)commented on a post you are following\(suffix)", date: notification.date)
         } else if type == .like {
             var prefix = ""
             if let numLikes = notification.count {
@@ -144,13 +154,13 @@ class NotificationTableViewCell: UITableViewCell {
                 }
             }
             
-            setMessageLabel(username: user.username, message: " \(prefix)liked your post.", date: notification.date)
+            setMessageLabel(username: username, message: " \(prefix)liked your post.", date: notification.date)
         } else if type == .mention {
             var suffix = "."
             if let text = notification.text {
                 suffix = ": \"\(text)\""
             }
-            setMessageLabel(username: user.username, message: " mentioned you in a comment\(suffix)", date: notification.date)
+            setMessageLabel(username: username, message: " mentioned you in a comment\(suffix)", date: notification.date)
         }
     }
     

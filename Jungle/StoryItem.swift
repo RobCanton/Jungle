@@ -31,6 +31,7 @@ class StoryItem: NSObject, NSCoding {
     private(set) var contentType:ContentType
     private(set) var dateCreated: Date
     private(set) var length: Double
+    private(set) var anon:AnonObject?
     var popularity:Double {
         didSet {
             cache()
@@ -77,7 +78,7 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoData:Data?
     
     init(key: String, authorId: String, caption:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
-         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  numReports:Int, colorHexcode:String?)
+         viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  numReports:Int, colorHexcode:String?, anon:AnonObject?)
     {
         
         self.key          = key
@@ -99,6 +100,7 @@ class StoryItem: NSObject, NSCoding {
         self.popularity   = popularity
         self.numReports   = numReports
         self.colorHexcode = colorHexcode
+        self.anon         = anon
         
     }
     
@@ -147,7 +149,9 @@ class StoryItem: NSObject, NSCoding {
             break
         }
         
-        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, numReports: numReports, colorHexcode: colorHexcode)
+        let anon = decoder.decodeObject(forKey: "anon") as? AnonObject
+        
+        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, numReports: numReports, colorHexcode: colorHexcode, anon: anon)
     }
     
     
@@ -178,6 +182,10 @@ class StoryItem: NSObject, NSCoding {
         coder.encode(numReports, forKey: "numReports")
         coder.encode(popularity, forKey: "popularity")
         coder.encode(colorHexcode, forKey: "colorHexcode")
+        
+        if anon != nil {
+            coder.encode(anon, forKey: "anon")
+        }
     }
     
     

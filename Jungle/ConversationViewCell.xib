@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -44,11 +44,11 @@
                         <nil key="highlightedColor"/>
                     </label>
                     <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6HX-A4-pmz">
-                        <rect key="frame" x="9" y="31" width="6" height="6"/>
+                        <rect key="frame" x="8" y="30" width="8" height="8"/>
                         <color key="backgroundColor" red="1" green="0.45766729830000002" blue="0.48993881459999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="6" id="74K-a3-6dJ"/>
-                            <constraint firstAttribute="width" constant="6" id="bkW-0g-M76"/>
+                            <constraint firstAttribute="height" constant="8" id="74K-a3-6dJ"/>
+                            <constraint firstAttribute="width" constant="8" id="bkW-0g-M76"/>
                         </constraints>
                     </view>
                     <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sent_right_arrow" translatesAutoresizingMaskIntoConstraints="NO" id="DKz-zH-TXT">
@@ -66,11 +66,11 @@
                     <constraint firstItem="idP-dc-w1b" firstAttribute="leading" secondItem="DKz-zH-TXT" secondAttribute="trailing" id="PPg-h3-Wsj"/>
                     <constraint firstItem="DKz-zH-TXT" firstAttribute="leading" secondItem="SfB-4D-cvF" secondAttribute="trailing" constant="10" id="R0r-nE-TWi"/>
                     <constraint firstAttribute="trailingMargin" secondItem="idP-dc-w1b" secondAttribute="trailing" constant="16" id="SPa-FR-oTC"/>
-                    <constraint firstItem="SfB-4D-cvF" firstAttribute="leading" secondItem="6HX-A4-pmz" secondAttribute="trailing" constant="8" id="UOc-jA-vK3"/>
+                    <constraint firstItem="SfB-4D-cvF" firstAttribute="leading" secondItem="6HX-A4-pmz" secondAttribute="trailing" constant="7" id="UOc-jA-vK3"/>
                     <constraint firstAttribute="bottomMargin" secondItem="SfB-4D-cvF" secondAttribute="bottom" constant="4" id="VDb-KU-XYk"/>
                     <constraint firstItem="P6p-jh-oP9" firstAttribute="leading" secondItem="SfB-4D-cvF" secondAttribute="trailing" constant="10" id="dJ7-Sh-nWY"/>
                     <constraint firstItem="P6p-jh-oP9" firstAttribute="top" secondItem="SfB-4D-cvF" secondAttribute="top" id="dw9-ge-QrX"/>
-                    <constraint firstItem="6HX-A4-pmz" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="1" id="glE-BC-tEy"/>
+                    <constraint firstItem="6HX-A4-pmz" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="glE-BC-tEy"/>
                     <constraint firstItem="idP-dc-w1b" firstAttribute="top" secondItem="P6p-jh-oP9" secondAttribute="bottom" constant="2" id="xAC-VO-x2D"/>
                     <constraint firstItem="DKz-zH-TXT" firstAttribute="centerY" secondItem="idP-dc-w1b" secondAttribute="centerY" id="xYx-D1-imr"/>
                     <constraint firstItem="SfB-4D-cvF" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="yv1-ZY-bQV"/>

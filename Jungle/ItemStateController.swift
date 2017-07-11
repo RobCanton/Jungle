@@ -198,7 +198,6 @@ class ItemStateController {
                         let key = snapshot.key
                         
                         if let anon = dict["anon"] as? [String:Any] {
-                            let aid = dict["aid"] as! String
                             let adjective = anon["adjective"] as! String
                             let animal = anon["animal"] as! String
                             let color = anon["color"] as! String

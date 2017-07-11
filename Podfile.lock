@@ -1,5 +1,7 @@
 PODS:
   - ActiveLabel (0.7.1)
+  - Alamofire (4.4.0)
+  - BadgeSwift (5.0.1)
   - Firebase (4.0.0):
     - Firebase/Core (= 4.0.0)
   - Firebase/Auth (4.0.0):
@@ -88,6 +90,8 @@ PODS:
 
 DEPENDENCIES:
   - ActiveLabel
+  - Alamofire (~> 4.4)
+  - BadgeSwift (~> 5.0)
   - Firebase
   - Firebase/Auth
   - Firebase/Database
@@ -110,6 +114,8 @@ DEPENDENCIES:
 
 SPEC CHECKSUMS:
   ActiveLabel: 68625f22775f51c31bb691ca8de20f1e5a3bc825
+  Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
+  BadgeSwift: 3defa56f504bfb46f2300122c4a565ec9e405c1e
   Firebase: 284eea779b73fdff309791817da7c68bff8dd572
   FirebaseAnalytics: 6f08e746f7d66f5452931bc2e822b5df9c66b64a
   FirebaseAuth: ebb6abcbabae00fc47446d690c19ce68d8484fde
@@ -137,6 +143,6 @@ SPEC CHECKSUMS:
   TwicketSegmentedControl: 6d7a4cf243657e0ac3f00d06d873a25334c04042
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 72c3ed59d2dec4b98bd9eb09fc42ee0043ec2278
+PODFILE CHECKSUM: 8d72dbe8b707705e8a9743de87dd742bed07739a
 
 COCOAPODS: 1.2.0

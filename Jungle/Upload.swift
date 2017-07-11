@@ -22,6 +22,7 @@ class Upload {
     var image:UIImage?
     var videoURL:URL?
     var recipients:[String:Bool] = [:]
+    var anonObject:AnonObject?
     
     func printDescription() {
         

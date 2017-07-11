@@ -122,7 +122,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         collectionView.register(PostViewController.self, forCellWithReuseIdentifier: "presented_cell")
         collectionView.backgroundColor = UIColor.black
-        collectionView.bounces = false
+        collectionView.bounces = true
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.isPagingEnabled = true
@@ -306,6 +306,8 @@ extension GalleryViewController: PopupProtocol {
         controller.itemStateController = cell.itemStateController
         controller.item = item
         controller.mode = .likes
+        controller.commentBar.isHidden = true
+        controller.commentBar.isUserInteractionEnabled = false
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
@@ -320,6 +322,8 @@ extension GalleryViewController: PopupProtocol {
         controller.item = item
         controller.mode = .comments
         controller.initialIndex = indexPath
+        controller.commentBar.isHidden = false
+        controller.commentBar.isUserInteractionEnabled = true
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

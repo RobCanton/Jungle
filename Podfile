@@ -27,4 +27,6 @@ pod 'ActiveLabel'
 pod 'SwiftMessages'
 pod 'Segmentio', '2.1'
 pod "Popover"
+pod 'BadgeSwift', '~> 5.0'
+pod 'Alamofire', '~> 4.4'
 end

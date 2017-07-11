@@ -27,6 +27,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     var refreshControl: UIRefreshControl!
     
     var item:StoryItem!
+    var numAnonLikes = 0
     var likers = [String]()
     var viewers = [String]()
     var comments = [Comment]()
@@ -46,6 +47,9 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     
     var initialIndex:IndexPath?
     
+    var headerView:UIView!
+    var anonLikesLabel:UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.addNavigationBarBackdrop()
@@ -57,7 +61,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         control.insertSegment(withTitle: "Likes", at: 0, animated: false)
         control.insertSegment(withTitle: "Comments", at: 1, animated: false)
         control.addTarget(self, action: #selector(controlChange), for: .valueChanged)
-        
         
         control.tintColor = UIColor.black
         navigationItem.titleView = control
@@ -78,7 +81,24 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         let nib2 = UINib(nibName: "CommentViewCell", bundle: nil)
         tableView.register(nib2, forCellReuseIdentifier: "commentCell")
         
+        headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 32))
+        headerView.backgroundColor = infoColor
+        
+        anonLikesLabel  = UILabel(frame: headerView.bounds)
+        anonLikesLabel.textColor = UIColor.white
+        anonLikesLabel.font = UIFont.systemFont(ofSize: 15.0, weight: UIFontWeightSemibold)
+        anonLikesLabel.text = ""
+        anonLikesLabel.textAlignment = .center
+        headerView.addSubview(anonLikesLabel)
+        
+        if mode == .likes && numAnonLikes > 0 {
+            tableView.tableHeaderView = headerView
+        } else {
+            tableView.tableHeaderView = UIView()
+        }
+        
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 12))
+        
         tableView.reloadData()
 
         refreshControl = UIRefreshControl()
@@ -90,13 +110,19 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         fetchLikes()
         
-        if item.authorId == mainStore.state.userState.uid {
-            control.insertSegment(withTitle: "Views", at: 2, animated: false)
-            fetchViews()
-        }
+        
+        
+        
+//        if item.authorId == mainStore.state.userState.uid {
+//            control.insertSegment(withTitle: "Views", at: 2, animated: false)
+//            fetchViews()
+//        }
         
         view.addSubview(commentBar)
         commentBar.darkMode()
+        commentBar.showCurrentAnonMode()
+        commentBar.likeButton.removeFromSuperview()
+        commentBar.moreButton.removeFromSuperview()
         commentBar.delegate = self
         commentBar.textField.delegate = self
         
@@ -111,6 +137,13 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         itemStateController.delegate = self
         
         self.comments = item.comments
+        
+        if mode == .likes && numAnonLikes > 0 {
+            tableView.tableHeaderView = headerView
+        } else {
+            tableView.tableHeaderView = UIView()
+        }
+        
         self.tableView.reloadData()
         
         
@@ -125,7 +158,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         } else{
             scrollBottom(animated: false)
         }
-        
         
     }
     
@@ -152,6 +184,12 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func newState(state: AppState) {
+        if mode == .likes && numAnonLikes > 0 {
+            tableView.tableHeaderView = headerView
+        } else {
+            tableView.tableHeaderView = UIView()
+        }
+        
         tableView.reloadData()
     }
     
@@ -180,6 +218,12 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             break
         default:
             break
+        }
+        
+        if mode == .likes && numAnonLikes > 0 {
+            tableView.tableHeaderView = headerView
+        } else {
+            tableView.tableHeaderView = UIView()
         }
         
         tableView.reloadData()
@@ -250,14 +294,40 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func fetchLikes() {
+        var _numAnonLikes = 0
         let ref = Database.database().reference()
         ref.child("uploads/likes/\(item.key)").observeSingleEvent(of: .value, with: { snapshot in
             var uids = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
-                uids.append(childSnap.key)
+                if let dict = childSnap.value as? [String:Any] {
+                    let isAnon = dict["anon"] as! Bool
+                    if isAnon {
+                        _numAnonLikes += 1
+                    } else {
+                        uids.append(childSnap.key)
+                    }
+                }
             }
+            
+            self.numAnonLikes = _numAnonLikes
+            
+            if self.numAnonLikes == 1 { // Renee's code! 🦁
+                self.anonLikesLabel.text = "+1 anonymous like."
+            } else {
+                self.anonLikesLabel.text = "+\(self.numAnonLikes) anonymous likes."
+            }
+            
             self.likers = uids
+            if self.mode == .likes && self.numAnonLikes > 0 {
+                self.tableView.tableHeaderView = self.headerView
+            } else {
+                self.tableView.tableHeaderView = UIView()
+            }
+            
+            
+            print("Likes: \(self.likers) | numAnonLikes: \(self.numAnonLikes)")
+            
             self.tableView.reloadData()
         })
     }
@@ -333,9 +403,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             cell.delegate = self
             cell.shadow = false
             cell.setContent(comment: comments[indexPath.row], lightMode: false)
-            cell.authorLabel.textColor = UIColor.black
-            cell.commentLabel.textColor = UIColor.black
-            cell.timeLabel.textColor = UIColor.gray
             
             cell.timeLabel.isHidden = false
             
@@ -366,10 +433,14 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             break
         case .comments:
             let cell = tableView.cellForRow(at: indexPath) as! CommentCell
-            if let username = cell.authorLabel.text, username != "" {
-                commentBar.textField.text = "@\(username) "
-                commentBar.textField.becomeFirstResponder()
+            let comment = comments[indexPath.row]
+            if !isCurrentUserId(id: comment.author) {
+                if let username = cell.authorLabel.text, username != "" {
+                    commentBar.textField.text = "@\(username) "
+                    commentBar.textField.becomeFirstResponder()
+                }
             }
+
             tableView.deselectRow(at: indexPath, animated: true)
             
             break
@@ -504,9 +575,7 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
         let info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
-        self.commentBar.likeButton.isUserInteractionEnabled = false
-        self.commentBar.moreButton.isUserInteractionEnabled = false
-        self.commentBar.sendButton.isUserInteractionEnabled = true
+        self.commentBar.setKeyboardUp(true)
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
@@ -516,6 +585,7 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
             
             self.commentBar.sendButton.alpha = 1.0
             self.commentBar.activityIndicator.alpha = 1.0
+            self.commentBar.userImageView.alpha = userState.anonMode ? 0.6 : 1.0
 
         })
     }
@@ -524,9 +594,7 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
         keyboardUp = false
 
         print("keyboardWillDisappear")
-        self.commentBar.likeButton.isUserInteractionEnabled = true
-        self.commentBar.moreButton.isUserInteractionEnabled = true
-        self.commentBar.sendButton.isUserInteractionEnabled = false
+        self.commentBar.setKeyboardUp(false)
 
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
@@ -535,7 +603,7 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
             let textViewFrame = self.commentBar.frame
             let textViewStart = height - textViewFrame.height
             self.commentBar.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)
-
+            self.commentBar.userImageView.alpha = 0.35
             self.commentBar.sendButton.alpha = 0.5
             self.commentBar.activityIndicator.alpha = 0.0
         })

@@ -62,23 +62,40 @@ class PostHeaderView: UIView {
         setNumLikes(item.numLikes)
         setNumComments(item.numComments)
         
-        UserService.getUser(item.authorId, completion: { _user in
-            guard let user = _user else { return }
-            self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
-            self.usernameLabel.setUsernameWithBadge(username: user.username, badge: user.badge, fontSize: 16.0, fontWeight: UIFontWeightSemibold)
-
+        if let anon = item.anon {
+            if isCurrentUserId(id: item.authorId) {
+                self.usernameLabel.text = "\(anon.anonName) (YOU)"
+            } else {
+                self.usernameLabel.text = anon.anonName
+            }
+            self.usernameLabel.textColor = anon.color
+            self.userImageView.image = UIImage(named:anon.animal)
+            self.userImageView.backgroundColor = anon.color
             self.timeLabel.text = item.dateCreated.timeStringSinceNow()
             self.timeLabel2.text = self.timeLabel.text
-            
-            if user.verified {
-                self.badgeView.image = UIImage(named: "verified_white")
-                self.timeLabelLeadingConstraint.constant = 28
-            } else {
-                self.badgeView.image = nil
-                self.timeLabelLeadingConstraint.constant = 8
-            }
-            
-        })
+            self.badgeView.image = nil
+            self.timeLabelLeadingConstraint.constant = 8
+        } else {
+            UserService.getUser(item.authorId, completion: { _user in
+                guard let user = _user else { return }
+                self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
+                self.userImageView.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
+                self.usernameLabel.setUsernameWithBadge(username: user.username, badge: user.badge, fontSize: 16.0, fontWeight: UIFontWeightSemibold)
+                self.usernameLabel.textColor = UIColor.white
+                self.timeLabel.text = item.dateCreated.timeStringSinceNow()
+                self.timeLabel2.text = self.timeLabel.text
+                
+                if user.verified {
+                    self.badgeView.image = UIImage(named: "verified_white")
+                    self.timeLabelLeadingConstraint.constant = 28
+                } else {
+                    self.badgeView.image = nil
+                    self.timeLabelLeadingConstraint.constant = 8
+                }
+                
+            })
+        }
+        
         
         tap = UITapGestureRecognizer(target: self, action: #selector(self.userTapped))
         self.userImageView.isUserInteractionEnabled = true

@@ -53,7 +53,9 @@ class CommentCell: UITableViewCell {
 
     func handleTap(sender:UITapGestureRecognizer) {
         if comment == nil { return }
-        delegate?.showAuthor(comment!.author)
+        if !comment!.isKind(of: AnonymousComment.self) {
+            delegate?.showAuthor(comment!.author)
+        }
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {

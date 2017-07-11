@@ -26,6 +26,7 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     var user:User?
     
     
+    
     var conversation:Conversation? {
         didSet{
             userImageView.image = nil
@@ -89,7 +90,8 @@ class ConversationViewCell: UITableViewCell, GetUserProtocol {
     
     
     override func awakeFromNib() {
-       
+        super.awakeFromNib()
+        unreadDot.backgroundColor = infoColor
     }
     
 }

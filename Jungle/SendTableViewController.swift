@@ -8,6 +8,7 @@
 import UIKit
 import GoogleMaps
 import GooglePlaces
+import Firebase
 
 class SendViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, GMSMapViewDelegate {
     
@@ -31,12 +32,16 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var cameraViewRef:CameraViewController?
     var navHeight:CGFloat!
     
+    var userButton:UIButton!
+    
+    var titleLabel:UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.tintColor = UIColor.black
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
         self.addNavigationBarBackdrop()
-        title = "Post To..."
+        title = "Post as @\(userState.user!.username)"
         self.navigationController?.navigationBar.titleTextAttributes = [ NSFontAttributeName: UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightSemibold)]
         self.navigationController?.navigationBar.tintColor = accentColor
         sendView.backgroundColor = UIColor.clear
@@ -58,6 +63,27 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.delegate = self
         tableView.dataSource = self
         
+        titleLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 32))
+        titleLabel.textColor = accentColor
+        titleLabel.text = "Post"
+        titleLabel.textAlignment = .center
+        navigationItem.titleView = titleLabel
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(switchAnonMode))
+        titleLabel.isUserInteractionEnabled = true
+        titleLabel.addGestureRecognizer(tap)
+        
+        userButton = UIButton(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
+        userButton.setImage(nil, for: .normal)
+        userButton.cropToCircle()
+        userButton.addTarget(self, action: #selector(switchAnonMode), for: .touchUpInside)
+        
+        
+        let barButton = UIBarButtonItem(customView: userButton)
+        barButton.action = #selector(switchAnonMode)
+
+        self.navigationItem.rightBarButtonItem = barButton
+        
         headerView  = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 275 + navHeight))
         
         tableView.tableHeaderView = headerView
@@ -74,8 +100,56 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
         sendLabel.text = "My Location"
         self.tableView.reloadData()
+        showCurrentAnonMode()
         
     }
+
+    
+    func switchAnonMode() {
+        mainStore.dispatch(ToggleAnonMode())
+        showCurrentAnonMode()
+        
+        
+    }
+    
+    func showCurrentAnonMode() {
+        let isAnon = mainStore.state.userState.anonMode
+        if isAnon {
+            
+            setTitleLabel(prefix: "Post ", username: "anonymously", suffix: " to...")
+            userButton.setImage(UIImage(named: "private_dark"), for: .normal)
+        } else {
+            guard let user = mainStore.state.userState.user else {
+                userButton.setImage(nil, for: .normal)
+                return
+            }
+            
+            setTitleLabel(prefix: "Post as ", username: "@\(user.username)", suffix: " to...")
+            loadImageUsingCacheWithURL(user.imageURL) { image, fromCache in
+                self.userButton.setImage(image, for: .normal)
+            }
+        }
+    }
+    
+    func setTitleLabel(prefix:String, username:String, suffix:String) {
+        let str = "\(prefix)\(username)\(suffix)"
+        let attributes: [String: AnyObject] = [
+            NSForegroundColorAttributeName: accentColor,
+            NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightBold)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        let a: [String: AnyObject] = [
+            NSForegroundColorAttributeName: UIColor.darkGray,
+            NSFontAttributeName : UIFont.systemFont(ofSize: 16, weight: UIFontWeightSemibold),
+            ]
+        title.addAttributes(a, range: NSRange(location: 0, length: prefix.characters.count))
+        title.addAttributes(a, range: NSRange(location: prefix.characters.count + username.characters.count, length: suffix.characters.count))
+        
+        titleLabel.attributedText = title
+        
+    }
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -176,16 +250,16 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { _ in
                 mainStore.dispatch(UploadWarningShown())
                 UserService.ref.child("users/settings/\(mainStore.state.userState.uid)/upload_warning_shown").setValue(true)
-                self.uploadPost()
+                self.preparePost()
             }))
             
             self.present(alert, animated: true, completion: nil)
             return
         }
-        uploadPost()
+        preparePost()
     }
     
-    func uploadPost() {
+    func preparePost() {
         let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
         activityIndicator.startAnimating()
         activityIndicator.center = sendView.center
@@ -194,6 +268,25 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         sendLabel.isHidden = true
         
         
+        if userState.anonMode {
+            
+            APIService.getRandomAnonymousInfo() { anonObject, success in
+                DispatchQueue.main.async {
+                    if success, let anon = anonObject {
+                        self.upload.anonObject = anon
+                        self.uploadPost()
+                    }
+                }
+
+            }
+        } else {
+            
+            uploadPost()
+        }
+        
+    }
+    
+    func uploadPost() {
         if let videoURL = upload.videoURL {
             let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let outputUrl = documentsURL.appendingPathComponent("output.mp4")

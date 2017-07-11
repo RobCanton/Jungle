@@ -49,7 +49,6 @@ class CommentItemBar: UIView {
         userImageTap = UITapGestureRecognizer(target: self, action: #selector(switchAnonMode))
         userImageView.addGestureRecognizer(userImageTap)
         userImageView.isUserInteractionEnabled = true
-        showCurrentAnonMode()
     }
     
     
@@ -78,6 +77,7 @@ class CommentItemBar: UIView {
             self.likeButton.setImage(UIImage(named: "like"), for: .normal)
             self.likeButton.imageEdgeInsets = UIEdgeInsets.zero
         }
+        showCurrentAnonMode()
     }
     
     func switchAnonMode() {
@@ -89,7 +89,7 @@ class CommentItemBar: UIView {
         let isAnon = mainStore.state.userState.anonMode
         if isAnon {
             placeHolderString = "Comment anonymously"
-            userImageView.image = UIImage(named:"private2")
+            userImageView.image = isDarkMode ? UIImage(named: "private_dark") : UIImage(named:"private2")
         } else {
             guard let user = mainStore.state.userState.user else {
                 userImageView.image = nil
@@ -101,12 +101,19 @@ class CommentItemBar: UIView {
         
         if isKeyboardUp {
             userImageView.alpha = isAnon ? 0.6 : 1.0
-            textField.placeholder = placeHolderString
+            if isDarkMode {
+                textField.attributedPlaceholder =
+                    NSAttributedString(string: placeHolderString, attributes: [NSForegroundColorAttributeName : UIColor.gray])
+            } else  {
+                textField.placeholder = placeHolderString
+            }
         }
     }
     
+    var isDarkMode = false
     
     func darkMode() {
+        isDarkMode = true
         activityIndicator.tintColor = UIColor.gray
         sendButton.tintColor = UIColor.black
         sendButton.setTitleColor(UIColor.black, for: .normal)
@@ -191,15 +198,28 @@ class CommentItemBar: UIView {
     func setKeyboardUp(_ up:Bool) {
         self.isKeyboardUp = up
         if up {
-            likeButton.isUserInteractionEnabled = false
-            moreButton.isUserInteractionEnabled = false
-            sendButton.isUserInteractionEnabled = true
-            textField.placeholder = placeHolderString
+            likeButton?.isUserInteractionEnabled = false
+            moreButton?.isUserInteractionEnabled = false
+            sendButton?.isUserInteractionEnabled = true
+            
+            if isDarkMode {
+                textField.attributedPlaceholder =
+                    NSAttributedString(string: placeHolderString, attributes: [NSForegroundColorAttributeName : UIColor.gray])
+            } else  {
+                textField.placeholder = placeHolderString
+            }
+            
         } else {
-            likeButton.isUserInteractionEnabled = true
-            moreButton.isUserInteractionEnabled = true
-            sendButton.isUserInteractionEnabled = false
-            textField.placeholder = "Comment"
+            likeButton?.isUserInteractionEnabled = true
+            moreButton?.isUserInteractionEnabled = true
+            sendButton?.isUserInteractionEnabled = false
+            
+            if isDarkMode {
+                textField.attributedPlaceholder =
+                    NSAttributedString(string: "Comment", attributes: [NSForegroundColorAttributeName : UIColor.gray])
+            } else {
+                textField.placeholder = "Comment"
+            }
         }
     }
     

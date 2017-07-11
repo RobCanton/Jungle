@@ -118,7 +118,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         collectionView.register(StoryViewController.self, forCellWithReuseIdentifier: "presented_cell")
         collectionView.backgroundColor = UIColor.black
-        collectionView.bounces = false
+        collectionView.bounces = true
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.isPagingEnabled = true

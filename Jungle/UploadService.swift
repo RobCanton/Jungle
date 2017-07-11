@@ -13,6 +13,7 @@ import AVFoundation
 import GooglePlaces
 import GoogleMaps
 import SwiftMessages
+import Alamofire
 
 
 let dataCache = NSCache<NSString, AnyObject>()
@@ -174,7 +175,7 @@ class UploadService {
         })
     }
 
-    static func sendImage(upload:Upload, completion:(()->())) {
+    static func sendImage(upload:Upload, completion: (()->())) {
         
         //If upload has no destination do not upload it
         guard let image = upload.image else { return }
@@ -204,17 +205,83 @@ class UploadService {
                 if (error != nil) {
                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                 } else {
-                    // Metadata contains file metadata such as size, content-type, and download URL.
-                    let downloadURL = metadata!.downloadURL()
-                    var obj = [
-                        "author": uid,
-                        "url": downloadURL!.absoluteString,
-                        "contentType": contentTypeStr,
-                        "dateCreated": [".sv": "timestamp"],
-                        "length": 6.0,
-                        "color": colorHex,
-                        "live": upload.toStory || upload.toNearby
-                    ] as [String : Any]
+                    
+                    
+                    Auth.auth().currentUser!.getIDToken() { token, error in
+                        
+                        if error != nil { return }
+                        
+                        guard let tokenID = token else { return }
+                        
+                        // Metadata contains file metadata such as size, content-type, and download URL.
+                        let downloadURL = metadata!.downloadURL()
+                        var obj = [
+                            "url": downloadURL!.absoluteString,
+                            "contentType": contentTypeStr,
+                            "length": 6.0,
+                            "color": colorHex,
+                            ] as [String : Any]
+                        
+                        if let coordinates = upload.coordinates {
+                            obj["coordinates"] = [
+                                "lat": coordinates.coordinate.latitude,
+                                "lon":coordinates.coordinate.longitude
+                            ] as [String: Any]
+                        }
+                        
+                        if let place = upload.place {
+                            obj["placeID"] = place.placeID
+                        }
+                        
+                        if let caption = upload.caption {
+                            obj["caption"] = caption
+                        }
+                        
+                        if let aid = userState.anonID, userState.anonMode {
+                            obj["aid"] = aid
+                        }
+                        
+                        
+                        let headers: HTTPHeaders = ["Authorization": "Bearer \(tokenID)", "Accept": "application/json", "Content-Type" :"application/json"]
+                        print("ALAMOFIRE REQEUST")
+                        Alamofire.request("https://us-central1-jungleiosapp.cloudfunctions.net/app/upload", method: .post, parameters: obj, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                            DispatchQueue.main.async {
+                                
+                                // result of response serialization : SUCCESS / FAILURE
+                                print("Response result is :",response.result)
+                                
+                                switch response.result {
+                                case .success:
+                                    print("Validation Successful")
+                                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                                case .failure(let error):
+                                    print(error)
+                                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+                                }
+                            
+                            }
+                            
+                        }
+                        
+                        
+                    }
+                    
+                    
+//                    let requestRef = ref.child("api/requests/\(uid)/upload/add").childByAutoId()
+//                    
+//                    requestRef.setValue(obj) { error, ref in
+//                        print("uploaded!")
+//                    }
+                    /*
+                    if let anonObject = upload.anonObject {
+                        anonMode = true
+                        obj["author"] = userState.anonID!
+                        obj["anon"] = [
+                            "adjective": anonObject.adjective,
+                            "animal": anonObject.animal,
+                            "color": anonObject.colorHexcode
+                            ] as [String : Any]
+                    }
                     
                     if let place = upload.place {
                         obj["placeID"] = place.placeID
@@ -224,13 +291,20 @@ class UploadService {
                         obj["caption"] = caption
                     }
                     
-                
-                    
                     var updateValues: [String : Any] = [
                         "uploads/meta/\(postKey)": obj,
                         "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
                         "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
                     ]
+                    
+                    if !anonMode {
+                        updateValues["users/uploads/\(uid)/\(postKey)"] = [".sv": "timestamp"]
+                        updateValues["users/story/\(uid)/posts/\(postKey)"] = [".sv": "timestamp"]
+                    } else {
+                        
+                    }
+                    
+                    
                     
                     if let coordinates = upload.coordinates {
                         updateValues["uploads/location/\(postKey)/u"] = uid
@@ -254,6 +328,8 @@ class UploadService {
                         }
                     }
                     
+                    print(updateValues)
+                    
                     ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
                         if error == nil {
                             globalMainInterfaceProtocol?.fetchAllStories()
@@ -266,6 +342,7 @@ class UploadService {
                             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                         }
                     })
+                    */
                 }
             }
             completion()
@@ -479,7 +556,7 @@ class UploadService {
                         }
                     }
                     
-                    guard let dateCreated = dict["dateCreated"] as? Double else { return completion(item) }
+                    guard let dateCreated = dict["timestamp"] as? Double else { return completion(item) }
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     let viewers = [String:Double]()
@@ -521,7 +598,16 @@ class UploadService {
                         color = hex
                     }
                     
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color)
+                    var anon:AnonObject?
+                    if let _anon = dict["anon"] as? [String:String],
+                        let adjective = _anon["adjective"],
+                        let animal = _anon["animal"],
+                        let color = _anon["color"] {
+                        
+                        anon = AnonObject(adjective: adjective, animal: animal, colorHexcode: color)
+                    }
+                    
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color, anon: anon)
                     uploadDataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -667,7 +753,8 @@ class UploadService {
         
         let updateObject = [
             "users/liked/\(uid)/\(post.key)": true,
-            "uploads/likes/\(post.key)/\(uid)": [".sv":"timestamp"]
+            "uploads/likes/\(post.key)/\(uid)/anon": userState.anonMode,
+            "uploads/likes/\(post.key)/\(uid)/t": [".sv":"timestamp"]
             ] as [String : Any]
         
         ref.updateChildValues(updateObject) { error, ref in

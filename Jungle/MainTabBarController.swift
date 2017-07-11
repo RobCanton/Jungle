@@ -67,7 +67,7 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
     
     func makeDot() -> UIView {
         let dot = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 5))
-        dot.backgroundColor = errorColor
+        dot.backgroundColor = infoColor
         dot.layer.cornerRadius = dot.frame.width / 2
         dot.clipsToBounds = true
         return dot
@@ -79,7 +79,8 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
         message_service?.subscribe(identifier, subscriber: self)
         notification_service?.subscribe(identifier, subscriber: self)
         
-        notificationDots[3].isHidden = UserService.isEmailVerified ? true : false
+        tabBar.items?[4].badgeValue = UserService.isEmailVerified ? nil : "\(1)"
+        //notificationDots[3].isHidden = UserService.isEmailVerified ? true : false
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -96,8 +97,8 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
             }
         }
         
-        //tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
-        notificationDots[1].isHidden = unseenMessages == 0 ? true : false
+        tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
+        //notificationDots[1].isHidden = unseenMessages == 0 ? true : false
     }
     
     func notificationsUpdated(_ notificationsDict: [String : Bool]) {
@@ -108,8 +109,8 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
             }
         }
         
-        //tabBar.items?[3].badgeValue = unseenNotifications > 0 ? "\(unseenNotifications)" : nil
-        notificationDots[2].isHidden = unseenNotifications == 0 ? true : false
+        tabBar.items?[3].badgeValue = unseenNotifications > 0 ? "\(unseenNotifications)" : nil
+        //notificationDots[2].isHidden = unseenNotifications == 0 ? true : false
     }
     
     
