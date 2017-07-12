@@ -13,6 +13,7 @@ protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
     func refreshPulled()
     func showMetaComments(_ indexPath:IndexPath?)
+    func showAnonOptions(_ aid:String)
 }
 
 class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSource, CommentCellProtocol {
@@ -26,6 +27,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     var refreshControl: UIRefreshControl!
     
     weak var delegate:CommentsTableProtocol?
+    weak var itemRef:StoryItem?
     
     func cleanUp() {
         comments = [Comment]()
@@ -36,6 +38,14 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     
     func showAuthor(_ uid: String) {
         delegate?.showUser(uid)
+    }
+    
+    func commentAuthorTapped(_ comment:Comment) {
+        if let anon = comment as? AnonymousComment {
+            delegate?.showAnonOptions(anon.author)
+        } else {
+            delegate?.showUser(comment.author)
+        }
     }
     
     var header:UIView!
@@ -92,8 +102,9 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         lastKey = firstComment.key
     }
     
-    func setTableComments(comments:[Comment], animated:Bool)
+    func setTableComments(item:StoryItem, comments:[Comment], animated:Bool)
     {
+        self.itemRef = item
         self.comments = comments
         divider.isHidden = hasCaption || comments.count == 0
         reloadTable()
@@ -180,7 +191,14 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
-        cell.setContent(comment: comments[indexPath.row], lightMode: true)
+        let comment = comments[indexPath.row]
+        if let item = itemRef {
+            cell.isOP = comment.author == item.authorId
+        } else {
+            cell.isOP = false
+        }
+        
+        cell.setContent(comment: comment, lightMode: true)
         cell.delegate = self
         
         if showTimeStamps {

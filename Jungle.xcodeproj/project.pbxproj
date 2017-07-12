@@ -133,6 +133,9 @@
 		B0C86D4B1E80B9440067E004 /* UserStoryCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */; };
 		B0CBE0571EAE8D4100D6FF06 /* FollowingPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CBE0551EAE8D4100D6FF06 /* FollowingPhotoCell.swift */; };
 		B0CBE0581EAE8D4100D6FF06 /* FollowingPhotoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0CBE0561EAE8D4100D6FF06 /* FollowingPhotoCell.xib */; };
+		B0D1DF2A1F15F09400B05028 /* BlockedUsersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D1DF291F15F09400B05028 /* BlockedUsersListViewController.swift */; };
+		B0D1DF2D1F15F0C500B05028 /* BlockedUserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D1DF2B1F15F0C500B05028 /* BlockedUserTableViewCell.swift */; };
+		B0D1DF2E1F15F0C500B05028 /* BlockedUserTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0D1DF2C1F15F0C500B05028 /* BlockedUserTableViewCell.xib */; };
 		B0D790BE1E9828A000D8680E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D790BD1E9828A000D8680E /* AppDelegate.swift */; };
 		B0DF822B1EDCAA9200461DD8 /* SignUpPhoneCountryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DF822A1EDCAA9200461DD8 /* SignUpPhoneCountryViewController.swift */; };
 		B0DF822D1EDCAEEC00461DD8 /* countryCodes.json in Resources */ = {isa = PBXBuildFile; fileRef = B0DF822C1EDCAEEC00461DD8 /* countryCodes.json */; };
@@ -318,6 +321,9 @@
 		B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserStoryCollectionViewCell.xib; sourceTree = "<group>"; };
 		B0CBE0551EAE8D4100D6FF06 /* FollowingPhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowingPhotoCell.swift; sourceTree = "<group>"; };
 		B0CBE0561EAE8D4100D6FF06 /* FollowingPhotoCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FollowingPhotoCell.xib; sourceTree = "<group>"; };
+		B0D1DF291F15F09400B05028 /* BlockedUsersListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUsersListViewController.swift; sourceTree = "<group>"; };
+		B0D1DF2B1F15F0C500B05028 /* BlockedUserTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockedUserTableViewCell.swift; sourceTree = "<group>"; };
+		B0D1DF2C1F15F0C500B05028 /* BlockedUserTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BlockedUserTableViewCell.xib; sourceTree = "<group>"; };
 		B0D790BD1E9828A000D8680E /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B0DF822A1EDCAA9200461DD8 /* SignUpPhoneCountryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpPhoneCountryViewController.swift; sourceTree = "<group>"; };
 		B0DF822C1EDCAEEC00461DD8 /* countryCodes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = countryCodes.json; sourceTree = "<group>"; };
@@ -696,6 +702,9 @@
 				B0550DA61E91EE20007DAAAC /* UsersListViewController.swift */,
 				B0550DA71E91EE21007DAAAC /* UserViewCell.swift */,
 				B0550DA81E91EE21007DAAAC /* UserViewCell.xib */,
+				B0D1DF291F15F09400B05028 /* BlockedUsersListViewController.swift */,
+				B0D1DF2B1F15F0C500B05028 /* BlockedUserTableViewCell.swift */,
+				B0D1DF2C1F15F0C500B05028 /* BlockedUserTableViewCell.xib */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -803,6 +812,7 @@
 				B093FFC71E790F6800011B43 /* GoogleService-Info(OLD).plist in Resources */,
 				B0DF82451EDFC7EB00461DD8 /* StoryInfoView.xib in Resources */,
 				B07169B21E83B4EB00AF6A41 /* ProfileTabHeader.xib in Resources */,
+				B0D1DF2E1F15F0C500B05028 /* BlockedUserTableViewCell.xib in Resources */,
 				B0DF822D1EDCAEEC00461DD8 /* countryCodes.json in Resources */,
 				B0A6FCD91EC43113009933F8 /* EmptyMyStoryCell.xib in Resources */,
 				B093FFCB1E7910E700011B43 /* SendProfileViewCell.xib in Resources */,
@@ -983,6 +993,7 @@
 				B093FFC31E790D5E00011B43 /* StoryItem.swift in Sources */,
 				B0550D971E8E21C4007DAAAC /* AkiraTextField.swift in Sources */,
 				B0550D801E8A1A94007DAAAC /* LocationHeaderView.swift in Sources */,
+				B0D1DF2D1F15F0C500B05028 /* BlockedUserTableViewCell.swift in Sources */,
 				B0DF82441EDFC7EB00461DD8 /* StoryInfoView.swift in Sources */,
 				B093FFBE1E790D5E00011B43 /* PhotoCell.swift in Sources */,
 				B0A4C5F41EDBF2FD00A9F7CF /* SignUpPhoneViewController.swift in Sources */,
@@ -999,6 +1010,7 @@
 				B0550D761E85E438007DAAAC /* MapViewController.swift in Sources */,
 				B0550D9B1E8E21C4007DAAAC /* JiroTextField.swift in Sources */,
 				B0F2A1901EE8A90F004857CA /* PlaceHeaderView.swift in Sources */,
+				B0D1DF2A1F15F09400B05028 /* BlockedUsersListViewController.swift in Sources */,
 				B0F8946D1E7B9D5A00E490C4 /* CommentCell.swift in Sources */,
 				B07169AA1E83681B00AF6A41 /* PostViewController.swift in Sources */,
 				B0550D9A1E8E21C4007DAAAC /* IsaoTextField.swift in Sources */,

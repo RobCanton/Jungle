@@ -23,6 +23,8 @@ class CommentCell: UITableViewCell {
     weak var comment:Comment?
     weak var delegate:CommentCellProtocol?
     
+    var isOP = false
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -52,10 +54,11 @@ class CommentCell: UITableViewCell {
     }
 
     func handleTap(sender:UITapGestureRecognizer) {
+        print("HMM")
         if comment == nil { return }
-        if !comment!.isKind(of: AnonymousComment.self) {
-            delegate?.showAuthor(comment!.author)
-        }
+        print("WHAT?")
+        delegate?.commentAuthorTapped(comment!)
+        //delegate?.showAuthor(comment!.author)
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -99,6 +102,7 @@ class CommentCell: UITableViewCell {
             timeLabel.textColor = UIColor.gray
         }
         
+        
         if shadow {
             authorLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
             commentLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
@@ -108,7 +112,7 @@ class CommentCell: UITableViewCell {
         }
         
         if let anonComment = comment as? AnonymousComment {
-            setupAnonymousComment(anonComment)
+            setupAnonymousComment(anonComment, lightMode)
             return
         }
         self.imageBackground.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
@@ -146,13 +150,17 @@ class CommentCell: UITableViewCell {
         
     }
     
-    func setupAnonymousComment(_ comment:AnonymousComment) {
+    func setupAnonymousComment(_ comment:AnonymousComment, _ lightMode:Bool) {
         self.userImage.image = UIImage(named:comment.animal)
         self.userImage.alpha = 0.8
-        self.authorLabel.textColor = comment.color
+        let color = lightMode ? comment.color : darkerColorForColor(color: comment.color)
+        
+        self.authorLabel.textColor = color
         self.imageBackground.backgroundColor = comment.color
         if let anonID = userState.anonID, anonID == comment.author {
-            self.authorLabel.text = "\(comment.anonName) (YOU)"
+            self.authorLabel.setAnonymousName(anonName: comment.anonName, color: color, suffix: "[YOU]", fontSize: 14.0)
+        } else if isOP {
+            self.authorLabel.setAnonymousName(anonName: comment.anonName, color: color, suffix: "[OP]", fontSize: 14.0)
         } else {
             self.authorLabel.text = comment.anonName
         }

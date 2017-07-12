@@ -70,7 +70,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         tableView = UITableView(frame:  CGRect(x: 0,y: navHeight, width: view.frame.width,height: view.frame.height - navHeight - 50.0))
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.backgroundColor = UIColor.white
+        tableView.backgroundColor = UIColor(white:0.96, alpha: 1.0)
         tableView.keyboardDismissMode = .onDrag
         
         view.addSubview(tableView)
@@ -400,11 +400,15 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             return cell
         case .comments:
             let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! CommentCell
+            let comment = comments[indexPath.row]
+            cell.isOP = comment.author == item.authorId
+
             cell.delegate = self
             cell.shadow = false
-            cell.setContent(comment: comments[indexPath.row], lightMode: false)
+            cell.setContent(comment: comment, lightMode: false)
             
             cell.timeLabel.isHidden = false
+            cell.contentView.backgroundColor = UIColor.white
             
             let labelX = cell.authorLabel.frame.origin.x
             cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
@@ -452,7 +456,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         let comment = self.comments[indexPath.row]
         
         var action:UITableViewRowAction!
-        if comment.author == mainStore.state.userState.uid {
+        if isCurrentUserId(id: comment.author) {
             action = UITableViewRowAction(style: .normal, title: "Delete") { (rowAction, indexPath) in
                 guard let item = self.item else { return }
                 let actionComment = self.comments[indexPath.row]
@@ -536,10 +540,57 @@ extension PostMetaTableViewController: UserCellProtocol {
 }
 
 extension PostMetaTableViewController: CommentCellProtocol {
-    func showAuthor(_ uid: String) {
-        let controller = UserProfileViewController()
-        controller.uid = uid
-        self.navigationController?.pushViewController(controller, animated: true)
+    
+    func commentAuthorTapped(_ comment:Comment) {
+        if let _ = comment as? AnonymousComment {
+            showAnonOptions(comment.author)
+        } else {
+            let controller = UserProfileViewController()
+            controller.uid = comment.author
+            self.navigationController?.pushViewController(controller, animated: true)
+
+        }
+    }
+    
+    func showAnonOptions(_ aid: String) {
+
+        if let my_aid = userState.anonID, my_aid != aid {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+//            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
+//                
+//            }
+//            actionSheet.addAction(messageAction)
+            
+            let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
+                UserService.blockAnonUser(aid: aid) { success in }
+            }
+            
+            actionSheet.addAction(blockAction)
+            
+            let reportAction: UIAlertAction = UIAlertAction(title: "Report User", style: .destructive) { action -> Void in
+                let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this user?", preferredStyle: .actionSheet)
+                reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                reportSheet.addAction(UIAlertAction(title: "Harassment", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Harassment, completion: { success in })
+                }))
+                reportSheet.addAction(UIAlertAction(title: "Bot", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Bot, completion: { success in })
+                }))
+                self.present(reportSheet, animated: true, completion: nil)
+            }
+            
+            actionSheet.addAction(reportAction)
+            
+            actionSheet.addAction(reportAction)
+            
+            self.present(actionSheet, animated: true, completion: nil)
+            
+        }
     }
 }
 

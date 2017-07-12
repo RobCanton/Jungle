@@ -12,7 +12,7 @@ import SwiftMessages
 
 class APIService {
 
-
+    
     
     static func getRandomAnonymousInfo(completion: @escaping (_ anonObject:AnonObject?, _ success:Bool)->()) {
         var anonObject:AnonObject?

@@ -22,7 +22,7 @@ protocol StoryCommentsProtocol: class {
 }
 
 protocol CommentCellProtocol: class {
-    func showAuthor(_ uid:String)
+    func commentAuthorTapped(_ comment:Comment)
 }
 
 protocol CommentsHeaderProtocol: class {
@@ -410,8 +410,8 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
 }
 
 extension CommentsViewController: CommentCellProtocol {
-    func showAuthor(_ uid: String) {
-        showUser(uid: uid)
+    
+    func commentAuthorTapped(_ comment:Comment) {
     }
 }
 

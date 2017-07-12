@@ -53,24 +53,29 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
         state.following.remove(a.uid)
         print("Removed following")
         break
-    case _ as AddBlocked:
-        let a = action as! AddBlocked
+    case _ as AddBlockedUser:
+        let a = action as! AddBlockedUser
         state.blocked.insert(a.uid)
         break
-    case _ as RemoveBlocked:
-        let a = action as! RemoveBlocked
+    case _ as RemoveBlockedUser:
+        let a = action as! RemoveBlockedUser
         state.blocked.remove(a.uid)
         break
-    case _ as AddBlockedBy:
-        let a = action as! AddBlockedBy
-        state.blockedBy.insert(a.uid)
+    case _ as AddBlockedAnonymousUser:
+        let a = action as! AddBlockedAnonymousUser
+        state.blockedAnonymous.append((a.aid, a.timestamp))
         break
-    case _ as RemoveBlockedBy:
-        let a = action as! RemoveBlockedBy
-        state.blockedBy.remove(a.uid)
+    case _ as RemoveBlockedAnonymousUser:
+        let a = action as! RemoveBlockedAnonymousUser
+        for i in 0..<state.blockedAnonymous.count {
+            let entry = state.blockedAnonymous[i]
+            if entry.0 == a.aid {
+                state.blockedAnonymous.remove(at: i)
+                break
+            }
+        }
         break
     case _ as ClearSocialState:
-        
         state = SocialState()
         break
     default:
@@ -78,6 +83,13 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
     }
     
     return state
+}
+
+func isAnonBlocked(_ aid:String) -> Bool{
+    for (id,_) in mainStore.state.socialState.blockedAnonymous {
+        if id == aid { return true }
+    }
+    return false
 }
 
 struct AddFollower: Action {
@@ -96,20 +108,22 @@ struct RemoveFollowing: Action {
     let uid: String
 }
 
-struct AddBlocked: Action {
+struct AddBlockedUser: Action {
     let uid: String
 }
 
-struct RemoveBlocked: Action {
+struct RemoveBlockedUser: Action {
     let uid: String
 }
 
-struct AddBlockedBy: Action {
-    let uid: String
+
+struct AddBlockedAnonymousUser: Action {
+    let aid: String
+    let timestamp:Double
 }
 
-struct RemoveBlockedBy: Action {
-    let uid: String
+struct RemoveBlockedAnonymousUser: Action {
+    let aid: String
 }
 
 struct ClearSocialState: Action {}

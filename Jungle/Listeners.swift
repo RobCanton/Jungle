@@ -21,12 +21,18 @@ class Listeners {
     fileprivate static var listenForForcedRefersh = false
     
     static func stopListeningToAll() {
-
+        let uid = mainStore.state.userState.uid
         stopListeningToFollowers()
         stopListeningToFollowing()
         stopListeningToSettings()
         stopListeningToViewed()
         stopListeningForForcedRefresh()
+        
+        let blockedRef = ref.child("social/blockedUsers/\(uid)")
+        blockedRef.removeAllObservers()
+        
+        let blockedAnonRef = ref.child("social/blockedAnonymous/\(uid)")
+        blockedAnonRef.removeAllObservers()
     }
     
     static func startListeningForForcedRefresh() {
@@ -181,6 +187,49 @@ class Listeners {
         let viewedRef = ref.child("users/viewed/\(uid)")
         viewedRef.removeAllObservers()
         listeningToViewed = false
+    }
+    
+    static func startListeningToBlocked() {
+
+        let current_uid = mainStore.state.userState.uid
+        let blockedRef = ref.child("social/blockedUsers/\(current_uid)")
+        
+        /**
+         Listen for a Following Added
+         */
+        blockedRef.observe(.childAdded, with: { snapshot in
+            print("Blocked Anonynmous added")
+            mainStore.dispatch(AddBlockedUser(uid: snapshot.key))
+        })
+        
+        
+        /**
+         Listen for a Following Removed
+         */
+        blockedRef.observe(.childRemoved, with: { snapshot in
+            print("Blocked Anonynmous removed")
+            mainStore.dispatch(RemoveBlockedUser(uid: snapshot.key))
+            
+        })
+        
+        let blockedAnonRef = ref.child("social/blockedAnonymous/\(current_uid)")
+        /**
+         Listen for a Following Added
+         */
+        blockedAnonRef.observe(.childAdded, with: { snapshot in
+            print("Blocked Anonynmous added")
+            mainStore.dispatch(AddBlockedAnonymousUser(aid: snapshot.key, timestamp: snapshot.value as! Double))
+        })
+        
+        
+        /**
+         Listen for a Following Removed
+         */
+        blockedAnonRef.observe(.childRemoved, with: { snapshot in
+            print("Blocked Anonynmous removed")
+            mainStore.dispatch(RemoveBlockedAnonymousUser(aid: snapshot.key))
+            
+        })
     }
     
     

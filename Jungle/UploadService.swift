@@ -253,6 +253,7 @@ class UploadService {
                                 switch response.result {
                                 case .success:
                                     print("Validation Successful")
+                                    globalMainInterfaceProtocol?.fetchAllStories()
                                     return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
                                 case .failure(let error):
                                     print(error)
@@ -266,83 +267,6 @@ class UploadService {
                         
                     }
                     
-                    
-//                    let requestRef = ref.child("api/requests/\(uid)/upload/add").childByAutoId()
-//                    
-//                    requestRef.setValue(obj) { error, ref in
-//                        print("uploaded!")
-//                    }
-                    /*
-                    if let anonObject = upload.anonObject {
-                        anonMode = true
-                        obj["author"] = userState.anonID!
-                        obj["anon"] = [
-                            "adjective": anonObject.adjective,
-                            "animal": anonObject.animal,
-                            "color": anonObject.colorHexcode
-                            ] as [String : Any]
-                    }
-                    
-                    if let place = upload.place {
-                        obj["placeID"] = place.placeID
-                    }
-                    
-                    if let caption = upload.caption {
-                        obj["caption"] = caption
-                    }
-                    
-                    var updateValues: [String : Any] = [
-                        "uploads/meta/\(postKey)": obj,
-                        "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
-                        "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
-                    ]
-                    
-                    if !anonMode {
-                        updateValues["users/uploads/\(uid)/\(postKey)"] = [".sv": "timestamp"]
-                        updateValues["users/story/\(uid)/posts/\(postKey)"] = [".sv": "timestamp"]
-                    } else {
-                        
-                    }
-                    
-                    
-                    
-                    if let coordinates = upload.coordinates {
-                        updateValues["uploads/location/\(postKey)/u"] = uid
-                        updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
-                        updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
-                        updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]
-                        if let place = upload.place {
-                            let placeId = place.placeID
-                            updateValues["places/info/\(placeId)/name"] = place.name
-                            updateValues["places/info/\(placeId)/lat"] = place.coordinate.latitude
-                            updateValues["places/info/\(placeId)/lon"] = place.coordinate.longitude
-                            updateValues["places/info/\(placeId)/address"] = place.formattedAddress
-                            for type in place.types {
-                                updateValues["places/info/\(place.placeID)/types/\(type)"] = true
-                            }
-                            updateValues["places/coords/\(placeId)/lat"] = place.coordinate.latitude
-                            updateValues["places/coords/\(placeId)/lon"] = place.coordinate.longitude
-                            updateValues["places/posts/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
-                            updateValues["places/story/\(placeId)/\(postKey)/t"] = [".sv": "timestamp"]
-                            updateValues["places/story/\(placeId)/\(postKey)/u"] = uid
-                        }
-                    }
-                    
-                    print(updateValues)
-                    
-                    ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
-                        if error == nil {
-                            globalMainInterfaceProtocol?.fetchAllStories()
-                            
-                            let subscriberRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
-                            subscriberRef.setValue(true)
-                            
-                            return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
-                        } else {
-                            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
-                        }
-                    })
-                    */
                 }
             }
             completion()

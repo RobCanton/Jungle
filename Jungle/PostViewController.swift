@@ -108,7 +108,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        commentsView.setTableComments(comments: item.comments, animated: false)
+        commentsView.setTableComments(item:item, comments: item.comments, animated: false)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -129,7 +129,9 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func itemStateDidChange(comments: [Comment]) {
-        self.commentsView.setTableComments(comments: comments, animated: true)
+        self.headerView.setNumComments(comments.count)
+        guard let item = self.storyItem else { return }
+        self.commentsView.setTableComments(item:item, comments: comments, animated: true)
     }
     
     func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {
@@ -242,10 +244,16 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func showAuthor() {
         guard let item = self.storyItem else { return }
         if let _ = item.anon {
-            
+            print("HMM")
+            delegate?.showAnonOptions(item.authorId)
         } else {
             delegate?.showUser(item.authorId)
         }
+    }
+    
+    func showAnonOptions(_ aid:String) {
+        print("showAnonOptions")
+        delegate?.showAnonOptions(aid)
     }
     
     
@@ -500,7 +508,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height/2)
+        view.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height * 0.35)
         return view
     }()
     

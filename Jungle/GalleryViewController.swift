@@ -174,7 +174,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             return false
         } else {
             if let item = cell.storyItem {
-                if translate.y < 0 && !item.shouldBlock {
+                if translate.y < -1 && !item.shouldBlock {
                     cell.commentBar.textField.becomeFirstResponder()
                 }
             }
@@ -275,6 +275,50 @@ extension GalleryViewController: PopupProtocol {
             self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
             
             navigationController?.popViewController(animated: animated)
+        }
+    }
+    
+    func showAnonOptions(_ aid: String) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        cell.pause()
+        if let my_aid = userState.anonID, my_aid != aid {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+//            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
+//                
+//            }
+//            actionSheet.addAction(messageAction)
+            
+            let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
+                UserService.blockAnonUser(aid: aid) { success in
+                    print("Success: \(success)")
+                    cell.resume()
+                }
+            }
+            
+            actionSheet.addAction(blockAction)
+            
+            let reportAction: UIAlertAction = UIAlertAction(title: "Report User", style: .destructive) { action -> Void in
+                let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this user?", preferredStyle: .actionSheet)
+                reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                reportSheet.addAction(UIAlertAction(title: "Harassment", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Harassment, completion: { success in })
+                }))
+                reportSheet.addAction(UIAlertAction(title: "Bot", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Bot, completion: { success in })
+                }))
+                self.present(reportSheet, animated: true, completion: nil)
+            }
+            
+            actionSheet.addAction(reportAction)
+            
+            self.present(actionSheet, animated: true, completion: nil)
+            
         }
     }
     

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="60" id="KGk-i7-Jjw" customClass="BlockedUserTableViewCell" customModule="Jungle" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="407" height="60"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="407" height="59.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ukq-eu-f5K">
+                        <rect key="frame" x="8" y="8" width="43" height="43"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ptx-cT-Qn2">
+                                <rect key="frame" x="2" y="2" width="39.5" height="39.5"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="width" secondItem="Ukq-eu-f5K" secondAttribute="height" multiplier="1:1" id="22i-NW-qtJ"/>
+                            <constraint firstItem="Ptx-cT-Qn2" firstAttribute="top" secondItem="Ukq-eu-f5K" secondAttribute="top" constant="2" id="LDX-i0-n1P"/>
+                            <constraint firstAttribute="trailing" secondItem="Ptx-cT-Qn2" secondAttribute="trailing" constant="2" id="hOx-N8-5d8"/>
+                            <constraint firstAttribute="bottom" secondItem="Ptx-cT-Qn2" secondAttribute="bottom" constant="2" id="hWA-zy-lcD"/>
+                            <constraint firstItem="Ptx-cT-Qn2" firstAttribute="leading" secondItem="Ukq-eu-f5K" secondAttribute="leading" constant="2" id="tJ3-6c-VKY"/>
+                        </constraints>
+                    </view>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pGH-O7-zWd">
+                        <rect key="frame" x="309" y="15" width="90" height="29"/>
+                        <color key="backgroundColor" red="1" green="0.51838942310000002" blue="0.5959288224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="width" relation="lessThanOrEqual" constant="110" id="8Si-EF-u6M"/>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="90" id="mcM-BX-ROI"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="14"/>
+                        <state key="normal" title="Unblock">
+                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        </state>
+                        <connections>
+                            <action selector="handleButton:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="c5w-OR-hNg"/>
+                        </connections>
+                    </button>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="robcanton" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mjh-6X-reZ">
+                        <rect key="frame" x="59" y="12" width="76" height="19.5"/>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Blocked 3d ago" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aKT-9N-Tz1">
+                        <rect key="frame" x="59" y="32" width="107" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Mjh-6X-reZ" firstAttribute="leading" secondItem="Ukq-eu-f5K" secondAttribute="trailing" constant="8" id="5sH-9l-ZVJ"/>
+                    <constraint firstItem="pGH-O7-zWd" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="6bH-YB-paJ"/>
+                    <constraint firstItem="Mjh-6X-reZ" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="4" id="CgW-Ln-06x"/>
+                    <constraint firstItem="Ukq-eu-f5K" firstAttribute="width" secondItem="Ukq-eu-f5K" secondAttribute="height" multiplier="1:1" id="GYx-l1-qB7"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="pGH-O7-zWd" secondAttribute="trailing" id="JA0-kw-wVV"/>
+                    <constraint firstAttribute="topMargin" secondItem="Ukq-eu-f5K" secondAttribute="top" id="Pdq-cH-8bc"/>
+                    <constraint firstAttribute="leadingMargin" secondItem="Ukq-eu-f5K" secondAttribute="leading" id="TZX-dI-gwU"/>
+                    <constraint firstItem="aKT-9N-Tz1" firstAttribute="top" secondItem="Mjh-6X-reZ" secondAttribute="bottom" id="Zfk-Pc-J5q"/>
+                    <constraint firstItem="aKT-9N-Tz1" firstAttribute="leading" secondItem="Ukq-eu-f5K" secondAttribute="trailing" constant="8" id="u39-V1-EBC"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="Ukq-eu-f5K" secondAttribute="bottom" id="zPz-nB-y3D"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="blockButton" destination="pGH-O7-zWd" id="BeL-bq-HIu"/>
+                <outlet property="timeLabel" destination="aKT-9N-Tz1" id="XwY-IS-wrt"/>
+                <outlet property="userImageView" destination="Ptx-cT-Qn2" id="gQw-KJ-Ulb"/>
+                <outlet property="usernameLabel" destination="Mjh-6X-reZ" id="REb-ou-Jm5"/>
+            </connections>
+            <point key="canvasLocation" x="24.5" y="52"/>
+        </tableViewCell>
+    </objects>
+</document>

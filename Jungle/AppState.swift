@@ -20,7 +20,7 @@ struct SocialState {
     var followers = Tree<String>()
     var following = Tree<String>()
     var blocked = Tree<String>()
-    var blockedBy = Tree<String>()
+    var blockedAnonymous = [(String,Double)]()
 }
 
 

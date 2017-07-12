@@ -183,6 +183,26 @@ extension UILabel {
         self.attributedText = title
         
     }
+    
+    func setAnonymousName(anonName:String, color:UIColor, suffix:String, fontSize:CGFloat) {
+        let str = "\(anonName) \(suffix)"
+        var attributes: [String: AnyObject] = [
+            NSForegroundColorAttributeName: color,
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize - 2.0, weight: UIFontWeightLight)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        var a: [String: AnyObject] = [
+            NSForegroundColorAttributeName: color,
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize, weight: UIFontWeightSemibold),
+            ]
+        
+        title.addAttributes(a, range: NSRange(location: 0, length: anonName.characters.count))
+        
+        self.attributedText = title
+        
+    }
+    
 
     public class func size(withText text: String, forWidth width: CGFloat, withFont font: UIFont) -> CGSize {
         let measurementLabel = UILabel()
@@ -314,6 +334,17 @@ func hexStringToUIColor (hex:String) -> UIColor {
         blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
         alpha: CGFloat(1.0)
     )
+}
+
+func darkerColorForColor(color: UIColor) -> UIColor {
+    
+    var r:CGFloat = 0, g:CGFloat = 0, b:CGFloat = 0, a:CGFloat = 0
+    
+    if color.getRed(&r, green: &g, blue: &b, alpha: &a){
+        return UIColor(red: max(r - 0.16, 0.0), green: max(g - 0.16, 0.0), blue: max(b - 0.16, 0.0), alpha: a)
+    }
+    
+    return color
 }
 
 

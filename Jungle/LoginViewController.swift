@@ -93,6 +93,7 @@ class FirstAuthViewController: FirstViewController {
                             Listeners.startListeningToFollowing()
                             Listeners.startListeningToViewed()
                             Listeners.startListeningToSettings()
+                            Listeners.startListeningToBlocked()
                             self.performSegue(withIdentifier: "login", sender: self)
                         } else {
                             UserService.logout()
@@ -230,6 +231,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     Listeners.startListeningToFollowing()
                     Listeners.startListeningToViewed()
                     Listeners.startListeningToSettings()
+                    Listeners.startListeningToBlocked()
                     //Listeners.startListeningForForcedRefresh()
                     self.performSegue(withIdentifier: "login", sender: self)
                 }

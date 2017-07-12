@@ -21,14 +21,12 @@ class PostHeaderView: UIView {
 
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var timeLabel: UILabel!
     
     @IBOutlet weak var likesView: UIView!
     @IBOutlet weak var commentsView: UIView!
     @IBOutlet weak var closeButton: UIButton!
     
     @IBOutlet weak var locationTitle: UILabel!
-    @IBOutlet weak var locationIcon: UIButton!
     
     @IBOutlet weak var likesLabel: UILabel!
     @IBOutlet weak var commentsLabel: UILabel!
@@ -42,7 +40,6 @@ class PostHeaderView: UIView {
         self.userImageView.cropToCircle()
         
     }
-    @IBOutlet weak var timeLabelLeadingConstraint: NSLayoutConstraint!
     
     @IBAction func handleClose(_ sender: Any) {
             delegate?.dismiss()
@@ -64,33 +61,32 @@ class PostHeaderView: UIView {
         
         if let anon = item.anon {
             if isCurrentUserId(id: item.authorId) {
-                self.usernameLabel.text = "\(anon.anonName) (YOU)"
+                self.usernameLabel.setAnonymousName(anonName: anon.anonName, color: anon.color, suffix: "[YOU]", fontSize: 16.0)//.usernameLabel.text = "\(anon.anonName) (YOU)"
             } else {
                 self.usernameLabel.text = anon.anonName
+                self.usernameLabel.textColor = anon.color
+                 self.usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightSemibold)
             }
-            self.usernameLabel.textColor = anon.color
+            
+           
             self.userImageView.image = UIImage(named:anon.animal)
             self.userImageView.backgroundColor = anon.color
-            self.timeLabel.text = item.dateCreated.timeStringSinceNow()
-            self.timeLabel2.text = self.timeLabel.text
+            self.timeLabel2.text = item.dateCreated.timeStringSinceNow()
             self.badgeView.image = nil
-            self.timeLabelLeadingConstraint.constant = 8
         } else {
+            
             UserService.getUser(item.authorId, completion: { _user in
                 guard let user = _user else { return }
                 self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
                 self.userImageView.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
                 self.usernameLabel.setUsernameWithBadge(username: user.username, badge: user.badge, fontSize: 16.0, fontWeight: UIFontWeightSemibold)
                 self.usernameLabel.textColor = UIColor.white
-                self.timeLabel.text = item.dateCreated.timeStringSinceNow()
-                self.timeLabel2.text = self.timeLabel.text
+                self.timeLabel2.text = item.dateCreated.timeStringSinceNow()
                 
                 if user.verified {
                     self.badgeView.image = UIImage(named: "verified_white")
-                    self.timeLabelLeadingConstraint.constant = 28
                 } else {
                     self.badgeView.image = nil
-                    self.timeLabelLeadingConstraint.constant = 8
                 }
                 
             })
@@ -143,7 +139,6 @@ class PostHeaderView: UIView {
     func clean() {
         self.userImageView.image = nil
         self.usernameLabel.text = ""
-        self.timeLabel.text = ""
         self.timeLabel2.text = ""
         if tap != nil {
             self.userImageView.removeGestureRecognizer(tap!)
@@ -152,7 +147,6 @@ class PostHeaderView: UIView {
             self.usernameLabel.removeGestureRecognizer(tap2!)
         }
         locationTitle.text = ""
-        locationIcon.isHidden = true
         
     }
     
@@ -167,16 +161,12 @@ class PostHeaderView: UIView {
         
         if locationKey != nil {
             self.locationKey = locationKey!
-            timeLabel2.isHidden = true
-            timeLabel.isHidden = false
             locationTitle.text = "Loading..."
             LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, _location in
                 if self.locationKey != key { return }
                 self.locationRetrieved(_location)
             }
         } else {
-            timeLabel2.isHidden = false
-            timeLabel.isHidden = true
             clearLocation()
         }
         
@@ -187,14 +177,11 @@ class PostHeaderView: UIView {
         self.location = location
         
         if location != nil {
-            locationTitle.text = location!.name
-            locationIcon.isHidden = false
+            locationTitle.text = " · \(location!.name)"
             placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
             self.locationTitle.isUserInteractionEnabled = true
             self.locationTitle.addGestureRecognizer(placeTap!)
             placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.locationIcon.isUserInteractionEnabled = true
-            self.locationIcon.addGestureRecognizer(placeTap2!)
         } else {
             clearLocation()
         }
@@ -202,13 +189,11 @@ class PostHeaderView: UIView {
     
     func clearLocation() {
         locationTitle.text = ""
-        locationIcon.isHidden = true
         if placeTap != nil {
             self.locationTitle.removeGestureRecognizer(placeTap!)
             placeTap = nil
         }
         if placeTap2 != nil {
-            self.locationIcon.removeGestureRecognizer(placeTap2!)
             placeTap2 = nil
         }
     }

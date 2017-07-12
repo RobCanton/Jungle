@@ -174,6 +174,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.showUser(item.authorId)
     }
     
+    func showAnonOptions(_ aid: String) {
+        delegate?.showAnonOptions(aid)
+    }
+    
     func showPlace(_ location: Location) {
         delegate?.showPlace(location)
     }
@@ -299,7 +303,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        commentsView.setTableComments(comments: item.comments, animated: false)
+        commentsView.setTableComments(item:item, comments: item.comments, animated: false)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -321,7 +325,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func itemStateDidChange(comments: [Comment]) {
         self.headerView.setNumComments(comments.count)
-        self.commentsView.setTableComments(comments: comments, animated: true)
+        guard let item = self.item else { return }
+        self.commentsView.setTableComments(item:item, comments: comments, animated: true)
     }
     
     func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {

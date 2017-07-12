@@ -62,11 +62,8 @@ class UserViewCell: UITableViewCell {
             }
         })
         
-        if mainStore.state.socialState.blockedBy.contains(uid) {
-            followButton.isHidden = true
-        } else {
-            setUserStatus(status: checkFollowingStatus(uid: uid))
-        }
+
+        setUserStatus(status: checkFollowingStatus(uid: uid))
     }
     
     func clearMode(_ enabled:Bool) {
@@ -131,7 +128,6 @@ class UserViewCell: UITableViewCell {
             delegate?.unfollowHandler(user)
             break
         case .None:
-            if mainStore.state.socialState.blockedBy.contains(user.uid) { return }
             setUserStatus(status: .Requested)
             UserService.followUser(uid: user.uid)
             break

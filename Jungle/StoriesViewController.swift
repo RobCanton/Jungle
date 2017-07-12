@@ -16,7 +16,7 @@ protocol PopupProtocol: class {
     func showPlace(_ location:Location) 
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
-    
+    func showAnonOptions(_ aid:String)
     func showMetaLikes()
     func showMetaComments(_ indexPath:IndexPath?)
 }
@@ -339,6 +339,39 @@ extension StoriesViewController: PopupProtocol {
             self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
             self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
             navigationController?.popViewController(animated: animated)
+        }
+    }
+    
+    func showAnonOptions(_ aid: String) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.item else { return }
+        cell.pause()
+        if let my_aid = userState.anonID, my_aid != aid {
+            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                cell.resume()
+            }
+            actionSheet.addAction(cancelActionButton)
+            
+            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
+                
+            }
+            actionSheet.addAction(messageAction)
+            
+            let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
+                
+            }
+
+            actionSheet.addAction(blockAction)
+            
+            let reportAction: UIAlertAction = UIAlertAction(title: "Report", style: .destructive) { action -> Void in
+                
+            }
+            
+            actionSheet.addAction(reportAction)
+
+            self.present(actionSheet, animated: true, completion: nil)
+            
         }
     }
     

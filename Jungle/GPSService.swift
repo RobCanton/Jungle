@@ -7,7 +7,7 @@ import GooglePlaces
 protocol ServiceProtocol {}
 
 
-let minimumAcceptedLikelihood = 0.3333
+let minimumAcceptedLikelihood = 0.0//.3333
 let excludedTypes:[String] = [
     //"street_address",
     "bus_station",

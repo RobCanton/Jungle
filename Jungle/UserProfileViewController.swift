@@ -162,10 +162,10 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
         if isBlocked {
-            sheet.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { _ in
+            sheet.addAction(UIAlertAction(title: "Unblock", style: .destructive, handler: { _ in
                 let alert = UIAlertController(title: "Unblock \(user.username)?", message: "They will be able to view your profile and posts, and send you direct messages.", preferredStyle: .alert)
                 
-                alert.addAction(UIAlertAction(title: "Unblock", style: .default, handler: { (action) -> Void in
+                alert.addAction(UIAlertAction(title: "Unblock", style: .destructive, handler: { (action) -> Void in
                     UserService.unblockUser(uid: user.uid, completion: { success in })
                 }))
                 
@@ -178,7 +178,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             sheet.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { _ in
                 let alert = UIAlertController(title: "Block \(user.username)?", message: "They won't be able to view your profile and posts, or send you direct messages. We won't let them know you blocked them.", preferredStyle: .alert)
                 
-                alert.addAction(UIAlertAction(title: "Block", style: .default, handler: { (action) -> Void in
+                alert.addAction(UIAlertAction(title: "Block", style: .destructive, handler: { (action) -> Void in
                     UserService.blockUser(uid: user.uid, completion: { success in })
                 }))
                 
@@ -189,7 +189,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
             }))
         }
         
-        sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: { _ in
+        sheet.addAction(UIAlertAction(title: "Report User", style: .destructive, handler: { _ in
             
             let reportSheet = UIAlertController(title: nil, message: "Why are you reporting \(user.username)?", preferredStyle: .actionSheet)
             reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))

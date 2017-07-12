@@ -17,7 +17,7 @@
 import Foundation
 import Firebase
 import SwiftMessages
-
+import Alamofire
 
 var badges = [String:Badge]()
 var availableBadgeKeys = [String]()
@@ -534,11 +534,31 @@ class UserService {
         })
     }
     
+    static func reportAnonUser(aid:String, type:ReportType, completion:@escaping ((_ success:Bool)->())) {
+        let ref = Database.database().reference()
+        let uid = mainStore.state.userState.uid
+        let reportRef = ref.child("reports/anon_users/\(aid)/\(uid)")
+        let value: [String: Any] = [
+            "type": type.rawValue,
+            "timestamp": [".sv": "timestamp"]
+        ]
+        reportRef.setValue(value, withCompletionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Report sent!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to send report.")
+                return completion(false)
+            }
+        })
+    }
+    
     static func blockUser(uid:String, completion:@escaping (_ success:Bool)->()) {
         let current_uid = mainStore.state.userState.uid
         
-        let socialRef = ref.child("social/blocked/\(current_uid)/\(uid)")
-        socialRef.setValue(true, withCompletionBlock: { error, ref in
+        
+        let socialRef = ref.child("social/blockedUsers/\(current_uid)/\(uid)")
+        socialRef.setValue([".sv": "timestamp"], withCompletionBlock: { error, ref in
             if error == nil {
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User blocked!")
                 return completion(true)
@@ -552,7 +572,39 @@ class UserService {
     static func unblockUser(uid:String, completion:@escaping (_ success:Bool)->()) {
         let current_uid = mainStore.state.userState.uid
         
-        let socialRef = ref.child("social/blocked/\(current_uid)/\(uid)")
+        let socialRef = ref.child("social/blockedUsers/\(current_uid)/\(uid)")
+        socialRef.removeValue(completionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User unblocked!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to unblock user.")
+                return completion(false)
+            }
+        })
+        
+    }
+    
+    static func blockAnonUser(aid:String, completion:@escaping (_ success:Bool)->()) {
+        let current_uid = mainStore.state.userState.uid
+        
+        
+        let socialRef = ref.child("social/blockedAnonymous/\(current_uid)/\(aid)")
+        socialRef.setValue([".sv": "timestamp"], withCompletionBlock: { error, ref in
+            if error == nil {
+                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User blocked!")
+                return completion(true)
+            } else {
+                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to block user.")
+                return completion(false)
+            }
+        })
+    }
+    
+    static func unblockAnonUser(aid:String, completion:@escaping (_ success:Bool)->()) {
+        let current_uid = mainStore.state.userState.uid
+        
+        let socialRef = ref.child("social/blockedAnonymous/\(current_uid)/\(aid)")
         socialRef.removeValue(completionBlock: { error, ref in
             if error == nil {
                 Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "User unblocked!")
