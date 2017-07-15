@@ -279,7 +279,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func setOverlays() {
         guard let item = item else { return }
         
-        commentBar.setup(item.authorId == mainStore.state.userState.uid)
+        commentBar.setup(isCurrentUserId(id: item.authorId))
         
         self.headerView.setup(item)
         self.headerView.delegate = self

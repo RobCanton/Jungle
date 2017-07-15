@@ -31,6 +31,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     var gradient:CAGradientLayer?
     
     var check:Int = 0
+    var privateLock:UIImageView?
+    var privateLabel:UILabel?
     
     weak var story:Story?
     weak var post:StoryItem?
@@ -181,6 +183,24 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             //self.timeLabel.applyShadow(radius: 3, opacity: 0.90, height: 1.0, shouldRasterize: true)
             
         })
+    }
+    
+    func setPrivate(_ on:Bool) {
+        privateLock?.removeFromSuperview()
+        privateLabel?.removeFromSuperview()
+        if on {
+            privateLock = UIImageView(frame: CGRect(x: 3, y: 3, width:16, height: 16))
+            privateLock?.tintColor = UIColor.white
+            privateLock?.image = UIImage(named: "lock_white")
+            
+            privateLabel = UILabel(frame: CGRect(x: 22, y: 3, width: self.frame.width - 22, height: 22))
+            privateLabel?.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightRegular)
+            privateLabel?.textColor = UIColor.white
+            privateLabel?.text = "Anonymous"
+            
+            self.addSubview(privateLabel!)
+            self.addSubview(privateLock!)
+        }
     }
     
     func setupCell (withPost post:StoryItem) {

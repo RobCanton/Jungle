@@ -16,6 +16,10 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
     weak var message_service:MessageService?
     weak var notification_service:NotificationService?
     
+    
+    var unseenMessages = 0
+    var unseenNotifications = 0
+    
     var notificationDots = [UIView]()
     
     override func viewDidLoad() {
@@ -90,28 +94,37 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
     }
     
     func conversationsUpdated(_ conversations: [Conversation]) {
-        var unseenMessages = 0
+        var _unseenMessages = 0
         for conversation in conversations {
             if !conversation.getSeen() {
-                unseenMessages += 1
+                _unseenMessages += 1
             }
         }
+        
+        unseenMessages = _unseenMessages
         
         tabBar.items?[1].badgeValue = unseenMessages > 0 ? "\(unseenMessages)" : nil
         //notificationDots[1].isHidden = unseenMessages == 0 ? true : false
+        
+        UIApplication.shared.applicationIconBadgeNumber = unseenMessages + unseenNotifications
     }
     
     func notificationsUpdated(_ notificationsDict: [String : Bool]) {
-        var unseenNotifications = 0
+        var _unseenNotifications = 0
         for (_, seen) in notificationsDict {
             if !seen {
-                unseenNotifications += 1
+                _unseenNotifications += 1
             }
         }
         
+        unseenNotifications = _unseenNotifications
         tabBar.items?[3].badgeValue = unseenNotifications > 0 ? "\(unseenNotifications)" : nil
         //notificationDots[2].isHidden = unseenNotifications == 0 ? true : false
+        
+        UIApplication.shared.applicationIconBadgeNumber = unseenMessages + unseenNotifications
+        
     }
+    
     
     
     

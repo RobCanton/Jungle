@@ -17,12 +17,14 @@ protocol SortOptionsProtocol:class {
 class SortOptionsView: UIView {
     
     
+    @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var backgroundView: UIView!
     @IBOutlet weak var slider: TGPDiscreteSlider!
     @IBOutlet weak var sliderLabels: TGPCamelLabels!
     
-    @IBOutlet weak var setButton: UIButton!
     
+    @IBOutlet weak var anonSwitch: UISwitch!
     
     weak var delegate:SortOptionsProtocol?
     
@@ -57,9 +59,10 @@ class SortOptionsView: UIView {
         backgroundView.layer.cornerRadius = 8.0
         backgroundView.clipsToBounds = true
         
-        setButton.layer.cornerRadius = 6.0
-        setButton.clipsToBounds = true
+        userImageView.cropToCircle()
         
+        anonSwitch.setOn(userState.anonMode, animated: false)
+        handleAnonSwitch(anonSwitch)
     }
     
     
@@ -67,37 +70,68 @@ class SortOptionsView: UIView {
     func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {
         let value = Int(sender.value)
         sliderLabels?.value = UInt(value)
+        let distance = Config.ranges[value].distance
+        LocationService.sharedInstance.setSearchRadius(distance)
+        print("Range changed")
     }
 
     func valueChanged(_ sender: TGPDiscreteSlider, event:UIEvent) {
         let value = Int(slider.value)
         sliderLabels?.value = UInt(sender.value)
-        activateSetButtton(Config.ranges[value].distance != LocationService.sharedInstance.radius)
+        print("valueChanged")
     }
     
-    func activateSetButtton(_ activate:Bool) {
-        if activate {
-            setButton.backgroundColor = accentColor
-            setButton.isEnabled = true
-        } else {
-            setButton.backgroundColor = UIColor.lightGray
-            setButton.isEnabled = false
-        }
-    }
-    
-    
-    @IBAction func handleSet(_ sender: Any) {
-        let value = Int(slider.value)
 
-        let distance = Config.ranges[value].distance
-        LocationService.sharedInstance.setSearchRadius(distance)
-        
-        
-        delegate?.dismissSortOptions()
-    }
+    
+    
+//    @IBAction func handleSet(_ sender: Any) {
+//        let value = Int(slider.value)
+//
+//        let distance = Config.ranges[value].distance
+//        LocationService.sharedInstance.setSearchRadius(distance)
+//        
+//        
+//        delegate?.dismissSortOptions()
+//    }
 
     @IBAction func handleDismiss(_ sender: Any) {
         delegate?.dismissSortOptions()
+    }
+    @IBAction func handleAnonSwitch(_ sender: Any) {
+        if anonSwitch.isOn {
+            mainStore.dispatch(GoAnonymous())
+            setTitleLabel(prefix: "Use ", username: "anonymously")
+            userImageView.image = UIImage(named: "private_dark")
+        } else {
+            mainStore.dispatch(GoPublic())
+            
+            if let user = userState.user {
+                setTitleLabel(prefix: "Use as ", username: "@\(user.username)")
+                userImageView.loadImageAsync(user.imageURL, completion: nil)
+            } else {
+                usernameLabel.text = "User not found!"
+                userImageView.image = nil
+            }
+            
+        }
+    }
+    
+    func setTitleLabel(prefix:String, username:String) {
+        let str = "\(prefix)\(username)"
+        let attributes: [String: AnyObject] = [
+            NSForegroundColorAttributeName: UIColor.black,
+            NSFontAttributeName : UIFont.systemFont(ofSize: 15, weight: UIFontWeightSemibold)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        let a: [String: AnyObject] = [
+            NSForegroundColorAttributeName: UIColor.darkGray,
+            NSFontAttributeName : UIFont.systemFont(ofSize: 15, weight: UIFontWeightRegular),
+            ]
+        title.addAttributes(a, range: NSRange(location: 0, length: prefix.characters.count))
+        
+        usernameLabel.attributedText = title
+        
     }
 }
 

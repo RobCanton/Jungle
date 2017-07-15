@@ -96,7 +96,7 @@ class ItemStateController {
         guard let item = self.item else { return }
         let uid = mainStore.state.userState.uid
         numLikesRef?.removeAllObservers()
-        numLikesRef = Database.database().reference().child("uploads/meta/\(item.key)/likes")
+        numLikesRef = Database.database().reference().child("uploads/meta/\(item.key)/stats/likes")
         numLikesRef!.observe(.value, with: { snapshot in
             var count = 0
             if let _count = snapshot.value as? Int {
@@ -112,7 +112,7 @@ class ItemStateController {
         guard let item = self.item else { return }
         let uid = mainStore.state.userState.uid
         numCommentsRef?.removeAllObservers()
-        numCommentsRef = Database.database().reference().child("uploads/meta/\(item.key)/comments")
+        numCommentsRef = Database.database().reference().child("uploads/meta/\(item.key)/stats/comments")
         numCommentsRef!.observe(.value, with: { snapshot in
             var count = 0
             if let _count = snapshot.value as? Int {

@@ -10,6 +10,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     var shouldAutoPause = true
     var shouldAnimate = false
     var paused = false
+    var isCurrentItem = false
     
     var activityView:NVActivityIndicatorView!
     
@@ -84,7 +85,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func setOverlays() {
         guard let item = storyItem else { return }
 
-        commentBar.setup(item.authorId == mainStore.state.userState.uid)
+        commentBar.setup(isCurrentUserId(id: item.authorId))
         
         self.headerView.setup(item)
         self.headerView.delegate = self
@@ -235,10 +236,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func editCaption() {
         guard let item = self.storyItem else { return }
         editCaptionMode = true
-        commentBar.textField.placeholder = "Edit Caption"
-        commentBar.sendButton.setTitle("Set", for: .normal)
         commentBar.textField.becomeFirstResponder()
-        commentBar.textField.text = item.caption
     }
     
     func showAuthor() {
@@ -342,6 +340,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func playVideo() {
         guard let item = self.storyItem else { return }
         if item.shouldBlock { return }
+        if !isCurrentItem { return }
         self.playerLayer?.player?.play()
     }
     
@@ -412,7 +411,18 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         
         self.commentsView.showTimeLabels(visible: true)
-        self.commentBar.setKeyboardUp(true)
+        
+        if editCaptionMode {
+            commentBar.textField.placeholder = "Edit Caption"
+            commentBar.sendButton.setImage(nil, for: .normal)
+            commentBar.sendButton.setTitle("Set", for: .normal)
+            commentBar.moreButton.isHidden = true
+            commentBar.likeButton.isHidden = true
+            commentBar.textField.text = storyItem.caption
+        } else {
+            self.commentBar.setKeyboardUp(true)
+        }
+        
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.frame.height
             let textViewFrame = self.commentBar.frame
@@ -441,12 +451,15 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         self.commentsView.showTimeLabels(visible: false)
         self.commentBar.setKeyboardUp(false)
-//        if editCaptionMode {
-//            commentBar.textField.placeholder = "Comment"
-//            commentBar.textField.text = ""
-//            commentBar.sendButton.setTitle("Send", for: .normal)
-//            editCaptionMode = false
-//        }
+        if editCaptionMode {
+            commentBar.textField.placeholder = "Comment"
+            commentBar.textField.text = ""
+            commentBar.sendButton.setTitle("", for: .normal)
+            commentBar.sendButton.setImage(UIImage(named: "send"), for: .normal)
+            commentBar.moreButton.isHidden = false
+            commentBar.likeButton.isHidden = false
+            editCaptionMode = false
+        }
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             
             let height = self.frame.height

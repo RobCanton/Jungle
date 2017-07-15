@@ -161,7 +161,7 @@ class PostHeaderView: UIView {
         
         if locationKey != nil {
             self.locationKey = locationKey!
-            locationTitle.text = "Loading..."
+            locationTitle.text = " · Loading..."
             LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, _location in
                 if self.locationKey != key { return }
                 self.locationRetrieved(_location)

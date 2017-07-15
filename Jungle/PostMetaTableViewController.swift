@@ -586,8 +586,6 @@ extension PostMetaTableViewController: CommentCellProtocol {
             
             actionSheet.addAction(reportAction)
             
-            actionSheet.addAction(reportAction)
-            
             self.present(actionSheet, animated: true, completion: nil)
             
         }

@@ -11,6 +11,11 @@ import UIKit
 
 class MasterNavigationController: UINavigationController {
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.navigationBar.tintColor = UIColor.black
+    }
+    
     func activateNavbar(_ activate: Bool) {
         let navbar = navigationBar as! MasterNavigationBar
         navbar.ignoreTouches = !activate

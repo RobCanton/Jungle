@@ -185,10 +185,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     func handleOptions() {
         let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
         sortOptionsView.delegate = self
-        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 190.0)
+        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 234)
         let messageView = BaseView(frame: f)
         messageView.installContentView(sortOptionsView)
-        messageView.preferredHeight = 190.0
+        messageView.preferredHeight = 234
         messageView.configureDropShadow()
         var config = SwiftMessages.defaultConfig
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)

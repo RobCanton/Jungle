@@ -74,6 +74,7 @@
                     <constraints>
                         <constraint firstAttribute="width" secondItem="jxW-Vb-FFh" secondAttribute="height" multiplier="1:1" id="Z6p-91-Tp9"/>
                     </constraints>
+                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <state key="normal" image="send">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

@@ -26,6 +26,16 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     var shouldScrollToBottom = false
     
     var currentIndexPath:IndexPath?
+    {
+        willSet {
+            getCurrentCell()?.isCurrentItem = false
+            print("Prev value: \(currentIndexPath)")
+        }
+        didSet {
+            getCurrentCell()?.isCurrentItem = true
+            print("Next value: \(currentIndexPath)")
+        }
+    }
     
     deinit {
         print("Deinit >> GalleryViewController")
@@ -67,6 +77,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         self.navigationController?.delegate = transitionController
         
+        getCurrentCell()?.isCurrentItem = true
         getCurrentCell()?.resume()
         
         
@@ -281,8 +292,8 @@ extension GalleryViewController: PopupProtocol {
     func showAnonOptions(_ aid: String) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
-        cell.pause()
         if let my_aid = userState.anonID, my_aid != aid {
+            cell.pause()
             let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
             let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
                 cell.resume()

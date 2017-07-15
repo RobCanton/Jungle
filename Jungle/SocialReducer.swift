@@ -85,6 +85,13 @@ func SocialReducer(action: Action, state:SocialState?) -> SocialState {
     return state
 }
 
+func isBlocked(_ id:String) -> Bool {
+    if mainStore.state.socialState.blocked.contains(id) {
+        return true
+    }
+    return isAnonBlocked(id)
+}
+
 func isAnonBlocked(_ aid:String) -> Bool{
     for (id,_) in mainStore.state.socialState.blockedAnonymous {
         if id == aid { return true }

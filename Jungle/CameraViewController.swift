@@ -151,6 +151,24 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
             videoFileOutput = AVCaptureMovieFileOutput()
             self.captureSession!.addOutput(videoFileOutput)
             
+            // Add audio device
+            let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
+            do {
+                
+                audioInput = try AVCaptureDeviceInput(device: audioDevice)
+                if self.captureSession!.canAddInput(audioInput!) {
+                    print("Added audio tings")
+                    self.captureSession!.beginConfiguration()
+                    self.captureSession!.addInput(audioInput!)
+                    self.captureSession!.commitConfiguration()
+                } else {
+                    print("Dont need to add audio tings")
+                }
+            } catch {
+                print("Unable to add audio device to the recording.")
+            }
+
+            
  
             if captureSession?.canAddInput(input) != nil {
                 captureSession?.addInput(input)
@@ -273,22 +291,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     
     func recordVideo() {
         
-//        // Add audio device
-//        let audioDevice: AVCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
-//        do {
-//            
-//            audioInput = try AVCaptureDeviceInput(device: audioDevice)
-//            if self.captureSession!.canAddInput(audioInput!) {
-//                print("Added audio tings")
-//                self.captureSession!.beginConfiguration()
-//                self.captureSession!.addInput(audioInput!)
-//                self.captureSession!.commitConfiguration()
-//            } else {
-//                print("Dont need to add audio tings")
-//            }
-//        } catch {
-//            print("Unable to add audio device to the recording.")
-//        }
         cameraState = .Recording
         progressTimer = Timer.scheduledTimer(timeInterval: 0.025, target: self, selector: #selector(updateProgress), userInfo: nil, repeats: true)
         
@@ -316,14 +318,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
         
         playerLayer!.player?.play()
         playerLayer!.player?.actionAtItemEnd = .none
-        
-        // Remove audio device
-        captureSession!.beginConfiguration()
-        if audioInput != nil {
-            captureSession!.removeInput(audioInput!)
-        }
-        captureSession!.commitConfiguration()
-        print("Audio input removed")
         
         cameraState = .VideoTaken
         loopVideo()

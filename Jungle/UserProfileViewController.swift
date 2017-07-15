@@ -258,7 +258,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         guard let userId = uid else { return }
        // if mainStore.state.socialState.blockedBy.contains(userId) { return }
-        postsRef = UserService.ref.child("users/uploads/\(userId)")
+        postsRef = UserService.ref.child("users/uploads/public/\(userId)")
         postsRef?.observeSingleEvent(of: .value, with: { snapshot in
             var postKeys = [String]()
             if snapshot.exists() {

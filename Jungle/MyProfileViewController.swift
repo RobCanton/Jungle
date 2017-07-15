@@ -130,7 +130,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         guard let userId = uid else { return }
         stopListeningToPosts()
         // if mainStore.state.socialState.blockedBy.contains(userId) { return }
-        postsRef = UserService.ref.child("users/uploads/\(userId)")
+        postsRef = UserService.ref.child("users/uploads/public/\(userId)")
         postsRef?.observeSingleEvent(of: .value, with: { snapshot in
             var postKeys = [String]()
             if snapshot.exists() {
@@ -139,8 +139,25 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
                     postKeys.append(key)
                 }
             }
-            self.postKeys = postKeys
-            self.downloadStory(postKeys: postKeys)
+            
+            self.getAnonPosts(postKeys)
+        })
+    }
+    
+    func getAnonPosts(_ publicPosts:[String]) {
+        guard let userId = uid else { return }
+        let anonPostsRef = UserService.ref.child("users/uploads/anon/\(userId)")
+        anonPostsRef.observeSingleEvent(of: .value, with: { snapshot in
+            var anonPostKeys = [String]()
+            if snapshot.exists() {
+                let keys = snapshot.value as! [String:AnyObject]
+                for (key, _) in keys {
+                    anonPostKeys.append(key)
+                }
+            }
+            self.postKeys = publicPosts
+            self.postKeys.append(contentsOf: anonPostKeys)
+            self.downloadStory(postKeys: self.postKeys)
         })
     }
     
@@ -219,7 +236,9 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        cell.setupCell(withPost: posts[indexPath.item])
+        let post = posts[indexPath.item]
+        cell.setupCell(withPost: post)
+        cell.setPrivate(post.anon != nil)
         return cell
     }
     

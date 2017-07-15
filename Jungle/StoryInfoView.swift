@@ -50,28 +50,48 @@ class StoryInfoView: UIView {
     func setInfo(_ item:StoryItem) {
 
         self.userImageView.cropToCircle()
-        UserService.getUser(item.authorId, completion: { user in
-            if user != nil {
-                self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 16.0, fontWeight: UIFontWeightMedium)
-                self.captionLabel.text = item.caption
-                if item.caption != "" {
-                    self.usernameTopConstraint.constant = 8
-                } else {
-                    self.usernameTopConstraint.constant = 16
-                }
-                
-                if user!.verified {
-                    self.verifiedBadge.image = UIImage(named:"verified_white")
-                } else {
-                    self.verifiedBadge.image = nil
-                }
-                self.userImageView.loadImageAsync(user!.imageURL, completion: nil)
-                
-                let tap = UITapGestureRecognizer(target: self, action: #selector(self.authorTapped))
-                self.userImageView.isUserInteractionEnabled = true
-                self.userImageView.addGestureRecognizer(tap)
+        
+        if let anon = item.anon {
+            self.verifiedBadge.image = nil
+            self.userImageView.image = UIImage(named:anon.animal)
+            self.captionLabel.text = item.caption
+            self.usernameLabel.textColor = anon.color
+            self.userImageView.backgroundColor = anon.color
+            
+            if let anonID = userState.anonID, anonID == item.authorId {
+                self.usernameLabel.setAnonymousName(anonName: anon.anonName, color: anon.color, suffix: "[YOU]", fontSize: 14.0)
+            } else {
+                self.usernameLabel.text = anon.anonName
             }
-        })
+            let tap = UITapGestureRecognizer(target: self, action: #selector(self.authorTapped))
+            self.userImageView.isUserInteractionEnabled = true
+            self.userImageView.addGestureRecognizer(tap)
+        } else {
+        
+            UserService.getUser(item.authorId, completion: { user in
+                if user != nil {
+                    self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightMedium)
+                    self.captionLabel.text = item.caption
+                    if item.caption != "" {
+                        self.usernameTopConstraint.constant = 8
+                    } else {
+                        self.usernameTopConstraint.constant = 16
+                    }
+                    
+                    if user!.verified {
+                        self.verifiedBadge.image = UIImage(named:"verified_white")
+                    } else {
+                        self.verifiedBadge.image = nil
+                    }
+                    self.userImageView.loadImageAsync(user!.imageURL, completion: nil)
+                    
+                    let tap = UITapGestureRecognizer(target: self, action: #selector(self.authorTapped))
+                    self.userImageView.isUserInteractionEnabled = true
+                    self.userImageView.addGestureRecognizer(tap)
+                }
+            })
+            
+        }
         
     }
     

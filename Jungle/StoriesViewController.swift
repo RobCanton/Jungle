@@ -353,23 +353,34 @@ extension StoriesViewController: PopupProtocol {
             }
             actionSheet.addAction(cancelActionButton)
             
-            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
-                
-            }
-            actionSheet.addAction(messageAction)
+            //            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
+            //
+            //            }
+            //            actionSheet.addAction(messageAction)
             
             let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
-                
+                UserService.blockAnonUser(aid: aid) { success in
+                    print("Success: \(success)")
+                    cell.resume()
+                }
             }
-
+            
             actionSheet.addAction(blockAction)
             
-            let reportAction: UIAlertAction = UIAlertAction(title: "Report", style: .destructive) { action -> Void in
-                
+            let reportAction: UIAlertAction = UIAlertAction(title: "Report User", style: .destructive) { action -> Void in
+                let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this user?", preferredStyle: .actionSheet)
+                reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                reportSheet.addAction(UIAlertAction(title: "Harassment", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Harassment, completion: { success in })
+                }))
+                reportSheet.addAction(UIAlertAction(title: "Bot", style: .destructive, handler: { _ in
+                    UserService.reportAnonUser(aid: aid, type: .Bot, completion: { success in })
+                }))
+                self.present(reportSheet, animated: true, completion: nil)
             }
             
             actionSheet.addAction(reportAction)
-
+            
             self.present(actionSheet, animated: true, completion: nil)
             
         }

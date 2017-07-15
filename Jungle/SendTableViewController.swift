@@ -303,16 +303,16 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
             
             UploadService.compressVideo(inputURL: videoURL, outputURL: outputUrl, handler: { session in
                 DispatchQueue.main.async {
-                    UploadService.uploadVideo(upload: self.upload, completion: { success in
+                    UploadService.getUploadKey(upload: self.upload) { success in
                         self.sent()
-                    })
+                    }
                 }
             })
             
         } else if upload.image != nil {
-            UploadService.sendImage(upload: upload, completion: { success in
+            UploadService.getUploadKey(upload: self.upload) { success in
                 self.sent()
-            })
+            }
         }
     }
     

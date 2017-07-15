@@ -174,18 +174,44 @@ class UploadService {
             }
         })
     }
+    
+    static func getUploadKey(upload:Upload, completion:@escaping (_ success:Bool)->()){
+        
+        Auth.auth().currentUser!.getIDToken() { token, error in
+            
+            if token == nil || error != nil {
+                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+            }
+            
+            let headers: HTTPHeaders = ["Authorization": "Bearer \(token!)", "Accept": "application/json", "Content-Type" :"application/json"]
+            Alamofire.request("\(API_ENDPOINT)/uploadKey", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    
+                    if let json = response.result.value as? [String:Any], let uploadKey = json["uploadKey"] as? String {
+                        print("UPLOADKEY: \(uploadKey)") // serialized json response
+                        
+                        completion(true)
+                        if upload.videoURL != nil {
+                            uploadVideo(uploadKey: uploadKey, headers: headers, upload: upload)
+                        } else {
+                            uploadImage(uploadKey: uploadKey, headers: headers, upload: upload)
+                        }
+                        return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                    } else {
+                        completion(false)
+                        return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+                    }
+                }
+            }
+        }
+    }
 
-    static func sendImage(upload:Upload, completion: (()->())) {
+    private static func uploadImage(uploadKey:String, headers:HTTPHeaders, upload:Upload) {
         
         //If upload has no destination do not upload it
         guard let image = upload.image else { return }
         
-        let ref = Database.database().reference()
-        let dataRef = ref.child("uploads/meta").childByAutoId()
-        let postKey = dataRef.key
-        
-        let uid = mainStore.state.userState.uid
-        
+        let uid = userState.uid
         Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
         
         let avgColor = image.areaAverage()
@@ -200,88 +226,75 @@ class UploadService {
             
             // Upload file and metadata to the object
             let storageRef = Storage.storage().reference()
-            let uploadTask = storageRef.child("user_uploads/\(uid)/\(postKey).jpg").putData(data, metadata: metadata) { metadata, error in
+            let uploadTask = storageRef.child("user_uploads/\(uid)/\(uploadKey).jpg").putData(data, metadata: metadata) { metadata, error in
                 
                 if (error != nil) {
                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                 } else {
                     
+                    // Metadata contains file metadata such as size, content-type, and download URL.
+                    let downloadURL = metadata!.downloadURL()
+                    var obj = [
+                        "key": uploadKey,
+                        "url": downloadURL!.absoluteString,
+                        "contentType": contentTypeStr,
+                        "length": 6.0,
+                        "color": colorHex,
+                        ] as [String : Any]
                     
-                    Auth.auth().currentUser!.getIDToken() { token, error in
-                        
-                        if error != nil { return }
-                        
-                        guard let tokenID = token else { return }
-                        
-                        // Metadata contains file metadata such as size, content-type, and download URL.
-                        let downloadURL = metadata!.downloadURL()
-                        var obj = [
-                            "url": downloadURL!.absoluteString,
-                            "contentType": contentTypeStr,
-                            "length": 6.0,
-                            "color": colorHex,
-                            ] as [String : Any]
-                        
-                        if let coordinates = upload.coordinates {
-                            obj["coordinates"] = [
-                                "lat": coordinates.coordinate.latitude,
-                                "lon":coordinates.coordinate.longitude
-                            ] as [String: Any]
-                        }
-                        
-                        if let place = upload.place {
-                            obj["placeID"] = place.placeID
-                        }
-                        
-                        if let caption = upload.caption {
-                            obj["caption"] = caption
-                        }
-                        
-                        if let aid = userState.anonID, userState.anonMode {
-                            obj["aid"] = aid
-                        }
-                        
-                        
-                        let headers: HTTPHeaders = ["Authorization": "Bearer \(tokenID)", "Accept": "application/json", "Content-Type" :"application/json"]
-                        print("ALAMOFIRE REQEUST")
-                        Alamofire.request("https://us-central1-jungleiosapp.cloudfunctions.net/app/upload", method: .post, parameters: obj, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
-                            DispatchQueue.main.async {
-                                
-                                // result of response serialization : SUCCESS / FAILURE
-                                print("Response result is :",response.result)
-                                
-                                switch response.result {
-                                case .success:
-                                    print("Validation Successful")
-                                    globalMainInterfaceProtocol?.fetchAllStories()
-                                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
-                                case .failure(let error):
-                                    print(error)
-                                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
-                                }
-                            
-                            }
-                            
-                        }
-                        
-                        
+                    if let coordinates = upload.coordinates {
+                        obj["coordinates"] = [
+                            "lat": coordinates.coordinate.latitude,
+                            "lon":coordinates.coordinate.longitude
+                        ] as [String: Any]
                     }
                     
+                    if let place = upload.place {
+                        obj["placeID"] = place.placeID
+                    }
+                    
+                    if let caption = upload.caption {
+                        obj["caption"] = caption
+                    }
+                    
+                    if let aid = userState.anonID, userState.anonMode {
+                        obj["aid"] = aid
+                    }
+                
+                    Alamofire.request("\(API_ENDPOINT)/upload", method: .post, parameters: obj, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                        DispatchQueue.main.async {
+                            
+                            // result of response serialization : SUCCESS / FAILURE
+                            print("Response result is :",response.result)
+                            
+                            switch response.result {
+                            case .success:
+                                print("Validation Successful")
+                                globalMainInterfaceProtocol?.fetchAllStories()
+                                return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                            case .failure(let error):
+                                print(error)
+                                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
+                            }
+                        }
+                    }
                 }
             }
-            completion()
         }
     }
     
-    static func uploadVideo(upload:Upload, completion:(_ success:Bool)->()){
+    
+    private static func uploadVideo(uploadKey:String, headers:HTTPHeaders, upload:Upload) {
         
-        if upload.videoURL == nil { return }
+        guard let url = upload.videoURL else { return }
         
-        let url = upload.videoURL!
+        var author = mainStore.state.userState.uid
+        let aid = userState.anonID
+        if userState.anonMode && aid == nil { return }
         
-        let ref = Database.database().reference()
-        let dataRef = ref.child("uploads/meta").childByAutoId()
-        let postKey = dataRef.key
+        if userState.anonMode && aid != nil {
+            author = aid!
+        }
         
         Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
         
@@ -291,98 +304,80 @@ class UploadService {
             let saturatedColor = avgColor.modified(withAdditionalHue: 0, additionalSaturation: 0.3, additionalBrightness: 0.20)
             let colorHex = saturatedColor.htmlRGBColor
             if let data = UIImageJPEGRepresentation(videoStill, 0.5) {
-                
-                completion(true)
-                
+
                 let stillMetaData = StorageMetadata()
                 stillMetaData.contentType = "image"
-                let uid = mainStore.state.userState.uid
-                storageRef.child("user_uploads/\(uid)/\(postKey).jpg").putData(data, metadata: stillMetaData) { metadata, error in
-                  
+                storageRef.child("user_uploads/\(author)/\(uploadKey).jpg").putData(data, metadata: stillMetaData) { metadata, error in
+
                     let thumbURL = metadata?.downloadURL()?.absoluteString
                     if (thumbURL == nil || error != nil) {
                         return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                     }
-                    
+
                     let data = NSData(contentsOf: url)
-                    
+
                     let metadata = StorageMetadata()
                     let contentTypeStr = "video"
                     let playerItem = AVAsset(url: url)
                     let length = CMTimeGetSeconds(playerItem.duration)
                     metadata.contentType = contentTypeStr
-                    
+
                     let storageRef = Storage.storage().reference()
-                    storageRef.child("user_uploads/\(uid)/\(postKey).mp4").putData(data as! Data, metadata: metadata) { metadata, error in
-                        
+                    storageRef.child("user_uploads/\(author)/\(uploadKey).mp4").putData(data as! Data, metadata: metadata) { metadata, error in
+
                         if (error != nil) {
                             // HANDLE ERROR
                             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                         } else {
+
                             // Metadata contains file metadata such as size, content-type, and download URL.
-                            
                             let downloadURL = metadata!.downloadURL()
                             var obj = [
-                                "author": uid,
+                                "key": uploadKey,
                                 "url": thumbURL!,
                                 "videoURL": downloadURL!.absoluteString,
                                 "contentType": contentTypeStr,
-                                "dateCreated": [".sv": "timestamp"],
                                 "length": length,
                                 "color": colorHex,
-                                "live":true,
                                 ] as [String : Any]
-                            
+
+                            if let coordinates = upload.coordinates {
+                                obj["coordinates"] = [
+                                    "lat": coordinates.coordinate.latitude,
+                                    "lon":coordinates.coordinate.longitude
+                                    ] as [String: Any]
+                            }
+
                             if let place = upload.place {
                                 obj["placeID"] = place.placeID
                             }
-                            
+
                             if let caption = upload.caption {
                                 obj["caption"] = caption
                             }
-                            
-                            var updateValues: [String : Any] = [
-                                "uploads/meta/\(postKey)": obj,
-                                "users/uploads/\(uid)/\(postKey)": [".sv": "timestamp"],
-                                "users/story/\(uid)/posts/\(postKey)": [".sv": "timestamp"]
-                            ]
-                            
-                            if let coordinates = upload.coordinates {
-                                updateValues["uploads/location/\(postKey)/u"] = uid
-                                updateValues["uploads/location/\(postKey)/lat"] = coordinates.coordinate.latitude
-                                updateValues["uploads/location/\(postKey)/lon"] = coordinates.coordinate.longitude
-                                updateValues["uploads/location/\(postKey)/t"]   = [".sv": "timestamp"]
-                                
-                                if let place = upload.place {
-                                    let placeId = place.placeID
-                                    updateValues["places/info/\(placeId)/name"] = place.name
-                                    updateValues["places/info/\(placeId)/lat"] = place.coordinate.latitude
-                                    updateValues["places/info/\(placeId)/lon"] = place.coordinate.longitude
-                                    updateValues["places/info/\(placeId)/address"] = place.formattedAddress
-                                    for type in place.types {
-                                        updateValues["places/info/\(place.placeID)/types/\(type)"] = true
+
+                            if aid != nil && userState.anonMode {
+                                obj["aid"] = aid!
+                            }
+
+                            Alamofire.request("\(API_ENDPOINT)/upload", method: .post, parameters: obj, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                                DispatchQueue.main.async {
+
+                                    // result of response serialization : SUCCESS / FAILURE
+                                    print("Response result is :",response.result)
+
+                                    switch response.result {
+                                    case .success:
+                                        print("Validation Successful")
+                                        globalMainInterfaceProtocol?.fetchAllStories()
+                                        return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                                    case .failure(let error):
+                                        print(error)
+                                        return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                                     }
-                                    updateValues["places/coords/\(placeId)/lat"] = place.coordinate.latitude
-                                    updateValues["places/coords/\(placeId)/lon"] = place.coordinate.longitude
-                                    updateValues["places/posts/\(placeId)/\(postKey)"] = [".sv": "timestamp"]
-                                    updateValues["places/story/\(placeId)/\(postKey)/t"] = [".sv": "timestamp"]
-                                    updateValues["places/story/\(placeId)/\(postKey)/u"] = uid
                                 }
                             }
                             
-                            ref.updateChildValues(updateValues, withCompletionBlock: { error, ref in
-                                
-                                if error == nil {
-                                    globalMainInterfaceProtocol?.fetchAllStories()
-                                    
-                                    let subscriberRef = ref.child("uploads/subscribers/\(postKey)/\(uid)")
-                                    subscriberRef.setValue(true)
-                                    
-                                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
-                                } else {
-                                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
-                                }
-                            })
                         }
                     }
                     
@@ -390,9 +385,8 @@ class UploadService {
                 }
             }
         } else {
-            completion(false)
+           return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
         }
-
     }
     
     private static func generateVideoStill(url:URL) -> UIImage?{
@@ -475,46 +469,52 @@ class UploadService {
                         contentType = .image
                     } else if contentTypeStr == "video" {
                         contentType = .video
-                        if dict["videoURL"] != nil {
-                            videoURL = URL(string: dict["videoURL"] as! String)!
+                        if let _videoURL = dict["videoURL"] as? String {
+                            videoURL = URL(string: _videoURL)!
                         }
                     }
                     
-                    guard let dateCreated = dict["timestamp"] as? Double else { return completion(item) }
+                    
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
                     let viewers = [String:Double]()
                     let likes = [String:Double]()
                     let comments = [Comment]()
                     
-                    var numViews = 0
-                    if let _views = dict["views"] as? Int {
+                    var numViews:Int = 0
+                    var numLikes:Int = 0
+                    var numComments:Int = 0
+                    var numCommenters:Int = 0
+                    var numReports:Int = 0
+                    var popularity:Double = 0.0
+                    
+                    guard let stats = dict["stats"] as? [String:Any] else { return completion(item) }
+                    guard let dateCreated = stats["timestamp"] as? Double else { return completion(item) }
+                    
+                    if let _views = stats["views"] as? Int {
                         numViews = _views
                     }
                     
-                    var numLikes = 0
-                    if let _likes = dict["likes"] as? Int {
+                    if let _likes = stats["likes"] as? Int {
                         numLikes = _likes
                     }
                     
-                    var numComments = 0
-                    if let _numComments = dict["comments"] as? Int {
+                    if let _numComments = stats["comments"] as? Int {
                         numComments = _numComments
                     }
                     
-                    var numCommenters = 0
-                    if let _numCommenters = dict["commenters"] as? Int {
+                    if let _numCommenters = stats["commenters"] as? Int {
                         numCommenters = _numCommenters
                     }
                     
-                    var popularity:Double = 0
+                    
+                    if let _numReports = stats["reports"] as? Int {
+                        numReports = _numReports
+                    }
+
+                    
                     if let _popularity = dict["popularity"] as? Double {
                         popularity = _popularity
-                    }
-                    
-                    var numReports = 0
-                    if let _numReports = dict["reports"] as? Int {
-                        numReports = _numReports
                     }
                     
                     var color:String?
@@ -552,6 +552,11 @@ class UploadService {
         if !UserService.isEmailVerified {
             completion(false)
             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
+        
+        if isBlocked(post.authorId) {
+            completion(false)
+            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their post.")
         }
         
         let now = Date()
@@ -666,6 +671,10 @@ class UploadService {
         
         if !UserService.isEmailVerified {
             return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
+        
+        if isBlocked(post.authorId) {
+            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to like their post.")
         }
         
         let ref = Database.database().reference()

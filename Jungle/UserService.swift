@@ -31,13 +31,23 @@ class UserService {
     static var allowContent = false
     
     static func logout() {
-        let uid = mainStore.state.userState.uid
-        ref.child("users/badges/\(uid)").removeAllObservers()
-        Listeners.stopListeningToAll()
-        mainStore.dispatch(ClearSocialState())
-        mainStore.dispatch(UserIsUnauthenticated())
+        if let token = InstanceID.instanceID().token() {
+            let fcmRef = ref.child("users/FCMToken/\(token)")
+            fcmRef.removeValue() { error, ref in
+                
+                let uid = mainStore.state.userState.uid
+                ref.child("users/badges/\(uid)").removeAllObservers()
+                Listeners.stopListeningToAll()
+                mainStore.dispatch(ClearSocialState())
+                mainStore.dispatch(UserIsUnauthenticated())
+                
+                try! Auth.auth().signOut()
+                
+            }
+        }
         
-        try! Auth.auth().signOut()
+
+
     }
     
     static var isEmailVerified:Bool {
