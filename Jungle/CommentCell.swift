@@ -17,7 +17,6 @@ class CommentCell: UITableViewCell {
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var verifiedBadge: UIImageView!
     
-    @IBOutlet weak var imageBackground: UIView!
     var tap:UITapGestureRecognizer!
     
     weak var comment:Comment?
@@ -85,7 +84,6 @@ class CommentCell: UITableViewCell {
         
         self.comment = comment
         userImage.cropToCircle()
-        imageBackground.cropToCircle()
         
         backgroundColor = UIColor.clear
         backgroundView = nil
@@ -115,8 +113,7 @@ class CommentCell: UITableViewCell {
             setupAnonymousComment(anonComment, lightMode)
             return
         }
-        self.imageBackground.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
-        self.userImage.alpha = 1.0
+        self.userImage.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
         
         UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
@@ -151,12 +148,15 @@ class CommentCell: UITableViewCell {
     }
     
     func setupAnonymousComment(_ comment:AnonymousComment, _ lightMode:Bool) {
-        self.userImage.image = UIImage(named:comment.animal)
-        self.userImage.alpha = 0.8
+        UploadService.retrieveAnonImage(withCheck: self.check, withName: comment.animal) { check, image, fromFile in
+            if check != self.check { return }
+            self.userImage.image = image
+        }
         let color = lightMode ? comment.color : darkerColorForColor(color: comment.color)
         
         self.authorLabel.textColor = color
-        self.imageBackground.backgroundColor = comment.color
+        self.userImage.backgroundColor = comment.color
+        //self.imageBackground.backgroundColor = comment.color
         if let anonID = userState.anonID, anonID == comment.author {
             self.authorLabel.setAnonymousName(anonName: comment.anonName, color: color, suffix: "[YOU]", fontSize: 14.0)
         } else if isOP {

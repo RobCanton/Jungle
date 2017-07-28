@@ -41,6 +41,7 @@ class HomeStateController: StoreSubscriber {
     private(set) var recentPlaceStories = [LocationStory]()
     private(set) var nearbyPlaceStories = [LocationStory]()
     
+    private(set) var nearbyCityStories = [CityStory]()
     
     fileprivate var myStoryRef:DatabaseReference?
     fileprivate var followingRef:DatabaseReference?
@@ -51,6 +52,7 @@ class HomeStateController: StoreSubscriber {
     
     fileprivate var popularPlacesRef:DatabaseReference?
     fileprivate var nearbyPlacesRef:DatabaseReference?
+    fileprivate var nearbyCitiesRef:DatabaseReference?
     fileprivate var recentPlacesRef:DatabaseReference?
     
     private(set) var viewedPosts = [String:Double]()
@@ -91,6 +93,8 @@ class HomeStateController: StoreSubscriber {
         nearbyPlacesRef?.removeAllObservers()
         recentPlacesRef?.removeAllObservers()
         
+        nearbyCitiesRef?.removeAllObservers()
+        
         myStoryRef = nil
         followingRef = nil
         nearbyFollowingRef = nil
@@ -100,6 +104,7 @@ class HomeStateController: StoreSubscriber {
         nearbyPlacesRef = nil
         recentPlacesRef = nil
         
+        nearbyCitiesRef = nil
         stopObservingViewed()
         viewedPosts = [:]
         
@@ -108,7 +113,8 @@ class HomeStateController: StoreSubscriber {
     func fetchAll() {
         mainStore.subscribe(self)
         observeMyStory()
-        observeNearbyPlaces()
+        observeNearbyCities()
+        //observeNearbyPlaces()
         observeNearbyPosts()
         observePopularPosts()
         observeViewed()
@@ -228,7 +234,7 @@ class HomeStateController: StoreSubscriber {
         let uid = mainStore.state.userState.uid
         nearbyRef?.removeAllObservers()
         nearbyRef = UserService.ref.child("users/location/nearby/\(uid)/posts")
-        nearbyRef?.queryOrdered(byChild: "t").queryLimited(toLast: 100).observe(.value, with: { snapshot in
+        nearbyRef?.queryOrdered(byChild: "t").queryLimited(toLast: 150).observe(.value, with: { snapshot in
             var posts = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
@@ -267,6 +273,48 @@ class HomeStateController: StoreSubscriber {
         }
     }
     
+    fileprivate func observeNearbyCities() {
+        let uid = mainStore.state.userState.uid
+        nearbyCitiesRef?.removeAllObservers()
+        nearbyCitiesRef = UserService.ref.child("users/location/nearby/\(uid)/cities")
+        nearbyCitiesRef?.queryOrderedByValue().observe(.value, with: { snapshot in
+            var cities = [String:Double]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                let key = childSnap.key
+                if let distance = childSnap.value as? Double {
+                    cities[key] = distance
+                }
+            }
+            self.downloadNearbyCityStories(cities)
+        })
+    }
+    
+    fileprivate func downloadNearbyCityStories(_ cities:[String:Double]) {
+        var cityStories = [CityStory]()
+        if cities.count == 0 {
+            self.nearbyCityStories = cityStories
+            delegate?.update(.places)
+            return
+        }
+        var count = 0
+        for (key, distance) in cities {
+            LocationService.sharedInstance.getCityStory(key, withDistance: distance) { story in
+                if story != nil {
+                    cityStories.append(story!)
+                }
+                count += 1
+                if count >= cities.count {
+                    count = -1
+                    self.nearbyCityStories = cityStories.sorted(by: { return $0.count > $1.count })
+                    
+                    // DispatchQueue.main.async {
+                    self.delegate?.update(.places)
+                    // }
+                }
+            }
+        }
+    }
     
     fileprivate func observeNearbyPlaces() {
         let uid = mainStore.state.userState.uid

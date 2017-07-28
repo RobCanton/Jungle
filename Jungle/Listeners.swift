@@ -198,7 +198,6 @@ class Listeners {
          Listen for a Following Added
          */
         blockedRef.observe(.childAdded, with: { snapshot in
-            print("Blocked Anonynmous added")
             mainStore.dispatch(AddBlockedUser(uid: snapshot.key))
         })
         
@@ -207,7 +206,6 @@ class Listeners {
          Listen for a Following Removed
          */
         blockedRef.observe(.childRemoved, with: { snapshot in
-            print("Blocked Anonynmous removed")
             mainStore.dispatch(RemoveBlockedUser(uid: snapshot.key))
             
         })
@@ -217,7 +215,6 @@ class Listeners {
          Listen for a Following Added
          */
         blockedAnonRef.observe(.childAdded, with: { snapshot in
-            print("Blocked Anonynmous added")
             mainStore.dispatch(AddBlockedAnonymousUser(aid: snapshot.key, timestamp: snapshot.value as! Double))
         })
         
@@ -226,7 +223,6 @@ class Listeners {
          Listen for a Following Removed
          */
         blockedAnonRef.observe(.childRemoved, with: { snapshot in
-            print("Blocked Anonynmous removed")
             mainStore.dispatch(RemoveBlockedAnonymousUser(aid: snapshot.key))
             
         })

@@ -75,8 +75,12 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         layout2.minimumLineSpacing = 0.0
         layout2.scrollDirection = .horizontal
         
+        
+        
+        
         //resetStack()
     }
+    
     
     var discoverLabel:UILabel?
     var sectionRef:Int = 0
@@ -118,8 +122,8 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         switch sectionRef {
         case 0:
             //removeStackView(view: topBanner)
-            topLabel.text = "FOLLOWING"
-            bottomLabel.text = "POPULAR"
+            topLabel.setKerning(withText: "FOLLOWING", 1.125)
+            bottomLabel.setKerning(withText: "POPULAR", 1.125)
             
             if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
                 removeStackView(view: topBanner)
@@ -132,15 +136,14 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             break
         case 1:
 
-            topLabel.text = "NEARBY"
-            bottomLabel.text = ""
-            longDivider.isHidden = false
+            topLabel.setKerning(withText: "CITIES", 1.125)
+            bottomLabel.setKerning(withText: "RECENT", 1.125)
             
-            if state.nearbyPlaceStories.count == 0  {
-                removeStackView(view: bottomHeader)
+            if state.nearbyCityStories.count == 0  {
+                removeStackView(view: topBanner)
                 removeStackView(view: collectionView)
                 if state.nearbyPosts.count == 0 {
-                    removeStackView(view: topBanner)
+                    //removeStackView(view: topBanner)
                 }
             }
             break
@@ -190,8 +193,8 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                 return state.watchedFollowingStories.count
             }
         } else if self.sectionRef == 1 {
-            print("state.nearbyPlaceStories.count \(state.nearbyPlaceStories.count)")
-            return state.nearbyPlaceStories.count
+            print("nearbyCityStories \(state.nearbyCityStories.count)")
+            return state.nearbyCityStories.count
         }
         return 0
         
@@ -209,8 +212,8 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             }
         } else{
             
-            let story = stateRef!.nearbyPlaceStories[indexPath.item]
-            cell.setupCell(withPlaceStory: story, showDot: false)
+            let story = stateRef!.nearbyCityStories[indexPath.item]
+            cell.setupCell(withCityStory: story)
         }
         
         return cell
@@ -247,10 +250,10 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                 }
             }
         } else {
-            let story = stateRef!.nearbyPlaceStories[indexPath.row]
+            let story = stateRef!.nearbyCityStories[indexPath.row]
             story.determineState()
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: stateRef!.nearbyPlaceStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: stateRef!.nearbyCityStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadFirstItem()
             }

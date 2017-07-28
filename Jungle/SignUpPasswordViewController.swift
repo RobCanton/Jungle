@@ -108,7 +108,7 @@ class SignUpPasswordViewController: UIViewController, UITextFieldDelegate {
     }
     
     func validateForm() {
-        if let password = passwordField.text, password != "", password.characters.count > 5 {
+        if let password = passwordField.text, password != "", password.characters.count > 7 {
             self.password = password
             setLoginButton(enabled: true)
         }
@@ -177,7 +177,7 @@ class SignUpPasswordViewController: UIViewController, UITextFieldDelegate {
         return true
     }
     
-    let ACCEPTABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_."
+    let ACCEPTABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-/:;()$&@\",?!'[]{}#%*^=+-|`~<>\\"
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let cs = CharacterSet(charactersIn: ACCEPTABLE_CHARACTERS).inverted

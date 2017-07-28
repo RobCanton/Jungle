@@ -35,6 +35,61 @@ class UploadService {
         }
     }
     
+    static func readAnonImageFromFile(withName name:String) -> UIImage? {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/anon-\(name).png")
+        return UIImage(contentsOfFile: dataPath.path)
+    }
+    
+    static func writeAnonImageToFile(withName name:String, image:UIImage) {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataPath = documentsDirectory.appendingPathComponent("user_content/anon-\(name).png")
+        if let pngData = UIImagePNGRepresentation(image) {
+            do {
+                try pngData.write(to: dataPath, options: [.atomic])
+            } catch {
+                print("Error writing to disk")
+            }
+        }
+    }
+    
+    static func downloadAnonImage(withName name:String, completion:@escaping(_ image:UIImage?)->()) {
+        let imageRef = Storage.storage().reference().child("anon/\(name).png")
+        
+        // Download in memory with a maximum allowed size of 2MB (2 * 1024 * 1024 bytes)
+        imageRef.getData(maxSize: 2 * 1024 * 1024) { (data, error) -> Void in
+            if (error != nil) {
+                print("Error - \(error!.localizedDescription)")
+                completion(nil)
+            } else {
+                var image:UIImage?
+                if data != nil {
+                    image = UIImage(data: data!)
+                }
+                return completion(image)
+            }
+        }
+    }
+    
+    static func retrieveAnonImage(withName name: String, completion: @escaping (_ image:UIImage?, _ fromFile:Bool)->()) {
+        if let image = readAnonImageFromFile(withName: name) {
+            completion(image, true)
+        } else {
+            downloadAnonImage(withName: name) { image in
+                if image != nil {
+                    writeAnonImageToFile(withName: name, image: image!)
+                }
+                completion(image, false)
+            }
+        }
+    }
+    
+    static func retrieveAnonImage(withCheck check:Int, withName name: String, completion: @escaping (_ check:Int, _ image:UIImage?, _ fromFile:Bool)->()) {
+        retrieveAnonImage(withName: name) { image, fromFile in
+            completion(check, image, fromFile)
+        }
+    }
+    
     static func readImageFromFile(withKey key:String) -> UIImage? {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let dataPath = documentsDirectory.appendingPathComponent("user_content/upload_image-\(key).jpg")
@@ -477,6 +532,9 @@ class UploadService {
                     
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
+                    let city = dict["city"] as? String
+                    let country = dict["country"] as? String
+                    
                     let viewers = [String:Double]()
                     let likes = [String:Double]()
                     let comments = [Comment]()
@@ -531,7 +589,7 @@ class UploadService {
                         anon = AnonObject(adjective: adjective, animal: animal, colorHexcode: color)
                     }
                     
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color, anon: anon)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, city:city, country:country, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color, anon: anon)
                     uploadDataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }
@@ -631,19 +689,29 @@ class UploadService {
     }
     
     static func removeComment(postKey:String, commentKey:String, completion: @escaping ((_ success: Bool, _ commentKey:String)->())) {
-        let ref = Database.database().reference()
-        let uploadRef = ref.child("uploads/comments/\(postKey)/\(commentKey)")
-        uploadRef.removeValue() { error, ref in
         
-            if error == nil {
-                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment deleted!")
-                return completion(true, commentKey)
-            } else {
-                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete comment.")
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Deleting comment...")
+        
+        UserService.getHTTPSHeaders() { headers in
+            if headers == nil {
                 return completion(false, commentKey)
             }
-        
+            
+            Alamofire.request("\(API_ENDPOINT)/comment/\(postKey)/\(commentKey)", method: .delete, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    
+                    switch response.result {
+                    case .success:
+                        Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment deleted!")
+                        return completion(true, commentKey)
+                    case .failure(let error):
+                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete comment.")
+                        return completion(false, commentKey)
+                    }
+                }
+            }
         }
+        
     }
     
     static func addView(post:StoryItem) {
@@ -719,18 +787,29 @@ class UploadService {
 
     
     static func deleteItem(item:StoryItem, completion: @escaping ((_ success:Bool)->())){
-        let ref = Database.database().reference()
-
-        let postRef = ref.child("uploads/meta/\(item.key)")
-        postRef.removeValue { error, ref in
-            if error == nil {
-                uploadDataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
-                globalMainInterfaceProtocol?.fetchAllStories()
-                Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
-                return completion(true)
-            } else {
-                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete.")
+        
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Deleting post...")
+        
+        UserService.getHTTPSHeaders() { headers in
+            if headers == nil {
                 return completion(false)
+            }
+            
+            Alamofire.request("\(API_ENDPOINT)/upload/\(item.key)", method: .delete, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    
+                    switch response.result {
+                    case .success:
+                        uploadDataCache.removeObject(forKey: "upload-\(item.key)" as NSString)
+                        globalMainInterfaceProtocol?.fetchAllStories()
+                        Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Deleted!")
+                        return completion(true)
+                    case .failure(let error):
+                        print(error)
+                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete.")
+                        return completion(false)
+                    }
+                }
             }
         }
     }
@@ -761,16 +840,32 @@ class UploadService {
     }
     
     static func editCaption(postKey:String, caption:String, completion:@escaping ((_ success:Bool)->())) {
-        let ref = Database.database().reference()
-        let uploadRef = ref.child("uploads/meta/\(postKey)/caption")
+        
         Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Updating caption...")
-        uploadRef.setValue(caption) { error, ref in
-            if error != nil {
-                Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to edit caption")
+        
+        UserService.getHTTPSHeaders() { headers in
+            if headers == nil {
                 return completion(false)
             }
-            Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Caption edited!")
-            return completion(true)
+            
+            let obj = [
+                "caption": caption
+            ] as [String:Any]
+            
+            Alamofire.request("\(API_ENDPOINT)/editcaption/\(postKey)", method: .post, parameters: obj, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    
+                    switch response.result {
+                    case .success:
+                        Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Caption edited!")
+                        return completion(true)
+                    case .failure(let error):
+                        print(error)
+                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to edit caption.")
+                        return completion(false)
+                    }
+                }
+            }
         }
     }
     

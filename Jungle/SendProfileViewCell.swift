@@ -35,13 +35,9 @@ class SendProfileViewCell: UITableViewCell {
             circleButton.clipsToBounds = true
             circleButton.layer.borderColor = UIColor.clear.cgColor
             label.textColor = UIColor.lightGray
-            circleButton.backgroundColor = UIColor.lightGray
-            
-            circleButton.isHidden = true
+            circleButton.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
             circleButton.isEnabled = false
 
-        } else {
-            publicSwitch.removeFromSuperview()
         }
     }
     override func setSelected(_ selected: Bool, animated: Bool) {

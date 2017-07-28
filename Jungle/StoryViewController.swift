@@ -38,6 +38,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     var keyboardUp = false
     var flagLabel:UILabel?
     
+    var isCurrentItem = false
+    
     var itemStateController:ItemStateController!
     
     func addFlagLabel() {
@@ -279,7 +281,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func setOverlays() {
         guard let item = item else { return }
         
-        commentBar.setup(isCurrentUserId(id: item.authorId))
+        commentBar.setup(item)
         
         self.headerView.setup(item)
         self.headerView.delegate = self
@@ -395,7 +397,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         
         timer = Timer.scheduledTimer(timeInterval: itemLength, target: self, selector: #selector(nextItem), userInfo: nil, repeats: false)
 
-        if shouldAutoPause {
+        if shouldAutoPause || !isCurrentItem {
             shouldAutoPause = false
             pause()
         }
@@ -455,15 +457,19 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         killTimer()
         progressBar?.resetAllProgressBars()
         progressBar?.removeFromSuperview()
+        commentBar.reset()
         delegate = nil
         item = nil
         returnIndex = nil
+        isCurrentItem = false
         itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
     }
     
     func reset() {
+        commentBar.reset()
         progressBar?.resetActiveIndicator()
+        isCurrentItem = false
         shouldAutoPause = true
         pause()
     }
@@ -505,6 +511,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
 
     
     func resume() {
+        if !isCurrentItem { return }
         if !paused { return }
         paused = false
         progressBar?.hideAll(false)

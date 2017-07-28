@@ -29,9 +29,11 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     {
         willSet {
             getCurrentCell()?.isCurrentItem = false
+            getCurrentCell()?.shouldAutoPause = true
             print("Prev value: \(currentIndexPath)")
         }
         didSet {
+            getCurrentCell()?.shouldAutoPause = false
             getCurrentCell()?.isCurrentItem = true
             print("Next value: \(currentIndexPath)")
         }
@@ -388,24 +390,25 @@ extension GalleryViewController: PopupProtocol {
             cell.resume()
         return }
         
-        if cell.storyItem.authorId == mainStore.state.userState.uid {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resume()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let subscribed = cell.subscribedToPost
-            var message = "Recieve Notifications"
-            
-            if subscribed {
-                message = "Mute Notifications"
-            }
-            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
-                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
-            }
-            actionSheet.addAction(notificationsAction)
-            
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+            cell.resume()
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let subscribed = cell.subscribedToPost
+        var message = "Recieve Notifications"
+        
+        if subscribed {
+            message = "Mute Notifications"
+        }
+        let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+            UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+        }
+        actionSheet.addAction(notificationsAction)
+        
+        if isCurrentUserId(id: item.authorId) {
             let deleteAction: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
                 UploadService.deleteItem(item: item) { success in
                     if success {
@@ -414,26 +417,7 @@ extension GalleryViewController: PopupProtocol {
                 }
             }
             actionSheet.addAction(deleteAction)
-            self.present(actionSheet, animated: true, completion: nil)
         } else {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resume()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let subscribed = cell.subscribedToPost
-            var message = "Recieve Notifications"
-            
-            if subscribed {
-                message = "Mute Notifications"
-            }
-            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
-               UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
-            }
-            actionSheet.addAction(notificationsAction)
-            
             let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
                 let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 
@@ -459,8 +443,9 @@ extension GalleryViewController: PopupProtocol {
             }
             actionSheet.addAction(OKAction)
             
-            self.present(actionSheet, animated: true, completion: nil)
         }
+        
+        self.present(actionSheet, animated: true, completion: nil)
         
     }
     

@@ -52,12 +52,15 @@ func UserStateReducer(_ action: Action, state: UserState?) -> UserState {
         break
     case _ as GoAnonymous:
         state.anonMode = true
+        UserService.setAnonSetting(true)
         break
     case _ as GoPublic:
         state.anonMode = false
+        UserService.setAnonSetting(false)
         break
     case _ as ToggleAnonMode:
         state.anonMode = !state.anonMode
+        UserService.setAnonSetting(state.anonMode)
         break
     default:
         break

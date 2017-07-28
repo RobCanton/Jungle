@@ -224,7 +224,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                 }
 
             case 1:
-                if state.nearbyPlaceStories.count == 0 {
+                if state.nearbyCityStories.count == 0 {
                     placesHeader = nil
                     midCollectionViewRef = nil
                     return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
@@ -262,7 +262,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
             break
         case 1:
             ///verticalHeight += 48
-            verticalHeight += state.nearbyPlaceStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
+            verticalHeight += state.nearbyCityStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
             break
         default:
             break

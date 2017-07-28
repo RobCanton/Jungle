@@ -45,10 +45,13 @@ func == (lhs: Badge, rhs: Badge) -> Bool {
 
 
 class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
-
+    
+     let ACCEPTABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     
     @IBOutlet weak var cancelButton: UIBarButtonItem!
     
+    @IBOutlet weak var firstNameField: UITextField!
+    @IBOutlet weak var lastNameField: UITextField!
     @IBOutlet weak var bioTextView: UITextView!
     
     @IBOutlet weak var bioPlaceholder: UITextField!
@@ -104,8 +107,15 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
                 self.headerView.isUserInteractionEnabled = true
                 self.headerView.addGestureRecognizer(self.imageTap)
             })
+            firstNameField.text = user.firstname
+            lastNameField.text = user.lastname
             bioTextView.text = user.bio
         }
+        
+        firstNameField.delegate = self
+        lastNameField.delegate = self
+        firstNameField.addTarget(self, action: #selector(firstNameEdited), for: .editingChanged)
+        lastNameField.addTarget(self, action: #selector(lastNameEdited), for: .editingChanged)
         
         bioTextView.delegate = self
         bioPlaceholder.isHidden = !bioTextView.text.isEmpty
@@ -213,6 +223,8 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
     func updateUser(profileURL:String?) {
         var basicProfileObj = [String:Any]()
 
+        basicProfileObj["firstname"] = firstNameField.text as Any?
+        basicProfileObj["lastname"] = lastNameField.text as Any?
         basicProfileObj["bio"] = bioTextView.text as Any?
         
         if let imageURL = profileURL {
@@ -293,6 +305,34 @@ extension EditProfileViewController: UIImagePickerControllerDelegate, UINavigati
         self.imagePicker.allowsEditing = false
         self.imagePicker.sourceType = .photoLibrary
         self.present(self.imagePicker, animated: true, completion: nil)
+    }
+    
+}
+
+extension EditProfileViewController: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        //return newLength <= usernameLengthLimit
+        if newLength > nameLength { return false }
+        let cs = CharacterSet(charactersIn: ACCEPTABLE_CHARACTERS).inverted
+        let filtered: String = (string.components(separatedBy: cs) as NSArray).componentsJoined(by: "")
+        
+        return (string == filtered)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        
+        return true
+    }
+    
+    func firstNameEdited(_ textField:UITextField) {
+        didEdit = true
+    }
+    
+    func lastNameEdited(_ textField:UITextField) {
+        didEdit = true
     }
     
 }

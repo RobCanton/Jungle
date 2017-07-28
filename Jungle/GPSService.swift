@@ -7,7 +7,7 @@ import GooglePlaces
 protocol ServiceProtocol {}
 
 
-let minimumAcceptedLikelihood = 0.0//.3333
+let minimumAcceptedLikelihood = 0.1
 let excludedTypes:[String] = [
     //"street_address",
     "bus_station",
@@ -60,6 +60,8 @@ class GPSService: Service, CLLocationManagerDelegate {
     fileprivate var lastSignificantLocation: CLLocation?
     fileprivate var placesClient: GMSPlacesClient!
     fileprivate var likelihoods = [GMSPlaceLikelihood]()
+    
+    private(set) var currentCity:City?
     
     override init(_ subscribers:[String:ServiceProtocol]) {
         super.init(subscribers)
@@ -157,6 +159,8 @@ class GPSService: Service, CLLocationManagerDelegate {
             lastSignificantLocation = location
             subscribers.forEach { $0.value.significantLocationUpdate(location) }
             getCurrentPlaces()
+            reverseGeocode(lastSignificantLocation!)
+
         } else {
             let age = location.timestamp.timeIntervalSince(lastSignificantLocation!.timestamp)
             
@@ -166,10 +170,32 @@ class GPSService: Service, CLLocationManagerDelegate {
                 lastSignificantLocation = location
                 subscribers.forEach { $0.value.significantLocationUpdate(location) }
                 getCurrentPlaces()
+                reverseGeocode(lastSignificantLocation!)
             }
         }
         
         subscribers.forEach { $0.value.tracingLocation(location) }
+        
+    }
+    
+    private func reverseGeocode(_ coordinates:CLLocation) {
+        let gms = GMSGeocoder()
+        
+        gms.reverseGeocodeCoordinate(coordinates.coordinate) { response, error in
+            if let address = response?.firstResult() {
+                guard let local = address.locality else {
+                    self.currentCity = nil
+                    return }
+                guard let country = address.country else {
+                    self.currentCity = nil
+                    return }
+                let coords = CLLocation(latitude: address.coordinate.latitude, longitude: address.coordinate.longitude)
+                
+                self.currentCity = City(key: "CURRENT_CITY", name: local, country: country, coordinates: coords)
+            } else {
+                self.currentCity = nil
+            }
+        }
         
     }
     

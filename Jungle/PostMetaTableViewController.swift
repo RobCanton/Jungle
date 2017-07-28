@@ -48,6 +48,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     var initialIndex:IndexPath?
     
     var headerView:UIView!
+    var viewsLabel:UILabel!
     var anonLikesLabel:UILabel!
     
     override func viewDidLoad() {
@@ -73,6 +74,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         tableView.backgroundColor = UIColor(white:0.96, alpha: 1.0)
         tableView.keyboardDismissMode = .onDrag
         
+        
         view.addSubview(tableView)
         
         let nib = UINib(nibName: "UserViewCell", bundle: nil)
@@ -80,6 +82,23 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         let nib2 = UINib(nibName: "CommentViewCell", bundle: nil)
         tableView.register(nib2, forCellReuseIdentifier: "commentCell")
+        
+        let button = UIButton(frame: CGRect(x:0,y:0,width:50,height:50))
+        button.titleLabel!.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightMedium)
+        button.titleLabel?.numberOfLines = 0
+        button.titleLabel?.textAlignment = .center
+        let views = item.numViews
+        if views == 1 {
+            button.setTitle("\(views)\nview", for: .normal)
+        } else {
+            button.setTitle("\(views)\nviews", for: .normal)
+        }
+
+        
+        button.titleLabel?.textColor = UIColor.black
+        button.setTitleColor(UIColor.black, for: .normal)
+        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: button)
         
         headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 32))
         headerView.backgroundColor = infoColor

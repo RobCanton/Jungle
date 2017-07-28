@@ -26,6 +26,8 @@ let errorColor = UIColor(red: 1, green: 110/255, blue: 110/255, alpha: 1.0)
 let infoColor = UIColor(red: 29/255, green: 202/255, blue: 1.0, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
+let nameLength = 16
+
 let API_ENDPOINT = "https://us-central1-jungleiosapp.cloudfunctions.net/app"
 let mainStore = Store<AppState>(
     reducer: AppReducer(),

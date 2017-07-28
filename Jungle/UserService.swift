@@ -30,6 +30,8 @@ class UserService {
     
     static var allowContent = false
     
+    
+    
     static func logout() {
         if let token = InstanceID.instanceID().token() {
             let fcmRef = ref.child("users/FCMToken/\(token)")
@@ -45,9 +47,6 @@ class UserService {
                 
             }
         }
-        
-
-
     }
     
     static var isEmailVerified:Bool {
@@ -66,6 +65,18 @@ class UserService {
         }
     }
     
+    static func getHTTPSHeaders(_ completion:@escaping (_ headers:HTTPHeaders?)->()) {
+        Auth.auth().currentUser!.getIDToken() { token, error in
+            
+            if token == nil || error != nil {
+                return completion(nil)
+            }
+            
+            let headers: HTTPHeaders = ["Authorization": "Bearer \(token!)", "Accept": "application/json", "Content-Type" :"application/json"]
+            return completion(headers)
+        }
+    }
+    
     static func sendVerificationEmail(completion:@escaping ((_ success:Bool)->())) {
         Auth.auth().currentUser?.sendEmailVerification { error in
             completion(error == nil )
@@ -79,6 +90,26 @@ class UserService {
                 fcmRef.setValue(user.uid)
             }
         }
+    }
+    
+    static func setAnonSetting(_ anonMode:Bool) {
+        let uid = userState.uid
+        let settingsRef = ref.child("users/settings/\(uid)/anonMode")
+        settingsRef.setValue(anonMode) { error, ref in }
+    }
+    
+    static func getAnonSetting() {
+        let uid = userState.uid
+        let settingsRef = ref.child("users/settings/\(uid)/anonMode")
+        settingsRef.observeSingleEvent(of: .value, with: { snapshot in
+            if let anonMode = snapshot.value as? Bool {
+                if anonMode {
+                    mainStore.dispatch(GoAnonymous())
+                } else {
+                    mainStore.dispatch(GoPublic())
+                }
+            }
+        })
     }
     
     static func getAnonID() {

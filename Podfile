@@ -29,4 +29,5 @@ pod 'Segmentio', '2.1'
 pod "Popover"
 pod 'BadgeSwift', '~> 5.0'
 pod 'Alamofire', '~> 4.4'
+pod 'AKPickerView-Swift', :git => 'https://github.com/Akkyie/AKPickerView-Swift.git'
 end

@@ -35,6 +35,8 @@ class PostHeaderView: UIView {
     var commentsTap:UITapGestureRecognizer?
     var likesTap:UITapGestureRecognizer?
     
+    weak var itemRef:StoryItem?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         self.userImageView.cropToCircle()
@@ -52,12 +54,17 @@ class PostHeaderView: UIView {
     var placeTap2:UITapGestureRecognizer?
     
     func setup(_ item:StoryItem) {
-        
+        self.itemRef = item
         clean()
         
         setupLocation(locationKey: item.locationKey)
         setNumLikes(item.numLikes)
         setNumComments(item.numComments)
+        
+        
+        usernameLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        timeLabel2.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        locationTitle.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
         
         if let anon = item.anon {
             if isCurrentUserId(id: item.authorId) {
@@ -69,7 +76,9 @@ class PostHeaderView: UIView {
             }
             
            
-            self.userImageView.image = UIImage(named:anon.animal)
+            UploadService.retrieveAnonImage(withName: anon.animal) { image, fromFile in
+                self.userImageView.image = image
+            }
             self.userImageView.backgroundColor = anon.color
             self.timeLabel2.text = item.dateCreated.timeStringSinceNow()
             self.badgeView.image = nil
@@ -166,6 +175,8 @@ class PostHeaderView: UIView {
                 if self.locationKey != key { return }
                 self.locationRetrieved(_location)
             }
+        } else if let item = itemRef, let city = item.city, let country = item.country {
+            locationTitle.text = " · \(city), \(country)"
         } else {
             clearLocation()
         }
@@ -182,10 +193,13 @@ class PostHeaderView: UIView {
             self.locationTitle.isUserInteractionEnabled = true
             self.locationTitle.addGestureRecognizer(placeTap!)
             placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+        } else if let item = itemRef, let city = item.city, let country = item.country {
+            locationTitle.text = " · \(city), \(country)"
         } else {
             clearLocation()
         }
     }
+    
     
     func clearLocation() {
         locationTitle.text = ""

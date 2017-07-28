@@ -9,6 +9,7 @@ import UIKit
 import GoogleMaps
 import GooglePlaces
 import Firebase
+import Popover
 
 class SendViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, GMSMapViewDelegate {
     
@@ -35,6 +36,10 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var userButton:UIButton!
     
     var titleLabel:UILabel!
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -318,15 +323,18 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 64
+        return 60
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return 1
+        }
         return likelihoods.count
     }
     
@@ -338,14 +346,21 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "profileCell", for: indexPath)
             as! SendProfileViewCell
-        cell.label.text = likelihoods[indexPath.row].place.name
-        if let address = likelihoods[indexPath.row].place.formattedAddress {
-            cell.subtitle.text = getShortFormattedAddress(address)
+        if indexPath.section == 0 {
+            cell.label.text = gps_service.currentCity!.name
+            cell.subtitle.text = gps_service.currentCity!.country
+            cell.lockState(true)
         } else {
-            cell.subtitle.text = ""
+            cell.label.text = likelihoods[indexPath.row].place.name
+            if let address = likelihoods[indexPath.row].place.formattedAddress {
+                cell.subtitle.text = getShortFormattedAddress(address)
+            } else {
+                cell.subtitle.text = ""
+            }
+            cell.toggleSelection(false)
         }
         
-        cell.toggleSelection(false)
+        
         return cell
     }
     
@@ -355,24 +370,26 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let place = likelihoods[indexPath.row].place
         
         let currentCell = tableView.cellForRow(at: indexPath) as! SendProfileViewCell
-        if currentCell.isActive {
-            currentCell.toggleSelection(false)
-            selectedIndex =  nil
-            upload.place = nil
-            sendLabel.text = "My location"
-            if let location = gps_service.getLastLocation() {
-                mapView?.animate(toLocation: location.coordinate)
+        if indexPath.section == 1 {
+            if currentCell.isActive {
+                currentCell.toggleSelection(false)
+                selectedIndex =  nil
+                upload.place = nil
+                sendLabel.text = "My location"
+                if let location = gps_service.getLastLocation() {
+                    mapView?.animate(toLocation: location.coordinate)
+                }
+            } else {
+                if let oldPath = selectedIndex {
+                    let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
+                    oldCell.toggleSelection(false)
+                }
+                currentCell.toggleSelection(true)
+                selectedIndex =  indexPath
+                upload.place = place
+                sendLabel.text = place.name
+                mapView?.animate(toLocation: place.coordinate)
             }
-        } else {
-            if let oldPath = selectedIndex {
-                let oldCell = tableView.cellForRow(at: oldPath) as! SendProfileViewCell
-                oldCell.toggleSelection(false)
-            }
-            currentCell.toggleSelection(true)
-            selectedIndex =  indexPath
-            upload.place = place
-            sendLabel.text = place.name
-            mapView?.animate(toLocation: place.coordinate)
         }
         
     }

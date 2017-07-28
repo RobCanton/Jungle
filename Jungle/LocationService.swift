@@ -10,6 +10,7 @@ import CoreLocation
 import Firebase
 
 
+
 protocol LocationDelegate {
     func locationsUpdated(locations:[Location])
 }
@@ -20,7 +21,7 @@ class LocationService: NSObject {
     fileprivate let ref = Database.database().reference()
     
     var nearbyLocations = [Location]()
-    var radius = 25
+    var radius = 100
     
     var delegate:LocationDelegate?
     var gps_service:GPSService?
@@ -101,6 +102,41 @@ class LocationService: NSObject {
         }
     }
     
+    func getCityInfoInfo(_ key:String, completion: @escaping (_ city:City?)->()) {
+        
+        if let cachedCity = dataCache.object(forKey: "city-\(key)" as NSString) as? City {
+            completion(cachedCity)
+        } else {
+            let locRef = ref.child("cities/info/\(key)")
+            
+            locRef.observeSingleEvent(of: .value, with: { snapshot in
+                var city:City?
+                
+                if snapshot.exists() {
+                    let dict         = snapshot.value as! [String:AnyObject]
+                    let name         = dict["city"] as! String
+                    let country      = dict["country"] as! String
+                    let lat          = dict["lat"] as! Double
+                    let lon          = dict["lon"] as! Double
+                    
+                    let coord = CLLocation(latitude: lat, longitude: lon)
+                    
+                    
+                    city = City(key: snapshot.key, name: name, country: country, coordinates: coord)
+                    dataCache.setObject(city!, forKey: "city-\(key)" as NSString)
+                }
+                
+                completion(city)
+            })
+        }
+    }
+    
+    func getCityInfoInfo(withCheck check:Int, key:String, completion: @escaping (_ check:Int, _ city:City?)->()) {
+        getCityInfoInfo(key) { city in
+            completion(check, city)
+        }
+    }
+    
     func getLocationInfo(withReturnKey locationKey:String, completion: @escaping (_ key:String, _ location:Location?)->()) {
         getLocationInfo(locationKey) { location in
             completion(locationKey, location)
@@ -112,6 +148,7 @@ class LocationService: NSObject {
             completion(check, location)
         }
     }
+    
     func getLocationStory(_ key:String, withDistance distance:Double, completion: @escaping ((_ story:LocationStory?)->())) {
         
         let storyRef = Database.database().reference().child("places/story/\(key)")
@@ -133,6 +170,38 @@ class LocationService: NSObject {
 
             if postKeys.count > 0 { //&& contributers.count > 1 {
                 story = LocationStory(postKeys: postKeys, locationKey: key, distance: distance)
+            }
+            
+            completion(story)
+            
+        }, withCancel: { error in
+            completion(nil)
+        })
+    }
+    
+    func getCityStory(_ key:String, withDistance distance:Double, completion: @escaping ((_ story:CityStory?)->())) {
+        
+        let storyRef = Database.database().reference().child("cities/posts/\(key)")
+        
+        storyRef.queryOrderedByValue().observeSingleEvent(of: .value, with: { snapshot in
+            var story:CityStory?
+            var contributers = [String:Bool]()
+            var postKeys = [(String,Double)]()
+            for child in snapshot.children {
+                
+                let childSnap = child as! DataSnapshot
+                if let dict = childSnap.value as? [String:Any] {
+                    let timestamp = dict["t"] as! Double
+                    let uid = dict["a"] as! String
+                    contributers[uid] = true
+                    print("AYYYEE!: \(childSnap.key)")
+                    postKeys.append((childSnap.key, timestamp))
+                    
+                }
+            }
+            
+            if postKeys.count > 0 { //&& contributers.count > 1 {
+                story = CityStory(postKeys: postKeys, cityKey: key, distance: distance)
             }
             
             completion(story)

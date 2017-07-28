@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class AnonObject:NSObject
+class AnonObject:NSObject, NSCoding
 {
     private(set) var adjective:String
     private(set) var animal:String

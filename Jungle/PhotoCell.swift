@@ -189,14 +189,14 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         privateLock?.removeFromSuperview()
         privateLabel?.removeFromSuperview()
         if on {
-            privateLock = UIImageView(frame: CGRect(x: 3, y: 3, width:16, height: 16))
+            privateLock = UIImageView(frame: CGRect(x: 4, y: 4, width:12, height: 12))
             privateLock?.tintColor = UIColor.white
             privateLock?.image = UIImage(named: "lock_white")
             
-            privateLabel = UILabel(frame: CGRect(x: 22, y: 3, width: self.frame.width - 22, height: 22))
-            privateLabel?.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightRegular)
+            privateLabel = UILabel(frame: CGRect(x: 20, y: 4, width: self.frame.width - 22, height: 16))
+            privateLabel?.font = UIFont.systemFont(ofSize: 10.0, weight: UIFontWeightRegular)
             privateLabel?.textColor = UIColor.white
-            privateLabel?.text = "Anonymous"
+            privateLabel?.text = "Hidden"
             
             self.addSubview(privateLabel!)
             self.addSubview(privateLock!)
@@ -219,8 +219,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         self.timeLabel.isHidden = true
         self.timeLabel.text = post.dateCreated.timeStringSinceNow()
         
-        self.backgroundColor = post.getColor()
-        self.colorView.backgroundColor = UIColor.clear
         self.imageView.image = nil
         
         let numLikes = post.numLikes
@@ -264,6 +262,8 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             self.secondLabel.isHidden = true
         }
         
+        
+        self.colorView.isHidden = numLikes == 0 && numComments == 0 ? true : false
         self.gradient?.removeFromSuperlayer()
         
         
@@ -278,7 +278,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
                 
                 self.imageView.image = image
             
-                if let color = post.getColor() {
+                if let color = post.getColor(), !self.colorView.isHidden {
                     self.gradient = CAGradientLayer()
                     self.gradient!.frame = self.colorView.bounds
                     self.gradient!.locations = [0.0, 1.0]

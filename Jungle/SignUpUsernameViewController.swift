@@ -25,6 +25,7 @@ enum SignUpButtonState {
 
 class SignUpUsernameViewController: UIViewController, UITextFieldDelegate {
     
+    
     @IBOutlet weak var check: UIButton!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var scrollView: UIScrollView!

@@ -93,8 +93,10 @@ class NotificationTableViewCell: UITableViewCell {
         var username = "Someone"
         if let anon = notification as? AnonymousNotification {
             username = anon.anonName
-            self.userImageView.image = UIImage(named: anon.animal)
             self.userImageView.backgroundColor = anon.color
+            UploadService.retrieveAnonImage(withName: anon.animal) { image, fromFile in
+                self.userImageView.image = image
+            }
         } else if let user = self.user {
             username = user.username
             self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })

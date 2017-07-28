@@ -37,6 +37,17 @@ class LocationStory:Story {
         self.distance = distance
         super.init(postKeys: postKeys)
     }
+}
+
+class CityStory:Story {
+    private(set) var cityKey:String
+    private(set) var distance:Double
+    
+    init(postKeys:[(String,Double)], cityKey:String, distance:Double) {
+        self.cityKey = cityKey
+        self.distance = distance
+        super.init(postKeys: postKeys)
+    }
     
     
 }

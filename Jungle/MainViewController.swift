@@ -16,6 +16,7 @@ import ReSwift
 import JSQMessagesViewController
 import SwiftMessages
 
+
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
 protocol MainInterfaceProtocol {
@@ -107,16 +108,14 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var messageWrapper:SwiftMessages!
     
-    fileprivate lazy var cancelButton: UIButton = {
-        let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
-        button.setImage(UIImage(named: "delete_thick"), for: .normal)
-        button.center = CGPoint(x: button.frame.width * 0.60, y: button.frame.height * 0.60)
-        button.tintColor = UIColor.white
-        button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
-        return button
-        
-    }()
+    var locations = [
+        "None",
+        "Markham",
+        "Funky Munky",
+        "Starbucks",
+        "Canadian Tire",
+        "McDonalds"
+    ]
     
     fileprivate lazy var sendButton: UIButton = {
         let definiteBounds = UIScreen.main.bounds
@@ -132,27 +131,14 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         return button
     }()
     
-    fileprivate lazy var captionButton: UIButton = {
+    
+    fileprivate lazy var editOptionsBar: PostEditOptionsBar = {
         let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
-        button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.5, y: button.frame.height * 0.5)
-        button.setImage(UIImage(named: "type"), for: .normal)
-        button.tintColor = UIColor.white
-        button.clipsToBounds = true
-        button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
-        return button
+        let view = UINib(nibName: "PostEditOptionsBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostEditOptionsBar
+        view.frame = CGRect(x: 0, y: 0, width: definiteBounds.width, height: 64)
+        return view
     }()
     
-    fileprivate lazy var locationButton: UIButton = {
-        let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
-        button.center = CGPoint(x: definiteBounds.width - button.frame.width * 1.5, y: button.frame.height * 0.5)
-        button.setImage(UIImage(named: "poi"), for: .normal)
-        button.tintColor = UIColor.white
-        button.clipsToBounds = true
-        button.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
-        return button
-    }()
     
     fileprivate lazy var textView: UITextView = {
         let definiteBounds = UIScreen.main.bounds
@@ -178,7 +164,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }()
     
     fileprivate var textViewPanGesture:UIPanGestureRecognizer?
-    fileprivate var textViewTapGesture:UITapGestureRecognizer!
+    fileprivate var textViewTapGesture:UILongPressGestureRecognizer!
     
     deinit {
         print("Deinit >> MainViewController")
@@ -195,7 +181,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         navigationController?.navigationBar.tintColor = UIColor.black
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
+        //textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
+        textViewTapGesture = UILongPressGestureRecognizer(target: self, action: #selector(editCaptionTapped))
+        textViewTapGesture.minimumPressDuration = 0.0
+        textViewTapGesture.numberOfTapsRequired = 2
         
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         cameraBtnFrame = recordBtn.frame
@@ -450,6 +439,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView != self.scrollView { return }
         screenMode = .Transitioning
         recordBtn.removeGestures()
         let scrollViewIndex = view.subviews.index(of: scrollView)!
@@ -673,7 +663,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
 }
 
-extension MainViewController: CameraDelegate, UITextViewDelegate {
+extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBarProtocol {
     
     func takingVideo() {
         statusBarShouldHide = true
@@ -714,9 +704,11 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     func showEditOptions() {
         statusBarShouldHide = true
         self.setNeedsStatusBarAppearanceUpdate()
-        self.view.addSubview(cancelButton)
+        self.view.addSubview(editOptionsBar)
         self.view.addSubview(sendButton)
-        self.view.addSubview(captionButton)
+        
+        editOptionsBar.delegate = self
+
         //self.view.addSubview(locationButton)
         
         textView.resignFirstResponder()
@@ -731,9 +723,9 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         
         self.view.addSubview(textView)
  
-        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        //cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        captionButton.addTarget(self, action: #selector(editCaption), for: .touchUpInside)
+        //captionButton.addTarget(self, action: #selector(editCaption), for: .touchUpInside)
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -745,18 +737,16 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
 
     
     func hideEditOptions() {
-        cancelButton.removeFromSuperview()
+        editOptionsBar.removeFromSuperview()
         sendButton.removeFromSuperview()
-        captionButton.removeFromSuperview()
-        //locationButton.removeFromSuperview()
+
+        editOptionsBar.delegate = nil
         textView.removeFromSuperview()
         self.view.removeGestureRecognizer(textViewTapGesture)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
-        cancelButton.removeTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        captionButton.removeTarget(self, action: #selector(editCaption), for: .touchUpInside)
         uploadLikelihoods = []
         statusBarShouldHide = false
         self.setNeedsStatusBarAppearanceUpdate()
@@ -838,7 +828,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         
     }
     
-    func cancelButtonTapped(sender: UIButton) {
+    func editCancel() {
         
         cameraView.destroyVideoPreview()
         
@@ -851,7 +841,24 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         }
     }
     
-    func editCaption(sender: UIButton) {
+    func editLocation() {
+        let height = view.frame.height * 0.45
+        let sortOptionsView = UINib(nibName: "LocationPickerView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! LocationPickerView
+        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: height)
+        let messageView = BaseView(frame: f)
+        messageView.installContentView(sortOptionsView)
+        messageView.preferredHeight = height
+        messageView.configureDropShadow()
+        var config = SwiftMessages.defaultConfig
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        config.duration = .forever
+        config.presentationStyle = .bottom
+        config.dimMode = .gray(interactive: true)
+        config.interactiveHide = true
+        messageWrapper.show(config: config, view: messageView)
+    }
+    
+    func editCaption() {
         textView.becomeFirstResponder()
     }
     
@@ -861,7 +868,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
         guard let keyboardValue = info[UIKeyboardFrameEndUserInfoKey] as? NSValue else { return }
         let keyboardFrame: CGRect = keyboardValue.cgRectValue
         
-        captionButton.isUserInteractionEnabled = false
+        //captionButton.isUserInteractionEnabled = false
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
@@ -876,7 +883,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate {
     func keyboardWillDisappear(notification: NSNotification) {
        
         //textView.isUserInteractionEnabled = false
-        captionButton.isUserInteractionEnabled = true
+        //captionButton.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             /*let height = self.view.frame.height
             let textViewFrame = self.textView.frame

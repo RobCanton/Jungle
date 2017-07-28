@@ -206,6 +206,19 @@ class SignUpNameViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    let ACCEPTABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.characters.count + string.characters.count - range.length
+        //return newLength <= usernameLengthLimit
+        if newLength > nameLength { return false }
+        let cs = CharacterSet(charactersIn: ACCEPTABLE_CHARACTERS).inverted
+        let filtered: String = (string.components(separatedBy: cs) as NSArray).componentsJoined(by: "")
+        
+        return (string == filtered)
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         validateForm()

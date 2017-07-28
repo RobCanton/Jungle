@@ -14,7 +14,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     var activityView:NVActivityIndicatorView!
     
-    var editCaptionMode = false
     var keyboardUp = false
     var subscribedToPost = false
     
@@ -85,7 +84,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func setOverlays() {
         guard let item = storyItem else { return }
 
-        commentBar.setup(isCurrentUserId(id: item.authorId))
+        commentBar.setup(item)
         
         self.headerView.setup(item)
         self.headerView.delegate = self
@@ -188,7 +187,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             playVideo()
         }
         
-        if shouldAutoPause {
+        if shouldAutoPause || !isCurrentItem {
             shouldAutoPause = false
             pause()
         }
@@ -200,7 +199,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         guard let item = self.storyItem else { return }
         if comment == "" { return }
         commentBar.setBusyState(true)
-        if editCaptionMode {
+        if commentBar.editCaptionMode {
             
             self.commentBar.textField.resignFirstResponder()
             UploadService.editCaption(postKey: item.key, caption: comment) { success in
@@ -235,8 +234,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func editCaption() {
         guard let item = self.storyItem else { return }
-        editCaptionMode = true
-        commentBar.textField.becomeFirstResponder()
+        
     }
     
     func showAuthor() {
@@ -319,6 +317,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func resume() {
+        if !isCurrentItem { return }
         //itemStateController.delegate = self
         activityView.alpha = 1.0
         paused = false
@@ -340,7 +339,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func playVideo() {
         guard let item = self.storyItem else { return }
         if item.shouldBlock { return }
-        if !isCurrentItem { return }
         self.playerLayer?.player?.play()
     }
     
@@ -361,8 +359,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func cleanUp() {
         content.image = nil
         destroyVideoPlayer()
+        commentBar.reset()
         delegate = nil
         storyItem = nil
+        
+        isCurrentItem = false
         
         headerView.delegate = nil
         infoView.delegate = nil
@@ -372,6 +373,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     }
     
     func reset() {
+        commentBar.reset()
+        isCurrentItem = false
         shouldAutoPause = true
         pause()
     }
@@ -411,17 +414,8 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         
         self.commentsView.showTimeLabels(visible: true)
-        
-        if editCaptionMode {
-            commentBar.textField.placeholder = "Edit Caption"
-            commentBar.sendButton.setImage(nil, for: .normal)
-            commentBar.sendButton.setTitle("Set", for: .normal)
-            commentBar.moreButton.isHidden = true
-            commentBar.likeButton.isHidden = true
-            commentBar.textField.text = storyItem.caption
-        } else {
-            self.commentBar.setKeyboardUp(true)
-        }
+
+        self.commentBar.setKeyboardUp(true)
         
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.frame.height
@@ -438,7 +432,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
             self.commentBar.likeButton.alpha = 0.0
             self.commentBar.moreButton.alpha = 0.0
             self.commentBar.sendButton.alpha = 1.0
-            self.commentBar.userImageView.alpha = userState.anonMode ? 0.6 : 1.0
+            self.commentBar.userImageView.alpha = 1.0
             self.commentBar.activityIndicator.alpha = 1.0
             self.commentBar.backgroundView.alpha = 1.0
             self.headerView.alpha = 0.0
@@ -451,15 +445,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         self.commentsView.showTimeLabels(visible: false)
         self.commentBar.setKeyboardUp(false)
-        if editCaptionMode {
-            commentBar.textField.placeholder = "Comment"
-            commentBar.textField.text = ""
-            commentBar.sendButton.setTitle("", for: .normal)
-            commentBar.sendButton.setImage(UIImage(named: "send"), for: .normal)
-            commentBar.moreButton.isHidden = false
-            commentBar.likeButton.isHidden = false
-            editCaptionMode = false
-        }
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             
             let height = self.frame.height

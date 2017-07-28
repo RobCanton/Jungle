@@ -32,7 +32,10 @@ class CommentItemBar: UIView {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var delegate:CommentItemBarProtocol?
     var liked = false
+    var editCaptionMode = false
     var isKeyboardUp = false
+    
+    weak var itemRef:StoryItem?
     
     var userImageTap:UITapGestureRecognizer!
     
@@ -54,7 +57,9 @@ class CommentItemBar: UIView {
     
     @IBAction func likeTapped(_ sender: Any) {
         if currentUserMode {
-            delegate?.editCaption()
+            ///delegate?.editCaption()
+            editCaptionMode = true
+            textField.becomeFirstResponder()
             return
         }
         setLikedStatus(!self.liked, animated: true)
@@ -63,13 +68,11 @@ class CommentItemBar: UIView {
     
     var currentUserMode = false
     
-    func beginEditCaption() {
-        sendButton.setTitle("Set Caption", for: .normal)
-        textField.becomeFirstResponder()
-    }
     
-    func setup(_ currentUserMode:Bool) {
-        self.currentUserMode = currentUserMode
+    func setup(_ item:StoryItem) {
+        self.itemRef = item
+        
+        self.currentUserMode = isCurrentUserId(id: item.authorId)
         if currentUserMode {
             self.likeButton.setImage(UIImage(named: "edit"), for: .normal)
             self.likeButton.imageEdgeInsets = UIEdgeInsetsMake(4.0, 4.0, 4.0, 4.0)
@@ -100,7 +103,6 @@ class CommentItemBar: UIView {
         }
         
         if isKeyboardUp {
-            userImageView.alpha = isAnon ? 0.6 : 1.0
             if isDarkMode {
                 textField.attributedPlaceholder =
                     NSAttributedString(string: placeHolderString, attributes: [NSForegroundColorAttributeName : UIColor.gray])
@@ -166,7 +168,7 @@ class CommentItemBar: UIView {
             }
             
         } else {
-            likeButton.setImage(UIImage(named:"like"), for: .normal)
+            likeButton?.setImage(UIImage(named:"like"), for: .normal)
         }
     }
     
@@ -202,7 +204,22 @@ class CommentItemBar: UIView {
             moreButton?.isUserInteractionEnabled = false
             sendButton?.isUserInteractionEnabled = true
             
-            if isDarkMode {
+            if editCaptionMode {
+                textField.placeholder = "Edit Caption"
+                sendButton.setImage(nil, for: .normal)
+                sendButton.setTitle("Set", for: .normal)
+                moreButton.isHidden = true
+                likeButton.isHidden = true
+                textField.text = itemRef != nil ? itemRef!.caption : nil
+                
+                if let item = itemRef {
+                    if item.anon != nil {
+                        userImageView.image = isDarkMode ? UIImage(named: "private_dark") : UIImage(named:"private2")
+                    } else if let user = userState.user {
+                        userImageView.loadImageAsync(user.imageURL, completion: nil)
+                    }
+                }
+            } else if isDarkMode {
                 textField.attributedPlaceholder =
                     NSAttributedString(string: placeHolderString, attributes: [NSForegroundColorAttributeName : UIColor.gray])
             } else  {
@@ -210,9 +227,27 @@ class CommentItemBar: UIView {
             }
             
         } else {
+            
+            
             likeButton?.isUserInteractionEnabled = true
             moreButton?.isUserInteractionEnabled = true
             sendButton?.isUserInteractionEnabled = false
+            
+            if editCaptionMode {
+                editCaptionMode = false
+                textField.text = nil
+                sendButton.setTitle("", for: .normal)
+                sendButton.setImage(UIImage(named: "send"), for: .normal)
+                moreButton.isHidden = false
+                likeButton.isHidden = false
+                
+                if userState.anonMode {
+                    userImageView.image = isDarkMode ? UIImage(named: "private_dark") : UIImage(named:"private2")
+                } else if let user = userState.user {
+                    userImageView.loadImageAsync(user.imageURL, completion: nil)
+                }
+                
+            }
             
             if isDarkMode {
                 textField.attributedPlaceholder =
@@ -221,6 +256,14 @@ class CommentItemBar: UIView {
                 textField.placeholder = "Comment"
             }
         }
+    }
+    
+    func reset() {
+        textField.text = nil
+        itemRef = nil
+        liked = false
+        editCaptionMode = false
+        isKeyboardUp = false
     }
     
 }

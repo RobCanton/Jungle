@@ -63,11 +63,17 @@ class StoryInfoView: UIView {
             } else {
                 self.usernameLabel.text = anon.anonName
             }
+            
+            UploadService.retrieveAnonImage(withName: anon.animal) { image, fromFile in
+                self.userImageView.image = image
+            }
+            
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.authorTapped))
             self.userImageView.isUserInteractionEnabled = true
             self.userImageView.addGestureRecognizer(tap)
         } else {
-        
+            self.usernameLabel.textColor = UIColor.white
+            self.userImageView.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
             UserService.getUser(item.authorId, completion: { user in
                 if user != nil {
                     self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightMedium)

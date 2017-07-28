@@ -83,10 +83,8 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     
     func notificationsUpdated(_ notificationsDict: [String : Bool]) {
         guard let service = notification_service else { return }
-        print("YUH")
         print(notificationsDict)
         if notificationsDict.count == 0 {
-            print("HMM")
             self.tableView.reloadData()
             self.refreshIndicator.stopAnimating()
             return
@@ -96,9 +94,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         var count = 0
         refreshIndicator.startAnimating()
         for (key, _) in notificationsDict {
-            print("NOT: \(key)")
             service.getNotification(key, completion: { notification, seen in
-                print("notification: \(notification?.key)")
                 if notification != nil {
                     tempNotifications.append(notification!)
                 }

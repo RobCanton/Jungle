@@ -34,6 +34,17 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     var firstCell = true
     
     var currentIndexPath:IndexPath?
+    {
+        willSet {
+            getCurrentCell()?.isCurrentItem = false
+            print("Prev value: \(currentIndexPath)")
+        }
+        didSet {
+            getCurrentCell()?.isCurrentItem = true
+            print("Next value: \(currentIndexPath)")
+        }
+    }
+    
     var startIndex:Int?
     
     deinit {
@@ -59,6 +70,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         automaticallyAdjustsScrollViewInsets = false
          globalMainInterfaceProtocol?.statusBar(hide: true, animated: false)
         
+        getCurrentCell()?.isCurrentItem = true
         getCurrentCell()?.resume()
 
         self.navigationController?.delegate = transitionController
@@ -439,24 +451,25 @@ extension StoriesViewController: PopupProtocol {
         guard let item = cell.item else { return }
         cell.pause()
         
-        if item.authorId == mainStore.state.userState.uid {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resume()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let subscribed = cell.subscribedToPost
-            var message = "Recieve Notifications"
-            
-            if subscribed {
-                message = "Mute Notifications"
-            }
-            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
-                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
-            }
-            actionSheet.addAction(notificationsAction)
-            
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+            cell.resume()
+        }
+        actionSheet.addAction(cancelActionButton)
+        
+        let subscribed = cell.subscribedToPost
+        var message = "Recieve Notifications"
+        
+        if subscribed {
+            message = "Mute Notifications"
+        }
+        let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
+            UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
+        }
+        actionSheet.addAction(notificationsAction)
+        
+        if isCurrentUserId(id: item.authorId) {
             let deleteAction: UIAlertAction = UIAlertAction(title: "Delete", style: .destructive) { action -> Void in
                 UploadService.deleteItem(item: item) { success in
                     if success {
@@ -465,26 +478,7 @@ extension StoriesViewController: PopupProtocol {
                 }
             }
             actionSheet.addAction(deleteAction)
-            self.present(actionSheet, animated: true, completion: nil)
         } else {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-                cell.resume()
-            }
-            actionSheet.addAction(cancelActionButton)
-            
-            let subscribed = cell.subscribedToPost
-            var message = "Recieve Notifications"
-            
-            if subscribed {
-                message = "Mute Notifications"
-            }
-            let notificationsAction = UIAlertAction(title: message, style: .default) { (action) in
-                UploadService.subscribeToPost(withKey: item.key, subscribe: !subscribed)
-            }
-            actionSheet.addAction(notificationsAction)
-            
             let OKAction = UIAlertAction(title: "Report", style: .destructive) { (action) in
                 let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 
@@ -510,8 +504,9 @@ extension StoriesViewController: PopupProtocol {
             }
             actionSheet.addAction(OKAction)
             
-            self.present(actionSheet, animated: true, completion: nil)
         }
+        
+        self.present(actionSheet, animated: true, completion: nil)
         
     }
 
