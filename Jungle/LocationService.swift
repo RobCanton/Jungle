@@ -182,8 +182,9 @@ class LocationService: NSObject {
     func getCityStory(_ key:String, withDistance distance:Double, completion: @escaping ((_ story:CityStory?)->())) {
         
         let storyRef = Database.database().reference().child("cities/posts/\(key)")
-        
-        storyRef.queryOrderedByValue().observeSingleEvent(of: .value, with: { snapshot in
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let timestamp = yesterday.timeIntervalSince1970 * 1000
+        storyRef.queryOrdered(byChild: "t").queryStarting(atValue: timestamp).observeSingleEvent(of: .value, with: { snapshot in
             var story:CityStory?
             var contributers = [String:Bool]()
             var postKeys = [(String,Double)]()

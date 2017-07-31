@@ -13,6 +13,11 @@ func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
 }
 
 
+protocol HomeHeaderProtocol: class {
+    func emptyHeaderTapped()
+}
+
+
 
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
@@ -30,8 +35,11 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
 
     @IBOutlet weak var longDivider: UIView!
     
+    @IBOutlet weak var emptyView: UIView!
+    @IBOutlet weak var emptyGrayView: UIView!
     weak var stateRef:HomeStateController?
 
+    weak var delegate:HomeHeaderProtocol?
     
     @IBOutlet weak var stackTopAnchor: NSLayoutConstraint!
     override func awakeFromNib() {
@@ -75,10 +83,18 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         layout2.minimumLineSpacing = 0.0
         layout2.scrollDirection = .horizontal
         
+        emptyGrayView.layer.cornerRadius = 8.0
+        emptyGrayView.clipsToBounds = true
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(emptyHeaderTapped))
+        emptyGrayView.addGestureRecognizer(tap)
         
         
         //resetStack()
+    }
+    
+    func emptyHeaderTapped() {
+        delegate?.emptyHeaderTapped()
     }
     
     
@@ -89,16 +105,22 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         for view in stackView.arrangedSubviews {
             stackView.removeArrangedSubview(view)
         }
-        //stackView.addArrangedSubview(gapView)
 
         stackView.addArrangedSubview(topBanner)
         stackView.addArrangedSubview(collectionView)
         stackView.addArrangedSubview(bottomHeader)
+        stackView.addArrangedSubview(emptyView)
         
     
         topBanner.isHidden = false
         collectionView.isHidden = false
         bottomHeader.isHidden = false
+        emptyView.isHidden = false
+        
+        topBanner.isUserInteractionEnabled = true
+        collectionView.isUserInteractionEnabled = true
+        bottomHeader.isUserInteractionEnabled = true
+        emptyGrayView.isUserInteractionEnabled = true
         
         longDivider.isHidden = true
     }
@@ -108,6 +130,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             stackView.removeArrangedSubview(view)
         }
         view.isHidden = true
+        view.isUserInteractionEnabled = true
     }
     
     func setupStories(state: HomeStateController, section:Int) {
@@ -116,14 +139,13 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
         self.sectionRef = section
         self.stateRef = state
         
-        
         resetStack()
 
         switch sectionRef {
         case 0:
-            //removeStackView(view: topBanner)
-            topLabel.setKerning(withText: "FOLLOWING", 1.125)
-            bottomLabel.setKerning(withText: "POPULAR", 1.125)
+            removeStackView(view: emptyView)
+            topLabel.setKerning(withText: "FOLLOWING", 1.15)
+            bottomLabel.setKerning(withText: "POPULAR", 1.15)
             
             if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
                 removeStackView(view: topBanner)
@@ -133,11 +155,16 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             if state.popularPosts.count == 0 {
                 removeStackView(view: bottomHeader)
             }
+            
             break
         case 1:
 
-            topLabel.setKerning(withText: "CITIES", 1.125)
-            bottomLabel.setKerning(withText: "RECENT", 1.125)
+            topLabel.setKerning(withText: "PLACES", 1.15)
+            bottomLabel.setKerning(withText: "RECENT", 1.15)
+            
+            if state.nearbyPosts.count > 0 {
+                removeStackView(view: emptyView)
+            }
             
             if state.nearbyCityStories.count == 0  {
                 removeStackView(view: topBanner)

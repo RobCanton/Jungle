@@ -21,7 +21,7 @@ enum HomeSection {
     case following, popular, places, nearby
 }
 
-class HomeViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, StoreSubscriber, HomeProtocol {
+class HomeViewController:RoundedViewController, UICollectionViewDelegate, UICollectionViewDataSource, StoreSubscriber, HomeProtocol, HomeHeaderProtocol {
     var state:HomeStateController!
     
     
@@ -182,13 +182,17 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         state.fetchAll()
     }
     
+    func emptyHeaderTapped() {
+        handleOptions()
+    }
+    
     func handleOptions() {
         let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
         sortOptionsView.delegate = self
-        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 234)
+        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 250)
         let messageView = BaseView(frame: f)
         messageView.installContentView(sortOptionsView)
-        messageView.preferredHeight = 234
+        messageView.preferredHeight = 250
         messageView.configureDropShadow()
         var config = SwiftMessages.defaultConfig
         config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
@@ -211,7 +215,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                     topCollectionViewRef = nil
                     if state.popularPosts.count > 0 {
                         let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "bannerView", for: indexPath as IndexPath) as! CollectionBannerView
-                        view.label.text = "POPULAR"
+                        view.label.setKerning(withText: "POPULAR", 1.15)
                         return view
                     }
                     return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
@@ -224,17 +228,24 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
                 }
 
             case 1:
-                if state.nearbyCityStories.count == 0 {
-                    placesHeader = nil
-                    midCollectionViewRef = nil
-                    return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
-                } else {
-                    let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
-                    placesHeader = view
-                    midCollectionViewRef = view.collectionView
-                    view.setupStories(state: state, section: indexPath.section)
-                    return view
-                }
+                
+//                if state.nearbyCityStories.count == 0 {
+//                    placesHeader = nil
+//                    midCollectionViewRef = nil
+//                    if state.nearbyPosts.count > 0 {
+//                        let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "bannerView", for: indexPath as IndexPath) as! CollectionBannerView
+//                        view.label.setKerning(withText: "RECENT", 1.15)
+//                        return view
+//                    }
+//                    return collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader", for: indexPath as IndexPath)
+//                    
+//                } else {
+                let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! FollowingHeader
+                view.delegate = self
+                placesHeader = view
+                midCollectionViewRef = view.collectionView
+                view.setupStories(state: state, section: indexPath.section)
+                return view
             default:
                 break
             }
@@ -263,6 +274,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         case 1:
             ///verticalHeight += 48
             verticalHeight += state.nearbyCityStories.count > 0 ? collectionViewHeight + bannerHeight * 2.0 : bannerHeight
+            verticalHeight += state.nearbyPosts.count == 0 ? 84 : 0
             break
         default:
             break

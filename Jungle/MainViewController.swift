@@ -52,13 +52,13 @@ extension MainViewController: MainInterfaceProtocol {
     
     func presentHomeScreen(animated: Bool) {
         cameraView.cameraState = .Initiating
-        scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 2.0), animated: animated)
+        scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 1.0), animated: animated)
         mainTabBar.selectedIndex = 0
         
     }
     
     func presentCamera() {
-        scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+        scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
     }
     
     func fetchAllStories() {
@@ -91,14 +91,14 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var flashView:UIView!
     fileprivate var uploadCoordinate:CLLocation?
+    fileprivate var uploadPlace:GMSPlaceLikelihood?
     
     fileprivate var uploadLikelihoods:[GMSPlaceLikelihood]!
     
     fileprivate var flashButton:UIButton!
     fileprivate var switchButton:UIButton!
-    fileprivate var locationHeader:LocationHeaderView!
+    fileprivate var homeButton:UIButton!
     
-    fileprivate var mapView:GMSMapView?
     
     fileprivate var screenMode:ScreenMode = .Main
     
@@ -108,53 +108,45 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     fileprivate var messageWrapper:SwiftMessages!
     
-    var locations = [
-        "None",
-        "Markham",
-        "Funky Munky",
-        "Starbucks",
-        "Canadian Tire",
-        "McDonalds"
-    ]
-    
-    fileprivate lazy var sendButton: UIButton = {
-        let definiteBounds = UIScreen.main.bounds
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 54, height: 54))
-        button.setImage(UIImage(named: "send_arrow"), for: .normal)
-        button.center = CGPoint(x: definiteBounds.width - button.frame.width * 0.75, y: definiteBounds.height - button.frame.height * 0.75)
-        button.tintColor = UIColor.white
-        button.backgroundColor = UIColor(red: 69/255, green: 182/255, blue: 73/255, alpha: 1.0)
-        button.layer.cornerRadius = button.frame.width / 2
-        button.clipsToBounds = true
-        button.imageEdgeInsets = UIEdgeInsets(top: 6.0, left: 7.0, bottom: 6.0, right: 5.0)
-        button.applyShadow(radius: 5, opacity: 0.4, height: 2.5, shouldRasterize: false)
-        return button
-    }()
-    
+
     
     fileprivate lazy var editOptionsBar: PostEditOptionsBar = {
         let definiteBounds = UIScreen.main.bounds
         let view = UINib(nibName: "PostEditOptionsBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostEditOptionsBar
         view.frame = CGRect(x: 0, y: 0, width: definiteBounds.width, height: 64)
+        view.applyShadow(radius: 3.0, opacity: 0.20, height: 0.0, shouldRasterize: false)
+        return view
+    }()
+    
+    fileprivate lazy var sendOptionsBar: PostSendOptionsBar = {
+        let definiteBounds = UIScreen.main.bounds
+        let view = UINib(nibName: "PostSendOptionsBar", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostSendOptionsBar
+        view.frame = CGRect(x: 0, y: definiteBounds.height - 64, width: definiteBounds.width, height: 64)
+        view.applyShadow(radius: 3.0, opacity: 0.20, height: 0.0, shouldRasterize: false)
         return view
     }()
     
     
     fileprivate lazy var textView: UITextView = {
         let definiteBounds = UIScreen.main.bounds
-        let textView = UITextView(frame: CGRect(x: 0,y: 0,width: definiteBounds.width,height: 44))
+        let textView = UITextView(frame: CGRect(x: 8,y: 0,width: definiteBounds.width - 16,height: 44))
         textView.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightRegular)
         textView.textColor = UIColor.white
-        textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
         textView.isHidden = false
         textView.keyboardAppearance = .dark
         textView.isScrollEnabled = false
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8)
-        textView.backgroundColor = UIColor.clear
         textView.isUserInteractionEnabled = false
         textView.text = "funkymunky"
         textView.fitHeightToContent()
         textView.text = ""
+
+        
+        textView.layer.cornerRadius = 8.0
+        textView.clipsToBounds = true
+        
+        textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
+        
         return textView
     }()
     
@@ -164,7 +156,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }()
     
     fileprivate var textViewPanGesture:UIPanGestureRecognizer?
-    fileprivate var textViewTapGesture:UILongPressGestureRecognizer!
+    fileprivate var textViewTapGesture:UITapGestureRecognizer!
     
     deinit {
         print("Deinit >> MainViewController")
@@ -181,10 +173,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         navigationController?.navigationBar.tintColor = UIColor.black
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        //textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
-        textViewTapGesture = UILongPressGestureRecognizer(target: self, action: #selector(editCaptionTapped))
-        textViewTapGesture.minimumPressDuration = 0.0
-        textViewTapGesture.numberOfTapsRequired = 2
+        textViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(editCaptionTapped))
         
         recordBtn = CameraButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         cameraBtnFrame = recordBtn.frame
@@ -228,21 +217,18 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         switchButton.tintColor = UIColor.white
         switchButton.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
         
+        homeButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+        homeButton.setImage(UIImage(named:"bluedot"), for: .normal)
+        homeButton.center = CGPoint(x: view.center.x, y: view.frame.height - 26)
+        homeButton.alpha = 0.35
+        homeButton.tintColor = UIColor.white
+        homeButton.imageEdgeInsets = UIEdgeInsetsMake(12.0, 12.0, 12.0, 12.0)
+
+        homeButton.applyShadow(radius: 0.5, opacity: 0.75, height: 0.0, shouldRasterize: false)
+        
         flashButton.addTarget(self, action: #selector(switchFlashMode), for: .touchUpInside)
         switchButton.addTarget(self, action: #selector(switchCamera), for: .touchUpInside)
-        
-        locationHeader = UINib(nibName: "LocationHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! LocationHeaderView
-        locationHeader.frame = CGRect(x: 0, y: 20.0, width: view.frame.width, height: 44)
-        locationHeader.isHidden = false
-        locationHeader.isSearching(true)
-        
-        let locationHeaderTap = UITapGestureRecognizer(target: self, action: #selector(locationHeaderTapped))
-        locationHeader.addGestureRecognizer(locationHeaderTap)
-       
-        
-        let mapViewController  = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MapViewController") as! MapViewController
-        mapViewController.view.frame = view.bounds
-        mapViewController.locationHeaderRef = locationHeader
+        homeButton.addTarget(self, action: #selector(goHome), for: .touchUpInside)
         
         let v1  = UIViewController()
         v1.view.backgroundColor = UIColor.clear
@@ -271,14 +257,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         v1.view.frame = v1Frame
         
         var v2Frame: CGRect = CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.height - 20.0)
-        v2Frame.origin.y = screenBounds.height * 2 + 20.0
+        v2Frame.origin.y = screenBounds.height * 1 + 20.0
         mainTabBar.view.frame = v2Frame
         
         scrollView = UIScrollView(frame: view.bounds)
-        
-        addChildViewController(mapViewController)
-        scrollView.addSubview(mapViewController.view)
-        mapViewController.didMove(toParentViewController: self)
         
         addChildViewController(v1)
         scrollView.addSubview(v1.view)
@@ -288,7 +270,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         scrollView.addSubview(mainTabBar.view)
         mainTabBar.didMove(toParentViewController: self)
         
-        scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 3)
+        scrollView.contentSize = CGSize(width: screenBounds.width, height: screenBounds.height * 2)
         scrollView.isPagingEnabled = true
         scrollView.bounces = false
         scrollView.delegate = self
@@ -302,10 +284,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         view.addSubview(scrollView)
         view.addSubview(flashButton)
         view.addSubview(switchButton)
-        view.addSubview(locationHeader)
+        view.addSubview(homeButton)
         view.addSubview(recordBtn)
         
-        scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 2.0), animated: false)
+        scrollView.setContentOffset(CGPoint(x: 0, y: screenBounds.height * 1.0), animated: false)
         screenMode = .Main
         
         flashView.isUserInteractionEnabled = true
@@ -321,7 +303,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         zoomGesture.delegate = self
         
         if gps_service == nil {
-            gps_service = GPSService(["MapViewController":mapViewController, "MainViewController":self])
+            gps_service = GPSService(["MainViewController":self])
             gps_service.startUpdatingLocation()
             
             places.gps_service = gps_service
@@ -422,6 +404,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         } else {
             statusBar(hide: false, animated: true)
         }
+        
+        notification_service.registerForNotifications()
 
     }
     
@@ -445,7 +429,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let scrollViewIndex = view.subviews.index(of: scrollView)!
         let flashButtonIndex = view.subviews.index(of: flashButton)!
         let switchButtonIndex = view.subviews.index(of: switchButton)!
-        let locationHeaderIndex = view.subviews.index(of: locationHeader)!
+        let homeButtonIndex = view.subviews.index(of: homeButton)!
         
         if flashButtonIndex > scrollViewIndex {
            view.exchangeSubview(at: scrollViewIndex, withSubviewAt: flashButtonIndex)
@@ -453,63 +437,46 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         if switchButtonIndex > scrollViewIndex {
             view.exchangeSubview(at: scrollViewIndex, withSubviewAt: switchButtonIndex)
         }
-        if locationHeaderIndex > scrollViewIndex {
-            view.exchangeSubview(at: scrollViewIndex, withSubviewAt: locationHeaderIndex)
+        
+        if homeButtonIndex > scrollViewIndex {
+            view.exchangeSubview(at: scrollViewIndex, withSubviewAt: homeButtonIndex)
         }
 
         let height = UIScreen.main.bounds.height
         let y = scrollView.contentOffset.y
-        if y < height {
-            let alpha = y / height
-            let reverseAlpha = 1 - alpha
-            recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * reverseAlpha)
-            let multiple = alpha * alpha * alpha * alpha * alpha
-            recordBtn.transform = CGAffineTransform(scaleX: 0.55 + 0.15 * multiple, y: 0.55 + 0.15 * multiple)
-            recordBtn.ring.layer.borderColor = UIColor.white.cgColor
-            recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 0)
-            flashButton.center = CGPoint(x: cameraBtnFrame.origin.x / 2 + flashButton.frame.width * reverseAlpha, y: flashButton.center.y)
-            flashButton.alpha = multiple
-            switchButton.center = CGPoint(x: view.frame.width - cameraBtnFrame.origin.x / 2 - switchButton.frame.width * reverseAlpha, y: switchButton.center.y)
-            switchButton.alpha = multiple
-            
-            //locationHeader.alpha = multiple
-            locationHeader.center = CGPoint(x: locationHeader.center.x, y: 20 + 22 - (locationHeader.frame.height * 2.0 * reverseAlpha))
-        } else if y > height && y <= height * 2.0 {
-            let alpha = (y - height) / height
-            let reverseAlpha = 1 - alpha
-            recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * alpha)
-            let multiple = reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha
-            let color = UIColor(hue: 144/360, saturation: (1 - multiple) * 0.99, brightness: 0.85, alpha: 1.0)
-                //UIColor(hue: 149/360, saturation: 1 - multiple, brightness: 0.88, alpha: 1.0)
-            recordBtn.transform = CGAffineTransform(scaleX: 0.55 + 0.15 * multiple, y: 0.55 + 0.15 * multiple)
-            recordBtn.ring.layer.borderColor = color.cgColor
-            recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 1 - multiple)
-            flashView.alpha = alpha
-            flashButton.alpha = multiple
-            switchButton.alpha = multiple
-            //locationHeader.alpha = multiple
-            
-            if alpha < 0.98 && cameraView.cameraState == .Off{
-                cameraView.cameraState = .Initiating
-            }
+
+        let alpha = y / height
+        let reverseAlpha = 1 - alpha
+        recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y + cameraBtnFrame.height * 0.75 * alpha)
+        let multiple = reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha * reverseAlpha
+        let color = UIColor(hue: 144/360, saturation: (1 - multiple) * 0.99, brightness: 0.85, alpha: 1.0)
+            //UIColor(hue: 149/360, saturation: 1 - multiple, brightness: 0.88, alpha: 1.0)
+        recordBtn.transform = CGAffineTransform(scaleX: 0.55 + 0.15 * multiple, y: 0.55 + 0.15 * multiple)
+        recordBtn.ring.layer.borderColor = color.cgColor
+        recordBtn.ring.backgroundColor = UIColor(white: 1.0, alpha: 1 - multiple)
+        flashView.alpha = alpha
+        flashButton.alpha = multiple
+        switchButton.alpha = multiple
+        homeButton.alpha = multiple * 0.5
+        
+        if alpha < 0.98 && cameraView.cameraState == .Off{
+            cameraView.cameraState = .Initiating
         }
+        
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let height = UIScreen.main.bounds.height
         let y = scrollView.contentOffset.y
-        if y >= height && y < 10.0 + height {
+        if y < height {
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
             
             gps_service.setAccurateGPS(true)
-        } else if y >= height * 2.0 {
+        } else  {
             gps_service.setAccurateGPS(false)
             screenMode = .Main
             cameraView.cameraState = .Off
-        } else {
-            gps_service.setAccurateGPS(true)
-            screenMode = .Map
         }
     }
     
@@ -522,17 +489,17 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let scrollViewIndex = view.subviews.index(of: scrollView)!
         let flashButtonIndex = view.subviews.index(of: flashButton)!
         let switchButtonIndex = view.subviews.index(of: switchButton)!
-        let locationHeaderIndex = view.subviews.index(of: locationHeader)!
+        let homeButtonIndex = view.subviews.index(of: homeButton)!
+        
+        if homeButtonIndex < scrollViewIndex {
+            view.exchangeSubview(at: scrollViewIndex, withSubviewAt: homeButtonIndex)
+        }
         
         if switchButtonIndex < scrollViewIndex {
             view.exchangeSubview(at: scrollViewIndex, withSubviewAt: switchButtonIndex)
         }
         if flashButtonIndex < scrollViewIndex {
             view.exchangeSubview(at: scrollViewIndex, withSubviewAt: flashButtonIndex)
-        }
-        
-        if locationHeaderIndex < scrollViewIndex {
-            view.exchangeSubview(at: scrollViewIndex, withSubviewAt: locationHeaderIndex)
         }
         
         recordBtn.center = CGPoint(x: cameraCenter.x, y: cameraCenter.y )
@@ -544,11 +511,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         recordBtn.addGestures()
     }
     
-    func locationHeaderTapped() {
-        self.scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-    }
-    
-    
+
     
     var statusBarShouldHide = false
     var statusBarIsLight = true
@@ -663,7 +626,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
 }
 
-extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBarProtocol {
+extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBarProtocol, SendOptionsBarProtocol {
     
     func takingVideo() {
         statusBarShouldHide = true
@@ -691,41 +654,46 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         scrollView?.isUserInteractionEnabled = true
         flashButton?.isHidden = false
         switchButton?.isHidden = false
-        locationHeader?.isHidden = false
+        homeButton?.isHidden = false
     }
     
     func hideCameraOptions() {
         scrollView?.isUserInteractionEnabled = false
         flashButton?.isHidden = true
         switchButton?.isHidden = true
-        locationHeader?.isHidden = true
+        homeButton?.isHidden = true
     }
     
     func showEditOptions() {
         statusBarShouldHide = true
         self.setNeedsStatusBarAppearanceUpdate()
         self.view.addSubview(editOptionsBar)
-        self.view.addSubview(sendButton)
+        self.view.addSubview(sendOptionsBar)
         
+        
+        editOptionsBar.alpha = 1.0
+        sendOptionsBar.userImage.alpha = 1.0
+        sendOptionsBar.send.setTitleColor(UIColor.white, for: .normal)
+        sendOptionsBar.isUserInteractionEnabled = true
+        editOptionsBar.isUserInteractionEnabled = true
         editOptionsBar.delegate = self
-
+        sendOptionsBar.delegate = self
+        sendOptionsBar.setup()
+        
         //self.view.addSubview(locationButton)
         
         textView.resignFirstResponder()
-        textView.isUserInteractionEnabled = false
+        textView.isUserInteractionEnabled = true
         textView.text = ""
         textView.delegate = self
-        textView.backgroundColor = UIColor.clear
+        textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
         textView.textAlignment = .left
-        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height - textView.frame.height/2 - sendButton.frame.height - 32.0)
+        textViewCenter = CGPoint(x: view.frame.width/2, y: view.frame.height - textView.frame.height/2 - sendOptionsBar.frame.height - 8.0)
         textView.center = textViewCenter
+        self.view.removeGestureRecognizer(textViewTapGesture)
         self.view.addGestureRecognizer(textViewTapGesture)
         
         self.view.addSubview(textView)
- 
-        //cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        sendButton.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
-        //captionButton.addTarget(self, action: #selector(editCaption), for: .touchUpInside)
         
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -738,21 +706,25 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     
     func hideEditOptions() {
         editOptionsBar.removeFromSuperview()
-        sendButton.removeFromSuperview()
-
+        sendOptionsBar.removeFromSuperview()
         editOptionsBar.delegate = nil
+        sendOptionsBar.delegate = nil
+        textView.isUserInteractionEnabled = false
         textView.removeFromSuperview()
         self.view.removeGestureRecognizer(textViewTapGesture)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        
-        sendButton.removeTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         uploadLikelihoods = []
         statusBarShouldHide = false
         self.setNeedsStatusBarAppearanceUpdate()
     }
     
-    func editCaptionTapped() {
+    func editCaptionTapped(_ gesture:UITapGestureRecognizer) {
+        
+        let point = gesture.location(ofTouch: 0, in: self.view)
+        
+        if point.y < editOptionsBar.frame.height || point.y > textView.frame.origin.y { return }
+        
         if textView.isFirstResponder {
             textView.resignFirstResponder()
         } else {
@@ -766,40 +738,39 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             cameraView.didPressTakePhoto()
             break
         case .Main:
-            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
             break
         case .Map:
-            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
             break
         case .Transitioning:
-            scrollView.setContentOffset(CGPoint(x: 0, y: scrollView.frame.height), animated: true)
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
             break
         }
     }
     
     func sendButtonTapped(sender: UIButton) {
         
-        if !UserService.isEmailVerified {
-            let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
-            
-            alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
-            
-                UserService.sendVerificationEmail { success in
-                    if success {
-                        let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
-                        
-                        self.present(alert, animated: true, completion: nil)
-                    } else {
-                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
-                    }
-                }
-                
-            }))
-            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return
-        }
+//        if !UserService.isEmailVerified {
+//            let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
+//            
+//            alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
+//            
+//                UserService.sendVerificationEmail { success in
+//                    if success {
+//                        let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
+//                        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+//                        
+//                        self.present(alert, animated: true, completion: nil)
+//                    } else {
+//                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+//                    }
+//                }
+//                
+//            }))
+//            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+//            self.present(alert, animated: true, completion: nil)
+//            return
+//        }
         
         cameraView.pauseVideo()
         
@@ -830,6 +801,9 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     
     func editCancel() {
         
+        uploadPlace = nil
+        uploadCoordinate = nil
+        editOptionsBar.setLocationName(nil)
         cameraView.destroyVideoPreview()
         
         recordBtn.isHidden = false
@@ -844,6 +818,18 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     func editLocation() {
         let height = view.frame.height * 0.45
         let sortOptionsView = UINib(nibName: "LocationPickerView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! LocationPickerView
+        sortOptionsView.places = gps_service.getLikelihoods()
+        sortOptionsView.setup()
+        sortOptionsView.locationPicked = { place in
+            self.uploadPlace = place
+            if place != nil {
+                self.editOptionsBar.setLocationName(place!.place.name)
+            } else {
+                self.editOptionsBar.setLocationName(nil)
+            }
+            self.messageWrapper.hide()
+        }
+        
         let f = CGRect(x: 0, y: 0, width: view.frame.width, height: height)
         let messageView = BaseView(frame: f)
         messageView.installContentView(sortOptionsView)
@@ -862,7 +848,96 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         textView.becomeFirstResponder()
     }
     
+    func sendPost() {
+        if !mainStore.state.settingsState.uploadWarningShown {
+            
+            let alert = UIAlertController(title: "Heads up!", message: "All posts on Jungle are public and can be seen by anyone (except for users you have blocked). Don't post anything too personal.", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Nevermind", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { _ in
+                mainStore.dispatch(UploadWarningShown())
+                UserService.ref.child("users/settings/\(mainStore.state.userState.uid)/upload_warning_shown").setValue(true)
+                self.uploadPost()
+            }))
+            
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+        
+        uploadPost()
+        
+    }
+    
+    func uploadPost() {
+        let upload = Upload()
+        if cameraView.cameraState == .PhotoTaken {
+            upload.image = cameraView.imageCaptureView.image!
+        } else if cameraView.cameraState == .VideoTaken {
+            upload.videoURL = cameraView.videoUrl
+        }
+        
+        if textView.text != "" {
+            upload.caption = textView.text
+        }
+        
+        upload.coordinates = uploadCoordinate
+        upload.place = uploadPlace?.place
+        
+        let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        activityIndicator.startAnimating()
+        activityIndicator.center = sendOptionsBar.center
+        view.addSubview(activityIndicator)
+        
+        sendOptionsBar.send.setTitleColor(UIColor.clear, for: .normal)
+        
+        editOptionsBar.isUserInteractionEnabled = false
+        sendOptionsBar.isUserInteractionEnabled = false
+        
+        UIView.animate(withDuration: 0.20, animations: {
+            self.editOptionsBar.alpha = 0.0
+            self.sendOptionsBar.userImage.alpha = 0.0
+        })
+        
+        if let videoURL = upload.videoURL {
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let outputUrl = documentsURL.appendingPathComponent("output.mp4")
+            
+            do {
+                try FileManager.default.removeItem(at: outputUrl)
+            }
+            catch let error as NSError {
+                if error.code != 4 && error.code != 2 {
+                    return print("Error \(error)")
+                }
+            }
+            upload.videoURL = outputUrl
+            
+            UploadService.compressVideo(inputURL: videoURL, outputURL: outputUrl, handler: { session in
+                DispatchQueue.main.async {
+                    UploadService.getUploadKey(upload: upload) { success in
+                        activityIndicator.removeFromSuperview()
+                        self.sent()
+                    }
+                }
+            })
+            
+        } else if upload.image != nil {
+            UploadService.getUploadKey(upload: upload) { success in
+                activityIndicator.removeFromSuperview()
+                self.sent()
+            }
+        }
+    }
+    
+    func sent() {
+        cameraView.cameraState = .Initiating
+        presentHomeScreen(animated: false)
+        //self.navigationController?.popViewController(animated: false)
+    }
+
+    
     func keyboardWillAppear(notification: NSNotification) {
+        
         
         guard let info = notification.userInfo else { return }
         guard let keyboardValue = info[UIKeyboardFrameEndUserInfoKey] as? NSValue else { return }
@@ -873,8 +948,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
             let textViewFrame = self.textView.frame
-            self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
-            self.textView.center = CGPoint(x: self.textViewCenter.x, y: height - keyboardFrame.height - textViewFrame.height / 2)
+            self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
+            self.textView.center = CGPoint(x: self.textViewCenter.x, y: height - keyboardFrame.height - textViewFrame.height / 2 - 8.0)
         }, completion: { _ in
             self.textView.isUserInteractionEnabled = true
         })
@@ -891,7 +966,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             self.textView.frame = CGRect(x: 0,y: textViewStart,width: textViewFrame.width, height: textViewFrame.height)*/
             self.textView.center = self.textViewCenter
             if self.textView.text != "" {
-                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.65)
+                
+                self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
             } else {
                 self.textView.backgroundColor = UIColor(white: 0.0, alpha: 0.0)
             }
@@ -901,12 +977,16 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     func updateTextAndCommentViews() {
         let oldHeight = textView.frame.size.height
         textView.fitHeightToContent()
+        
         let change = textView.frame.height - oldHeight
         
         textView.center = CGPoint(x: textView.center.x, y: textView.center.y - change)
+        self.textViewCenter = CGPoint(x: textViewCenter.x, y: textViewCenter.y - change / 2)
+        print("TextViewCenter: \(textViewCenter)")
     }
     
     public func textViewDidChange(_ textView: UITextView) {
+        textView.yo()
         updateTextAndCommentViews()
     }
     
@@ -966,6 +1046,10 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             break
         }
         cameraView.reloadCamera()
+    }
+    
+    func goHome() {
+        scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 1.0), animated: true)
     }
     
 }

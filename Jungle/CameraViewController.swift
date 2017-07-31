@@ -366,7 +366,7 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     var pivotPinchScale:CGFloat!
     
     func handlePinchGesture(gesture:UIPinchGestureRecognizer) {
-        
+        print("AYEE Its lit")
         guard let device = cameraDevice else { return }
         do {
             try device.lockForConfiguration()

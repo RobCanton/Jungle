@@ -157,8 +157,79 @@ extension Date
     
 }
 
+extension UITextView: UITextViewDelegate {
+    
+    // Placeholder text
+    var placeholder: String? {
+        
+        get {
+            // Get the placeholder text from the label
+            var placeholderText: String?
+            
+            if let placeHolderLabel = self.viewWithTag(100) as? UILabel {
+                placeholderText = placeHolderLabel.text
+            }
+            return placeholderText
+        }
+        
+        set {
+            // Store the placeholder text in the label
+            var placeHolderLabel = self.viewWithTag(100) as! UILabel?
+            if placeHolderLabel == nil {
+                // Add placeholder label to text view
+                self.addPlaceholderLabel(placeholderText: newValue!)
+            }
+            else {
+                placeHolderLabel?.text = newValue
+                placeHolderLabel?.sizeToFit()
+            }
+        }
+    }
+    
+    
+    func yo() {
+        var placeHolderLabel = self.viewWithTag(100)
+        
+        if !self.hasText {
+            // Get the placeholder label
+            placeHolderLabel?.isHidden = false
+        }
+        else {
+            placeHolderLabel?.isHidden = true
+        }
+    }
+    
+    
+    
+    // Add a placeholder label to the text view
+    func addPlaceholderLabel(placeholderText: String) {
+        
+        // Create the label and set its properties
+        var placeholderLabel = UILabel(frame: CGRect(x: 16, y: 10, width: self.bounds.width - 32, height: self.bounds.height - 20))
+        placeholderLabel.text = placeholderText
+        placeholderLabel.sizeToFit()
+        placeholderLabel.font = self.font
+        placeholderLabel.textColor = UIColor.white
+        placeholderLabel.alpha = 0.5
+        placeholderLabel.tag = 100
+        
+        // Hide the label if there is text in the text view
+        placeholderLabel.isHidden = self.text.characters.count > 0
+        
+        self.addSubview(placeholderLabel)
+        self.delegate = self;
+    }
+    
+}
+
+
 extension UILabel {
     
+    func setKerning(withText text:String, _ value:CGFloat) {
+        let attributedString = NSMutableAttributedString(string: text)
+        attributedString.addAttribute(NSKernAttributeName, value: value, range: NSRange(location: 0, length: attributedString.length))
+        self.attributedText = attributedString
+    }
     
     func setUsernameWithBadge(username:String, badge:String, fontSize:CGFloat, fontWeight:CGFloat) {
         
@@ -213,6 +284,18 @@ extension UILabel {
         measurementLabel.translatesAutoresizingMaskIntoConstraints = false
         
         measurementLabel.widthAnchor.constraint(equalToConstant: width).isActive = true
+        return measurementLabel.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+    }
+    
+    public class func size(withText text: String, forHeight height: CGFloat, withFont font: UIFont) -> CGSize {
+        let measurementLabel = UILabel()
+        measurementLabel.font = font
+        measurementLabel.text = text
+        measurementLabel.numberOfLines = 0
+        measurementLabel.lineBreakMode = .byWordWrapping
+        measurementLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        measurementLabel.heightAnchor.constraint(equalToConstant: height).isActive = true
         return measurementLabel.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
     }
     

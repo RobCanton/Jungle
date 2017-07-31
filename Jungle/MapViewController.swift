@@ -110,16 +110,13 @@ extension MapViewController: GPSServiceProtocol {
             if let address = first.place.formattedAddress {
                 self.locationAddressLabel.text = getShortFormattedAddress(address)
             }
-            locationHeaderRef.isSearching(false)
-            locationHeaderRef.locationLabel.text = first.place.name
+
             
         } else {
             print("Nothing nearby")
             
             self.locationLabel.text = "Nothing nearby"
             self.locationAddressLabel.text = ""
-            locationHeaderRef.isSearching(false)
-            locationHeaderRef.locationLabel.text = "Nothing nearby"
         }
     }
     

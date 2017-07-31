@@ -1,17 +1,20 @@
 //
-//  PlaceViewController.swift
-//  
+//  CityViewController.swift
+//  Jungle
 //
-//  Created by Robert Canton on 2017-06-07.
+//  Created by Robert Canton on 2017-07-28.
+//  Copyright © 2017 Robert Canton. All rights reserved.
 //
-//
+
 
 import UIKit
 import ReSwift
 import View2ViewTransition
 import Firebase
+import Alamofire
+import CoreLocation
 
-class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout {
+class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout {
     
     let cellIdentifier = "photoCell"
     var screenSize: CGRect!
@@ -24,10 +27,13 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
     var postKeys = [String]()
     
     var collectionView:UICollectionView!
-
-
-    var place:Location!
+    
+    var cityObject:City?
+    var city:String!
+    var country:String!
     var statusBarShouldHide = false
+    
+    var activityIndicator:UIActivityIndicatorView!
     
     override var prefersStatusBarHidden: Bool
         {
@@ -46,9 +52,8 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         self.addNavigationBarBackdrop()
         
         self.view.backgroundColor = UIColor.white
-        //self.title = place.name
         
-        self.navigationItem.setTitle(title: place.name, subtitle: place.shortAddress)
+        self.title = "\(city!), \(country!)"
         screenSize = self.view.frame
         screenWidth = screenSize.width
         screenHeight = screenSize.height
@@ -78,11 +83,51 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         self.view.addSubview(collectionView)
         collectionView.reloadData()
         
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.startAnimating()
+        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+        
+        UserService.getHTTPSHeaders() { httpHeaders in
+            guard let headers = httpHeaders else { return }
+            print("NOICE")
+            var ob = [
+                "city" : self.city!,
+                "country": self.country!
+            ] as [String:String]
+            Alamofire.request("\(API_ENDPOINT)/cityKey", method: .post, parameters: ob, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any],
+                        let cityKey = json["cityKey"] as? String,
+                        let lat = json["lat"] as? Double,
+                        let lon = json["lon"] as? Double {
+                        let city = City(key: cityKey, name: self.city!, country: self.country!, coordinates: CLLocation(latitude: lat, longitude: lon))
+                        self.getPosts(city)
+                        
+                    }
+                }
+            }
+        }
         
     }
     
-    
-    
+    func getPosts(_ city:City) {
+        self.cityObject = city
+        let ref = UserService.ref.child("cities/posts/\(city.key)")
+        ref.queryOrdered(byChild: "t").queryLimited(toLast: 60).observeSingleEvent(of: .value, with: { snapshot in
+            var postKeys = [String]()
+            for child in snapshot.children {
+                let childSnap = child as! DataSnapshot
+                postKeys.append(childSnap.key)
+            }
+            
+            self.postKeys = postKeys
+            self.downloadStory(postKeys: postKeys)
+        })
+    }
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -93,8 +138,6 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         if navigationController?.delegate === transitionController {
             statusBarShouldHide = false
             self.setNeedsStatusBarAppearanceUpdate()
-        } else {
-            listenToPosts()
         }
     }
     
@@ -106,7 +149,6 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         
         if navigationController?.delegate === transitionController {
             self.navigationController?.delegate = nil
-            listenToPosts()
         }
     }
     
@@ -117,39 +159,13 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         mainStore.unsubscribe(self)
-        stopListeningToPosts()
-
+        
     }
     
     func newState(state: AppState) {
-
-    }
-    
-    func listenToPosts() {
         
-        // if mainStore.state.socialState.blockedBy.contains(userId) { return }
-        postsRef = UserService.ref.child("places/posts/\(place.key)")
-        postsRef?.observeSingleEvent(of: .value, with: { snapshot in
-            print("OBSERVEING PSOTS")
-            var postKeys = [String]()
-            if snapshot.exists() {
-                print("WHY")
-                let keys = snapshot.value as! [String:AnyObject]
-                for (key, _) in keys {
-                    print("KEY: \(key)")
-                    postKeys.append(key)
-                }
-            }
-            print("POSTS: \(postKeys)")
-            self.postKeys = postKeys
-            self.downloadStory(postKeys: postKeys)
-        })
     }
-    
-    func stopListeningToPosts() {
-        postsRef?.removeAllObservers()
-    }
-    
+
     func downloadStory(postKeys:[String]) {
         if postKeys.count > 0 {
             UploadService.downloadStory(postKeys: postKeys, completion: { story in
@@ -157,17 +173,21 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
                 self.posts = story.sorted(by: { return $0 > $1 })
                 
                 self.collectionView!.reloadData()
+                self.activityIndicator.stopAnimating()
             })
         } else {
             self.posts = [StoryItem]()
             self.collectionView.reloadData()
+            self.activityIndicator.stopAnimating()
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! PlaceHeaderView
-            view.setLocation(place)
+            if cityObject != nil {
+                view.setCity(cityObject!)
+            }
             return view
         }
         
@@ -175,7 +195,7 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let staticHeight:CGFloat = 200
-
+        
         let size =  CGSize(width: collectionView.frame.size.width, height: staticHeight) // +8 for some empty padding
         return size
     }
@@ -231,7 +251,45 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
     }
 }
 
-extension PlaceViewController: View2ViewTransitionPresenting {
+extension UINavigationItem {
+    
+    
+    
+    func setTitle(title:String, subtitle:String) {
+        
+        let one = UILabel()
+        one.textAlignment = .center
+        one.text = title
+        one.font = UIFont.systemFont(ofSize: 17, weight: UIFontWeightMedium)
+        one.sizeToFit()
+        
+        let two = UILabel()
+        two.textAlignment = .center
+        two.text = subtitle
+        two.font = UIFont.systemFont(ofSize: 12)
+        two.textAlignment = .center
+        two.textColor = UIColor.gray
+        two.sizeToFit()
+        
+        
+        
+        let stackView = UIStackView(arrangedSubviews: [one, two])
+        stackView.distribution = .equalCentering
+        stackView.axis = .vertical
+        
+        let width = max(one.frame.size.width, two.frame.size.width)
+        stackView.frame = CGRect(x: 0, y: 0, width: width, height: 35)
+        
+        one.sizeToFit()
+        two.sizeToFit()
+        
+        
+        
+        self.titleView = stackView
+    }
+}
+
+extension CityViewController: View2ViewTransitionPresenting {
     
     func initialFrame(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> CGRect {
         

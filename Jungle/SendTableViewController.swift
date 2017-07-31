@@ -265,29 +265,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func preparePost() {
-        let activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-        activityIndicator.startAnimating()
-        activityIndicator.center = sendView.center
-        view.addSubview(activityIndicator)
-        
-        sendLabel.isHidden = true
-        
-        
-        if userState.anonMode {
-            
-            APIService.getRandomAnonymousInfo() { anonObject, success in
-                DispatchQueue.main.async {
-                    if success, let anon = anonObject {
-                        self.upload.anonObject = anon
-                        self.uploadPost()
-                    }
-                }
 
-            }
-        } else {
-            
-            uploadPost()
-        }
         
     }
     

@@ -27,7 +27,7 @@ class PostEditOptionsBar: UIView {
         super.awakeFromNib()
         
         locationBubble.layer.borderColor = UIColor.white.cgColor
-        locationBubble.layer.borderWidth = 1.0
+        locationBubble.layer.borderWidth = 1.5
         
         locationBubble.layer.cornerRadius = locationBubble.bounds.height / 2
         locationBubble.clipsToBounds = true
@@ -38,6 +38,19 @@ class PostEditOptionsBar: UIView {
         
     }
     
+    func setLocationName(_ name:String?) {
+        if name != nil {
+            locationLabel.text = name
+            locationLabel.textColor = UIColor.black
+            locationBubble.backgroundColor = UIColor.white
+            locationBubble.layer.borderColor = UIColor.white.cgColor
+        } else {
+            locationLabel.text = "+ Add Location"
+            locationLabel.textColor = UIColor.white
+            locationBubble.backgroundColor = UIColor.clear
+            locationBubble.layer.borderColor = UIColor.white.cgColor
+        }
+    }
     
     @IBAction func handleCancel(_ sender: Any) {
         delegate?.editCancel()

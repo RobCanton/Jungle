@@ -17,6 +17,8 @@ protocol SortOptionsProtocol:class {
 class SortOptionsView: UIView {
     
     
+    @IBOutlet weak var anonLabel: UILabel!
+    @IBOutlet weak var radiusLabel: UILabel!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var backgroundView: UIView!
@@ -30,6 +32,10 @@ class SortOptionsView: UIView {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        anonLabel.setKerning(withText: "ANONYMOUS", 1.15)
+        radiusLabel.setKerning(withText: "SEARCH RADIUS", 1.15)
+        
         var distanceLabels = [String]()
         let selectedDistance = LocationService.sharedInstance.radius
         
@@ -56,12 +62,9 @@ class SortOptionsView: UIView {
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
-        backgroundView.layer.cornerRadius = 8.0
-        backgroundView.clipsToBounds = true
-        
         userImageView.cropToCircle()
         
-        anonSwitch.setOn(userState.anonMode, animated: false)
+        anonSwitch.setOn(!userState.anonMode, animated: false)
         handleAnonSwitch(anonSwitch)
     }
     
@@ -98,15 +101,19 @@ class SortOptionsView: UIView {
         delegate?.dismissSortOptions()
     }
     @IBAction func handleAnonSwitch(_ sender: Any) {
-        if anonSwitch.isOn {
+        if !anonSwitch.isOn {
             mainStore.dispatch(GoAnonymous())
-            setTitleLabel(prefix: "Use ", username: "anonymously")
-            userImageView.image = UIImage(named: "private_dark")
+            setTitleLabel(prefix: "Use ", username: "anonymously", highlightColor: accentColor)
+            userImageView.image = UIImage(named: "private2")
+            userImageView.backgroundColor = accentColor
+            userImageView.layer.borderColor = accentColor.cgColor
+            userImageView.layer.borderWidth = 2.0
         } else {
-            mainStore.dispatch(GoPublic())
             
+            mainStore.dispatch(GoPublic())
+            userImageView.layer.borderColor = infoColor.cgColor
             if let user = userState.user {
-                setTitleLabel(prefix: "Use as ", username: "@\(user.username)")
+                setTitleLabel(prefix: "Use as ", username: "@\(user.username)", highlightColor: infoColor)
                 userImageView.loadImageAsync(user.imageURL, completion: nil)
             } else {
                 usernameLabel.text = "User not found!"
@@ -116,10 +123,10 @@ class SortOptionsView: UIView {
         }
     }
     
-    func setTitleLabel(prefix:String, username:String) {
+    func setTitleLabel(prefix:String, username:String, highlightColor:UIColor) {
         let str = "\(prefix)\(username)"
         let attributes: [String: AnyObject] = [
-            NSForegroundColorAttributeName: UIColor.black,
+            NSForegroundColorAttributeName: highlightColor,
             NSFontAttributeName : UIFont.systemFont(ofSize: 15, weight: UIFontWeightSemibold)
         ]
         

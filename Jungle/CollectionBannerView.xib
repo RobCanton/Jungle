@@ -42,8 +42,8 @@
                     <constraints>
                         <constraint firstItem="auP-LU-7fY" firstAttribute="leading" secondItem="d9X-9b-rrH" secondAttribute="trailing" constant="12" id="2rD-Ip-2hR"/>
                         <constraint firstItem="d9X-9b-rrH" firstAttribute="centerX" secondItem="3VE-4E-Cn3" secondAttribute="centerX" id="Rzv-sP-wPI"/>
+                        <constraint firstAttribute="trailing" secondItem="auP-LU-7fY" secondAttribute="trailing" constant="12" id="Tna-mE-XUU"/>
                         <constraint firstItem="d9X-9b-rrH" firstAttribute="centerY" secondItem="3VE-4E-Cn3" secondAttribute="centerY" id="Wta-Cg-ghB"/>
-                        <constraint firstAttribute="trailing" secondItem="auP-LU-7fY" secondAttribute="trailing" constant="12" id="Y8r-op-jdP"/>
                         <constraint firstAttribute="height" constant="32" id="Zum-BO-9KZ"/>
                         <constraint firstItem="auP-LU-7fY" firstAttribute="centerY" secondItem="3VE-4E-Cn3" secondAttribute="centerY" id="frq-tZ-slh"/>
                         <constraint firstItem="dBZ-z7-9M2" firstAttribute="centerY" secondItem="3VE-4E-Cn3" secondAttribute="centerY" id="gA8-LK-HqY"/>
@@ -61,7 +61,7 @@
             <connections>
                 <outlet property="label" destination="d9X-9b-rrH" id="jAE-QQ-U4J"/>
             </connections>
-            <point key="canvasLocation" x="225.5" y="73.5"/>
+            <point key="canvasLocation" x="225.5" y="73"/>
         </collectionReusableView>
     </objects>
 </document>

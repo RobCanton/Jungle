@@ -12,6 +12,7 @@ import UIKit
 protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
+    func showCity(_ city:String, _ country:String)
     func showMetaLikes()
     func showMetaComments(_ indexPath:IndexPath?)
     func dismiss()
@@ -164,6 +165,8 @@ class PostHeaderView: UIView {
     }
     
     var locationKey:String = ""
+    var city:String?
+    var country:String?
     weak var location:Location?
     
     func setupLocation(locationKey:String?) {
@@ -176,6 +179,13 @@ class PostHeaderView: UIView {
                 self.locationRetrieved(_location)
             }
         } else if let item = itemRef, let city = item.city, let country = item.country {
+            location = nil
+            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.locationTitle.isUserInteractionEnabled = true
+            self.locationTitle.addGestureRecognizer(placeTap!)
+            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.city = city
+            self.country = country
             locationTitle.text = " · \(city), \(country)"
         } else {
             clearLocation()
@@ -194,6 +204,12 @@ class PostHeaderView: UIView {
             self.locationTitle.addGestureRecognizer(placeTap!)
             placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
         } else if let item = itemRef, let city = item.city, let country = item.country {
+            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.locationTitle.isUserInteractionEnabled = true
+            self.locationTitle.addGestureRecognizer(placeTap!)
+            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+            self.city = city
+            self.country = country
             locationTitle.text = " · \(city), \(country)"
         } else {
             clearLocation()
@@ -210,12 +226,20 @@ class PostHeaderView: UIView {
         if placeTap2 != nil {
             placeTap2 = nil
         }
+        location = nil
+        city = nil
+        country = nil
     }
     
     func locationTapped(tap:UITapGestureRecognizer) {
-        guard let loc = self.location else { return }
-        print("PRESENT LOCATION: \(loc.name)")
-        delegate?.showPlace(loc)
+        
+        if let loc = self.location {
+            delegate?.showPlace(loc)
+        } else if let _city = self.city, let _country = self.country {
+            print("HERE")
+            delegate?.showCity(_city, _country)
+        }
+
     }
     
 

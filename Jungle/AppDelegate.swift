@@ -105,25 +105,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             print("error")
         }
         
-        if #available(iOS 10.0, *) {
-            // For iOS 10 display notification (sent via APNS)
-            UNUserNotificationCenter.current().delegate = self
-            
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]){
-                (granted,error) in
-                if granted{
-                    application.registerForRemoteNotifications()
-                } else {
-                    print("User Notification permission denied: \(String(describing: error?.localizedDescription))")
-                }
-                
-            }
-        } else {
-            // Fallback on earlier versions
-            UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.sound, .alert, .badge], categories: nil))
-            UIApplication.shared.registerForRemoteNotifications()
-        }
-        
         
         createDirectory("user_content")
         

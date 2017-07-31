@@ -235,12 +235,14 @@ class HomeStateController: StoreSubscriber {
         nearbyRef?.removeAllObservers()
         nearbyRef = UserService.ref.child("users/location/nearby/\(uid)/posts")
         nearbyRef?.queryOrdered(byChild: "t").queryLimited(toLast: 150).observe(.value, with: { snapshot in
+            
             var posts = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot
                 let key = childSnap.key
                 posts.append(key)
             }
+            
             self.downloadPosts(posts)
         })
     }
@@ -248,6 +250,7 @@ class HomeStateController: StoreSubscriber {
     fileprivate func downloadPosts(_ posts:[String]) {
         var nearbyPosts = [StoryItem]()
         if posts.count == 0 {
+            self.nearbyPosts = nearbyPosts
             delegate?.update(.nearby)
             return
         }

@@ -257,6 +257,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.showPlace(location)
     }
     
+    func showCity(_ city:String, _ country:String) {
+        print("HERE TOO")
+        delegate?.showCity(city, country)
+    }
+    
     func showUser(_ uid:String) {
         delegate?.showUser(uid)
     }

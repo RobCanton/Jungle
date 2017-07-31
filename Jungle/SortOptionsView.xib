@@ -54,6 +54,7 @@
                                     <subviews>
                                         <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="m7e-va-7WU">
                                             <rect key="frame" x="290" y="6.5" width="51" height="31"/>
+                                            <color key="onTintColor" red="0.1137254902" green="0.79215686269999996" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                             <connections>
                                                 <action selector="handleAnonSwitch:" destination="iN0-l3-epB" eventType="valueChanged" id="ZHB-c3-Niv"/>
                                             </connections>
@@ -87,21 +88,21 @@
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iEY-De-kvd">
                                     <rect key="frame" x="0.0" y="76" width="351" height="32"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="RANGE" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CTp-9T-paN">
-                                            <rect key="frame" x="154.5" y="9" width="42" height="14.5"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SEARCH RADIUS" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CTp-9T-paN">
+                                            <rect key="frame" x="126.5" y="9" width="98" height="14.5"/>
                                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                                             <color key="textColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8Tq-LK-cJb">
-                                            <rect key="frame" x="0.0" y="16" width="146.5" height="1"/>
+                                            <rect key="frame" x="0.0" y="16" width="118.5" height="1"/>
                                             <color key="backgroundColor" white="0.9218229166666666" alpha="1" colorSpace="calibratedWhite"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="1" id="jSz-J7-v5h"/>
                                             </constraints>
                                         </view>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cbx-ZO-kYk">
-                                            <rect key="frame" x="204.5" y="15" width="138.5" height="1"/>
+                                            <rect key="frame" x="232.5" y="15" width="110.5" height="1"/>
                                             <color key="backgroundColor" white="0.92182291670000005" alpha="1" colorSpace="calibratedWhite"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="1" id="Zmq-rP-9NB"/>
@@ -122,15 +123,24 @@
                                         <constraint firstItem="CTp-9T-paN" firstAttribute="centerX" secondItem="iEY-De-kvd" secondAttribute="centerX" id="lhc-ZN-eqf"/>
                                     </constraints>
                                 </view>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1IG-M7-OwX">
-                                    <rect key="frame" x="0.0" y="108" width="351" height="8"/>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FIlters nearby places and recent posts" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6EL-gr-5dL">
+                                    <rect key="frame" x="0.0" y="108" width="351" height="16"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="16" id="2P6-QG-Bua"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2eo-uV-hEr">
+                                    <rect key="frame" x="0.0" y="124" width="351" height="12"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     <constraints>
-                                        <constraint firstAttribute="height" constant="8" id="NuJ-qV-Awp"/>
+                                        <constraint firstAttribute="height" constant="12" id="19Z-py-SDT"/>
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B81-rS-W40" customClass="TGPCamelLabels" customModule="TGPControls">
-                                    <rect key="frame" x="0.0" y="116" width="351" height="16"/>
+                                    <rect key="frame" x="0.0" y="136" width="351" height="16"/>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <color key="tintColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                                     <constraints>
@@ -152,7 +162,7 @@
                                     </userDefinedRuntimeAttributes>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XN3-g6-4cF" customClass="TGPDiscreteSlider" customModule="TGPControls">
-                                    <rect key="frame" x="0.0" y="132" width="351" height="110"/>
+                                    <rect key="frame" x="0.0" y="152" width="351" height="86"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     <color key="tintColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.3411764706" alpha="1" colorSpace="calibratedRGB"/>
                                     <userDefinedRuntimeAttributes>
@@ -169,6 +179,13 @@
                                             <integer key="value" value="1"/>
                                         </userDefinedRuntimeAttribute>
                                     </userDefinedRuntimeAttributes>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m0B-EI-aE2">
+                                    <rect key="frame" x="0.0" y="238" width="351" height="4"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="4" id="IGK-MZ-XtE"/>
+                                    </constraints>
                                 </view>
                             </subviews>
                         </stackView>
@@ -191,8 +208,10 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="anonLabel" destination="xH6-x9-Lgl" id="cM8-uA-Yn1"/>
                 <outlet property="anonSwitch" destination="m7e-va-7WU" id="NMO-ye-R65"/>
                 <outlet property="backgroundView" destination="H53-uR-h4k" id="7om-oz-Who"/>
+                <outlet property="radiusLabel" destination="CTp-9T-paN" id="3HV-eW-8ob"/>
                 <outlet property="slider" destination="XN3-g6-4cF" id="rJI-VB-Dqw"/>
                 <outlet property="sliderLabels" destination="B81-rS-W40" id="Yce-Fb-qdC"/>
                 <outlet property="userImageView" destination="vFs-JB-ZyS" id="yGa-D1-AEz"/>

@@ -353,6 +353,17 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
+    func showCity(_ city:String, _ country:String) {
+        print("LIKE YIAHSDSD")
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = CityViewController()
+        controller.city = city
+        controller.country = country
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
     func showMetaLikes() {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }

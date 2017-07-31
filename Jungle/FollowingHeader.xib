@@ -11,11 +11,11 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="FollowingHeader" customModule="Jungle" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="545" height="424"/>
+            <rect key="frame" x="0.0" y="0.0" width="545" height="598"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="WKj-t0-SfA">
-                    <rect key="frame" x="0.0" y="0.0" width="545" height="424"/>
+                    <rect key="frame" x="0.0" y="0.0" width="545" height="598"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KWK-GF-U6d">
                             <rect key="frame" x="0.0" y="0.0" width="545" height="32"/>
@@ -55,10 +55,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X0T-yk-bxx">
-                            <rect key="frame" x="0.0" y="32" width="545" height="360"/>
+                            <rect key="frame" x="0.0" y="32" width="545" height="450"/>
                             <subviews>
                                 <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="4St-8H-0fB">
-                                    <rect key="frame" x="0.0" y="0.0" width="545" height="360"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="545" height="450"/>
                                     <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ipK-Vn-adu">
                                         <size key="itemSize" width="50" height="50"/>
                                         <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -75,7 +75,7 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uhQ-AP-VeA">
-                            <rect key="frame" x="0.0" y="392" width="545" height="32"/>
+                            <rect key="frame" x="0.0" y="482" width="545" height="32"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3D2-gu-ED6">
                                     <rect key="frame" x="12" y="16" width="220.5" height="1"/>
@@ -121,6 +121,45 @@
                                 <constraint firstAttribute="trailing" secondItem="SbF-WP-Jol" secondAttribute="trailing" constant="12" id="pZh-Ns-I6u"/>
                             </constraints>
                         </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="s6J-ef-lXN">
+                            <rect key="frame" x="0.0" y="514" width="545" height="84"/>
+                            <subviews>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z50-GD-2Ti">
+                                    <rect key="frame" x="12" y="0.0" width="521" height="84"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bananas! There's nothing around you." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JOO-ix-j4i">
+                                            <rect key="frame" x="8" y="16" width="505" height="18"/>
+                                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
+                                            <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tzV-HM-juo">
+                                            <rect key="frame" x="119" y="44" width="282" height="30"/>
+                                            <color key="tintColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <state key="normal" title="Increase your search radius">
+                                                <color key="titleColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            </state>
+                                        </button>
+                                    </subviews>
+                                    <color key="backgroundColor" white="0.91885817307692308" alpha="1" colorSpace="calibratedWhite"/>
+                                    <constraints>
+                                        <constraint firstItem="JOO-ix-j4i" firstAttribute="leading" secondItem="z50-GD-2Ti" secondAttribute="leading" constant="8" id="51x-PU-db6"/>
+                                        <constraint firstAttribute="bottom" secondItem="tzV-HM-juo" secondAttribute="bottom" constant="16" id="aCX-hK-fLh"/>
+                                        <constraint firstItem="JOO-ix-j4i" firstAttribute="top" secondItem="z50-GD-2Ti" secondAttribute="top" constant="16" id="cTq-H9-y6h"/>
+                                        <constraint firstItem="tzV-HM-juo" firstAttribute="centerX" secondItem="z50-GD-2Ti" secondAttribute="centerX" id="kUd-3Q-stO"/>
+                                        <constraint firstAttribute="trailing" secondItem="JOO-ix-j4i" secondAttribute="trailing" constant="8" id="nhI-Oj-UNt"/>
+                                    </constraints>
+                                </view>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <constraints>
+                                <constraint firstAttribute="trailing" secondItem="z50-GD-2Ti" secondAttribute="trailing" constant="12" id="PA8-83-7sd"/>
+                                <constraint firstAttribute="bottom" secondItem="z50-GD-2Ti" secondAttribute="bottom" id="Utr-4N-wii"/>
+                                <constraint firstAttribute="height" constant="84" id="WIu-u8-ikC"/>
+                                <constraint firstItem="z50-GD-2Ti" firstAttribute="leading" secondItem="s6J-ef-lXN" secondAttribute="leading" constant="12" id="eTp-H5-uWV"/>
+                                <constraint firstItem="z50-GD-2Ti" firstAttribute="top" secondItem="s6J-ef-lXN" secondAttribute="top" id="oLN-lS-OH1"/>
+                            </constraints>
+                        </view>
                     </subviews>
                 </stackView>
             </subviews>
@@ -136,13 +175,15 @@
                 <outlet property="bottomHeader" destination="uhQ-AP-VeA" id="ylR-yu-nie"/>
                 <outlet property="bottomLabel" destination="SNN-Rf-sUI" id="jrw-OP-LFu"/>
                 <outlet property="collectionView" destination="4St-8H-0fB" id="bm9-ff-H4A"/>
+                <outlet property="emptyGrayView" destination="z50-GD-2Ti" id="rVZ-B2-KIU"/>
+                <outlet property="emptyView" destination="s6J-ef-lXN" id="CGl-Lb-JSN"/>
                 <outlet property="longDivider" destination="SbF-WP-Jol" id="1OC-iB-9He"/>
                 <outlet property="stackTopAnchor" destination="dje-mz-fnY" id="3eN-vD-LoK"/>
                 <outlet property="stackView" destination="WKj-t0-SfA" id="ezO-fH-NHt"/>
                 <outlet property="topBanner" destination="KWK-GF-U6d" id="1q0-v4-0lz"/>
                 <outlet property="topLabel" destination="9Eh-33-kfI" id="Hvf-eJ-clE"/>
             </connections>
-            <point key="canvasLocation" x="-39.5" y="14"/>
+            <point key="canvasLocation" x="-39.5" y="101"/>
         </view>
     </objects>
 </document>

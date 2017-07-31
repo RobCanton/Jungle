@@ -94,12 +94,19 @@ class NotificationTableViewCell: UITableViewCell {
         if let anon = notification as? AnonymousNotification {
             username = anon.anonName
             self.userImageView.backgroundColor = anon.color
-            UploadService.retrieveAnonImage(withName: anon.animal) { image, fromFile in
-                self.userImageView.image = image
+            
+            UploadService.retrieveAnonImage(withCheck: check, withName: anon.animal) { check, image, fromFile in
+                if check == self.check {
+                    self.userImageView.image = image
+                }
             }
         } else if let user = self.user {
             username = user.username
-            self.userImageView.loadImageAsync(user.imageURL, completion: { fromCache in })
+            loadImageCheckingCache(withUrl: user.imageURL, check: check) { image, fromFile, check in
+                if check == self.check {
+                    self.userImageView.image = image
+                }
+            }
             self.userImageView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         }
         

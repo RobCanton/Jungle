@@ -33,26 +33,33 @@ class NotificationFollowCell: UITableViewCell {
     var status:FollowingStatus = .None
     var user:User?
     
+    var check:Int = 0
+    
     func setup(withNotification notification: Notification) {
         if notification.type != .follow { return }
+        check += 1
         
         followButton.layer.cornerRadius = 4.0
         followButton.clipsToBounds = true
         followButton.backgroundColor = accentColor
         
-        UserService.getUser(notification.sender, completion: { user in
+        UserService.getUser(withCheck: check, uid: notification.sender) { check, user in
             if user != nil {
                 self.user = user
                 self.userImageView.clipsToBounds = true
                 self.userImageView.layer.cornerRadius = self.userImageView.frame.width/2
                 self.userImageView.contentMode = .scaleAspectFill
                 
-                self.userImageView.loadImageAsync(user!.imageURL, completion: { fromCache in })
+                loadImageCheckingCache(withUrl: user!.imageURL, check: check) { image, fromFile, check in
+                    if check == self.check {
+                        self.userImageView.image = image
+                    }
+                }
                 
                 self.setLabel(username: user!.username, date: notification.date)
                 
             }
-        })
+        }
         
         setUserStatus(status: checkFollowingStatus(uid: notification.sender))
     }

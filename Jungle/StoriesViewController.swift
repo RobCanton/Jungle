@@ -13,7 +13,8 @@ import View2ViewTransition
 protocol PopupProtocol: class {
     func showMore()
     func showUser(_ uid:String)
-    func showPlace(_ location:Location) 
+    func showPlace(_ location:Location)
+    func showCity(_ city:String, _ country:String)
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
     func showAnonOptions(_ aid:String)
@@ -417,6 +418,16 @@ extension StoriesViewController: PopupProtocol {
         }
         let controller = PlaceViewController()
         controller.place = location
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showCity(_ city:String, _ country:String) {
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = CityViewController()
+        controller.city = city
+        controller.country = country
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

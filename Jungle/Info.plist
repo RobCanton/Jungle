@@ -15,19 +15,19 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.0</string>
+	<string>2.1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Jungle requires your camera.</string>
+	<string>Jungle requires access to your camera so you can post photos &amp; videos.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Jungle requires your location.</string>
+	<string>Jungle requires access to your location to show content near you.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Jungle requires your location.</string>
+	<string>Jungle requires access to your location to show content near you.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Jungle requires your microphone.</string>
+	<string>Jungle requires access to your microphone so you can post videos with sound.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Can Jungle access your photo library so you can select a profile photo?</string>
 	<key>UILaunchStoryboardName</key>

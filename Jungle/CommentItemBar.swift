@@ -224,6 +224,7 @@ class CommentItemBar: UIView {
                     NSAttributedString(string: placeHolderString, attributes: [NSForegroundColorAttributeName : UIColor.gray])
             } else  {
                 textField.placeholder = placeHolderString
+                
             }
             
         } else {
