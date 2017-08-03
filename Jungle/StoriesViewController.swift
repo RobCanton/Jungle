@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import View2ViewTransition
+import AnimatedCollectionViewLayout
 
 protocol PopupProtocol: class {
     func showMore()
@@ -119,12 +120,13 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        let layout = AnimatedCollectionViewLayout()
         layout.itemSize = UIScreen.main.bounds.size
         layout.sectionInset = UIEdgeInsets(top: 0 , left: 0, bottom: 0, right: 0)
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
+        layout.animator = PageAttributesAnimator()
         
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
@@ -279,6 +281,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
         
         startIndex = nil
+        cell.clipsToBounds = true
         
         return cell
     }

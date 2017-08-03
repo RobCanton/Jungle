@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import View2ViewTransition
+import AnimatedCollectionViewLayout
 
 class GalleryViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
@@ -122,12 +123,13 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
-        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        let layout = AnimatedCollectionViewLayout()
         layout.itemSize = UIScreen.main.bounds.size
         layout.sectionInset = UIEdgeInsets(top: 0 , left: 0, bottom: 0, right: 0)
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
+        layout.animator = CubeAttributesAnimator()
         
         collectionContainerView = UIView(frame: UIScreen.main.bounds)
         collectionView = UICollectionView(frame: collectionContainerView.bounds, collectionViewLayout: layout)
@@ -215,6 +217,8 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         let cell: PostViewController = collectionView.dequeueReusableCell(withReuseIdentifier: "presented_cell", for: indexPath as IndexPath) as! PostViewController
         cell.delegate = self
         cell.preparePost(posts[indexPath.item], cellIndex: indexPath.item)
+        cell.clipsToBounds = true
+        
         return cell
     }
     

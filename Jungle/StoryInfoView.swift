@@ -32,9 +32,9 @@ class StoryInfoView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        usernameLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
-        captionLabel.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
-        pinImage.applyShadow(radius: 0.25, opacity: 0.5, height: 0.25, shouldRasterize: true)
+        usernameLabel.applyShadow(radius: 0.25, opacity: 0.25, height: 0.25, shouldRasterize: true)
+        captionLabel.applyShadow(radius: 0.25, opacity: 0.25, height: 0.25, shouldRasterize: true)
+        pinImage.applyShadow(radius: 0.25, opacity: 0.25, height: 0.25, shouldRasterize: true)
         pinImage.isHidden = true
         
         captionLabel.enabledTypes = [.mention]

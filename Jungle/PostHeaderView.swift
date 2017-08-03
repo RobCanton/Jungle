@@ -52,7 +52,7 @@ class PostHeaderView: UIView {
         
         self.gradient?.removeFromSuperlayer()
         self.gradient = CAGradientLayer()
-        self.gradient!.frame = self.bounds
+        self.gradient!.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height + 12)
         self.gradient!.locations = [0.0, 1.0]
         self.gradient!.startPoint = CGPoint(x: 0, y: 0)
         self.gradient!.endPoint = CGPoint(x: 0, y: 1)

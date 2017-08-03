@@ -36,7 +36,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var tabHeader:PlacesTabHeader!
     
-    var refreshButton:UIButton!
     var refreshIndicator:UIActivityIndicatorView!
     
     var isFollowingMode = false
@@ -54,6 +53,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     var followingHeader:FollowingHeader?
     var placesHeader:FollowingHeader?
     
+    var refreshControl:UIRefreshControl!
+    
+    var anonButton:UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -69,28 +72,25 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         titleLabel.textAlignment = .center
         header.addSubview(titleLabel)
         
-        refreshButton = UIButton(frame: CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
-        refreshButton.setImage(UIImage(named: "restart"), for: .normal)
-        refreshButton.tintColor = UIColor.black
-        refreshButton.addTarget(self, action: #selector(handleRefresh), for: .touchUpInside)
         
-        refreshIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-        refreshIndicator.frame = refreshButton.frame
-        refreshIndicator.hidesWhenStopped = true
-        
-        header.addSubview(refreshIndicator)
-        header.addSubview(refreshButton)
-        
-        let clearCacheButton = UIButton(frame: CGRect(x: 0, y: 0.0, width: 44.0, height: 44.0))
-        clearCacheButton.setImage(UIImage(named: "sorting"), for: .normal)
-        clearCacheButton.tintColor = UIColor.black
-        clearCacheButton.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
-        header.addSubview(clearCacheButton)
+        let optionsButton = UIButton(frame: CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
+        optionsButton.setImage(UIImage(named: "sorting"), for: .normal)
+        optionsButton.tintColor = UIColor.black
+        optionsButton.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
+        header.addSubview(optionsButton)
         
         view.addSubview(header)
         
 
+        anonButton = UIButton(frame: CGRect(x: 6.0, y: 6.0, width: 32.0, height: 32.0))
+        anonButton.setImage(UIImage(named: "private2"), for: .normal)
+        anonButton.layer.cornerRadius = anonButton.frame.height / 2
+        anonButton.clipsToBounds = true
+        anonButton.backgroundColor = accentColor
+        anonButton.addTarget(self, action: #selector(switchAnonMode), for: .touchUpInside)
         
+        header.addSubview(anonButton)
+        showCurrentAnonMode()
         screenSize = self.view.frame
         screenWidth = screenSize.width
         screenHeight = screenSize.height
@@ -136,22 +136,61 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         view.addSubview(collectionView)
         
+        refreshControl = UIRefreshControl()
+        refreshControl.tintColor = UIColor.gray
+        refreshControl.backgroundColor = UIColor.clear
+        
+        refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        collectionView.addSubview(self.refreshControl)
+        
         //LocationService.sharedInstance.delegate = self
 
         self.collectionView.reloadData()
-        
-        refreshButton.isHidden = true
-        refreshIndicator.startAnimating()
+        refreshControl.beginRefreshing()
         
         state = HomeStateController(delegate:self)
         
         messageWrapper = SwiftMessages()
     }
     
+    func switchAnonMode() {
+        
+        mainStore.dispatch(ToggleAnonMode())
+        if userState.anonMode {
+            Alerts.showStatusAnonAlert(inWrapper: messageWrapper)
+        } else {
+            Alerts.showStatusPublicAlert(inWrapper: messageWrapper)
+        }
+    }
+    
+    func showCurrentAnonMode() {
+        let isAnon = mainStore.state.userState.anonMode
+        if isAnon {
+            
+            anonButton.setImage(UIImage(named:"private2"), for: .normal)
+            anonButton.backgroundColor = accentColor
+
+            
+        } else {
+            guard let user = mainStore.state.userState.user else {
+                return
+            }
+            anonButton.setImage(nil, for: .normal)
+            loadImageCheckingCache(withUrl: user.imageURL, check: 0, completion: { image, fromFile, check in
+                if image != nil {
+                    self.anonButton.setImage(image!, for: .normal)
+                }
+            })
+
+            anonButton.backgroundColor = infoColor
+
+            
+        }
+    }
+    
     
     func update(_ section:HomeSection?) {
-        refreshButton.isHidden = false
-        refreshIndicator.stopAnimating()
+        refreshControl.endRefreshing()
         
         if let section = section {
             switch section {
@@ -176,9 +215,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     }
     
     func handleRefresh() {
-        uploadDataCache.removeAllObjects()
-        refreshButton.isHidden = true
-        refreshIndicator.startAnimating()
+        
+        //uploadDataCache.removeAllObjects()
+        //refreshButton.isHidden = true
+        //refreshIndicator.startAnimating()
         state.fetchAll()
     }
     
@@ -294,6 +334,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         //print("Home: viewWillAppear")
+        mainStore.subscribe(self)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         
     }
@@ -317,12 +358,13 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        mainStore.unsubscribe(self)
         //print("Home: viewWillDisappear")
         
     }
     
     func newState(state: AppState) {
-        
+        showCurrentAnonMode()
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {

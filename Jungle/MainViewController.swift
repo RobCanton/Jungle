@@ -275,6 +275,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         scrollView.bounces = false
         scrollView.delegate = self
         scrollView.showsVerticalScrollIndicator = false
+        scrollView.isScrollEnabled = false
         
         flashView = UIView(frame: view.bounds)
         flashView.backgroundColor = UIColor.black
@@ -471,9 +472,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         if y < height {
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
-            
+            scrollView.isScrollEnabled = true
             gps_service.setAccurateGPS(true)
         } else  {
+            scrollView.isScrollEnabled = false
             gps_service.setAccurateGPS(false)
             screenMode = .Main
             cameraView.cameraState = .Off
@@ -738,6 +740,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             cameraView.didPressTakePhoto()
             break
         case .Main:
+            scrollView.isScrollEnabled = true
             scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
             break
         case .Map:
@@ -932,6 +935,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     func sent() {
         cameraView.cameraState = .Initiating
         presentHomeScreen(animated: false)
+        scrollView.isScrollEnabled = false
         //self.navigationController?.popViewController(animated: false)
     }
 

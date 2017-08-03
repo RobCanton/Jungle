@@ -168,5 +168,44 @@ struct Alerts {
         }
     }
     
+    static func showStatusAnonAlert(inWrapper wrapper: SwiftMessages?) {
+        let alert = MessageView.viewFromNib(layout: .StatusLine)
+        alert.backgroundView.backgroundColor = accentColor
+        alert.bodyLabel?.textColor = UIColor.white
+        alert.configureContent(body: "Switched to anonymous")
+        
+        var config = SwiftMessages.defaultConfig
+        config.duration = SwiftMessages.Duration.seconds(seconds: 2.0)
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+    }
+    
+    static func showStatusPublicAlert(inWrapper wrapper: SwiftMessages?) {
+        guard let user = userState.user else { return }
+        let alert = MessageView.viewFromNib(layout: .StatusLine)
+        alert.backgroundView.backgroundColor = infoColor
+        alert.bodyLabel?.textColor = UIColor.white
+        alert.configureContent(body: "Switched to @\(user.username)")
+        
+        var config = SwiftMessages.defaultConfig
+        config.duration = SwiftMessages.Duration.seconds(seconds: 2.0)
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        
+        if wrapper != nil {
+            wrapper!.hideAll()
+            wrapper!.show(config: config, view: alert)
+        } else {
+            SwiftMessages.hideAll()
+            SwiftMessages.show(config: config, view: alert)
+        }
+    }
+    
     
 }

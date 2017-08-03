@@ -102,8 +102,8 @@ class CommentCell: UITableViewCell {
         
         
         if shadow {
-            authorLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
-            commentLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+            authorLabel.applyShadow(radius: 0.3, opacity: 0.25, height: 0.3, shouldRasterize: true)
+            commentLabel.applyShadow(radius: 0.3, opacity: 0.25, height: 0.3, shouldRasterize: true)
         } else {
             authorLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
             commentLabel.applyShadow(radius: 0, opacity: 0, height: 0, shouldRasterize: true)
