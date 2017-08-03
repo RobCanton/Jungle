@@ -62,20 +62,16 @@ class City: NSObject, NSCoding {
     
     private(set) var key:String                    // Key in database
     private(set) var name:String
-    private(set) var country:String
+    private(set) var address:String
     private(set) var coordinates:CLLocation
     
-    var formattedName:String {
-        get {
-            return "\(name), \(country)"
-        }
-    }
+
     
-    init(key:String, name:String, country:String, coordinates:CLLocation)
+    init(key:String, name:String, address:String, coordinates:CLLocation)
     {
         self.key         = key
         self.name        = name
-        self.country     = country
+        self.address     = address
         self.coordinates = coordinates
         
     }
@@ -84,9 +80,9 @@ class City: NSObject, NSCoding {
         
         let key = decoder.decodeObject(forKey: "key") as! String
         let name = decoder.decodeObject(forKey: "name") as! String
-        let country = decoder.decodeObject(forKey: "country") as! String
+        let address = decoder.decodeObject(forKey: "address") as! String
         let coordinates = decoder.decodeObject(forKey: "coordinates") as! CLLocation
-        self.init(key: key, name: name, country: country, coordinates: coordinates)
+        self.init(key: key, name: name, address: address, coordinates: coordinates)
         
     }
     
@@ -94,7 +90,7 @@ class City: NSObject, NSCoding {
     func encode(with coder: NSCoder) {
         coder.encode(key, forKey: "key")
         coder.encode(name, forKey: "name")
-        coder.encode(country, forKey: "country")
+        coder.encode(address, forKey: "address")
         coder.encode(coordinates, forKey: "coordinates")
     }
     

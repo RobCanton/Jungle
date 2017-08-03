@@ -76,7 +76,8 @@ class StoryInfoView: UIView {
             self.userImageView.backgroundColor = UIColor(white: 1.0, alpha: 0.35)
             UserService.getUser(item.authorId, completion: { user in
                 if user != nil {
-                    self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightMedium)
+                    //self.usernameLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightMedium)
+                    self.usernameLabel.text = user!.username
                     self.captionLabel.text = item.caption
                     if item.caption != "" {
                         self.usernameTopConstraint.constant = 8

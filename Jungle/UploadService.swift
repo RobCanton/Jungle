@@ -300,7 +300,7 @@ class UploadService {
                     if let coordinates = upload.coordinates {
                         obj["coordinates"] = [
                             "lat": coordinates.coordinate.latitude,
-                            "lon":coordinates.coordinate.longitude
+                            "lon": coordinates.coordinate.longitude
                         ] as [String: Any]
                     }
                     
@@ -324,9 +324,11 @@ class UploadService {
                             
                             switch response.result {
                             case .success:
-                                print("Validation Successful")
-                                globalMainInterfaceProtocol?.fetchAllStories()
-                                return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                                if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool, success == true {
+                                    globalMainInterfaceProtocol?.fetchAllStories()
+                                    return Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Uploaded!")
+                                }
+                                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
                             case .failure(let error):
                                 print(error)
                                 return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -511,7 +513,9 @@ class UploadService {
                     let key = key
                     guard let authorId       = dict["author"] as? String else { return completion(item) }
                     
-                    let locationKey    = dict["placeID"] as? String
+                    let regionKey            = dict["regionPlaceID"] as? String
+                    let locationKey          = dict["placeID"] as? String
+                    
                     guard let downloadUrl    = dict["url"] as? String else { return completion(item) }
                     guard let url            = URL(string: downloadUrl) else { return completion(item) }
                     guard let contentTypeStr = dict["contentType"] as? String else { return completion(item) }
@@ -532,8 +536,6 @@ class UploadService {
                     
                     guard let length      = dict["length"] as? Double else { return completion(item) }
                     
-                    let city = dict["city"] as? String
-                    let country = dict["country"] as? String
                     
                     let viewers = [String:Double]()
                     let likes = [String:Double]()
@@ -589,7 +591,7 @@ class UploadService {
                         anon = AnonObject(adjective: adjective, animal: animal, colorHexcode: color)
                     }
                     
-                    item = StoryItem(key: key, authorId: authorId, caption: caption, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, city:city, country:country, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color, anon: anon)
+                    item = StoryItem(key: key, authorId: authorId, caption: caption, regionKey: regionKey, locationKey: locationKey, downloadUrl: url,videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes:likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity:popularity, numReports: numReports, colorHexcode: color, anon: anon)
                     uploadDataCache.setObject(item!, forKey: "upload-\(key)" as NSString)
                 }
             }

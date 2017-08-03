@@ -184,9 +184,10 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.showPlace(location)
     }
     
-    func showCity(_ city:String, _ country:String) {
-        delegate?.showCity(city, country)
+    func showRegion(_ region: City) {
+        delegate?.showRegion(region)
     }
+    
     
     func showUser(_ uid:String) {
         delegate?.showUser(uid)

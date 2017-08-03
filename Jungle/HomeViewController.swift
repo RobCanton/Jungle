@@ -348,14 +348,15 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         
         switch indexPath.section {
         case 0:
-            cell.setCrownStatus(isKing: indexPath.row == 0)
+            
             cell.setupCell(withPost: state.visiblePopularPosts[indexPath.row])
+            cell.setCrownStatus(isKing: indexPath.row == 0)
             cell.viewMore(indexPath.row == state.visiblePopularPosts.count - 1 && state.popularPosts.count > state.visiblePopularPosts.count)
             break
         case 1:
-            cell.setCrownStatus(isKing: false)
             cell.viewMore(false)
             cell.setupCell(withPost: state.nearbyPosts[indexPath.row])
+            cell.setCrownStatus(isKing: false)
             break
         default:
             break
@@ -400,7 +401,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     var itemSideLength:CGFloat!
     func getItemSize() -> CGSize {
-        return CGSize(width: itemSideLength, height: itemSideLength * 1.25)
+        return CGSize(width: itemSideLength, height: itemSideLength * 1.3)
     }
     
     func getHeader() -> FollowingHeader? {

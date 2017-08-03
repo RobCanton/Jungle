@@ -112,10 +112,10 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
-                            <tableViewSection headerTitle="Badges" id="3jq-qG-x4L">
+                            <tableViewSection headerTitle="Badges" footerTitle="Badges display beside your username on your profile and posts." id="3jq-qG-x4L">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="200" id="tMg-BV-PxK">
-                                        <rect key="frame" x="0.0" y="255" width="375" height="200"/>
+                                        <rect key="frame" x="0.0" y="262.5" width="375" height="200"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="tMg-BV-PxK" id="cXK-s9-nE1">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="199.5"/>
@@ -178,7 +178,7 @@
             <objects>
                 <navigationController storyboardIdentifier="EditProfileNavigationController" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="xub-SY-k9r" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="ATs-HM-5AO">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="ATs-HM-5AO">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

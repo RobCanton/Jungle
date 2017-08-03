@@ -102,7 +102,7 @@ class LocationService: NSObject {
         }
     }
     
-    func getCityInfoInfo(_ key:String, completion: @escaping (_ city:City?)->()) {
+    func getCityInfo(_ key:String, completion: @escaping (_ city:City?)->()) {
         
         if let cachedCity = dataCache.object(forKey: "city-\(key)" as NSString) as? City {
             completion(cachedCity)
@@ -113,16 +113,16 @@ class LocationService: NSObject {
                 var city:City?
                 
                 if snapshot.exists() {
-                    let dict         = snapshot.value as! [String:AnyObject]
-                    let name         = dict["city"] as! String
-                    let country      = dict["country"] as! String
-                    let lat          = dict["lat"] as! Double
-                    let lon          = dict["lon"] as! Double
+                    guard let dict    = snapshot.value as? [String:AnyObject] else { return completion(city) }
+                    guard let name    = dict["name"] as? String else { return completion(city) }
+                    guard let address = dict["address"] as? String else { return completion(city) }
+                    guard let lat     = dict["lat"] as? Double else { return completion(city) }
+                    guard let lon     = dict["lon"] as? Double else { return completion(city) }
                     
                     let coord = CLLocation(latitude: lat, longitude: lon)
                     
                     
-                    city = City(key: snapshot.key, name: name, country: country, coordinates: coord)
+                    city = City(key: snapshot.key, name: name, address: address, coordinates: coord)
                     dataCache.setObject(city!, forKey: "city-\(key)" as NSString)
                 }
                 
@@ -131,9 +131,15 @@ class LocationService: NSObject {
         }
     }
     
-    func getCityInfoInfo(withCheck check:Int, key:String, completion: @escaping (_ check:Int, _ city:City?)->()) {
-        getCityInfoInfo(key) { city in
+    func getCityInfo(withCheck check:Int, key:String, completion: @escaping (_ check:Int, _ city:City?)->()) {
+        getCityInfo(key) { city in
             completion(check, city)
+        }
+    }
+    
+    func getRegionInfo(withReturnKey key:String, completion: @escaping (_ key:String, _ region:City?)->()) {
+        getCityInfo(key) { region in
+            completion(key, region)
         }
     }
     
@@ -184,20 +190,19 @@ class LocationService: NSObject {
         let storyRef = Database.database().reference().child("cities/posts/\(key)")
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         let timestamp = yesterday.timeIntervalSince1970 * 1000
-        storyRef.queryOrdered(byChild: "t").queryStarting(atValue: timestamp).observeSingleEvent(of: .value, with: { snapshot in
+        print("CITY REF")
+        print("cities/posts/\(key)")
+        storyRef.queryOrderedByValue().queryStarting(atValue: timestamp).observeSingleEvent(of: .value, with: { snapshot in
             var story:CityStory?
-            var contributers = [String:Bool]()
             var postKeys = [(String,Double)]()
+            
             for child in snapshot.children {
-                
+              
+                print("YEA YEA")
                 let childSnap = child as! DataSnapshot
-                if let dict = childSnap.value as? [String:Any] {
-                    let timestamp = dict["t"] as! Double
-                    let uid = dict["a"] as! String
-                    contributers[uid] = true
-                    print("AYYYEE!: \(childSnap.key)")
+                print(childSnap)
+                if let timestamp = childSnap.value as? Double {
                     postKeys.append((childSnap.key, timestamp))
-                    
                 }
             }
             

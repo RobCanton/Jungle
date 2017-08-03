@@ -25,6 +25,7 @@ class StoryItem: NSObject, NSCoding {
     private(set) var key:String                    // Key in database
     private(set) var authorId:String
     private(set) var caption:String?
+    private(set) var regionKey:String?
     private(set) var locationKey:String?
     private(set) var downloadUrl:URL
     private(set) var videoURL:URL?
@@ -32,8 +33,7 @@ class StoryItem: NSObject, NSCoding {
     private(set) var dateCreated: Date
     private(set) var length: Double
     private(set) var anon:AnonObject?
-    private(set) var city:String?
-    private(set) var country:String?
+    
     var popularity:Double {
         didSet {
             cache()
@@ -79,21 +79,20 @@ class StoryItem: NSObject, NSCoding {
     dynamic var videoFilePath: URL?
     dynamic var videoData:Data?
     
-    init(key: String, authorId: String, caption:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double, city:String?, country:String?,
+    init(key: String, authorId: String, caption:String?, regionKey:String?, locationKey:String?, downloadUrl: URL, videoURL:URL?, contentType: ContentType, dateCreated: Double, length: Double,
          viewers:[String:Double], likes:[String:Double], comments: [Comment], numViews:Int, numLikes:Int, numComments:Int, numCommenters:Int, popularity:Double,  numReports:Int, colorHexcode:String?, anon:AnonObject?)
     {
         
         self.key          = key
         self.authorId     = authorId
         self.caption      = caption
+        self.regionKey    = regionKey
         self.locationKey  = locationKey
         self.downloadUrl  = downloadUrl
         self.videoURL     = videoURL
         self.contentType  = contentType
         self.dateCreated  = Date(timeIntervalSince1970: dateCreated/1000) as Date
         self.length       = length
-        self.city         = city
-        self.country      = country
         self.viewers      = viewers
         self.likes        = likes
         self.comments     = comments
@@ -113,13 +112,12 @@ class StoryItem: NSObject, NSCoding {
         let key         = decoder.decodeObject(forKey: "key") as! String
         let authorId    = decoder.decodeObject(forKey: "authorId") as! String
         let caption     = decoder.decodeObject(forKey: "caption") as? String
+        let regionKey   = decoder.decodeObject(forKey: "regionKey") as? String
         let locationKey = decoder.decodeObject(forKey: "locationKey") as? String
         let downloadUrl = decoder.decodeObject(forKey: "downloadUrl") as! URL
         let ctInt       = decoder.decodeObject(forKey: "contentType") as! Int
         let dateCreated = decoder.decodeObject(forKey: "dateCreated") as! Double
         let length      = decoder.decodeObject(forKey: "length") as! Double
-        let city        = decoder.decodeObject(forKey: "city") as? String
-        let country     = decoder.decodeObject(forKey: "country") as? String
         let videoURL    = decoder.decodeObject(forKey: "videoURL") as? URL
         let numViews    = decoder.decodeObject(forKey: "numViews") as! Int
         let numLikes    = decoder.decodeObject(forKey: "numLikes") as! Int
@@ -157,16 +155,22 @@ class StoryItem: NSObject, NSCoding {
         
         let anon = decoder.decodeObject(forKey: "anon") as? AnonObject
         
-        self.init(key: key, authorId: authorId, caption: caption, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, city: city, country: country, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, numReports: numReports, colorHexcode: colorHexcode, anon: anon)
+        self.init(key: key, authorId: authorId, caption: caption, regionKey: regionKey, locationKey:locationKey, downloadUrl: downloadUrl, videoURL: videoURL, contentType: contentType, dateCreated: dateCreated, length: length, viewers: viewers, likes: likes, comments: comments, numViews: numViews, numLikes: numLikes, numComments: numComments, numCommenters: numCommenters, popularity: popularity, numReports: numReports, colorHexcode: colorHexcode, anon: anon)
     }
     
     
     func encode(with coder: NSCoder) {
         coder.encode(key, forKey: "key")
         coder.encode(authorId, forKey: "authorId")
+        
+        if regionKey != nil {
+            coder.encode(regionKey!, forKey: "regionKey")
+        }
+        
         if locationKey != nil {
             coder.encode(locationKey!, forKey: "locationKey")
         }
+        
         if caption != nil {
             coder.encode(caption!, forKey: "caption")
         }
@@ -189,13 +193,6 @@ class StoryItem: NSObject, NSCoding {
         coder.encode(popularity, forKey: "popularity")
         coder.encode(colorHexcode, forKey: "colorHexcode")
         
-        if city != nil {
-            coder.encode(city!, forKey: "city")
-        }
-        
-        if country != nil {
-            coder.encode(country!, forKey: "country")
-        }
         
         if anon != nil {
             coder.encode(anon!, forKey: "anon")

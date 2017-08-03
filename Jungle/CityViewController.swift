@@ -28,9 +28,7 @@ class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDel
     
     var collectionView:UICollectionView!
     
-    var cityObject:City?
-    var city:String!
-    var country:String!
+    var region:City!
     var statusBarShouldHide = false
     
     var activityIndicator:UIActivityIndicatorView!
@@ -53,7 +51,7 @@ class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDel
         
         self.view.backgroundColor = UIColor.white
         
-        self.title = "\(city!), \(country!)"
+        self.navigationItem.setTitle(title: region.name, subtitle: region.address)
         screenSize = self.view.frame
         screenWidth = screenSize.width
         screenHeight = screenSize.height
@@ -90,32 +88,12 @@ class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDel
         
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: activityIndicator)
         
-        UserService.getHTTPSHeaders() { httpHeaders in
-            guard let headers = httpHeaders else { return }
-            print("NOICE")
-            var ob = [
-                "city" : self.city!,
-                "country": self.country!
-            ] as [String:String]
-            Alamofire.request("\(API_ENDPOINT)/cityKey", method: .post, parameters: ob, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
-                DispatchQueue.main.async {
-                    if let json = response.result.value as? [String:Any],
-                        let cityKey = json["cityKey"] as? String,
-                        let lat = json["lat"] as? Double,
-                        let lon = json["lon"] as? Double {
-                        let city = City(key: cityKey, name: self.city!, country: self.country!, coordinates: CLLocation(latitude: lat, longitude: lon))
-                        self.getPosts(city)
-                        
-                    }
-                }
-            }
-        }
+        getPosts()
         
     }
     
-    func getPosts(_ city:City) {
-        self.cityObject = city
-        let ref = UserService.ref.child("cities/posts/\(city.key)")
+    func getPosts() {
+        let ref = UserService.ref.child("cities/posts/\(region.key)")
         ref.queryOrdered(byChild: "t").queryLimited(toLast: 60).observeSingleEvent(of: .value, with: { snapshot in
             var postKeys = [String]()
             for child in snapshot.children {
@@ -185,9 +163,7 @@ class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDel
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! PlaceHeaderView
-            if cityObject != nil {
-                view.setCity(cityObject!)
-            }
+            view.setCity(region)
             return view
         }
         

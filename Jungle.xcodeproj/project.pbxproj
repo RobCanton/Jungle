@@ -601,6 +601,7 @@
 		B0F2A18B1EE8A374004857CA /* Place */ = {
 			isa = PBXGroup;
 			children = (
+				B0950FB21F2C1F0100E9305B /* CityViewController.swift */,
 				B0F2A18C1EE8A39E004857CA /* PlaceViewController.swift */,
 				B0F2A18E1EE8A90F004857CA /* PlaceHeaderView.swift */,
 				B0F2A18F1EE8A90F004857CA /* PlaceHeaderView.xib */,
@@ -634,7 +635,6 @@
 				B0AE229A1E7A509E00141709 /* PostHeaderView.swift */,
 				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
 				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
-				B0950FB21F2C1F0100E9305B /* CityViewController.swift */,
 				B07169A81E83681B00AF6A41 /* PostViewController.swift */,
 				B0C867821EF26D0C00BE7F14 /* GuardView.xib */,
 				B0168B551EEE4649001069C4 /* ItemStateController.swift */,

@@ -325,8 +325,8 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let cell = tableView.dequeueReusableCell(withIdentifier: "profileCell", for: indexPath)
             as! SendProfileViewCell
         if indexPath.section == 0 {
-            cell.label.text = gps_service.currentCity!.name
-            cell.subtitle.text = gps_service.currentCity!.country
+            //cell.label.text = gps_service.currentCity!.name
+            //cell.subtitle.text = gps_service.currentCity!.country
             cell.lockState(true)
         } else {
             cell.label.text = likelihoods[indexPath.row].place.name

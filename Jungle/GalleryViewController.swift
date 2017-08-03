@@ -353,14 +353,12 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showCity(_ city:String, _ country:String) {
-        print("LIKE YIAHSDSD")
+    func showRegion(_ region: City) {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
         let controller = CityViewController()
-        controller.city = city
-        controller.country = country
+        controller.region = region
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

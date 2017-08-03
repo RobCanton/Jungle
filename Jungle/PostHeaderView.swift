@@ -12,7 +12,7 @@ import UIKit
 protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
-    func showCity(_ city:String, _ country:String)
+    func showRegion(_ region:City)
     func showMetaLikes()
     func showMetaComments(_ indexPath:IndexPath?)
     func dismiss()
@@ -22,14 +22,11 @@ class PostHeaderView: UIView {
 
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var usernameLabel: UILabel!
-    
-    @IBOutlet weak var likesView: UIView!
-    @IBOutlet weak var commentsView: UIView!
-    @IBOutlet weak var closeButton: UIButton!
-    
     @IBOutlet weak var locationTitle: UILabel!
     
+    @IBOutlet weak var likesIcon: UIImageView!
     @IBOutlet weak var likesLabel: UILabel!
+    @IBOutlet weak var commentsIcon: UIImageView!
     @IBOutlet weak var commentsLabel: UILabel!
     @IBOutlet weak var badgeView: UIImageView!
     
@@ -44,28 +41,36 @@ class PostHeaderView: UIView {
         
     }
     
-    @IBAction func handleClose(_ sender: Any) {
-            delegate?.dismiss()
-    }
+    var gradient:CAGradientLayer?
     
     weak var delegate:PostHeaderProtocol?
     var tap:UITapGestureRecognizer?
     var tap2:UITapGestureRecognizer?
-    var placeTap:UITapGestureRecognizer?
-    var placeTap2:UITapGestureRecognizer?
+    var placeTap:UITapGestureRecognizer!
     
     func setup(_ item:StoryItem) {
+        
+        self.gradient?.removeFromSuperlayer()
+        self.gradient = CAGradientLayer()
+        self.gradient!.frame = self.bounds
+        self.gradient!.locations = [0.0, 1.0]
+        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
+        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
+        self.gradient!.shouldRasterize = false
+        self.gradient!.colors = [UIColor(white: 0.0, alpha: 0.30).cgColor, UIColor.clear.cgColor]
+        self.layer.shouldRasterize = false
+        self.layer.insertSublayer(self.gradient!, at: 0)
+
         self.itemRef = item
         clean()
         
-        setupLocation(locationKey: item.locationKey)
+        setupLocation(locationKey: item.locationKey, regionKey: item.regionKey)
         setNumLikes(item.numLikes)
         setNumComments(item.numComments)
         
-        
-        usernameLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
-        timeLabel2.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
-        locationTitle.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        //usernameLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        //timeLabel2.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
+        //locationTitle.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
         
         if let anon = item.anon {
             if isCurrentUserId(id: item.authorId) {
@@ -111,19 +116,16 @@ class PostHeaderView: UIView {
         self.usernameLabel.addGestureRecognizer(tap2!)
         
         likesTap = UITapGestureRecognizer(target: self, action: #selector(self.likesTapped))
-        self.likesView.isUserInteractionEnabled = true
-        self.likesView.addGestureRecognizer(likesTap!)
+       
         
         commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
-        self.commentsView.isUserInteractionEnabled = true
-        self.commentsView.addGestureRecognizer(commentsTap!)
+       
         
-        //self.applyShadow(radius: 3.0, opacity: 0.5, height: 0.0, shouldRasterize: false)
-        likesView.layer.cornerRadius = 3.0
-        likesView.clipsToBounds = true
+        placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
+        locationTitle.isUserInteractionEnabled = true
+        locationTitle.addGestureRecognizer(placeTap)
         
-        commentsView.layer.cornerRadius = 3.0
-        commentsView.clipsToBounds = true
+
     }
     
     func setNumLikes(_ numLikes:Int) {
@@ -165,79 +167,54 @@ class PostHeaderView: UIView {
     }
     
     var locationKey:String = ""
-    var city:String?
-    var country:String?
+    var regionKey:String = ""
+
     weak var location:Location?
+    weak var region:City?
     
-    func setupLocation(locationKey:String?) {
-        
+    func setupLocation(locationKey:String?, regionKey:String?) {
+        clearLocation()
         if locationKey != nil {
             self.locationKey = locationKey!
             locationTitle.text = " · Loading..."
             LocationService.sharedInstance.getLocationInfo(withReturnKey: locationKey!) { key, _location in
                 if self.locationKey != key { return }
-                self.locationRetrieved(_location)
+                self.location = _location
+                if let location = _location {
+                    self.locationTitle.text = " · \(location.name)"
+                } else {
+                    self.locationTitle.text = nil
+                }
             }
-        } else if let item = itemRef, let city = item.city, let country = item.country {
-            location = nil
-            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.locationTitle.isUserInteractionEnabled = true
-            self.locationTitle.addGestureRecognizer(placeTap!)
-            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.city = city
-            self.country = country
-            locationTitle.text = " · \(city), \(country)"
-        } else {
-            clearLocation()
+        } else if regionKey != nil {
+            self.regionKey = regionKey!
+            locationTitle.text = " · Loading..."
+            LocationService.sharedInstance.getRegionInfo(withReturnKey: regionKey!) { key, _region in
+                if self.regionKey != key { return }
+                self.region = _region
+                if let region = _region {
+                    self.locationTitle.text = " · \(region.address)"
+                } else {
+                    self.locationTitle.text = nil
+                }
+            }
         }
         
-    }
-    
-    func locationRetrieved(_ location:Location?) {
-        self.locationKey = ""
-        self.location = location
-        
-        if location != nil {
-            locationTitle.text = " · \(location!.name)"
-            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.locationTitle.isUserInteractionEnabled = true
-            self.locationTitle.addGestureRecognizer(placeTap!)
-            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-        } else if let item = itemRef, let city = item.city, let country = item.country {
-            placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.locationTitle.isUserInteractionEnabled = true
-            self.locationTitle.addGestureRecognizer(placeTap!)
-            placeTap2 = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
-            self.city = city
-            self.country = country
-            locationTitle.text = " · \(city), \(country)"
-        } else {
-            clearLocation()
-        }
     }
     
     
     func clearLocation() {
-        locationTitle.text = ""
-        if placeTap != nil {
-            self.locationTitle.removeGestureRecognizer(placeTap!)
-            placeTap = nil
-        }
-        if placeTap2 != nil {
-            placeTap2 = nil
-        }
+        locationTitle.text = nil
         location = nil
-        city = nil
-        country = nil
+        region = nil
     }
     
     func locationTapped(tap:UITapGestureRecognizer) {
         
         if let loc = self.location {
             delegate?.showPlace(loc)
-        } else if let _city = self.city, let _country = self.country {
-            print("HERE")
-            delegate?.showCity(_city, _country)
+        } else if let region = self.region {
+            delegate?.showRegion(region)
         }
 
     }

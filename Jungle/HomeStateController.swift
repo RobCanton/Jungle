@@ -294,6 +294,7 @@ class HomeStateController: StoreSubscriber {
     }
     
     fileprivate func downloadNearbyCityStories(_ cities:[String:Double]) {
+        print("NEARBY CITIES: \(cities)")
         var cityStories = [CityStory]()
         if cities.count == 0 {
             self.nearbyCityStories = cityStories

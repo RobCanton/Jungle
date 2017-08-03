@@ -117,7 +117,8 @@ class CommentCell: UITableViewCell {
         
         UserService.getUser(comment.author, withCheck: check, completion: { user, check in
             if user != nil && check == self.check{
-                self.authorLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightSemibold)
+                //self.authorLabel.setUsernameWithBadge(username: user!.username, badge: user!.badge, fontSize: 14.0, fontWeight: UIFontWeightSemibold)
+                self.self.authorLabel.text = user!.username
                 self.authorLabel.alpha = 1.0
                 
                 loadImageCheckingCache(withUrl: user!.imageURL, check: check) { image, fromFile, check in

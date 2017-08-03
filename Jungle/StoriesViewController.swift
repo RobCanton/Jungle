@@ -14,7 +14,7 @@ protocol PopupProtocol: class {
     func showMore()
     func showUser(_ uid:String)
     func showPlace(_ location:Location)
-    func showCity(_ city:String, _ country:String)
+    func showRegion(_ region:City)
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
     func showAnonOptions(_ aid:String)
@@ -421,15 +421,15 @@ extension StoriesViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showCity(_ city:String, _ country:String) {
+    func showRegion(_ region: City) {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
         let controller = CityViewController()
-        controller.city = city
-        controller.country = country
+        controller.region = region
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
+    
     
     func showMetaLikes() {
         guard let cell = getCurrentCell() else { return }

@@ -191,7 +191,7 @@ class GPSService: Service, CLLocationManagerDelegate {
                     return }
                 let coords = CLLocation(latitude: address.coordinate.latitude, longitude: address.coordinate.longitude)
                 
-                self.currentCity = City(key: "CURRENT_CITY", name: local, country: country, coordinates: coords)
+                //self.currentCity = City(key: "CURRENT_CITY", name: local, country: country, region: "", coordinates: coords)
             } else {
                 self.currentCity = nil
             }

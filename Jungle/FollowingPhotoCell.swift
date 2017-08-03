@@ -141,19 +141,10 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.timeLabel.text = ""
         self.colorView.alpha = 0.0
         
-        /*LocationService.sharedInstance.getLocationInfo(withCheck: check, locationKey: story.locationKey) { check, location in
-            if self.check != check { return }
-            if location != nil {
-                self.nameLabel.text = location!.name
-                self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
-            }
-        }*/
-        
-        LocationService.sharedInstance.getCityInfoInfo(withCheck: check, key: story.cityKey) { check, city in
-            if self.check != check { return }
-            
-            if city != nil {
-                self.nameLabel.text = city!.name
+        LocationService.sharedInstance.getRegionInfo(withReturnKey: story.cityKey) { key, region in
+            if key != story.cityKey { return }
+            if region != nil {
+                self.nameLabel.text = region!.name
                 self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
             }
         }
