@@ -179,7 +179,7 @@
                 <outlet property="emptyView" destination="s6J-ef-lXN" id="CGl-Lb-JSN"/>
                 <outlet property="longDivider" destination="SbF-WP-Jol" id="1OC-iB-9He"/>
                 <outlet property="stackTopAnchor" destination="dje-mz-fnY" id="3eN-vD-LoK"/>
-                <outlet property="stackView" destination="WKj-t0-SfA" id="ezO-fH-NHt"/>
+                <outlet property="stackView" destination="WKj-t0-SfA" id="V3X-em-4IB"/>
                 <outlet property="topBanner" destination="KWK-GF-U6d" id="1q0-v4-0lz"/>
                 <outlet property="topLabel" destination="9Eh-33-kfI" id="Hvf-eJ-clE"/>
             </connections>

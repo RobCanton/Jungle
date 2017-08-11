@@ -167,6 +167,41 @@ class NotificationService: Service, UNUserNotificationCenterDelegate {
         }
     }
     
+    func notificationsEnabled(completion:@escaping((_ status:NotificationStatus)->())) {
+        if #available(iOS 10.0, *) {
+            let current = UNUserNotificationCenter.current()
+            
+            current.getNotificationSettings() { (settings) in
+                if settings.authorizationStatus == .notDetermined {
+                    // Notification permission has not been asked yet, go for it!
+                    return completion(.notDetermined)
+                }
+                
+                if settings.authorizationStatus == .denied {
+                    // Notification permission was previously denied, go to settings & privacy to re-enable
+                    return completion(.denined)
+                }
+                
+                if settings.authorizationStatus == .authorized {
+                    // Notification permission was already granted
+                    return completion(.authorized)
+                    
+                }
+            }
+        } else {
+            let notificationType = UIApplication.shared.currentUserNotificationSettings!.types
+            if notificationType == [] {
+                return completion(.notDetermined)
+            } else {
+                return completion(.authorized)
+            }
+        }
+    }
+    
     
 
+}
+
+enum NotificationStatus {
+    case notDetermined, denined, authorized
 }

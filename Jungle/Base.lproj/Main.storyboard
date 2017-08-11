@@ -287,7 +287,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EUb-Hl-CBs" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2693.5999999999999" y="1350.6746626686659"/>
+            <point key="canvasLocation" x="2207" y="1410"/>
         </scene>
         <!--Sign In View Controller-->
         <scene sceneID="0Iv-Qe-0rh">
@@ -535,7 +535,7 @@
                         <inset key="imageInsets" minX="0.0" minY="4" maxX="0.0" maxY="-4"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="SEa-f8-Nqc">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="SEa-f8-Nqc">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -578,7 +578,7 @@
                         <inset key="imageInsets" minX="0.0" minY="4" maxX="0.0" maxY="-4"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="aFY-7g-KAH">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="aFY-7g-KAH">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -622,7 +622,7 @@
                         <inset key="imageInsets" minX="0.0" minY="4" maxX="0.0" maxY="-4"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="FWk-ih-g73">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="FWk-ih-g73">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -665,7 +665,7 @@
                         <inset key="imageInsets" minX="0.0" minY="4" maxX="0.0" maxY="-4"/>
                     </tabBarItem>
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="pRT-7m-dlr">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="pRT-7m-dlr">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1001,7 +1001,7 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="H6M-M2-RCL" customClass="MasterNavigationController" customModule="Jungle" customModuleProvider="target" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="1Mh-Zn-NYX" customClass="MasterNavigationBar" customModule="Jungle" customModuleProvider="target">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="1Mh-Zn-NYX" customClass="MasterNavigationBar" customModule="Jungle" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1531,7 +1531,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3TD-xt-KhK" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="zAw-IY-J8j" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="4316" y="659.82008995502258"/>
+            <point key="canvasLocation" x="4332" y="660"/>
         </scene>
         <!--Sign Up Username View Controller-->
         <scene sceneID="WPh-94-KJz">
@@ -1734,13 +1734,44 @@
                     <connections>
                         <outlet property="profileImageView" destination="v4t-EF-eHg" id="gCF-HH-Ihr"/>
                         <outlet property="submitButton" destination="IuA-Dh-DQ1" id="COm-jX-b1e"/>
-                        <segue destination="r8u-zV-rcY" kind="unwind" identifier="unwindToLoginScreen" animates="NO" unwindAction="unwindToMenuWithSegue:" id="lgc-fZ-vqf"/>
+                        <segue destination="r8u-zV-rcY" kind="unwind" identifier="unwindToMenu" animates="NO" unwindAction="unwindToMenuWithSegue:" id="lgc-fZ-vqf"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="apg-yH-4Qd" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="r8u-zV-rcY" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="7165.6000000000004" y="653.52323838080963"/>
+            <point key="canvasLocation" x="7386" y="654"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="tSE-2H-Ury">
+            <objects>
+                <viewController id="vaG-Om-RnW" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="TbM-Ds-Ljo"/>
+                        <viewControllerLayoutGuide type="bottom" id="94A-Q3-h58"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="QVd-56-aRx">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Get notified!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dmH-JL-DxZ">
+                                <rect key="frame" x="28" y="80" width="319" height="24"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="dmH-JL-DxZ" firstAttribute="top" secondItem="TbM-Ds-Ljo" secondAttribute="bottom" constant="60" id="KGx-iw-fXu"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="dmH-JL-DxZ" secondAttribute="trailing" constant="12" id="UEl-Vl-9Kk"/>
+                            <constraint firstItem="dmH-JL-DxZ" firstAttribute="leading" secondItem="QVd-56-aRx" secondAttribute="leadingMargin" constant="12" id="ld0-fm-yGi"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ybc-yb-XNw" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="8060" y="635.53223388305855"/>
         </scene>
         <!--Sign Up Password View Controller-->
         <scene sceneID="jET-Vs-cr2">

@@ -294,7 +294,6 @@ class HomeStateController: StoreSubscriber {
     }
     
     fileprivate func downloadNearbyCityStories(_ cities:[String:Double]) {
-        print("NEARBY CITIES: \(cities)")
         var cityStories = [CityStory]()
         if cities.count == 0 {
             self.nearbyCityStories = cityStories
@@ -310,7 +309,7 @@ class HomeStateController: StoreSubscriber {
                 count += 1
                 if count >= cities.count {
                     count = -1
-                    self.nearbyCityStories = cityStories.sorted(by: { return $0.count > $1.count })
+                    self.nearbyCityStories = cityStories.sorted(by: { return $0.distance < $1.distance })
                     
                     // DispatchQueue.main.async {
                     self.delegate?.update(.places)

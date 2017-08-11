@@ -52,7 +52,7 @@ class MessageService: Service {
     
     internal func startListeningToConversations() {
         let uid = mainStore.state.userState.uid
-        let conversationsRef = Database.database().reference().child("users/conversations/\(uid)")
+        let conversationsRef = Database.database().reference().child("users/directMessages/\(uid)")
         conversationsRef.observe(.childAdded, with: { snapshot in
             if snapshot.exists() {
                 
@@ -65,13 +65,13 @@ class MessageService: Service {
                     } else {
                         let seen = dict["seen"] as! Bool
                         let sender = dict["sender"] as! String
-                        let lastMessage = dict["text"] as! String
-                        let timestamp = dict["latest"] as! Double
-                        let isMediaMessage = dict["isMediaMessage"] as! Bool
+                        let text = dict["text"] as! String
+                        let timestamp = dict["timestamp"] as! Double
+
                         let date = Date(timeIntervalSince1970: timestamp/1000) as Date
                         let listening = true
 
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: lastMessage, isMediaMessage:isMediaMessage, listening: listening)
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: text, isMediaMessage:false, listening: listening)
                         self.conversations.append(conversation)
                         self.updateSubscribers()
                     }
@@ -90,13 +90,13 @@ class MessageService: Service {
                     } else {
                         let seen = dict["seen"] as! Bool
                         let sender = dict["sender"] as! String
-                        let lastMessage = dict["text"] as! String
-                        let timestamp = dict["latest"] as! Double
-                        let isMediaMessage = dict["isMediaMessage"] as! Bool
+                        let text = dict["text"] as! String
+                        let timestamp = dict["timestamp"] as! Double
+
                         let date = Date(timeIntervalSince1970: timestamp/1000) as Date
                         let listening = true
                         
-                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: lastMessage, isMediaMessage:isMediaMessage, listening: listening)
+                        let conversation = Conversation(key: pairKey, partner_uid: partner, seen: seen, date: date, sender: sender, lastMessage: text, isMediaMessage:false, listening: listening)
                         self.changeConversation(conversation)
                     }
                     

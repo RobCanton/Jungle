@@ -375,7 +375,7 @@ class SendViewController: UIViewController, UITableViewDataSource, UITableViewDe
 }
 
 extension SendViewController: GPSServiceProtocol {
-    func authorizationDidChange() {
+    func authorizationDidChange(_ status: CLAuthorizationStatus) {
         
     }
 

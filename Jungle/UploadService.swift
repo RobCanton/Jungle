@@ -190,7 +190,7 @@ class UploadService {
         let videoRef = Storage.storage().reference().child("user_uploads/\(author)/\(key).mp4")
         
         // Download in memory with a maximum allowed size of 2MB (2 * 1024 * 1024 bytes)
-        videoRef.getData(maxSize: 2 * 1024 * 1024) { (data, error) -> Void in
+        videoRef.getData(maxSize: 5 * 1024 * 1024) { (data, error) -> Void in
             if (error != nil) {
                 print("Error - \(error!.localizedDescription)")
                 completion(nil)

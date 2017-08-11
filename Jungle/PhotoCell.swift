@@ -27,8 +27,16 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     @IBOutlet weak var timeLabel: UILabel!
     
     @IBOutlet weak var overlay: UIView!
+    @IBOutlet weak var captionLeading: NSLayoutConstraint!
+    @IBOutlet weak var captionBottom: NSLayoutConstraint!
+    @IBOutlet weak var captionTrailing: NSLayoutConstraint!
+    
+    @IBOutlet weak var firstIconWidth: NSLayoutConstraint!
+    @IBOutlet weak var secondIconWidth: NSLayoutConstraint!
+    
     var location:Location!
     var gradient:CAGradientLayer?
+    var largeGradient:CAGradientLayer?
     
     var check:Int = 0
     var privateLock:UIImageView?
@@ -52,15 +60,89 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
     }
     
-    func setCrownStatus(isKing:Bool) {
-        crown.isHidden = !isKing
+    func setCrownStatus(index:Int) {
         
-        crownLabel.isHidden = true//!isKing
-        firstIcon.isHidden = isKing
-        firstLabel.isHidden = isKing
-        secondIcon.isHidden = isKing
-        secondLabel.isHidden = isKing
+        
+        if index == 0 {
+            crown.isHidden = false
+            crownLabel.isHidden = true
+            
+            captionLabel.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightSemibold)
+            captionLabel.numberOfLines = 3
+            
+            self.crown.applyShadow(radius: 8.0, opacity: 0.75, height: 0.0, shouldRasterize: false)
+            self.crown.layer.shadowColor = UIColor.clear.cgColor
+            //self.gradient?.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 2 / 3, height: 320)
+            self.gradient?.removeFromSuperlayer() 
+            
+            //self.colorView.isHidden = numLikes == 0 && numComments == 0 ? true : false
+            self.largeGradient?.removeFromSuperlayer()
+            self.largeGradient = CAGradientLayer()
+            self.largeGradient!.frame = CGRect(x: 0, y: -80, width: UIScreen.main.bounds.width * 2 / 3, height: 320)
+            self.largeGradient!.locations = [0.0, 1.0]
+            self.largeGradient!.startPoint = CGPoint(x: 0, y: 0)
+            self.largeGradient!.endPoint = CGPoint(x: 0, y: 1)
+            self.largeGradient!.shouldRasterize = false
+            self.largeGradient!.isHidden = false
+            
+            self.timeLabel.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium)
+            self.firstLabel.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium)
+            self.secondLabel.font = UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium)
+            
+            self.firstIconWidth.constant = 12
+            self.secondIconWidth.constant = 12
+            
+            if let post = post, let color = post.getColor(), !self.colorView.isHidden {
+                self.largeGradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(1.0).cgColor]
+                self.colorView.alpha = 1.0
+                self.crown.layer.shadowColor = color.cgColor
+                captionBottom.constant = post.numLikes == 0 && post.numLikes == 0 ? 4 : 24
+            }
+            self.colorView.layer.shouldRasterize = false
+            self.colorView.layer.insertSublayer(self.largeGradient!, at: 0)
+        } else {
+            
+            self.largeGradient?.isHidden = true
+            self.largeGradient?.removeFromSuperlayer()
+            
+            crownLabel.isHidden = true
+            crown.isHidden = true
+            
+            captionLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
+            captionLabel.numberOfLines = 2
+            
+            self.timeLabel.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightRegular)
+            self.firstLabel.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightRegular)
+            self.secondLabel.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightRegular)
+            
+            self.firstIconWidth.constant = 9
+            self.secondIconWidth.constant = 9
+            if let post = post {
+                captionBottom.constant = post.numLikes == 0 && post.numComments == 0 ? 4 : 20
+            }
+            
+        }
+
     }
+    
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.gradient?.frame = self.colorView.bounds
+    }
+    
+    override func layoutSublayers(of layer: CALayer) {
+        super.layoutSublayers(of: layer)
+        if layer === gradient {
+            layer.frame = self.colorView.bounds
+        }
+    }
+    
+    override func layoutIfNeeded() {
+        super.layoutIfNeeded()
+        self.gradient?.frame = self.colorView.bounds
+    }
+    
     
     var viewMoreView:UIView?
     var viewMoreLabel:UILabel?
@@ -134,7 +216,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         
         self.imageView.image = nil
         
-        self.timeLabel.text = nil //post.dateCreated.timeStringSinceNow()
+        self.timeLabel.text = nil//post.dateCreated.timeStringSinceNow()
         
         let numLikes = post.numLikes
         let numComments = post.numComments
@@ -142,48 +224,48 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         let likesImage = UIImage(named: "liked")
         let commentsImage = UIImage(named: "comments_filled")
         
-        if numComments > 0 {
-            self.secondLabel.text = getNumericShorthandString(numComments)
-            self.secondIcon.image = commentsImage
-            self.secondIcon.isHidden = false
-            self.secondLabel.isHidden = false
+        if numLikes > 0 {
+            self.firstLabel.text = getNumericShortesthandString(numLikes)
+            self.firstIcon.image = likesImage
+            self.firstIcon.isHidden = false
+            self.firstLabel.isHidden = false
             
-        
-            if numLikes > 0 {
-                self.firstLabel.text = getNumericShorthandString(numLikes)
-                self.firstIcon.image = likesImage
-                self.firstIcon.isHidden = false
-                self.firstLabel.isHidden = false
-            } else {
-                self.firstLabel.text = nil
-                self.firstIcon.image = nil
-                self.firstIcon.isHidden = true
-                self.firstLabel.isHidden = true
-            }
-        } else {
-            self.firstLabel.text = nil
-            self.firstIcon.image = nil
-            self.firstIcon.isHidden = true
-            self.firstLabel.isHidden = true
+            self.secondLabel.text = getNumericShortesthandString(numComments)
             
-            if numLikes > 0 {
-                self.secondLabel.text = getNumericShorthandString(numLikes)
-                self.secondIcon.image = likesImage
+            if numComments > 0 {
+                self.secondIcon.image = commentsImage
                 self.secondIcon.isHidden = false
                 self.secondLabel.isHidden = false
+                
             } else {
-                self.secondLabel.text = nil
                 self.secondIcon.image = nil
                 self.secondIcon.isHidden = true
                 self.secondLabel.isHidden = true
             }
+        } else {
+            self.firstLabel.text = getNumericShortesthandString(numComments)
+            self.secondLabel.text = nil
+            if numComments > 0 {
+                self.firstIcon.image = commentsImage
+                self.firstIcon.isHidden = false
+                self.firstLabel.isHidden = false
+            } else {
+                self.firstIcon.image = nil
+                self.firstIcon.isHidden = true
+                self.firstLabel.isHidden = true
+            }
             
+            self.secondIcon.image = nil
+            self.secondIcon.isHidden = true
+            self.secondLabel.isHidden = true
         }
         
-        //self.colorView.isHidden = numLikes == 0 && numComments == 0 ? true : false
+        captionBottom.constant = numLikes == 0 && numComments == 0 ? 4 : 20
+        
+        self.colorView.isHidden = numLikes == 0 && numComments == 0 && (post.caption == nil || post.caption == "") ? true : false
         self.gradient?.removeFromSuperlayer()
         self.gradient = CAGradientLayer()
-        self.gradient!.frame = self.colorView.bounds
+        //self.gradient!.frame = self.colorView.bounds
         self.gradient!.locations = [0.0, 1.0]
         self.gradient!.startPoint = CGPoint(x: 0, y: 0)
         self.gradient!.endPoint = CGPoint(x: 0, y: 1)
@@ -215,10 +297,12 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             self.firstLabel.applyShadow(radius: 5, opacity: 0.6, height: 0.0, shouldRasterize: true)
             self.secondIcon.applyShadow(radius: 5, opacity: 0.6, height: 0.0, shouldRasterize: true)
             self.secondLabel.applyShadow(radius: 3, opacity: 0.6, height: 0.0, shouldRasterize: true)
-            self.crown.applyShadow(radius: 5.0, opacity: 0.6, height: 0.0, shouldRasterize: true)
+            self.largeGradient?.isHidden = false
         }
         
     }
+    
+    
     
     
     func setupUserCell (_ post:StoryItem) {

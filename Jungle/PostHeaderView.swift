@@ -49,17 +49,6 @@ class PostHeaderView: UIView {
     var placeTap:UITapGestureRecognizer!
     
     func setup(_ item:StoryItem) {
-        
-        self.gradient?.removeFromSuperlayer()
-        self.gradient = CAGradientLayer()
-        self.gradient!.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height + 12)
-        self.gradient!.locations = [0.0, 1.0]
-        self.gradient!.startPoint = CGPoint(x: 0, y: 0)
-        self.gradient!.endPoint = CGPoint(x: 0, y: 1)
-        self.gradient!.shouldRasterize = false
-        self.gradient!.colors = [UIColor(white: 0.0, alpha: 0.30).cgColor, UIColor.clear.cgColor]
-        self.layer.shouldRasterize = false
-        self.layer.insertSublayer(self.gradient!, at: 0)
 
         self.itemRef = item
         clean()
@@ -89,7 +78,7 @@ class PostHeaderView: UIView {
             self.timeLabel2.text = item.dateCreated.timeStringSinceNow()
             self.badgeView.image = nil
         } else {
-            
+            self.usernameLabel.text = "Loading..."
             UserService.getUser(item.authorId, completion: { _user in
                 guard let user = _user else { return }
                 self.userImageView.loadImageAsync(user.imageURL, completion: { _ in })
@@ -116,10 +105,12 @@ class PostHeaderView: UIView {
         self.usernameLabel.addGestureRecognizer(tap2!)
         
         likesTap = UITapGestureRecognizer(target: self, action: #selector(self.likesTapped))
-       
+        likesIcon.superview!.isUserInteractionEnabled = true
+        likesIcon.superview!.addGestureRecognizer(likesTap!)
         
         commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
-       
+        commentsIcon.superview!.isUserInteractionEnabled = true
+        commentsIcon.superview!.addGestureRecognizer(commentsTap!)
         
         placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
         locationTitle.isUserInteractionEnabled = true

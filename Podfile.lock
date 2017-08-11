@@ -85,7 +85,7 @@ PODS:
   - ReSwift (3.0.0)
   - Segmentio (2.1)
   - SnapTimer (0.0.1)
-  - SwiftMessages (3.3.3)
+  - SwiftMessages (3.4.0)
   - TGPControls (4.0.0)
   - TwicketSegmentedControl (0.1.2)
   - View2ViewTransition (1.0.0)
@@ -111,7 +111,7 @@ DEPENDENCIES:
   - ReSwift (= 3.0.0)
   - Segmentio (= 2.1)
   - SnapTimer
-  - SwiftMessages
+  - SwiftMessages (= 3.4.0)
   - TGPControls
   - TwicketSegmentedControl
   - View2ViewTransition (= 1.0.0)
@@ -153,11 +153,11 @@ SPEC CHECKSUMS:
   ReSwift: f0255f4b4f2dacd12c5d97d34d13fc5dad6d6371
   Segmentio: ec9451dde6e5668f4b6a88c901a035faf08f8612
   SnapTimer: e860473dc4b8b86831b23804fec520dc48644df4
-  SwiftMessages: 09cea3336e3fb63c3578983c8aac65acaa6d884a
+  SwiftMessages: e20aa1557fde1525ea369361bec4943cc0d08e7c
   TGPControls: d7ab5a338746c100b2ae57f6b6cedee7151f116a
   TwicketSegmentedControl: 6d7a4cf243657e0ac3f00d06d873a25334c04042
   View2ViewTransition: 010ea80e451e42427988102527b0216b8534a741
 
-PODFILE CHECKSUM: 5bac0d94f9ad601d599b39311e56b19bad35de03
+PODFILE CHECKSUM: 17d19f765034458c6c0cfb0bd8b044b35c10eb4d
 
 COCOAPODS: 1.2.0

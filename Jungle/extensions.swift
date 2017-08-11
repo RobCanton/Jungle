@@ -108,12 +108,25 @@ extension UIView {
         self.layer.shadowOpacity = opacity
         self.layer.shadowRadius = radius
         self.layer.shouldRasterize = shouldRasterize
+        
     }
     
     func cropToCircle() {
         self.layer.cornerRadius = self.frame.width/2
         self.clipsToBounds = true
     }
+}
+
+extension UIStackView {
+    
+    func remove(view:UIView) {
+        if self.arrangedSubviews.contains(view) {
+            self.removeArrangedSubview(view)
+        }
+        view.isHidden = true
+        view.isUserInteractionEnabled = true
+    }
+    
 }
 
 extension Date

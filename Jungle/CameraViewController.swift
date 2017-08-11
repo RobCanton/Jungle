@@ -36,6 +36,8 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     var flashMode:FlashMode = .Off
     var cameraMode:CameraMode = .Back
     
+    var allPermissionsGranted = false
+    
     weak var delegate: CameraDelegate?
     
     weak var recordBtnRef: CameraButton!
@@ -270,7 +272,30 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     {
         switch state {
         case .began:
+            if !UserService.isEmailVerified {
+                let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
+                
+                alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
+                    
+                    UserService.sendVerificationEmail { success in
+                        if success {
+                            let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                            
+                            self.present(alert, animated: true, completion: nil)
+                        } else {
+                            return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+                        }
+                    }
+                    
+                }))
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                return
+            }
+            
             if cameraState == .Running {
+                
                 recordVideo()
             }
             

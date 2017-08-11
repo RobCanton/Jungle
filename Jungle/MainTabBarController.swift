@@ -125,9 +125,6 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
         
     }
     
-    
-    
-    
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         if let _ = viewController as? DummyViewController {
             return false

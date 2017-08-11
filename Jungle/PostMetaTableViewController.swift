@@ -87,9 +87,10 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         button.titleLabel!.font = UIFont.systemFont(ofSize: 11.0, weight: UIFontWeightMedium)
         button.titleLabel?.numberOfLines = 0
         button.titleLabel?.textAlignment = .center
+        
         let views = item.numViews
         if views == 1 {
-            button.setTitle("\(views)\nview", for: .normal)
+            button.setTitle("1\nview", for: .normal)
         } else {
             button.setTitle("\(views)\nviews", for: .normal)
         }

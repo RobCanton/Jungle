@@ -27,7 +27,7 @@ protocol MainInterfaceProtocol {
     func presentCamera()
     func fetchAllStories()
     func statusBar(hide: Bool, animated:Bool)
-    func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
+    func presentNearbyPost(presentationType: PresentationType, posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentBannerStory(presentationType:PresentationType, stories:[Story], destinationIndexPath:IndexPath, initialIndexPath:IndexPath )
     func presentUserStory(userStories:[UserStory], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
     func presentProfileStory(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath)
@@ -54,6 +54,7 @@ extension MainViewController: MainInterfaceProtocol {
         cameraView.cameraState = .Initiating
         scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 1.0), animated: animated)
         mainTabBar.selectedIndex = 0
+        scrollView.isScrollEnabled = false
         
     }
     
@@ -68,7 +69,7 @@ extension MainViewController: MainInterfaceProtocol {
     }
 }
 
-class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegate, UIGestureRecognizerDelegate {
+class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegate, UIGestureRecognizerDelegate, CameraPermissionsProtocol {
 
     fileprivate var gps_service:GPSService!
     fileprivate var message_service:MessageService!
@@ -310,7 +311,6 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
             places.gps_service = gps_service
             LocationService.sharedInstance.gps_service = gps_service
             
-            authorizationDidChange()
            
         }
         
@@ -335,8 +335,188 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         mainStore.subscribe(self)
         
         
+        if !gps_service.isAuthorized() {
+            authorizeGPS()
+        } else {
+            registerForNotifications()
+        }
+    }
+    
+    func authorizeGPS() {
+        let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
+        messageView.configureBackgroundView(width: 250)
+        messageView.configureContent(title: "Enable location services", body: "Your location will be used to show you nearby posts and let you share posts with people near you.", iconImage: nil, iconText: "🌎", buttonImage: nil, buttonTitle: "Enable Location") { _ in
+            self.registerForNotifications()
+            self.messageWrapper.hide()
+        }
+        
+        let button = messageView.button!
+        button.backgroundColor = accentColor
+        button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
+        button.sizeToFit()
+        button.layer.cornerRadius = messageView.button!.bounds.height / 2
+        button.clipsToBounds = true
+        
+        let gradient = CAGradientLayer()
+        gradient.frame = button.bounds
+        gradient.colors = [
+            lightAccentColor.cgColor,
+            darkAccentColor.cgColor
+        ]
+        gradient.locations = [0.0, 1.0]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 1, y: 0)
+        button.layer.insertSublayer(gradient, at: 0)
+        
+        messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
+        messageView.backgroundView.layer.cornerRadius = 12
+        var config = SwiftMessages.defaultConfig
+        config.presentationStyle = .center
+        config.duration = .forever
+        config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+        config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+        self.messageWrapper.show(config: config, view: messageView)
+    }
+    
+    var cameraPermissionsView:CameraPermissionsView?
+    
+    func isCameraPermitted() -> Bool{
+        
+        let verified = UserService.isEmailVerified
+        
+        let locationPermission = gps_service.isAuthorized()
+        
+        let cameraPermission = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized
+        print("cameraPermission: \(cameraPermission)")
+        
+        let microphonePermission = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeAudio) == .authorized
+        print("microphonePermission: \(microphonePermission)")
+        
+        if (verified && locationPermission && cameraPermission && microphonePermission) {
+            return true
+        }
+        
+        cameraPermissionsView = UINib(nibName: "CameraPermissionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CameraPermissionsView
+        cameraPermissionsView!.setup(verified: verified, locationEnabled: locationPermission, cameraAllowed: cameraPermission, microphoneAllowed: microphonePermission)
+        cameraPermissionsView!.delegate = self
+        let messageView = BaseView(frame: view.bounds)
+        messageView.installContentView(cameraPermissionsView!)
+        messageView.preferredHeight = view.bounds.height
+        
+        
+        var config = SwiftMessages.defaultConfig
+        config.presentationStyle = .center
+        config.duration = .forever
+        config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+        config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+        messageWrapper.show(config: config, view: messageView)
+
+        return false
+    }
+    
+    func dismissPermissionsView() {
+        messageWrapper.hideAll()
+    }
+    
+    func resendTapped() {
+        print("resendTapped")
+        UserService.sendVerificationEmail { success in
+            if success {
+                let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+            }
+        }
+    }
+    
+    var requestingLocationAuthorization = false
+    
+    func enableLocationTapped() {
+        let gpsStatus = gps_service.authorizationStatus()
+        if gpsStatus == .denied || gpsStatus == .restricted {
+            
+            if #available(iOS 10.0, *) {
+                let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)! as URL
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            } else {
+                let alert = UIAlertController(title: "Go to Settings", message: "Please minimize Jungle and go to your settings to enable location services.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            }
+            
+        } else if gpsStatus == .notDetermined {
+            requestingLocationAuthorization = true
+            gps_service.requestAuthorization()
+        }
         
     }
+    
+    func allowCameraTapped() {
+        let cameraStatus = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        if cameraStatus == .denied || cameraStatus == .restricted {
+            if #available(iOS 10.0, *) {
+                let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)! as URL
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            } else {
+                let alert = UIAlertController(title: "Go to Settings", message: "Please minimize Jungle and go to your settings to allow camera usage.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            }
+            
+        } else if cameraStatus == .notDetermined {
+            AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (granted: Bool) -> Void in
+                DispatchQueue.main.async() {
+                    if granted {
+                        self.cameraPermissionsView?.removeCameraView()
+                        self.checkCameraPermissions()
+                    }
+                }
+            })
+        }
+    }
+    
+    func allowMicrophoneTapped() {
+        let microphoneStatus = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeAudio)
+        if microphoneStatus == .denied || microphoneStatus == .restricted {
+            if #available(iOS 10.0, *) {
+                let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)! as URL
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            } else {
+                let alert = UIAlertController(title: "Go to Settings", message: "Please minimize Jungle and go to your settings to allow microphone usage.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            }
+            
+        } else if microphoneStatus == .notDetermined {
+            AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (granted: Bool) -> Void in
+                DispatchQueue.main.async() {
+                    if granted {
+                        self.cameraPermissionsView?.removeMicrophoneView()
+                        self.checkCameraPermissions()
+                    }
+                }
+            })
+        }
+    }
+    
+    func checkCameraPermissions() {
+        let verified = UserService.isEmailVerified
+        let locationPermission = gps_service.isAuthorized()
+        let cameraPermission = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized
+        let microphonePermission = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeAudio) == .authorized
+        
+        if (verified && locationPermission && cameraPermission && microphonePermission) {
+            messageWrapper.hideAll()
+            scrollView.isScrollEnabled = true
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        }
+    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -377,7 +557,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if screenMode == .Camera {
+        if screenMode == .Camera && cameraView.allPermissionsGranted {
             return true
         }
         return false
@@ -398,22 +578,113 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         if self.navigationController?.delegate === transitionController {
             self.navigationController?.delegate = nil
             recordBtn.isUserInteractionEnabled = true
-            scrollView.isScrollEnabled = true
         }
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
            //statusBar(hide: true, animated: false)
         } else {
             statusBar(hide: false, animated: true)
         }
-        
-        notification_service.registerForNotifications()
-
     }
+    
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         textView.resignFirstResponder()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    func registerForNotifications() {
+        notification_service.notificationsEnabled() { status in
+            DispatchQueue.main.async {
+                switch status {
+                case .authorized:
+                    self.notification_service.registerForNotifications()
+                    break
+                case .denined:
+                    let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
+                    messageView.configureBackgroundView(width: 250)
+                    messageView.configureContent(title: "Notifications are disabled", body: "To enable notifications, go to your settings and turn on notifications for Jungle.", iconImage: nil, iconText: "🔕", buttonImage: nil, buttonTitle: "Go to settings") { _ in
+                        self.messageWrapper.hide()
+                        let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)! as URL
+                        if #available(iOS 10.0, *) {
+                            UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+                        } else {
+                            let alert = UIAlertController(title: "Go to Settings", message: "Please minimize Jungle and go to your settings to enable notifications.", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                            self.present(alert, animated: true, completion: nil)
+                        }
+                    }
+                    
+                    let button = messageView.button!
+                    button.backgroundColor = infoColor
+                    button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+                    button.setTitleColor(UIColor.white, for: .normal)
+                    button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
+                    button.sizeToFit()
+                    button.layer.cornerRadius = messageView.button!.bounds.height / 2
+                    button.clipsToBounds = true
+                    
+                    let gradient = CAGradientLayer()
+                    gradient.frame = button.bounds
+                    gradient.colors = [
+                        lightAccentColor.cgColor,
+                        darkAccentColor.cgColor
+                    ]
+                    gradient.locations = [0.0, 1.0]
+                    gradient.startPoint = CGPoint(x: 0, y: 0)
+                    gradient.endPoint = CGPoint(x: 1, y: 0)
+                    button.layer.insertSublayer(gradient, at: 0)
+                    
+                    messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
+                    messageView.backgroundView.layer.cornerRadius = 12
+                    var config = SwiftMessages.defaultConfig
+                    config.presentationStyle = .center
+                    config.duration = .forever
+                    config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+                    config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+                    self.messageWrapper.show(config: config, view: messageView)
+                    break
+                case .notDetermined:
+                    let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
+                    messageView.configureBackgroundView(width: 250)
+                    messageView.configureContent(title: "Recieve notifications?", body: "You will recieve alerts about new followers, messages, and activity on posts that you are subscribed to.", iconImage: nil, iconText: "🔔", buttonImage: nil, buttonTitle: "Enable Notifications") { _ in
+                        self.notification_service.registerForNotifications()
+                        self.messageWrapper.hide()
+                    }
+                    
+                    let button = messageView.button!
+                    button.backgroundColor = accentColor
+                    button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+                    button.setTitleColor(UIColor.white, for: .normal)
+                    button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
+                    button.sizeToFit()
+                    button.layer.cornerRadius = messageView.button!.bounds.height / 2
+                    button.clipsToBounds = true
+                    
+                    let gradient = CAGradientLayer()
+                    gradient.frame = button.bounds
+                    gradient.colors = [
+                        lightAccentColor.cgColor,
+                        darkAccentColor.cgColor
+                    ]
+                    gradient.locations = [0.0, 1.0]
+                    gradient.startPoint = CGPoint(x: 0, y: 0)
+                    gradient.endPoint = CGPoint(x: 1, y: 0)
+                    button.layer.insertSublayer(gradient, at: 0)
+                    
+                    messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
+                    messageView.backgroundView.layer.cornerRadius = 12
+                    var config = SwiftMessages.defaultConfig
+                    config.presentationStyle = .center
+                    config.duration = .forever
+                    config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+                    config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+                    self.messageWrapper.show(config: config, view: messageView)
+                    break
+                }
+            }
+        }
     }
     
     
@@ -543,9 +814,9 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     let transitionController: TransitionController = TransitionController()
     
-    func presentNearbyPost(posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
+    func presentNearbyPost(presentationType:PresentationType, posts:[StoryItem], destinationIndexPath:IndexPath, initialIndexPath:IndexPath) {
         guard let nav = self.navigationController else { return }
-        presentationType = .homeCollection
+        self.presentationType = presentationType
         
         let galleryViewController: GalleryViewController = GalleryViewController()
         galleryViewController.posts = posts
@@ -734,14 +1005,25 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         }
     }
     
+    var cameraPermissionsGranted:Bool {
+        get {
+            return false
+        }
+    }
+    
     func recordButtonTapped() {
         switch screenMode {
         case .Camera:
             cameraView.didPressTakePhoto()
             break
+            
         case .Main:
-            scrollView.isScrollEnabled = true
-            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+            
+            if isCameraPermitted() {
+                scrollView.isScrollEnabled = true
+                scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+            }
+            
             break
         case .Map:
             break
@@ -753,27 +1035,27 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     
     func sendButtonTapped(sender: UIButton) {
         
-//        if !UserService.isEmailVerified {
-//            let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
-//            
-//            alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
-//            
-//                UserService.sendVerificationEmail { success in
-//                    if success {
-//                        let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
-//                        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
-//                        
-//                        self.present(alert, animated: true, completion: nil)
-//                    } else {
-//                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
-//                    }
-//                }
-//                
-//            }))
-//            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
-//            self.present(alert, animated: true, completion: nil)
-//            return
-//        }
+        if !UserService.isEmailVerified {
+            let alert = UIAlertController(title: "Account verification required", message: "Before you post, please verify your email address.", preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Resend", style: .cancel, handler: { _ in
+            
+                UserService.sendVerificationEmail { success in
+                    if success {
+                        let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                        
+                        self.present(alert, animated: true, completion: nil)
+                    } else {
+                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+                    }
+                }
+                
+            }))
+            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
         
         cameraView.pauseVideo()
         
@@ -852,6 +1134,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     }
     
     func sendPost() {
+        
         if !mainStore.state.settingsState.uploadWarningShown {
             
             let alert = UIAlertController(title: "Heads up!", message: "All posts on Jungle are public and can be seen by anyone (except for users you have blocked). Don't post anything too personal.", preferredStyle: .alert)
@@ -901,6 +1184,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             self.sendOptionsBar.userImage.alpha = 0.0
         })
         
+        
+        
         if let videoURL = upload.videoURL {
             let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let outputUrl = documentsURL.appendingPathComponent("output.mp4")
@@ -915,19 +1200,37 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             }
             upload.videoURL = outputUrl
             
+            UIView.animate(withDuration: 0.20, animations: {
+                self.editOptionsBar.alpha = 0.0
+                self.sendOptionsBar.userImage.alpha = 0.0
+            })
+            
             UploadService.compressVideo(inputURL: videoURL, outputURL: outputUrl, handler: { session in
                 DispatchQueue.main.async {
+                    activityIndicator.removeFromSuperview()
+                    self.sent()
                     UploadService.getUploadKey(upload: upload) { success in
-                        activityIndicator.removeFromSuperview()
-                        self.sent()
+                        
                     }
                 }
             })
             
         } else if upload.image != nil {
+            UIView.animate(withDuration: 0.20, animations: {
+                self.editOptionsBar.alpha = 0.0
+                self.sendOptionsBar.userImage.alpha = 0.0
+            }, completion: { _ in
+                UIView.animate(withDuration: 0.5, animations: {
+                    
+                }, completion: { _ in
+                    DispatchQueue.main.async {
+                        activityIndicator.removeFromSuperview()
+                        self.sent()
+                    }
+                })
+            })
             UploadService.getUploadKey(upload: upload) { success in
-                activityIndicator.removeFromSuperview()
-                self.sent()
+                
             }
         }
     }
@@ -936,7 +1239,6 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         cameraView.cameraState = .Initiating
         presentHomeScreen(animated: false)
         scrollView.isScrollEnabled = false
-        //self.navigationController?.popViewController(animated: false)
     }
 
     
@@ -1071,13 +1373,19 @@ extension MainViewController: View2ViewTransitionPresenting {
             let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
-        case .homeHeader:
-            guard let headerCollectionView = places.topCollectionViewRef else { return CGRect.zero }
+        case .popular:
+            guard let headerCollectionView = places.homeHeader?.popularCollectionView else { return CGRect.zero }
+            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? PhotoCell else { return CGRect.zero }
+            let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
+            return CGRect(x: convertedFrame.origin.x, y: convertedFrame.origin.y, width: convertedFrame.width, height: convertedFrame.height)
+
+        case .following:
+            guard let headerCollectionView = places.homeHeader?.followingCollectionView else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
-        case .homeNearbyHeader:
-            guard let headerCollectionView = places.midCollectionViewRef else { return CGRect.zero }
+        case .places:
+            guard let headerCollectionView = places.homeHeader?.placesCollectionView else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
@@ -1103,11 +1411,14 @@ extension MainViewController: View2ViewTransitionPresenting {
         case .homeCollection:
             guard let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
             return cell
-        case .homeHeader:
-            guard let cell = places.topCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+        case .popular:
+            guard let cell = places.homeHeader?.popularCollectionView.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
+            return cell
+        case .following:
+            guard let cell = places.homeHeader?.followingCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
             return cell.container
-        case .homeNearbyHeader:
-            guard let cell = places.midCollectionViewRef?.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+        case .places:
+            guard let cell = places.homeHeader?.placesCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
             return cell.container
         case .notificationTable:
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
@@ -1133,8 +1444,8 @@ extension MainViewController: View2ViewTransitionPresenting {
                     places.collectionView!.layoutIfNeeded()
                 }
                 break
-            case .homeHeader:
-                if let bannerCollectionView = places.topCollectionViewRef {
+            case .popular:
+                if let bannerCollectionView = places.homeHeader?.popularCollectionView {
                     if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
                         bannerCollectionView.reloadData()
                         bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
@@ -1142,8 +1453,17 @@ extension MainViewController: View2ViewTransitionPresenting {
                     }
                 }
                 break
-            case .homeNearbyHeader:
-                if let bannerCollectionView = places.midCollectionViewRef {
+            case .following:
+                if let bannerCollectionView = places.homeHeader?.followingCollectionView {
+                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
+                        bannerCollectionView.reloadData()
+                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+                        bannerCollectionView.layoutIfNeeded()
+                    }
+                }
+                break
+            case .places:
+                if let bannerCollectionView = places.homeHeader?.placesCollectionView {
                     if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
                         bannerCollectionView.reloadData()
                         bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
@@ -1171,7 +1491,7 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func topView() -> UIView {
-        if presentationType == .homeCollection || presentationType == .homeHeader || presentationType == .homeNearbyHeader {
+        if presentationType == .homeCollection || presentationType == .popular || presentationType == .following || presentationType == .places {
             if let view = places.header.snapshotImageTransparent() {
                 let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
                 topView.backgroundColor = UIColor.black
@@ -1212,7 +1532,18 @@ extension MainViewController: GPSServiceProtocol {
     func tracingLocationDidFailWithError(_ error: NSError) {}
     func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood]) {}
     func horizontalAccuracyUpdated(_ accuracy:Double?) {}
-    func authorizationDidChange() {
+    func authorizationDidChange(_ status: CLAuthorizationStatus) {
+        places?.collectionView?.reloadData()
+        
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+            self.cameraPermissionsView?.removeLocationView()
+            
+            if requestingLocationAuthorization {
+                self.checkCameraPermissions()
+                requestingLocationAuthorization = false
+            }
+            
+        }
         
     }
 }
@@ -1239,5 +1570,5 @@ enum StoryType {
 }
 
 enum PresentationType {
-    case homeCollection, homeHeader, homeNearbyHeader, profileCollection, notificationTable
+    case homeCollection, popular, following, places, profileCollection, notificationTable
 }

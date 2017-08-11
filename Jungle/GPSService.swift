@@ -48,7 +48,7 @@ protocol GPSServiceProtocol:ServiceProtocol {
     func tracingLocationDidFailWithError(_ error: NSError)
     func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood])
     func horizontalAccuracyUpdated(_ accuracy:Double?)
-    func authorizationDidChange()
+    func authorizationDidChange(_ status: CLAuthorizationStatus)
 }
 
 
@@ -69,31 +69,31 @@ class GPSService: Service, CLLocationManagerDelegate {
         guard let locationManager = self.locationManager else {
             return
         }
-        if CLLocationManager.locationServicesEnabled() {
-            switch(CLLocationManager.authorizationStatus()) {
-            case .notDetermined:
-                print("No access")
-                locationManager.requestWhenInUseAuthorization()
-                break
-            case .restricted, .denied:
-                break
-            case .authorizedAlways, .authorizedWhenInUse:
-                print("Access")
-                break
-            }
-        } else {
-            print("Location services are not enabled")
-            locationManager.requestWhenInUseAuthorization()
-        }
-        if CLLocationManager.authorizationStatus() == .notDetermined {
-            // requestWhenInUseAuthorization
-            locationManager.requestWhenInUseAuthorization()
-        }
-        
+//        if CLLocationManager.locationServicesEnabled() {
+//            switch(CLLocationManager.authorizationStatus()) {
+//            case .notDetermined:
+//                print("No access")
+//                locationManager.requestWhenInUseAuthorization()
+//                break
+//            case .restricted, .denied:
+//                break
+//            case .authorizedAlways, .authorizedWhenInUse:
+//                print("Access")
+//                break
+//            }
+//        } else {
+//            print("Location services are not enabled")
+//            locationManager.requestWhenInUseAuthorization()
+//        }
+//        
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer // The accuracy of the location data
         locationManager.distanceFilter = 50.0 // The minimum distance (measured in meters) a device must move horizontally before an update event is generated.
         locationManager.delegate = self
         
+    }
+    
+    func requestAuthorization() {
+        self.locationManager?.requestWhenInUseAuthorization()
     }
     
     func setAccurateGPS(_ accurate:Bool) {
@@ -118,12 +118,15 @@ class GPSService: Service, CLLocationManagerDelegate {
     func getLastLocation() -> CLLocation? { return lastLocation }
     func getLikelihoods() -> [GMSPlaceLikelihood] { return likelihoods }
     
+    func authorizationStatus() -> CLAuthorizationStatus {
+        return CLLocationManager.authorizationStatus()
+    }
+    
     func isAuthorized() -> Bool {
         if CLLocationManager.locationServicesEnabled() {
             switch(CLLocationManager.authorizationStatus()) {
             case .notDetermined:
-                self.locationManager?.requestWhenInUseAuthorization()
-                return true
+                return false
             case .restricted, .denied:
                 return false
             case .authorizedAlways, .authorizedWhenInUse:
@@ -208,7 +211,7 @@ class GPSService: Service, CLLocationManagerDelegate {
     
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         guard let subscribers = getSubscribers() else { return }
-         subscribers.forEach { $0.value.authorizationDidChange()}
+         subscribers.forEach { $0.value.authorizationDidChange(status)}
     }
     
     internal func updateLocationDidFailWithError(_ error: NSError) {

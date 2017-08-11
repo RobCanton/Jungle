@@ -24,7 +24,7 @@ pod 'TGPControls'
 pod 'TwicketSegmentedControl'
 pod 'SnapTimer'
 pod 'ActiveLabel'
-pod 'SwiftMessages'
+pod 'SwiftMessages', '3.4.0'
 pod 'Segmentio', '2.1'
 pod "Popover"
 pod 'BadgeSwift', '~> 5.0'

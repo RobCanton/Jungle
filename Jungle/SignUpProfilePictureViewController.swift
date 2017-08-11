@@ -88,7 +88,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                     if error != nil {
                         print("Error: \(error!.localizedDescription)")
                         self.reset()
-                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error sending verification email.")
+                        self.showError()
                     }
                     
                     
@@ -118,7 +118,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                                 if error != nil {
                                     print("Error: \(error!.localizedDescription)")
                                     self.reset()
-                                    return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                                    self.showError()
                                 }
                                 
                             }
@@ -126,7 +126,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                         } else {
                             print("Error: \(error!.localizedDescription)")
                             self.reset()
-                            return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                            self.showError()
                         }
                     }
                     
@@ -135,9 +135,18 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                 
             } else {
                 print("Error: \(error!.localizedDescription)")
-                return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error creating account.")
+                self.showError()
             }
         }
+    }
+    
+    func showError() {
+        let alert = UIAlertController(title: nil, message: "There was an error creating your account. Please try again.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: { _ in
+            self.performSegue(withIdentifier: "unwindToMenu", sender: self)
+        }))
+        
+        self.present(alert, animated: true, completion: nil)
     }
     
     func reset() {

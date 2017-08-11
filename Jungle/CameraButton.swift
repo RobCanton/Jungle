@@ -89,8 +89,11 @@ class CameraButton: UIView {
     }
     
     func tapped(sender:UITapGestureRecognizer) {
-        tappedHandler?()
         
+        tappedHandler?()
+        if !UserService.isEmailVerified {
+            return
+        }
         UIView.animate(withDuration: 0.25, animations: {
             self.ring.alpha = 0.4
         }
@@ -101,8 +104,12 @@ class CameraButton: UIView {
     
     func pressed(sender: UILongPressGestureRecognizer)
     {
+        
         let state = sender.state
         pressedHandler?(state)
+        if !UserService.isEmailVerified {
+            return
+        }
         switch state {
         case .began:
             UIView.animate(withDuration: 1.0, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0, options: [.curveEaseInOut], animations: {

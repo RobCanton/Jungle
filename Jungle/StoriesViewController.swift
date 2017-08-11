@@ -126,7 +126,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
-        layout.animator = PageAttributesAnimator()
+        layout.animator = CubeAttributesAnimator()
         
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)

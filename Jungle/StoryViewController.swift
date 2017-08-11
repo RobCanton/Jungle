@@ -55,6 +55,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
         contentView.addSubview(gradientView)
+        contentView.addSubview(topGradient)
         contentView.addSubview(prevView)
         
         /* Info view */
@@ -750,7 +751,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         var view = UINib(nibName: "CommentsOverlayTableView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsOverlayTableView
-        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.36 )
+        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.333 )
         view.setup()
         return view
     }()
@@ -776,6 +777,25 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         gradient.endPoint = CGPoint(x: 0, y: 1)
         let dark = UIColor(white: 0.0, alpha: 0.35)
         gradient.colors = [UIColor.clear.cgColor , dark.cgColor]
+        view.layer.insertSublayer(gradient, at: 0)
+        view.isUserInteractionEnabled = false
+        return view
+    }()
+    
+    public lazy var topGradient: UIView = {
+        
+        let width: CGFloat = (UIScreen.main.bounds.size.width)
+        let height: CGFloat = (UIScreen.main.bounds.size.height)
+        
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height * 0.12))
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+        gradient.locations = [0.0, 1.0]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint = CGPoint(x: 0, y: 1)
+        gradient.shouldRasterize = false
+        let dark = UIColor(white: 0.0, alpha: 0.25)
+        gradient.colors = [dark.cgColor, UIColor.clear.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
         view.isUserInteractionEnabled = false
         return view

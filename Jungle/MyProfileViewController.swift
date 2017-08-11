@@ -41,7 +41,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         super.viewDidLoad()
         uid = mainStore.state.userState.uid
         view.backgroundColor = UIColor.clear
-        itemSideLength = (UIScreen.main.bounds.width - 4.0)/3.0
+        itemSideLength = (UIScreen.main.bounds.width - 2.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = false
         
         screenSize = self.view.frame
@@ -68,7 +68,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
         
-        collectionView.contentInset = UIEdgeInsets(top: 1.0, left: 1.0, bottom: 1.0, right: 1.0)
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.bounces = true

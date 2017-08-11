@@ -73,7 +73,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         super.viewDidLoad()
         navigationController?.navigationBar.tintColor = UIColor.black
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-        itemSideLength = (UIScreen.main.bounds.width - 3.0) / 3.0
+        itemSideLength = (UIScreen.main.bounds.width - 2.0) / 3.0
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -89,8 +89,8 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
         layout.itemSize = getItemSize()
-        layout.minimumInteritemSpacing = 1.5
-        layout.minimumLineSpacing = 1.5
+        layout.minimumInteritemSpacing = 1.0
+        layout.minimumLineSpacing = 1.0
         
         collectionView = UICollectionView(frame: CGRect(x: 0,y: navHeight,width: view.frame.width,height: view.frame.height - navHeight), collectionViewLayout: layout)
         
@@ -147,7 +147,7 @@ class UserProfileViewController: UIViewController, StoreSubscriber, UICollection
         
         let current_uid = mainStore.state.userState.uid
         blockedRef?.removeAllObservers()
-        blockedRef = UserService.ref.child("social/blocked/\(current_uid)/\(uid)")
+        blockedRef = UserService.ref.child("social/blockedUsers/\(current_uid)/\(uid)")
         blockedRef?.observe(.value, with: { snapshot in
             self.isBlocked = snapshot.exists()
         })

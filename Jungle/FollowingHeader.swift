@@ -13,12 +13,6 @@ func compareUserStories(storiesA:[UserStory], storiesB:[UserStory]) {
 }
 
 
-protocol HomeHeaderProtocol: class {
-    func emptyHeaderTapped()
-}
-
-
-
 class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICollectionViewDataSource {
 
     @IBOutlet weak var collectionView: UICollectionView!
@@ -94,7 +88,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
     }
     
     func emptyHeaderTapped() {
-        delegate?.emptyHeaderTapped()
+        
     }
     
     
@@ -262,7 +256,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                 story.determineState()
                 
                 if story.state == .contentLoaded {
-                    globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeHeader, stories: stateRef!.unseenFollowingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                    //globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeHeader, stories: stateRef!.unseenFollowingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
                 } else {
                     story.downloadFirstItem()
                 }
@@ -271,7 +265,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
                 story.determineState()
                 if story.state == .contentLoaded {
                     let dest = IndexPath(item: indexPath.item, section: 0)
-                    globalMainInterfaceProtocol?.presentBannerStory( presentationType: .homeHeader, stories: stateRef!.watchedFollowingStories, destinationIndexPath: dest, initialIndexPath: indexPath)
+                    //globalMainInterfaceProtocol?.presentBannerStory( presentationType: .homeHeader, stories: stateRef!.watchedFollowingStories, destinationIndexPath: dest, initialIndexPath: indexPath)
                 } else {
                     story.downloadFirstItem()
                 }
@@ -280,7 +274,7 @@ class FollowingHeader: UICollectionReusableView, UICollectionViewDelegate, UICol
             let story = stateRef!.nearbyCityStories[indexPath.row]
             story.determineState()
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: stateRef!.nearbyCityStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                //globalMainInterfaceProtocol?.presentBannerStory(presentationType: .homeNearbyHeader, stories: stateRef!.nearbyCityStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
             } else {
                 story.downloadFirstItem()
             }

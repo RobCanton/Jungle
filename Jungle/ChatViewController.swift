@@ -12,6 +12,7 @@ import JSQMessagesViewController
 import ReSwift
 import Firebase
 import View2ViewTransition
+import Alamofire
 
 
 class ChatViewController: JSQMessagesViewController, GetUserProtocol {
@@ -52,10 +53,11 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
         self.inputToolbar.contentView.leftBarButtonItemWidth = 0
+        self.inputToolbar.contentView.textView.placeHolder = "New message as @robcanton"
         collectionView?.collectionViewLayout.outgoingAvatarViewSize = .zero
         
         collectionView?.collectionViewLayout.springinessEnabled = true
-        collectionView?.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+        collectionView?.backgroundColor = UIColor(white: 0.94, alpha: 1.0)
         
         activityIndicator = UIActivityIndicatorView(frame: CGRect(x:0,y:0,width:50,height:50))
         activityIndicator.activityIndicatorViewStyle = .gray
@@ -66,7 +68,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         conversationKey = createUserIdPairKey(uid1: mainStore.state.userState.uid, uid2: partner.uid)
         title = partner.username
         
-        downloadRef = UserService.ref.child("conversations/\(conversationKey!)/messages")
+        downloadRef = UserService.ref.child("directMessages/\(conversationKey!)/messages")
         
         downloadRef?.queryOrderedByKey().queryLimited(toLast: 1).observeSingleEvent(of: .value, with: { snapshot in
             if !snapshot.exists() {
@@ -165,7 +167,7 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
                     let messageSnap = message as! DataSnapshot
                     let dict = messageSnap.value as! [String: AnyObject]
                     
-                    let senderId  = dict["senderId"] as! String
+                    let senderId  = dict["sender"] as! String
                     let timestamp = dict["timestamp"] as! Double
                     
                     if timestamp != endTimestamp {
@@ -244,12 +246,8 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         self.collectionView?.reloadData()
         //set seen timestamp
         if messages.count > 0 {
-            let lastMessage = messages[messages.count - 1]
-            let uid = mainStore.state.userState.uid
-            if lastMessage.senderId != uid {
-                let ref = UserService.ref.child("conversations/\(conversationKey!)/meta/\(uid)")
-                ref.setValue([".sv":"timestamp"])
-            }
+            let ref = UserService.ref.child("users/directMessages/\(userState.uid)/\(partner.uid)/seen")
+            ref.setValue(true)
         }
         
     }
@@ -422,8 +420,34 @@ extension ChatViewController {
     
     
     override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-        UserService.sendMessage(conversationKey: conversationKey, recipientId: partner.uid, message: text, completion: nil)
-        self.finishSendingMessage(animated: true)
+        
+        UserService.getHTTPSHeaders() { HTTPHeaders in
+            guard let headers = HTTPHeaders else { return }
+            
+            let params = [
+                "sender": userState.uid,
+                "recipient": self.partner.uid,
+                "text": text
+            ] as [String:Any]
+            
+            Alamofire.request("\(API_ENDPOINT)/message", method: .post, parameters: params, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool {
+                        
+                        if !success, let msg = json["msg"] as? String {
+                            return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: msg)
+                        }
+                        
+                    } else {
+                        
+                        return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send message.")
+                    }
+                }
+            }
+        }
+        
+        return self.finishSendingMessage(animated: true)
+        
         
     }
     
@@ -434,7 +458,7 @@ extension ChatViewController {
         downloadRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).observe(.childAdded, with: { snapshot in
             let dict = snapshot.value as! [String:AnyObject]
             
-            let senderId  = dict["senderId"] as! String
+            let senderId  = dict["sender"] as! String
             let timestamp = dict["timestamp"] as! Double
             
             let date = NSDate(timeIntervalSince1970: timestamp/1000)

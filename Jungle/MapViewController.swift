@@ -56,7 +56,7 @@ class MapViewController: UIViewController {
 }
 
 extension MapViewController: GPSServiceProtocol {
-    func authorizationDidChange() {
+    func authorizationDidChange(_ status: CLAuthorizationStatus) {
         
     }
 
