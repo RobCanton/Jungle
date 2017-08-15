@@ -20,7 +20,7 @@
                         <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="ROj-kP-xIr">
                             <rect key="frame" x="215" y="18" width="20" height="20"/>
                         </activityIndicatorView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Load More" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5ru-jf-jnY">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="View More" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5ru-jf-jnY">
                             <rect key="frame" x="187" y="19" width="75.5" height="18"/>
                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
                             <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>

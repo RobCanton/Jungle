@@ -32,7 +32,7 @@ class ItemStateController {
     var numCommentsRef:DatabaseReference?
     var subscribedRef:DatabaseReference?
     
-
+    var isSubscribed = false
     var limit:UInt = 16
     
     func setupItem(_ item:StoryItem) {
@@ -73,6 +73,8 @@ class ItemStateController {
     
     func removeAllObservers() {
         //item = nil
+        isSubscribed = false
+        limit = 16
         likedRef?.removeAllObservers()
         numLikesRef?.removeAllObservers()
         numCommentsRef?.removeAllObservers()
@@ -221,7 +223,8 @@ class ItemStateController {
         subscribedRef?.removeAllObservers()
         subscribedRef = UserService.ref.child("uploads/subscribers/\(item.key)/\(uid)")
         subscribedRef?.observe(.value, with: { snapshot in
-            self.delegate?.itemStateDidChange(subscribed: snapshot.exists())
+            self.isSubscribed = snapshot.exists()
+            self.delegate?.itemStateDidChange(subscribed: self.isSubscribed)
         })
     }
     

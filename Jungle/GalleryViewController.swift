@@ -366,7 +366,7 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showMetaLikes() {
+    func showPostMeta(_ indexPath:IndexPath?) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
         if let nav = self.navigationController {
@@ -375,25 +375,9 @@ extension GalleryViewController: PopupProtocol {
         let controller = PostMetaTableViewController()
         controller.itemStateController = cell.itemStateController
         controller.item = item
-        controller.mode = .likes
+        controller.initialIndex = indexPath
         controller.commentBar.isHidden = true
         controller.commentBar.isUserInteractionEnabled = false
-        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
-    }
-    
-    func showMetaComments(_ indexPath:IndexPath?) {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.storyItem else { return }
-        if let nav = self.navigationController {
-            nav.delegate = nil
-        }
-        let controller = PostMetaTableViewController()
-        controller.itemStateController = cell.itemStateController
-        controller.item = item
-        controller.mode = .comments
-        controller.initialIndex = indexPath
-        controller.commentBar.isHidden = false
-        controller.commentBar.isUserInteractionEnabled = true
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

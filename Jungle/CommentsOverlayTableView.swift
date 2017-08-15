@@ -12,7 +12,7 @@ import UIKit
 protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
     func refreshPulled()
-    func showMetaComments(_ indexPath:IndexPath?)
+    func showPostMeta(_ indexPath:IndexPath?)
     func showAnonOptions(_ aid:String)
 }
 
@@ -229,7 +229,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
 //            globalMainInterfaceProtocol?.presentPopover(withController: sheet, animated: true)
 //        }
         let comment = comments[indexPath.row]
-        delegate?.showMetaComments(indexPath)
+        delegate?.showPostMeta(indexPath)
         
         tableView.deselectRow(at: indexPath, animated: false)
     }

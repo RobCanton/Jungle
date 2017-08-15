@@ -180,14 +180,14 @@ class DetailedCommentCell: UITableViewCell {
     }
     
     func reset() {
-        self.likedRef?.removeAllObservers()
+        //self.likedRef?.removeAllObservers()
         self.liked = false
         self.likeButton.deselect()
-        self.numLikesRef?.removeAllObservers()
+        //self.numLikesRef?.removeAllObservers()
     }
     
     func setNumberOfLikes(_ value:Int) {
-        if value == 0 {
+        if value <= 0 {
             numLikesLabel.text = nil
         } else if value == 1 {
             numLikesLabel.text = "1 like"

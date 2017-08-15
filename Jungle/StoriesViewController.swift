@@ -19,8 +19,8 @@ protocol PopupProtocol: class {
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
     func showAnonOptions(_ aid:String)
-    func showMetaLikes()
-    func showMetaComments(_ indexPath:IndexPath?)
+    func showPostMeta(_ indexPath:IndexPath?)
+    
 }
 
 class StoriesViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
@@ -433,8 +433,7 @@ extension StoriesViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    
-    func showMetaLikes() {
+    func showPostMeta(_ indexPath:IndexPath?) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
         if let nav = self.navigationController {
@@ -443,20 +442,7 @@ extension StoriesViewController: PopupProtocol {
         let controller = PostMetaTableViewController()
         controller.itemStateController = cell.itemStateController
         controller.item = item
-        controller.mode = .likes
-        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
-    }
-    
-    func showMetaComments(_ indexPath:IndexPath?) {
-        guard let cell = getCurrentCell() else { return }
-        guard let item = cell.item else { return }
-        if let nav = self.navigationController {
-            nav.delegate = nil
-        }
-        let controller = PostMetaTableViewController()
-        controller.itemStateController = cell.itemStateController
-        controller.item = item
-        controller.mode = .comments
+        controller.initialIndex = indexPath
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     

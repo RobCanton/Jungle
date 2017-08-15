@@ -1,3 +1,4 @@
+
 //
 //  PostAuthorView.swift
 //  Lit
@@ -13,8 +14,8 @@ protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
     func showRegion(_ region:City)
-    func showMetaLikes()
-    func showMetaComments(_ indexPath:IndexPath?)
+    func showPostMeta(_ indexPath:IndexPath?)
+
     func dismiss()
 }
 
@@ -24,12 +25,17 @@ class PostHeaderView: UIView {
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var locationTitle: UILabel!
     
-    @IBOutlet weak var likesIcon: UIImageView!
-    @IBOutlet weak var likesLabel: UILabel!
-    @IBOutlet weak var commentsIcon: UIImageView!
-    @IBOutlet weak var commentsLabel: UILabel!
+
     @IBOutlet weak var badgeView: UIImageView!
-    
+
+    @IBOutlet weak var stackView: UIStackView!
+    @IBOutlet weak var viewsView: UIView!
+    @IBOutlet weak var viewsLabel: UILabel!
+    @IBOutlet weak var likesView: UIView!
+    @IBOutlet weak var likesLabel: UILabel!
+    @IBOutlet weak var commentsView: UIView!
+    @IBOutlet weak var commentsLabel: UILabel!
+
     var commentsTap:UITapGestureRecognizer?
     var likesTap:UITapGestureRecognizer?
     
@@ -48,21 +54,61 @@ class PostHeaderView: UIView {
     var tap2:UITapGestureRecognizer?
     var placeTap:UITapGestureRecognizer!
     
+    func resetStack() {
+        for view in stackView.arrangedSubviews {
+            stackView.removeArrangedSubview(view)
+        }
+        
+        stackView.addArrangedSubview(viewsView)
+        stackView.addArrangedSubview(likesView)
+        stackView.addArrangedSubview(commentsView)
+        
+        viewsView.isHidden = false
+        likesView.isHidden = false
+        commentsView.isHidden = false
+        
+        viewsView.isUserInteractionEnabled = true
+        likesView.isUserInteractionEnabled = true
+        commentsView.isUserInteractionEnabled = true
+    }
+    
     func setup(_ item:StoryItem) {
 
         self.itemRef = item
         clean()
         
         setupLocation(locationKey: item.locationKey, regionKey: item.regionKey)
-        setNumLikes(item.numLikes)
-        setNumComments(item.numComments)
+        
+        self.resetStack()
+        
+        let isCurrentUser = isCurrentUserId(id: item.authorId)
+        
+        let numViews = item.numViews
+        let numLikes = item.numLikes
+        let numComments = item.numComments
+        
+        viewsLabel.text = getNumericShorthandString(numViews)
+        likesLabel.text = getNumericShorthandString(numLikes)
+        commentsLabel.text = getNumericShorthandString(numComments)
+        
+        if numViews == 0 || !isCurrentUser {
+            stackView.remove(view: viewsView)
+        }
+        
+        if numLikes == 0 {
+            stackView.remove(view: likesView)
+        }
+        
+        if numComments == 0 {
+            stackView.remove(view: commentsView)
+        }
         
         //usernameLabel.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
         //timeLabel2.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
         //locationTitle.applyShadow(radius: 0.3, opacity: 0.65, height: 0.3, shouldRasterize: true)
         
         if let anon = item.anon {
-            if isCurrentUserId(id: item.authorId) {
+            if isCurrentUser {
                 self.usernameLabel.setAnonymousName(anonName: anon.anonName, color: anon.color, suffix: "[YOU]", fontSize: 16.0)//.usernameLabel.text = "\(anon.anonName) (YOU)"
             } else {
                 self.usernameLabel.text = anon.anonName
@@ -104,38 +150,74 @@ class PostHeaderView: UIView {
         self.usernameLabel.isUserInteractionEnabled = true
         self.usernameLabel.addGestureRecognizer(tap2!)
         
-        likesTap = UITapGestureRecognizer(target: self, action: #selector(self.likesTapped))
-        likesIcon.superview!.isUserInteractionEnabled = true
-        likesIcon.superview!.addGestureRecognizer(likesTap!)
-        
-        commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.commentsTapped))
-        commentsIcon.superview!.isUserInteractionEnabled = true
-        commentsIcon.superview!.addGestureRecognizer(commentsTap!)
-        
         placeTap = UITapGestureRecognizer(target: self, action: #selector(self.locationTapped))
         locationTitle.isUserInteractionEnabled = true
         locationTitle.addGestureRecognizer(placeTap)
+        
+        let stackTap = UITapGestureRecognizer(target: self, action: #selector(self.showPostMeta))
+        stackView.isUserInteractionEnabled = true
+        stackView.addGestureRecognizer(stackTap)
         
 
     }
     
     func setNumLikes(_ numLikes:Int) {
+        guard let item = itemRef else { return }
+        self.resetStack()
+        
+        let isCurrentUser = isCurrentUserId(id: item.authorId)
+        
+        let numViews = item.numViews
+        let numComments = item.numComments
+        
+        viewsLabel.text = getNumericShorthandString(numViews)
         likesLabel.text = getNumericShorthandString(numLikes)
+        commentsLabel.text = getNumericShorthandString(numComments)
+        
+        if numViews == 0 ||  !isCurrentUser {
+            stackView.remove(view: viewsView)
+        }
+        
+        if numLikes == 0 {
+            stackView.remove(view: likesView)
+        }
+        
+        if numComments == 0 {
+            stackView.remove(view: commentsView)
+        }
+        
     }
     
     func setNumComments(_ numComments:Int) {
+        guard let item = itemRef else { return }
+        self.resetStack()
         
+        let isCurrentUser = isCurrentUserId(id: item.authorId)
+        
+        let numViews = item.numViews
+        let numLikes = item.numLikes
+        
+        viewsLabel.text = getNumericShorthandString(numViews)
+        likesLabel.text = getNumericShorthandString(numLikes)
         commentsLabel.text = getNumericShorthandString(numComments)
+        
+        if numViews == 0 ||  !isCurrentUser {
+            stackView.remove(view: viewsView)
+        }
+        
+        if numLikes == 0 {
+            stackView.remove(view: likesView)
+        }
+        
+        if numComments == 0 {
+            stackView.remove(view: commentsView)
+        }
     }
     
     @IBOutlet weak var timeLabel2: UILabel!
     
-    
-    func likesTapped() {
-        delegate?.showMetaLikes()
-    }
-    func commentsTapped() {
-        delegate?.showMetaComments(nil)
+    func showPostMeta() {
+        delegate?.showPostMeta(nil)
     }
     
     
@@ -213,3 +295,4 @@ class PostHeaderView: UIView {
 
     
 }
+ 
