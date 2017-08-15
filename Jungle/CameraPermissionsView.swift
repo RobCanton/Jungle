@@ -29,6 +29,7 @@ class CameraPermissionsView: UIView {
     @IBOutlet weak var cameraView: UIView!
     @IBOutlet weak var microphoneView: UIView!
 
+    @IBOutlet weak var verifyLabel: UILabel!
     @IBOutlet weak var backView: UIView!
     @IBOutlet weak var container: UIView!
     
@@ -41,19 +42,27 @@ class CameraPermissionsView: UIView {
         
         resendButton.layer.cornerRadius = resendButton.frame.height / 2
         resendButton.clipsToBounds = true
+        resendButton.setGradient(colorA: lightAccentColor, colorB: accentColor)
         enableLocationButton.layer.cornerRadius = enableLocationButton.frame.height / 2
         enableLocationButton.clipsToBounds = true
+        enableLocationButton.setGradient(colorA: lightAccentColor, colorB: accentColor)
         allowCameraButton.layer.cornerRadius = allowCameraButton.frame.height / 2
         allowCameraButton.clipsToBounds = true
+        allowCameraButton.setGradient(colorA: lightAccentColor, colorB: accentColor)
         allowMicrophoneButton.layer.cornerRadius = allowMicrophoneButton.frame.height / 2
         allowMicrophoneButton.clipsToBounds = true
+        allowMicrophoneButton.setGradient(colorA: lightAccentColor, colorB: accentColor)
         
         backView.isUserInteractionEnabled = true
+        
+        
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(backViewTapped))
         backView.addGestureRecognizer(tap)
         
     }
+    
+    
     
     func backViewTapped() {
         delegate?.dismissPermissionsView()
@@ -79,6 +88,23 @@ class CameraPermissionsView: UIView {
         }
         
     }
+    
+    var refreshMode = true
+    
+    func setToResendMode() {
+        verifyLabel.text = "Hmm... You are still not verified. Try reopening Jungle or we can send you another verification email."
+        resendButton.backgroundColor = infoColor
+        resendButton.setTitle("Resend Email", for: .normal)
+        refreshMode = false
+    }
+    
+    func setToRefreshMode() {
+        verifyLabel.text = "We've sent you an email to verify your account. Tap Refresh once you have been verified."
+        resendButton.backgroundColor = accentColor
+        resendButton.setTitle("Refresh Account", for: .normal)
+        refreshMode = true
+    }
+    
     @IBAction func resendTapped(_ sender: Any) {
         delegate?.resendTapped()
     }

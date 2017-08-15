@@ -9,8 +9,9 @@
 import Foundation
 import UIKit
 import Firebase
+import ReSwift
 
-class MainTabBarController: UITabBarController, MessageServiceProtocol, NotificationServiceProtocol{
+class MainTabBarController: UITabBarController, StoreSubscriber, MessageServiceProtocol, NotificationServiceProtocol{
     
     let identifier = "MainTabBarController"
     weak var message_service:MessageService?
@@ -77,9 +78,15 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
         return dot
     }
     
+    func newState(state:AppState) {
+        
+        tabBar.items?[4].badgeValue = UserService.isEmailVerified ? nil : "\(1)"
+    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        mainStore.subscribe(self)
         message_service?.subscribe(identifier, subscriber: self)
         notification_service?.subscribe(identifier, subscriber: self)
         
@@ -89,6 +96,7 @@ class MainTabBarController: UITabBarController, MessageServiceProtocol, Notifica
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        mainStore.unsubscribe(self)
         message_service?.unsubscribe(identifier)
         notification_service?.unsubscribe(identifier)
     }

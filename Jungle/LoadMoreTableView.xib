@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="LoadMoreTableView" customModule="Jungle" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="453" height="60"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="K16-d8-fkM">
+                    <rect key="frame" x="2" y="2" width="449" height="56"/>
+                    <subviews>
+                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="ROj-kP-xIr">
+                            <rect key="frame" x="215" y="18" width="20" height="20"/>
+                        </activityIndicatorView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Load More" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5ru-jf-jnY">
+                            <rect key="frame" x="187" y="19" width="75.5" height="18"/>
+                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
+                            <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="5ru-jf-jnY" firstAttribute="centerY" secondItem="K16-d8-fkM" secondAttribute="centerY" id="7sm-UK-tg6"/>
+                        <constraint firstItem="ROj-kP-xIr" firstAttribute="centerX" secondItem="5ru-jf-jnY" secondAttribute="centerX" id="glF-fT-p0V"/>
+                        <constraint firstItem="ROj-kP-xIr" firstAttribute="centerY" secondItem="5ru-jf-jnY" secondAttribute="centerY" id="kSI-Cs-1GI"/>
+                        <constraint firstItem="5ru-jf-jnY" firstAttribute="centerX" secondItem="K16-d8-fkM" secondAttribute="centerX" id="l3d-r8-yLm"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="K16-d8-fkM" secondAttribute="bottom" constant="2" id="1Xp-wO-aSz"/>
+                <constraint firstAttribute="trailing" secondItem="K16-d8-fkM" secondAttribute="trailing" constant="2" id="8NL-hG-ZWV"/>
+                <constraint firstItem="K16-d8-fkM" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="2" id="JGd-LN-7QC"/>
+                <constraint firstItem="K16-d8-fkM" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="2" id="fJJ-ZX-V3a"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="activityIndicator" destination="ROj-kP-xIr" id="eJ1-Fl-Uvf"/>
+                <outlet property="label" destination="5ru-jf-jnY" id="Eta-bv-9cb"/>
+            </connections>
+            <point key="canvasLocation" x="63.5" y="-251"/>
+        </view>
+    </objects>
+</document>

@@ -48,6 +48,14 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    func commentLikeTapped(_ comment:Comment, _ liked:Bool) {
+        
+    }
+    
+    func commentReplyTapped(_ comment:Comment, _ username:String) {
+        
+    }
+    
     var header:UIView!
     func setup() {
         self.clipsToBounds = true

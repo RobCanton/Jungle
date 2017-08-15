@@ -184,7 +184,7 @@ class PostHeaderView: UIView {
                 if self.regionKey != key { return }
                 self.region = _region
                 if let region = _region {
-                    self.locationTitle.text = " · \(region.address)"
+                    self.locationTitle.text = " · \(region.name)"
                 } else {
                     self.locationTitle.text = nil
                 }

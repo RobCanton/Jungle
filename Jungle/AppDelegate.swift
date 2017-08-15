@@ -40,6 +40,12 @@ var userState:UserState {
     }
 }
 
+var settingsState:SettingsState {
+    get {
+        return mainStore.state.settingsState
+    }
+}
+
 
 var remoteConfig: RemoteConfig?
 

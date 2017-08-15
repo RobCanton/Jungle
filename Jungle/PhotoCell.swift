@@ -70,7 +70,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             captionLabel.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightSemibold)
             captionLabel.numberOfLines = 3
             
-            self.crown.applyShadow(radius: 8.0, opacity: 0.75, height: 0.0, shouldRasterize: false)
+            self.crown.applyShadow(radius: 8.0, opacity: 1.0, height: 0.0, shouldRasterize: false)
             self.crown.layer.shadowColor = UIColor.clear.cgColor
             //self.gradient?.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 2 / 3, height: 320)
             self.gradient?.removeFromSuperlayer() 

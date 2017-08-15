@@ -15,13 +15,15 @@ class Comment: NSObject {
     private(set) var author:String
     private(set) var text:String
     private(set) var date:Date
+    var numLikes:Int
     
-    init(key:String, author:String, text:String, timestamp:Double)
+    init(key:String, author:String, text:String, timestamp:Double, numLikes:Int)
     {
         self.key     = key
         self.author  = author
         self.text    = text
         self.date    = Date(timeIntervalSince1970: timestamp/1000)
+        self.numLikes = numLikes
     }
     
     
@@ -44,12 +46,12 @@ class AnonymousComment: Comment {
         }
     }
     
-    init(key:String, author:String, text:String, timestamp:Double, adjective:String, animal:String, colorHexcode:String)
+    init(key:String, author:String, text:String, timestamp:Double, numLikes: Int, adjective:String, animal:String, colorHexcode:String)
     {
         self.adjective = adjective
         self.animal = animal
         self.colorHexcode = colorHexcode
-        super.init(key: key, author: author, text: text, timestamp: timestamp)
+        super.init(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes)
     }
 }
 

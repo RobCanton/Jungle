@@ -12,6 +12,7 @@ import ReSwift
 struct SettingsState {
     var allowFlaggedContent = false
     var uploadWarningShown = false
+    var commentsSortingMode = CommentsSortedBy.date
 }
 
 func SettingsReducer(_ action: Action, state: SettingsState?) -> SettingsState {
@@ -28,6 +29,10 @@ func SettingsReducer(_ action: Action, state: SettingsState?) -> SettingsState {
     case _ as ResetSettings:
         state = SettingsState()
         break
+    case _ as SetCommentsSortMode:
+        let a = action as! SetCommentsSortMode
+        state.commentsSortingMode = a.mode
+        break
     default:
         break
     }
@@ -43,3 +48,7 @@ struct BlockFlaggedContent: Action {}
 struct ResetSettings: Action {}
 
 struct UploadWarningShown: Action {}
+
+struct SetCommentsSortMode: Action {
+    let mode:CommentsSortedBy
+}

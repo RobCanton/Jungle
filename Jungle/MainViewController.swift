@@ -15,7 +15,7 @@ import GooglePlaces
 import ReSwift
 import JSQMessagesViewController
 import SwiftMessages
-
+import Firebase
 
 var globalMainInterfaceProtocol:MainInterfaceProtocol?
 
@@ -335,49 +335,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         mainStore.subscribe(self)
         
         
-        if !gps_service.isAuthorized() {
-            authorizeGPS()
-        } else {
-            registerForNotifications()
-        }
-    }
-    
-    func authorizeGPS() {
-        let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
-        messageView.configureBackgroundView(width: 250)
-        messageView.configureContent(title: "Enable location services", body: "Your location will be used to show you nearby posts and let you share posts with people near you.", iconImage: nil, iconText: "🌎", buttonImage: nil, buttonTitle: "Enable Location") { _ in
-            self.registerForNotifications()
-            self.messageWrapper.hide()
-        }
-        
-        let button = messageView.button!
-        button.backgroundColor = accentColor
-        button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
-        button.setTitleColor(UIColor.white, for: .normal)
-        button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
-        button.sizeToFit()
-        button.layer.cornerRadius = messageView.button!.bounds.height / 2
-        button.clipsToBounds = true
-        
-        let gradient = CAGradientLayer()
-        gradient.frame = button.bounds
-        gradient.colors = [
-            lightAccentColor.cgColor,
-            darkAccentColor.cgColor
-        ]
-        gradient.locations = [0.0, 1.0]
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 1, y: 0)
-        button.layer.insertSublayer(gradient, at: 0)
-        
-        messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
-        messageView.backgroundView.layer.cornerRadius = 12
-        var config = SwiftMessages.defaultConfig
-        config.presentationStyle = .center
-        config.duration = .forever
-        config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
-        config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
-        self.messageWrapper.show(config: config, view: messageView)
+        registerForNotifications()
     }
     
     var cameraPermissionsView:CameraPermissionsView?
@@ -421,16 +379,42 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
     
     func resendTapped() {
-        print("resendTapped")
-        UserService.sendVerificationEmail { success in
-            if success {
-                let alert = UIAlertController(title: "Email Sent", message: nil, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+
+//
+        guard let permissionsView = self.cameraPermissionsView else { return }
+        if !UserService.isEmailVerified {
+        
+            if permissionsView.refreshMode {
                 
-                self.present(alert, animated: true, completion: nil)
+                Auth.auth().currentUser?.reload() { error in
+                    if error == nil {
+                        
+                        mainStore.dispatch(FIRUserUpdated())
+                        if UserService.isEmailVerified {
+                            permissionsView.removeVerifyView()
+                            self.checkCameraPermissions()
+                        } else {
+                            permissionsView.setToResendMode()
+                        }
+                        
+                    }
+                }
+                
             } else {
-                return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to send email.")
+                UserService.sendVerificationEmail { success in
+                    if success {
+                        permissionsView.setToRefreshMode()
+                    } else {
+                        
+                    }
+                }
+
             }
+            
+            
+        } else {
+            self.cameraPermissionsView?.removeVerifyView()
+            self.checkCameraPermissions()
         }
     }
     
@@ -625,16 +609,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
                     button.layer.cornerRadius = messageView.button!.bounds.height / 2
                     button.clipsToBounds = true
                     
-                    let gradient = CAGradientLayer()
-                    gradient.frame = button.bounds
-                    gradient.colors = [
-                        lightAccentColor.cgColor,
-                        darkAccentColor.cgColor
-                    ]
-                    gradient.locations = [0.0, 1.0]
-                    gradient.startPoint = CGPoint(x: 0, y: 0)
-                    gradient.endPoint = CGPoint(x: 1, y: 0)
-                    button.layer.insertSublayer(gradient, at: 0)
+                    button.setGradient(colorA: lightAccentColor, colorB: accentColor)
                     
                     messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
                     messageView.backgroundView.layer.cornerRadius = 12

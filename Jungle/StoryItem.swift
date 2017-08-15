@@ -247,7 +247,6 @@ class StoryItem: NSObject, NSCoding {
         }
         
         self.comments.append(comment)
-        self.numComments = self.comments.count
     }
     
     func removeComment(key:String) {
@@ -263,7 +262,6 @@ class StoryItem: NSObject, NSCoding {
             comments.remove(at: removeIndex!)
         }
         
-        self.numComments = self.comments.count
     }
     
     func addLike(_ uid:String) {

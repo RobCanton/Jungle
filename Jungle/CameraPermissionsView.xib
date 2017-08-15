@@ -46,27 +46,27 @@
                                     <rect key="frame" x="0.0" y="37" width="327" height="181.5"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Verify Account" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aX1-ce-Bhc">
-                                            <rect key="frame" x="12" y="12" width="303" height="89.5"/>
+                                            <rect key="frame" x="12" y="12" width="303" height="74"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <color key="textColor" white="0.12" alpha="1" colorSpace="calibratedWhite"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="We've sent you an email to verify your account." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ToA-Uw-Kw1">
-                                            <rect key="frame" x="12" y="105.5" width="303" height="16"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="We've sent you an email to verify your account. Tap Refresh once you have been verified." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ToA-Uw-Kw1">
+                                            <rect key="frame" x="12" y="90" width="303" height="31.5"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" white="0.12" alpha="1" colorSpace="calibratedWhite"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nvT-YS-31I">
-                                            <rect key="frame" x="94.5" y="129.5" width="139" height="40"/>
-                                            <color key="backgroundColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <rect key="frame" x="81.5" y="129.5" width="165" height="40"/>
+                                            <color key="backgroundColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="40" id="Kfl-Go-bVL"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <inset key="contentEdgeInsets" minX="16" minY="8" maxX="16" maxY="8"/>
-                                            <state key="normal" title="Resend Email">
+                                            <state key="normal" title="Refresh Account">
                                                 <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
                                             <connections>
@@ -104,7 +104,7 @@
                                         </label>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hS7-7x-Mug">
                                             <rect key="frame" x="84.5" y="129.5" width="159" height="40"/>
-                                            <color key="backgroundColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="backgroundColor" red="0.0078431372549019607" green="0.85098039215686272" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="40" id="lA5-tX-CRi"/>
                                             </constraints>
@@ -149,7 +149,7 @@
                                         </label>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7TU-TR-zmJ">
                                             <rect key="frame" x="93" y="98" width="142" height="40"/>
-                                            <color key="backgroundColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="backgroundColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="40" id="CHM-Wt-uAI"/>
                                             </constraints>
@@ -194,7 +194,7 @@
                                         </label>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0hw-hF-kyg">
                                             <rect key="frame" x="76.5" y="96" width="175" height="40"/>
-                                            <color key="backgroundColor" red="0.0" green="0.73333333329999995" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="backgroundColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="40" id="IHo-D3-wsW"/>
                                             </constraints>
@@ -256,6 +256,7 @@
                 <outlet property="microphoneView" destination="yjv-ht-Fq2" id="wWB-eZ-6M4"/>
                 <outlet property="resendButton" destination="nvT-YS-31I" id="g3k-bt-LRU"/>
                 <outlet property="stackView" destination="pnA-if-1BX" id="FgG-WR-1Pt"/>
+                <outlet property="verifyLabel" destination="ToA-Uw-Kw1" id="34g-Lt-KIK"/>
                 <outlet property="verifyView" destination="1yj-hN-eBe" id="MBz-vw-Wog"/>
             </connections>
             <point key="canvasLocation" x="24.5" y="82"/>

@@ -23,6 +23,8 @@ protocol StoryCommentsProtocol: class {
 
 protocol CommentCellProtocol: class {
     func commentAuthorTapped(_ comment:Comment)
+    func commentLikeTapped(_ comment:Comment, _ liked:Bool)
+    func commentReplyTapped(_ comment:Comment, _ username:String)
 }
 
 protocol CommentsHeaderProtocol: class {
@@ -172,7 +174,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                     let text = dict["text"] as! String
                     let timestamp = dict["timestamp"] as! Double
                     
-                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes: 0)
                     item.addComment(comment)
                     self.comments = item.comments
                     self.updateComments()
@@ -193,7 +195,7 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
                 let author = dict["author"] as! String
                 let text = dict["text"] as! String
                 let timestamp = dict["timestamp"] as! Double
-                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes: 0)
                 item.addComment(comment)
                 self.comments = item.comments
                 self.updateComments()
@@ -410,8 +412,16 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
 }
 
 extension CommentsViewController: CommentCellProtocol {
+    func commentLikeTapped(_ comment: Comment, _ liked:Bool) {
+        
+    }
     
     func commentAuthorTapped(_ comment:Comment) {
+    
+    }
+    
+    func commentReplyTapped(_ comment:Comment, _ username:String) {
+        
     }
 }
 

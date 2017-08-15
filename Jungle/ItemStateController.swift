@@ -126,53 +126,40 @@ class ItemStateController {
     
     func observeComments() {
         guard let item = self.item else { return }
+        //self.delegate?.itemStateDidChange(comments: item.comments)
         
         commentsRef?.removeAllObservers()
         commentsRef = UserService.ref.child("uploads/comments/\(item.key)")
-        
-//        if let lastItem = item.comments.last {
-//            let lastKey = lastItem.key
-//            let ts = lastItem.date.timeIntervalSince1970 * 1000
-//            commentsRef?.queryOrdered(byChild: "timestamp").queryStarting(atValue: ts).observe(.childAdded, with: { snapshot in
-//                
-//                let dict = snapshot.value as! [String:Any]
-//                let key = snapshot.key
-//                if key != lastKey {
-//                    let author = dict["author"] as! String
-//                    let text = dict["text"] as! String
-//                    let timestamp = dict["timestamp"] as! Double
-//                    
-//                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-//                    item.addComment(comment)
-//                    print("itemStateDidChange -> delegate?\(self.delegate != nil)")
-//                    self.delegate?.itemStateDidChange(comments: item.comments)
-//                }
-//            })
-//        } else {
 
-            commentsRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).observe(.childAdded, with: { snapshot in
-                let dict = snapshot.value as! [String:Any]
-                let key = snapshot.key
-                let author = dict["author"] as! String
-                let text = dict["text"] as! String
-                let timestamp = dict["timestamp"] as! Double
-                
-                if let anon = dict["anon"] as? [String:Any] {
-                    let adjective = anon["adjective"] as! String
-                    let animal = anon["animal"] as! String
-                    let color = anon["color"] as! String
-                    let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, adjective: adjective, animal: animal, colorHexcode: color)
-                    item.addComment(comment)
-                    self.delegate?.itemStateDidChange(comments: item.comments)
-                } else {
-                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
-                    item.addComment(comment)
-                    self.delegate?.itemStateDidChange(comments: item.comments)
-                }
-                
-            })
-        //}
+        commentsRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).observe(.childAdded, with: { snapshot in
+            let dict = snapshot.value as! [String:Any]
+            let key = snapshot.key
+            let author = dict["author"] as! String
+            let text = dict["text"] as! String
+            let timestamp = dict["timestamp"] as! Double
+            var numLikes = 0
+            if let likes = dict["likes"] as? Int {
+                numLikes = likes
+            }
+            
+            if let anon = dict["anon"] as? [String:Any] {
+                let adjective = anon["adjective"] as! String
+                let animal = anon["animal"] as! String
+                let color = anon["color"] as! String
+                let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes, adjective: adjective, animal: animal, colorHexcode: color)
+                item.addComment(comment)
+                self.delegate?.itemStateDidChange(comments: item.comments)
+            } else {
+                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes)
+                item.addComment(comment)
+                self.delegate?.itemStateDidChange(comments: item.comments)
+            }
+            
+        })
+
     }
+    
+
     
     func retrievePreviousComments() {
         guard let item = self.item else { return }
@@ -192,19 +179,22 @@ class ItemStateController {
                     let timestamp = dict["timestamp"] as! Double
                     let text = dict["text"] as! String
                     
-
+                    var numLikes = 0
+                    if let likes = dict["likes"] as? Int {
+                        numLikes = likes
+                    }
                     
                     if timestamp != endTimestamp {
-                        let key = snapshot.key
+                        let key = commentSnap.key
                         
                         if let anon = dict["anon"] as? [String:Any] {
                             let adjective = anon["adjective"] as! String
                             let animal = anon["animal"] as! String
                             let color = anon["color"] as! String
-                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, adjective: adjective, animal: animal, colorHexcode: color)
+                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
                             commentBatch.append(comment)
                         } else {
-                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp)
+                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
                             commentBatch.append(comment)
                         }
                         

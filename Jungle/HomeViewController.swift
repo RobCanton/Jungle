@@ -196,33 +196,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     
     func update(_ section:HomeSection?) {
         refreshControl.endRefreshing()
-        
-//        if let section = section {
-//            switch section {
-//            case .following:
-//                followingHeader?.setupStories(state: state, section: 0)
-//                break
-//            case .popular:
-//                followingHeader?.setupStories(state: state, section: 0)
-//                return self.collectionView.reloadData()
-//                
-//            case .places:
-//                placesHeader?.setupStories(state: state, section: 1)
-//                break
-//            case .nearby:
-//                placesHeader?.setupStories(state: state, section: 1)
-//                return self.collectionView.reloadData()
-//                
-//            }
-//        } else {
-            return self.collectionView.reloadData()
-        //}
+        return self.collectionView.reloadData()
+
     }
     
     func handleRefresh() {
-        //uploadDataCache.removeAllObjects()
-        //refreshButton.isHidden = true
-        //refreshIndicator.startAnimating()
         state.fetchAll()
     }
     
@@ -230,9 +208,37 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         handleOptions()
     }
     
-    func enableLocationTapped() {
-        print("YUH")
+    func authorizeGPS() {
+        let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
+        messageView.configureBackgroundView(width: 250)
+        messageView.configureContent(title: "Enable location services", body: "Your location will be used to show you nearby posts and let you share posts with people near you.", iconImage: nil, iconText: "🌎", buttonImage: nil, buttonTitle: "Enable Location") { _ in
+            self.enableLocationTapped()
+            self.messageWrapper.hide()
+        }
         
+        let button = messageView.button!
+        button.backgroundColor = accentColor
+        button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
+        button.sizeToFit()
+        button.layer.cornerRadius = messageView.button!.bounds.height / 2
+        button.clipsToBounds = true
+        
+        button.setGradient(colorA: lightAccentColor, colorB: accentColor)
+        
+        messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
+        messageView.backgroundView.layer.cornerRadius = 12
+        var config = SwiftMessages.defaultConfig
+        config.presentationStyle = .center
+        config.duration = .forever
+        config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+        config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+        self.messageWrapper.show(config: config, view: messageView)
+    }
+    
+    func enableLocationTapped() {
+
         let status = gps_service.authorizationStatus()
         switch status {
         case .authorizedAlways:
@@ -257,7 +263,16 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         }
     }
     
+    
+    
     func handleOptions() {
+        
+        let status = gps_service.authorizationStatus()
+        if status != .authorizedAlways && status != .authorizedWhenInUse {
+            authorizeGPS()
+            return
+        }
+        
         let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
         let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 180)
         let messageView = BaseView(frame: f)

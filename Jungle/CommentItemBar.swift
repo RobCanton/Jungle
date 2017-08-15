@@ -152,17 +152,17 @@ class CommentItemBar: UIView {
         self.liked = _liked
         
         if self.liked  {
-            likeButton.setImage(UIImage(named: "liked"), for: .normal)
+            likeButton?.setImage(UIImage(named: "liked"), for: .normal)
             if animated {
-                likeButton.setImage(UIImage(named: "liked"), for: .normal)
-                self.likeButton.transform = CGAffineTransform(scaleX: 1.6, y: 1.6)
+                likeButton?.setImage(UIImage(named: "liked"), for: .normal)
+                self.likeButton?.transform = CGAffineTransform(scaleX: 1.6, y: 1.6)
                 
                 UIView.animate(withDuration: 0.5, delay: 0.0,
                                usingSpringWithDamping: 0.5,
                                initialSpringVelocity: 1.6,
                                options: .curveEaseOut,
                                animations: {
-                                self.likeButton.transform = CGAffineTransform.identity
+                                self.likeButton?.transform = CGAffineTransform.identity
                 },
                                completion: nil)
             }

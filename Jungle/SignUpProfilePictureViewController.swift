@@ -113,7 +113,7 @@ class SignUpProfilePictureViewController: UIViewController, UINavigationControll
                                         self.reset()
                                         return Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Error sending verification email.")
                                     }
-                                    self.performSegue(withIdentifier: "unwindToLoginScreen", sender: self)
+                                    self.performSegue(withIdentifier: "unwindToMenu", sender: self)
                                 }
                                 if error != nil {
                                     print("Error: \(error!.localizedDescription)")

@@ -619,23 +619,23 @@ class UploadService {
             return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their post.")
         }
         
-        let now = Date()
-        if let lastDate = lastCommentTime  {
-            let timeSinceLastComment = now.timeIntervalSince(lastDate)
-            print("Time since last comment: \(timeSinceLastComment)")
-            if timeSinceLastComment < 10.0 {
-                numConsequtiveComments += 1
-                
-                if numConsequtiveComments >= 3 {
-                    lastCommentTime = Date()
-                    completion(false)
-                    return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Whoa slow down there! 😉")
-                }
-                
-            } else {
-                numConsequtiveComments = 0
-            }
-        }
+//        let now = Date()
+//        if let lastDate = lastCommentTime  {
+//            let timeSinceLastComment = now.timeIntervalSince(lastDate)
+//            print("Time since last comment: \(timeSinceLastComment)")
+//            if timeSinceLastComment < 10.0 {
+//                numConsequtiveComments += 1
+//                
+//                if numConsequtiveComments >= 3 {
+//                    lastCommentTime = Date()
+//                    completion(false)
+//                    return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Whoa slow down there! 😉")
+//                }
+//                
+//            } else {
+//                numConsequtiveComments = 0
+//            }
+//        }
         
         let uid = mainStore.state.userState.uid
         if userState.anonMode, let aid = userState.anonID {
@@ -692,7 +692,7 @@ class UploadService {
     
     static func removeComment(postKey:String, commentKey:String, completion: @escaping ((_ success: Bool, _ commentKey:String)->())) {
         
-        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Deleting comment...")
+        Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Removing comment...")
         
         UserService.getHTTPSHeaders() { headers in
             if headers == nil {
@@ -704,10 +704,10 @@ class UploadService {
                     
                     switch response.result {
                     case .success:
-                        Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment deleted!")
+                        Alerts.showStatusSuccessAlert(inWrapper: sm, withMessage: "Comment removed!")
                         return completion(true, commentKey)
                     case .failure(let error):
-                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to delete comment.")
+                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to remove comment.")
                         return completion(false, commentKey)
                     }
                 }

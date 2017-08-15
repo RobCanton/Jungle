@@ -332,7 +332,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     }
     
     func itemStateDidChange(comments: [Comment]) {
-        self.headerView.setNumComments(comments.count)
+        //self.headerView.setNumComments(comments.count)
         guard let item = self.item else { return }
         self.commentsView.setTableComments(item:item, comments: comments, animated: true)
     }
