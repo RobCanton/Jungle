@@ -541,7 +541,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if screenMode == .Camera && cameraView.allPermissionsGranted {
+        if screenMode == .Camera {
             return true
         }
         return false

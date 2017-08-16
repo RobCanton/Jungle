@@ -36,7 +36,6 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     var flashMode:FlashMode = .Off
     var cameraMode:CameraMode = .Back
     
-    var allPermissionsGranted = false
     
     weak var delegate: CameraDelegate?
     

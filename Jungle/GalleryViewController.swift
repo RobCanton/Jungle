@@ -277,6 +277,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             return true
         }
     }
+    
 }
 
 extension GalleryViewController: PopupProtocol {
@@ -366,15 +367,32 @@ extension GalleryViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
-    func showPostMeta(_ indexPath:IndexPath?) {
+    
+    func showPostLikes() {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
         if let nav = self.navigationController {
             nav.delegate = nil
         }
         let controller = PostMetaTableViewController()
-        controller.itemStateController = cell.itemStateController
         controller.item = item
+        controller.sort = .likes
+        controller.itemStateController = cell.itemStateController
+        controller.commentBar.isHidden = true
+        controller.commentBar.isUserInteractionEnabled = false
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
+    func showPostComments(_ indexPath:IndexPath?) {
+        guard let cell = getCurrentCell() else { return }
+        guard let item = cell.storyItem else { return }
+        if let nav = self.navigationController {
+            nav.delegate = nil
+        }
+        let controller = PostMetaTableViewController()
+        controller.item = item
+        controller.sort = .date
+        controller.itemStateController = cell.itemStateController
         controller.initialIndex = indexPath
         controller.commentBar.isHidden = true
         controller.commentBar.isUserInteractionEnabled = false

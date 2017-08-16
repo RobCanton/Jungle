@@ -19,6 +19,7 @@ class AnonObject:NSObject, NSCoding
             return "\(adjective)\(animal)"
         }
     }
+    var aid:String?
     
     var color:UIColor {
         get {

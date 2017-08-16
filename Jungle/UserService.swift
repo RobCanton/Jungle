@@ -34,19 +34,17 @@ class UserService {
     
     static func logout() {
         if let token = InstanceID.instanceID().token() {
+            print("YO")
             let fcmRef = ref.child("users/FCMToken/\(token)")
-            fcmRef.removeValue() { error, ref in
-                
-                let uid = mainStore.state.userState.uid
-                ref.child("users/badges/\(uid)").removeAllObservers()
-                Listeners.stopListeningToAll()
-                mainStore.dispatch(ClearSocialState())
-                mainStore.dispatch(UserIsUnauthenticated())
-                
-                try! Auth.auth().signOut()
-                
-            }
+            fcmRef.removeValue()
         }
+        let uid = mainStore.state.userState.uid
+        ref.child("users/badges/\(uid)").removeAllObservers()
+        Listeners.stopListeningToAll()
+        mainStore.dispatch(ClearSocialState())
+        mainStore.dispatch(UserIsUnauthenticated())
+        
+        try! Auth.auth().signOut()
     }
     
     static var isEmailVerified:Bool {

@@ -12,6 +12,7 @@ import Segmentio
 import Firebase
 import ReSwift
 import SwiftMessages
+import Alamofire
 
 enum PostMetaTableMode:Int {
     case likes = 0
@@ -22,6 +23,7 @@ enum PostMetaTableMode:Int {
 enum CommentsSortedBy {
     case popularity
     case date
+    case likes
 }
 
 class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, ItemStateProtocol, StoreSubscriber {
@@ -88,13 +90,13 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         navigationItem.titleView = titleButton
         
         
+        
+        
         tableView = UITableView(frame:  CGRect(x: 0,y: navHeight, width: view.frame.width,height: view.frame.height - navHeight - 50.0))
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = UIColor(white:0.96, alpha: 1.0)
         tableView.keyboardDismissMode = .onDrag
-        
-        
         view.addSubview(tableView)
         
         let nib = UINib(nibName: "UserViewCell", bundle: nil)
@@ -116,6 +118,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         notificationsMutedButton.tintColor = UIColor.black
         
         itemStateDidChange(subscribed: itemStateController.isSubscribed)
+        
         
         headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 32))
         headerView.backgroundColor = UIColor.white
@@ -143,10 +146,16 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         commentBar.moreButton.removeFromSuperview()
         commentBar.delegate = self
         commentBar.textField.delegate = self
-        
+        commentBar.isHidden = false
+        commentBar.isUserInteractionEnabled = true
+
         observeTopComments()
         
+        fetchLikes()
+        
     }
+    
+
     
     func loadMoreComments() {
         print("Load more comments")
@@ -171,6 +180,11 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             self.tableView.tableHeaderView = UIView()
             self.tableView.tableFooterView = topComments.count < item.numComments ? loadMore : UIView()
 
+            break
+        case .likes:
+            self.titleButton.setTitle("Likes", for: .normal)
+            self.tableView.tableHeaderView = UIView()
+            self.tableView.tableFooterView = UIView()
             break
         }
 
@@ -235,12 +249,12 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     
     func showSortingOptions() {
         
-        let alert = UIAlertController(title: "Sort by...", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
-        let dateStr = sort == .date ?  "• Date" :  "Date"
-        let popularitryStr = sort == .popularity ?  "• Popularity" :  "Popularity"
-        
+        let dateStr = sort == .date ?  "• Newest Comments" :  "Newest Comments"
+        let popularitryStr = sort == .popularity ?  "• Top Comments" :  "Top Comments"
+        let likesStr = sort == .likes ?  "• Likes" :  "Likes"
         alert.addAction(UIAlertAction(title: dateStr, style: .default, handler: { _ in
             self.sort = .date
             self.sortComments()
@@ -254,6 +268,13 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             self.tableView.reloadData()
             self.scrollToTop(animated: false)
         }))
+        
+        alert.addAction(UIAlertAction(title: likesStr, style: .default, handler: { _ in
+            self.sort = .likes
+            self.sortComments()
+            self.tableView.reloadData()
+            self.scrollToTop(animated: false)
+        }))
 
         
         self.present(alert, animated: true, completion: nil)
@@ -262,6 +283,51 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     func togglePostNotifications() {
         let subscribed = itemStateController.isSubscribed
         UploadService.subscribeToPost(withKey: self.item.key, subscribe: !subscribed)
+    }
+    
+    var numAnonLikes = 0
+    var likers = [Any]()
+    
+    func fetchLikes() {
+        UserService.getHTTPSHeaders() { HTTPHeaders in
+            guard let headers = HTTPHeaders else { return }
+            print("\(API_ENDPOINT)/likes/\(self.item.key)")
+            Alamofire.request("\(API_ENDPOINT)/likes/\(self.item.key)", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any],
+                        let success = json["success"] as? Bool,
+                        let likes = json["likes"] as? [Any]  {
+                        
+                        var _likers = [Any]()
+                        
+                        for liker in likes {
+                            if let uid = liker as? String {
+                                _likers.append(uid)
+                            } else if let anon = liker as? [String:Any],
+                                let aid = anon["aid"] as? String,
+                                let adjective = anon["adjective"] as? String,
+                                let animal = anon["animal"] as? String,
+                                let color = anon["color"] as? String {
+                                let anonObject = AnonObject(adjective: adjective, animal: animal, colorHexcode: color)
+                                    anonObject.aid = aid
+                                _likers.append(anonObject)
+                            }
+                        }
+                        self.likers = _likers
+                        if self.sort == .likes {
+                           self.tableView.reloadData()
+                        }
+                        
+                        print("LIKES RESPONSE: \(likes)")
+                        return
+                        
+                    } else {
+                        print("ERROR!: \(response.error)")
+                        return
+                    }
+                }
+            }
+        }
     }
     
     func observeTopComments() {
@@ -481,10 +547,15 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if sort == .popularity {
+
+        switch sort {
+        case .date:
+            return comments.count
+        case .likes:
+            return likers.count
+        case .popularity:
             return topComments.count
         }
-        return comments.count
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -493,7 +564,12 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 
+        if sort == .likes {
+            return 60
+        }
+        
         var comment:Comment!
+        
         if sort == .popularity {
             comment = topComments[indexPath.row]
         } else {
@@ -509,7 +585,24 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
+        if sort == .likes {
+            let cell = tableView.dequeueReusableCell(withIdentifier: userCellIdentifier, for: indexPath) as! UserViewCell
+            if let uid = likers[indexPath.row] as? String {
+                cell.setupUser(uid: uid)
+                cell.selectionStyle = .default
+            } else if let anon = likers[indexPath.row] as? AnonObject {
+                cell.setupAnon(anon)
+                cell.selectionStyle = .default
+            }
+            
+            cell.delegate = self
+            let labelX = cell.usernameLabel.frame.origin.x
+            cell.separatorInset = UIEdgeInsetsMake(0, labelX, 0, 0)
+            return cell
+        }
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! DetailedCommentCell
+        cell.selectionStyle = .none
         var comment:Comment!
         if sort == .popularity {
             comment = topComments[indexPath.row]
@@ -531,6 +624,10 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        if sort == .likes {
+            return nil
+        }
         
         let comment = self.comments[indexPath.row]
         
@@ -563,15 +660,73 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if sort == .likes {
+             return false
+        }
         return true
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     }
     
+    
+    
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if let commentCell = cell as? DetailedCommentCell {
             commentCell.reset()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        if sort == .likes {
+            
+            if let uid = likers[indexPath.row] as? String {
+                let controller = UserProfileViewController()
+                controller.uid = uid
+                self.navigationController?.pushViewController(controller, animated: true)
+                
+            } else if let anon = likers[indexPath.row] as? AnonObject, let aid = anon.aid {
+                
+                
+                if let my_aid = userState.anonID, my_aid != aid {
+                    let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                    let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                    }
+                    actionSheet.addAction(cancelActionButton)
+                    
+                    
+                    let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
+                        UserService.blockAnonUser(aid: aid) { success in
+                            print("Success: \(success)")
+                        }
+                    }
+                    
+                    actionSheet.addAction(blockAction)
+                    
+                    let reportAction: UIAlertAction = UIAlertAction(title: "Report User", style: .destructive) { action -> Void in
+                        let reportSheet = UIAlertController(title: nil, message: "Why are you reporting this user?", preferredStyle: .actionSheet)
+                        reportSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                        reportSheet.addAction(UIAlertAction(title: "Harassment", style: .destructive, handler: { _ in
+                            UserService.reportAnonUser(aid: aid, type: .Harassment, completion: { success in })
+                        }))
+                        reportSheet.addAction(UIAlertAction(title: "Bot", style: .destructive, handler: { _ in
+                            UserService.reportAnonUser(aid: aid, type: .Bot, completion: { success in })
+                        }))
+                        self.present(reportSheet, animated: true, completion: nil)
+                    }
+                    
+                    actionSheet.addAction(reportAction)
+                    
+                    self.present(actionSheet, animated: true, completion: { _ in
+                        tableView.deselectRow(at: indexPath, animated: true)
+                    })
+                    
+                } else {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                }
+
+            }
         }
     }
     

@@ -609,15 +609,49 @@ class UploadService {
         if comment == "" { return }
         let ref = Database.database().reference()
         
-        if !UserService.isEmailVerified {
-            completion(false)
-            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        UserService.getHTTPSHeaders() { HTTPHeaders in
+            guard let headers = HTTPHeaders else { return }
+            
+            var params = [
+                "postKey": post.key,
+                "author": post.authorId,
+                "text": comment,
+                "isAnonPost": post.anon != nil
+                
+            ] as [String:Any]
+            
+            let anonMode = userState.anonMode
+            
+            if anonMode, let aid = userState.anonID {
+                params["aid"] = aid
+            }
+            
+            
+            Alamofire.request("\(API_ENDPOINT)/comment", method: .post, parameters: params, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool {
+                        
+                        print("COMMENT RESPONSE: \(json)")
+                        return completion(success)
+                        
+                    } else {
+                        print("ERROR!")
+                        return completion(false)
+                    }
+                }
+            }
         }
-        
-        if isBlocked(post.authorId) {
-            completion(false)
-            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their post.")
-        }
+//        
+//        
+//        if !UserService.isEmailVerified {
+//            completion(false)
+//            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+//        }
+//        
+//        if isBlocked(post.authorId) {
+//            completion(false)
+//            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their posts.")
+//        }
         
 //        let now = Date()
 //        if let lastDate = lastCommentTime  {
@@ -637,56 +671,56 @@ class UploadService {
 //            }
 //        }
         
-        let uid = mainStore.state.userState.uid
-        if userState.anonMode, let aid = userState.anonID {
-            
-            let uploadRef = ref.child("api/requests/anon_comment/\(uid)/\(post.key)").childByAutoId()
-            let path = "api/requests/anon_comment/\(uid)/\(post.key)/\(uploadRef.key)"
-            
-            let updateObject = [
-                "\(path)/aid" : aid,
-                "\(path)/text" : comment,
-                "\(path)/timestamp" : [".sv":"timestamp"],
-                "uploads/subscribers/\(post.key)/\(uid)": true
-                ] as [String:Any]
-            
-            
-            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
-                
-                if error != nil {
-                    print("ERROR: \(error)")
-                    completion(false)
-                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
-                } else {
-                    lastCommentTime = Date()
-                    completion(true)
-                }
-            })
-            
-        } else {
-            let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
-            let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
-            
-            let updateObject = [
-                "\(path)/author" : uid,
-                "\(path)/text" : comment,
-                "\(path)/timestamp" : [".sv":"timestamp"],
-                "uploads/subscribers/\(post.key)/\(uid)": true
-                ] as [String:Any]
-            
-            
-            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
-                
-                if error != nil {
-                    print("ERROR: \(error)")
-                    completion(false)
-                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
-                } else {
-                    lastCommentTime = Date()
-                    completion(true)
-                }
-            })
-        }
+//        let uid = mainStore.state.userState.uid
+//        if userState.anonMode, let aid = userState.anonID {
+//            
+//            let uploadRef = ref.child("api/requests/anon_comment/\(uid)/\(post.key)").childByAutoId()
+//            let path = "api/requests/anon_comment/\(uid)/\(post.key)/\(uploadRef.key)"
+//            
+//            let updateObject = [
+//                "\(path)/aid" : aid,
+//                "\(path)/text" : comment,
+//                "\(path)/timestamp" : [".sv":"timestamp"],
+//                "uploads/subscribers/\(post.key)/\(uid)": true
+//                ] as [String:Any]
+//            
+//            
+//            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+//                
+//                if error != nil {
+//                    print("ERROR: \(error)")
+//                    completion(false)
+//                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+//                } else {
+//                    lastCommentTime = Date()
+//                    completion(true)
+//                }
+//            })
+//            
+//        } else {
+//            let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
+//            let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
+//            
+//            let updateObject = [
+//                "\(path)/author" : uid,
+//                "\(path)/text" : comment,
+//                "\(path)/timestamp" : [".sv":"timestamp"],
+//                "uploads/subscribers/\(post.key)/\(uid)": true
+//                ] as [String:Any]
+//            
+//            
+//            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
+//                
+//                if error != nil {
+//                    print("ERROR: \(error)")
+//                    completion(false)
+//                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+//                } else {
+//                    lastCommentTime = Date()
+//                    completion(true)
+//                }
+//            })
+//        }
         
     }
     
@@ -739,32 +773,63 @@ class UploadService {
     
     static func addLike(post:StoryItem) {
         
-        if !UserService.isEmailVerified {
-            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
-        }
-        
-        if isBlocked(post.authorId) {
-            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to like their post.")
-        }
-        
-        let ref = Database.database().reference()
-        let uid = mainStore.state.userState.uid
-        
-        
-        if uid == post.authorId { return }
-        if post.likes[uid] != nil { return }
-        
-        let updateObject = [
-            "users/liked/\(uid)/\(post.key)": true,
-            "uploads/likes/\(post.key)/\(uid)/anon": userState.anonMode,
-            "uploads/likes/\(post.key)/\(uid)/t": [".sv":"timestamp"]
-            ] as [String : Any]
-        
-        ref.updateChildValues(updateObject) { error, ref in
-            if error != nil {
-                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
+        UserService.getHTTPSHeaders() { HTTPHeaders in
+            guard let headers = HTTPHeaders else { return }
+            
+            var params = [
+                "postKey": post.key,
+                "author": post.authorId,
+                "isAnonPost": post.anon != nil
+                ] as [String:Any]
+            
+            let anonMode = userState.anonMode
+            
+            if anonMode, let aid = userState.anonID {
+                params["aid"] = aid
+            }
+            
+            
+            Alamofire.request("\(API_ENDPOINT)/like", method: .post, parameters: params, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool {
+                        
+                        print("COMMENT RESPONSE: \(json)")
+                        return
+                        
+                    } else {
+                        print("ERROR!")
+                        return
+                    }
+                }
             }
         }
+        
+//        if !UserService.isEmailVerified {
+//            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+//        }
+//        
+//        if isBlocked(post.authorId) {
+//            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to like their post.")
+//        }
+//        
+//        let ref = Database.database().reference()
+//        let uid = mainStore.state.userState.uid
+//        
+//        
+//        if uid == post.authorId { return }
+//        if post.likes[uid] != nil { return }
+//        
+//        let updateObject = [
+//            "users/liked/\(uid)/\(post.key)": true,
+//            "uploads/likes/\(post.key)/\(uid)/anon": userState.anonMode,
+//            "uploads/likes/\(post.key)/\(uid)/t": [".sv":"timestamp"]
+//            ] as [String : Any]
+//        
+//        ref.updateChildValues(updateObject) { error, ref in
+//            if error != nil {
+//                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
+//            }
+//        }
     }
     
     static func removeLike(post:StoryItem) {

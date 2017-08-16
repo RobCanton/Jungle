@@ -198,8 +198,12 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         delegate?.dismissPopup(true)
     }
     
-    func showPostMeta(_ indexPath:IndexPath?) {
-        delegate?.showPostMeta(indexPath)
+    func showPostLikes() {
+        delegate?.showPostLikes()
+    }
+    
+    func showPostComments(_ indexPath:IndexPath?) {
+        delegate?.showPostComments(indexPath)
     }
     
     func liked(_ liked:Bool) {
@@ -747,7 +751,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         var view = UINib(nibName: "CommentsOverlayTableView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsOverlayTableView
-        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.25 )
+        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.27 )
         view.setup()
         return view
     }()

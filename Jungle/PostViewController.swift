@@ -270,8 +270,12 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         delegate?.dismissPopup(true)
     }
     
-    func showPostMeta(_ indexPath:IndexPath?) {
-        delegate?.showPostMeta(indexPath)
+    func showPostLikes() {
+        delegate?.showPostLikes()
+    }
+    
+    func showPostComments(_ indexPath:IndexPath?) {
+        delegate?.showPostComments(indexPath)
     }
     
     func liked(_ liked:Bool) {
@@ -514,7 +518,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
         var view = UINib(nibName: "CommentsOverlayTableView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! CommentsOverlayTableView
-        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.25 )
+        view.frame = CGRect(x: 0, y: height / 2, width: width, height: height * 0.27 )
         view.setup()
         return view
     }()
@@ -531,7 +535,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         view.frame = CGRect(x: 0, y: height - 50.0, width: width, height: 50.0)
         return view
     }()
-    
+
     public lazy var gradientView: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: self.bounds.height * 0.45, width: self.bounds.width, height: self.bounds.height * 0.55))
         let gradient = CAGradientLayer()

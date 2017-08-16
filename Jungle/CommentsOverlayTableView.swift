@@ -12,7 +12,7 @@ import UIKit
 protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
     func refreshPulled()
-    func showPostMeta(_ indexPath:IndexPath?)
+    func showPostComments(_ indexPath:IndexPath?)
     func showAnonOptions(_ aid:String)
 }
 
@@ -83,6 +83,8 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         tableView.tableHeaderView = UIView(frame:CGRect(x:0,y:0,width:tableView.frame.width, height: 8.0))
         tableView.showsVerticalScrollIndicator = false
         tableView.tableFooterView = UIView()
+        tableView.keyboardDismissMode = .onDrag
+        
         
 
         self.addSubview(tableView)
@@ -220,16 +222,9 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath) as! CommentCell
-//        if let username = cell.authorLabel.text  {
-//            let text = comments[indexPath.row].text
-//            let sheet = UIAlertController(title: username, message: text, preferredStyle: .actionSheet)
-//            sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-//            sheet.addAction(UIAlertAction(title: "Reply", style: .default, handler: nil))
-//            sheet.addAction(UIAlertAction(title: "Report", style: .destructive, handler: nil))
-//            globalMainInterfaceProtocol?.presentPopover(withController: sheet, animated: true)
-//        }
+
         let comment = comments[indexPath.row]
-        delegate?.showPostMeta(indexPath)
+        delegate?.showPostComments(indexPath)
         
         tableView.deselectRow(at: indexPath, animated: false)
     }

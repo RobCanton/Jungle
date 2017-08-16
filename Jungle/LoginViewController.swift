@@ -44,13 +44,14 @@ class FirstAuthViewController: FirstViewController {
         view.addSubview(activityView)
         
         activityView.startAnimating()
+        
     }
     
     var authFetched = false
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("viewWillAppear")
-        
+
         checkVersionSupport { supported in
                 print("checkVersionSupport: \(supported)")
                 if !supported {
@@ -173,6 +174,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         gradientView = UIView(frame: view.bounds)
         self.view.insertSubview(gradientView, at: 0)

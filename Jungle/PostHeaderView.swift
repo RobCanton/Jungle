@@ -14,7 +14,8 @@ protocol PostHeaderProtocol: class {
     func showAuthor()
     func showPlace(_ location:Location)
     func showRegion(_ region:City)
-    func showPostMeta(_ indexPath:IndexPath?)
+    func showPostLikes()
+    func showPostComments(_ indexPath:IndexPath?)
 
     func dismiss()
 }
@@ -154,11 +155,13 @@ class PostHeaderView: UIView {
         locationTitle.isUserInteractionEnabled = true
         locationTitle.addGestureRecognizer(placeTap)
         
-        let stackTap = UITapGestureRecognizer(target: self, action: #selector(self.showPostMeta))
-        stackView.isUserInteractionEnabled = true
-        stackView.addGestureRecognizer(stackTap)
-        
+        let likesTap = UITapGestureRecognizer(target: self, action: #selector(self.showPostLikes))
+        likesView.isUserInteractionEnabled = true
+        likesView.addGestureRecognizer(likesTap)
 
+        let commentsTap = UITapGestureRecognizer(target: self, action: #selector(self.showPostComments))
+        commentsView.isUserInteractionEnabled = true
+        commentsView.addGestureRecognizer(commentsTap)
     }
     
     func setNumLikes(_ numLikes:Int) {
@@ -216,8 +219,12 @@ class PostHeaderView: UIView {
     
     @IBOutlet weak var timeLabel2: UILabel!
     
-    func showPostMeta() {
-        delegate?.showPostMeta(nil)
+    func showPostLikes() {
+        delegate?.showPostLikes()
+    }
+    
+    func showPostComments() {
+        delegate?.showPostComments(nil)
     }
     
     

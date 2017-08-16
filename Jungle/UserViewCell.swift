@@ -41,13 +41,31 @@ class UserViewCell: UITableViewCell {
     }
     
     var user:User?
-    
+    var check:Int = 0
     var status:FollowingStatus?
+    
+    func setupAnon(_ anon:AnonObject) {
+        status = nil
+        check += 1
+        self.contentImageView.backgroundColor = anon.color
+        self.followButton.isHidden = true
+        self.usernameLabel.text = anon.anonName
+        self.usernameLabel.textColor = darkerColorForColor(color: anon.color)
+        UploadService.retrieveAnonImage(withCheck: check, withName: anon.animal) { check, image, fromFile in
+            if check == self.check {
+                self.contentImageView.image = image
+            }
+        }
+    }
     
     func setupUser(uid:String) {
         contentImageView.image = nil
+        self.usernameLabel.textColor = UIColor.black
+        self.followButton.isHidden = false
+        check += 1
         
-        UserService.getUser(uid, completion: { user in
+        UserService.getUser(withCheck: check, uid: uid) { check, user in
+            if check != self.check { return }
             if user != nil {
                 self.user = user!
                 self.contentImageView.loadImageAsync(user!.imageURL, completion: nil)
@@ -60,7 +78,7 @@ class UserViewCell: UITableViewCell {
                 }
                 
             }
-        })
+        }
         
 
         setUserStatus(status: checkFollowingStatus(uid: uid))
@@ -86,7 +104,6 @@ class UserViewCell: UITableViewCell {
     }
     
     func setUserStatus(status:FollowingStatus) {
-        if self.status == status { return }
         self.status = status
         
         switch status {
