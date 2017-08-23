@@ -41,6 +41,10 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
     @IBOutlet weak var emptyView: UIView!
     @IBOutlet weak var emptyButton: UIButton!
     @IBOutlet weak var emptyBackground: UIView!
+    @IBOutlet weak var empyStackView: UIStackView!
+    @IBOutlet weak var emptyActivityIndicator: UIActivityIndicatorView!
+    
+    @IBOutlet weak var popularPageControl: UIPageControl!
     
     var state:HomeStateController!
     
@@ -130,6 +134,8 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         emptyBackground.layer.cornerRadius = 8.0
         emptyBackground.clipsToBounds = true
         
+        popularPageControl.applyShadow(radius: 8.0, opacity: 1.0, height: 0.0, shouldRasterize: false)
+        
     }
     
     func resetStack() {
@@ -190,9 +196,16 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         popularCollectionView.dataSource = self
         popularCollectionView.reloadData()
         
+       
+        
         placesCollectionView.delegate = self
         placesCollectionView.dataSource = self
         placesCollectionView.reloadData()
+        
+        
+        removeStackView(view: popularHeader)
+        removeStackView(view: popularCollectionView)
+        removeStackView(view: placesHeader)
         
         if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
             removeStackView(view: followingHeader)
@@ -253,7 +266,7 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
                 return state.watchedFollowingStories.count
             }
         case popularCollectionView:
-            return state.popularPosts.count
+            return 0
         case placesCollectionView:
             return state.nearbyCityStories.count
         default:
@@ -343,12 +356,51 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         
     }
     
+    var pageControlVisible = false
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView === popularCollectionView {
+            if !pageControlVisible {
+                pageControlVisible = true
+                 UIView.animate(withDuration: 0.25, animations: {
+                    self.popularPageControl.alpha = 1.0
+                })
+            }
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        
+        if scrollView === popularCollectionView {
+            let currentPage = Int(ceil(popularCollectionView.contentOffset.x / popularCollectionView.frame.size.width))
+            popularPageControl.currentPage = currentPage
+            pageControlVisible = false
+            UIView.animate(withDuration: 0.25, delay: 0.75, options: .curveLinear, animations: {
+                self.popularPageControl.alpha = 0.0
+            }, completion: nil)
+        }
+    }
+    
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        scrollViewDidEndDecelerating(scrollView)
+    }
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return collectionView === followingCollectionView ? 2 : 1
     }
     
     func getStoryItemSize() -> CGSize {
         return CGSize(width: itemSideLength, height: itemSideLength * 1.25)
+    }
+    
+    func setEmptyViewLoading(_ isLoading:Bool) {
+        emptyBackground.isHidden = isLoading
+        
+        if isLoading {
+            emptyActivityIndicator.startAnimating()
+        } else {
+            emptyActivityIndicator.stopAnimating()
+        }
     }
         
 }

@@ -21,8 +21,11 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     var refreshControl: UIRefreshControl!
 
     //var containerDelegate:ContainerViewController?
-    let incomingBubble = JSQMessagesBubbleImageFactory().incomingMessagesBubbleImage(with: UIColor(white: 0.85, alpha: 1.0))
-    let outgoingBubble = JSQMessagesBubbleImageFactory().outgoingMessagesBubbleImage(with: accentColor)
+    let incomingBubble = JSQMessagesBubbleImageFactory(bubble: UIImage.jsq_bubbleCompactTailless(), capInsets: UIEdgeInsets.zero).incomingMessagesBubbleImage(with: UIColor(white: 0.90, alpha: 1.0))
+    let incomingBubbleWithTail = JSQMessagesBubbleImageFactory().incomingMessagesBubbleImage(with: UIColor(white: 0.90, alpha: 1.0))
+    let outgoingBubble = JSQMessagesBubbleImageFactory(bubble: UIImage.jsq_bubbleCompactTailless(), capInsets: UIEdgeInsets.zero).outgoingMessagesBubbleImage(with: accentColor)
+    let outgoingBubbleWithTail = JSQMessagesBubbleImageFactory().outgoingMessagesBubbleImage(with: accentColor)
+    
     var messages:[JSQMessage]!
     
     var settingUp = true
@@ -42,22 +45,28 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
     var activityIndicator:UIActivityIndicatorView!
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+        view.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         
         if !popUpMode {
-            self.addNavigationBarBackdrop()
+            self.addNavigationBarBlurBackdrop()
         }
         
         messages = [JSQMessage]()
         // Do any additional setup after loading the view, typically from a nib.
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
+        self.inputToolbar.contentView.rightBarButtonItem.setTitleColor(accentColor, for: .normal)
         self.inputToolbar.contentView.leftBarButtonItemWidth = 0
-        self.inputToolbar.contentView.textView.placeHolder = "New message as @robcanton"
+        self.inputToolbar.contentView.textView.placeHolder = "New message"
+        if let user = userState.user {
+            self.inputToolbar.contentView.textView.placeHolder = "New message as @\(user.username)"
+        }
+        
+        //collectionView?.collectionViewLayout.incomingAvatarViewSize = CGSize(width: 32, height: 32)
         collectionView?.collectionViewLayout.outgoingAvatarViewSize = .zero
         
         collectionView?.collectionViewLayout.springinessEnabled = true
-        collectionView?.backgroundColor = UIColor(white: 0.94, alpha: 1.0)
+        collectionView?.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         
         activityIndicator = UIActivityIndicatorView(frame: CGRect(x:0,y:0,width:50,height:50))
         activityIndicator.activityIndicatorViewStyle = .gray
@@ -266,11 +275,49 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
         let data = messages[indexPath.row]
         switch(data.senderId) {
         case self.senderId:
-            return self.outgoingBubble
+            if indexPath.row < messages.count - 1 {
+                
+                
+                let nextMessage = messages[indexPath.row + 1]
+                
+                let gap = nextMessage.date.timeIntervalSince(data.date)
+                if gap > 1800 {
+                    return self.outgoingBubbleWithTail
+                    
+                }
+                
+                if nextMessage.senderId == self.senderId {
+                    return self.outgoingBubble
+                }
+                
+                
+            }
+            return self.outgoingBubbleWithTail
         default:
-            return self.incomingBubble
+            
+            if indexPath.row < messages.count - 1 {
+                
+                
+                let nextMessage = messages[indexPath.row + 1]
+                
+                let gap = nextMessage.date.timeIntervalSince(data.date)
+                if gap > 1800 {
+                    return self.incomingBubbleWithTail
+                    
+                }
+                
+                if nextMessage.senderId != self.senderId {
+                    return self.incomingBubble
+                }
+                
+                
+            }
+            
+            return self.incomingBubbleWithTail
         }
     }
+    
+
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, didTapMessageBubbleAt indexPath: IndexPath!) {
         let data = messages[indexPath.row]
@@ -392,15 +439,20 @@ class ChatViewController: JSQMessagesViewController, GetUserProtocol {
             
             if prevItem.senderId != currentItem.senderId {
                 return 1.0
+            } else {
+                return 0.0
             }
         }  else {
             return kJSQMessagesCollectionViewCellLabelHeightDefault
         }
         
-        return 0.0
+        
     }
     
-    
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForCellBottomLabelAt indexPath: IndexPath!) -> CGFloat {
+        return 0.0
+    }
+
         
     var loadingNextBatch = false
     var downloadRef:DatabaseReference?

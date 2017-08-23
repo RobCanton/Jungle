@@ -86,6 +86,12 @@ class CommentItemBar: UIView {
     func switchAnonMode() {
         mainStore.dispatch(ToggleAnonMode())
         showCurrentAnonMode()
+        if userState.anonMode {
+            Alerts.showStatusAnonAlert(inWrapper: nil)
+        } else {
+            Alerts.showStatusPublicAlert(inWrapper: nil)
+        }
+        
     }
     
     func showCurrentAnonMode() {
@@ -117,6 +123,7 @@ class CommentItemBar: UIView {
     func darkMode() {
         isDarkMode = true
         activityIndicator.tintColor = UIColor.gray
+        activityIndicator.color = UIColor.gray
         sendButton.tintColor = UIColor.black
         sendButton.setTitleColor(UIColor.black, for: .normal)
         sendButton.alpha = 0.5

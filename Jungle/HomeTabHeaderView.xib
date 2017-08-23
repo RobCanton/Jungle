@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="HomeTabHeaderView" customModule="Jungle" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="497" height="44"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AIC-fx-vQw">
+                    <rect key="frame" x="453" y="0.0" width="44" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="AIC-fx-vQw" secondAttribute="height" multiplier="1:1" id="QlL-NI-QFu"/>
+                    </constraints>
+                    <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <state key="normal" image="sorting">
+                        <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                    </state>
+                </button>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tdW-J1-i3i">
+                    <rect key="frame" x="0.0" y="43" width="497" height="0.5"/>
+                    <color key="backgroundColor" white="0.94846153850000003" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="0.5" id="Uh0-2x-QPI"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IkN-LQ-ItT">
+                    <rect key="frame" x="158.5" y="0.0" width="180" height="44"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HzT-Ks-my1">
+                            <rect key="frame" x="0.0" y="0.0" width="90" height="44"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="90" id="CVy-5s-eVN"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="13"/>
+                            <state key="normal" title="HOME">
+                                <color key="titleColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <state key="disabled">
+                                <color key="titleColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                            </state>
+                            <state key="selected">
+                                <color key="titleColor" white="0.85242788465384622" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <state key="highlighted">
+                                <color key="titleColor" white="0.85242788469999997" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="homeButtonTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="e7e-wq-O1s"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dRQ-4A-jnw">
+                            <rect key="frame" x="90" y="0.0" width="90" height="44"/>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="13"/>
+                            <state key="normal" title="POPULAR">
+                                <color key="titleColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <state key="disabled">
+                                <color key="titleColor" red="0.0078431372550000003" green="0.85098039219999999" blue="0.33725490200000002" alpha="1" colorSpace="calibratedRGB"/>
+                            </state>
+                            <state key="selected">
+                                <color key="titleColor" white="0.85242788469999997" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <state key="highlighted">
+                                <color key="titleColor" white="0.85242788469999997" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="popularButtonTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="fif-dK-0KC"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="dRQ-4A-jnw" secondAttribute="trailing" id="FpX-wc-Li8"/>
+                        <constraint firstItem="dRQ-4A-jnw" firstAttribute="top" secondItem="IkN-LQ-ItT" secondAttribute="top" id="VRT-BH-pd1"/>
+                        <constraint firstAttribute="bottom" secondItem="dRQ-4A-jnw" secondAttribute="bottom" id="WtK-eo-zOC"/>
+                        <constraint firstAttribute="bottom" secondItem="HzT-Ks-my1" secondAttribute="bottom" id="hWO-jm-tOG"/>
+                        <constraint firstItem="HzT-Ks-my1" firstAttribute="top" secondItem="IkN-LQ-ItT" secondAttribute="top" id="mUx-9M-b3N"/>
+                        <constraint firstItem="HzT-Ks-my1" firstAttribute="leading" secondItem="IkN-LQ-ItT" secondAttribute="leading" id="nZy-fD-8zG"/>
+                        <constraint firstItem="HzT-Ks-my1" firstAttribute="width" secondItem="dRQ-4A-jnw" secondAttribute="width" id="saz-Mo-hhX"/>
+                        <constraint firstItem="dRQ-4A-jnw" firstAttribute="leading" secondItem="HzT-Ks-my1" secondAttribute="trailing" id="yCN-XY-q99"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="tdW-J1-i3i" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="0Hq-cb-5eO"/>
+                <constraint firstAttribute="bottom" secondItem="IkN-LQ-ItT" secondAttribute="bottom" id="FO5-9P-wl6"/>
+                <constraint firstItem="IkN-LQ-ItT" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="KVB-id-ABM"/>
+                <constraint firstAttribute="bottom" secondItem="tdW-J1-i3i" secondAttribute="bottom" id="N96-02-CLK"/>
+                <constraint firstItem="AIC-fx-vQw" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="TFw-HK-3MJ"/>
+                <constraint firstAttribute="trailing" secondItem="tdW-J1-i3i" secondAttribute="trailing" id="WHU-LG-UUH"/>
+                <constraint firstItem="IkN-LQ-ItT" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="bjR-Pd-7M9"/>
+                <constraint firstAttribute="bottom" secondItem="AIC-fx-vQw" secondAttribute="bottom" id="ogN-OW-3U1"/>
+                <constraint firstAttribute="trailing" secondItem="AIC-fx-vQw" secondAttribute="trailing" id="sDI-B6-Clr"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="controlView" destination="IkN-LQ-ItT" id="o17-gf-S3K"/>
+                <outlet property="homeButton" destination="HzT-Ks-my1" id="fUA-Pu-FuB"/>
+                <outlet property="popularButton" destination="dRQ-4A-jnw" id="rbe-NI-gxo"/>
+            </connections>
+            <point key="canvasLocation" x="91.5" y="-232"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="sorting" width="25" height="25"/>
+    </resources>
+</document>

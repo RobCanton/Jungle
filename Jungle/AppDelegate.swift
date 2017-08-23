@@ -27,6 +27,7 @@ let infoColor = UIColor(red: 29/255, green: 202/255, blue: 1.0, alpha: 1.0)
 let GMSAPIKEY = "AIzaSyAdmbnsaZbK-8Q9EvuKh2pAcQ5p7Q6OKNI"
 
 let nameLength = 16
+let maxCommentLength = 360
 
 let API_ENDPOINT = "https://us-central1-jungleiosapp.cloudfunctions.net/app"
 let mainStore = Store<AppState>(
@@ -48,6 +49,7 @@ var settingsState:SettingsState {
 
 
 var remoteConfig: RemoteConfig?
+var openedNotificationType:NotificationType?
 
 
 @UIApplicationMain
@@ -169,10 +171,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        
+
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+
     }
     
     

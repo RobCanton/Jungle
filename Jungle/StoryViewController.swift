@@ -14,7 +14,7 @@ import NVActivityIndicatorView
 
 
 public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeaderProtocol, UIScrollViewDelegate, ItemStateProtocol,
-    CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol {
+    CommentItemBarProtocol, PostCaptionProtocol, CommentsTableProtocol, UIGestureRecognizerDelegate {
 
     private(set) var viewIndex = 0
     var returnIndex:Int?
@@ -46,6 +46,8 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
        
     }
     
+    var gestureView:UIView!
+    
     deinit { print("Deinit >> StoryViewController") }
     
     override init(frame: CGRect) {
@@ -54,19 +56,25 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         contentView.backgroundColor = UIColor(red: 0, green: 0, blue: 1.0, alpha: 0.0)
         contentView.addSubview(content)
         contentView.addSubview(videoContent)
+        
+        gestureView = UIView(frame: contentView.bounds)
+        gestureView.isUserInteractionEnabled = true
+        contentView.addSubview(gestureView)
+        
         contentView.addSubview(gradientView)
         contentView.addSubview(topGradient)
         contentView.addSubview(prevView)
+        
+        /* Comments view */
+        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
+        contentView.addSubview(commentsView)
+        
         
         /* Info view */
         infoView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - infoView.frame.height,width: self.frame.width,height: 0)
         contentView.addSubview(infoView)
         
         contentView.addSubview(commentBar)
-        
-        /* Comments view */
-        commentsView.frame = CGRect(x: 0,y: commentBar.frame.origin.y - commentsView.frame.height,width: commentsView.frame.width,height: commentsView.frame.height)
-        contentView.addSubview(commentsView)
         
         videoContent.isHidden = true
         
@@ -82,6 +90,78 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         /* Item State Controller */
         itemStateController = ItemStateController()
         
+        longPress = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
+        longPress.minimumPressDuration = 0.5
+        longPress.delaysTouchesBegan = true
+        longPress.delegate = self
+        self.addGestureRecognizer(longPress)
+        
+        tap = UITapGestureRecognizer(target: self, action: #selector(tapped))
+        tap.delegate = self
+        self.addGestureRecognizer(tap)
+        
+    }
+    
+    
+    
+    var longPress:UILongPressGestureRecognizer!
+    var tap:UITapGestureRecognizer!
+    
+    func tapped(gesture:UITapGestureRecognizer) {
+        if keyboardUp {
+            commentBar.textField.resignFirstResponder()
+            return
+        }
+        let l = gesture.location(ofTouch: 0, in: self)
+        if l.x > self.frame.width * 0.25 {
+            nextItem()
+        } else {
+            prevItem()
+            prevView.alpha = 1.0
+            UIView.animate(withDuration: 0.25, animations: {
+                self.prevView.alpha = 0.0
+            })
+        }
+        
+    }
+    
+    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let point = gestureRecognizer.location(ofTouch: 0, in: self)
+        let authorBottomY = headerView.frame.origin.y + headerView.frame.height
+        let commentsTableHeight = commentsView.getTableHeight()
+        let commentsTopY = infoView.frame.origin.y - commentsTableHeight
+        return point.y < commentsTopY && point.y > authorBottomY
+        
+    }
+    
+    
+    func longPressed(_ gesture:UILongPressGestureRecognizer) {
+        if keyboardUp { return }
+        
+        switch gesture.state {
+        case .began:
+            looping = true
+            UIView.animate(withDuration: 0.35, animations: {
+                self.headerView.alpha = 0.0
+                self.commentsView.alpha = 0.0
+                self.infoView.alpha = 0.0
+                self.commentBar.alpha = 0.0
+                self.progressBar?.alpha = 0.0
+            })
+            break
+        case .ended:
+            looping = false
+            UIView.animate(withDuration: 0.35, animations: {
+                self.headerView.alpha = 1.0
+                self.commentsView.alpha = 1.0
+                self.infoView.alpha = 1.0
+                self.commentBar.alpha = 1.0
+                self.progressBar?.alpha = 1.0
+            })
+            break
+        default:
+            break
+        }
     }
     
     func saveIndex() {
@@ -174,11 +254,15 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     func showAuthor() {
         guard let item = self.item else { return }
-        delegate?.showUser(item.authorId)
+        if let anon = item.anon {
+            delegate?.showAnonOptions(item.authorId, anon.anonName)
+        } else {
+            delegate?.showUser(item.authorId)
+        }
     }
     
-    func showAnonOptions(_ aid: String) {
-        delegate?.showAnonOptions(aid)
+    func showAnonOptions(_ aid:String, _ anonName:String) {
+        delegate?.showAnonOptions(aid, anonName)
     }
     
     func showPlace(_ location: Location) {
@@ -233,7 +317,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func itemsLoaded() {
         
         let screenWidth: CGFloat = (UIScreen.main.bounds.size.width)
-        let margin:CGFloat = 12.0
+        let margin:CGFloat = 8.0
         
         progressBar?.removeFromSuperview()
         progressBar = StoryProgressIndicator(frame: CGRect(x: margin,y: margin, width: screenWidth - margin * 2,height: 1.5))
@@ -311,7 +395,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        commentsView.setTableComments(item:item, comments: item.comments, animated: false)
+        commentsView.setTableComments(item:item, comments: item.comments, animated: false, delayViewMore: true)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -334,7 +418,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     func itemStateDidChange(comments: [Comment]) {
         //self.headerView.setNumComments(comments.count)
         guard let item = self.item else { return }
-        self.commentsView.setTableComments(item:item, comments: comments, animated: true)
+        self.commentsView.setTableComments(item:item, comments: comments, animated: true, delayViewMore: false)
     }
     
     func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {
@@ -465,11 +549,17 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         progressBar?.removeFromSuperview()
         commentBar.reset()
         delegate = nil
-        item = nil
+        //item = nil
         returnIndex = nil
         isCurrentItem = false
-        itemStateController.removeAllObservers()
+        //itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    func cleanItem() {
+        print("CLEAN ITEM")
+        item = nil
+        itemStateController.removeAllObservers()
     }
     
     func reset() {
@@ -551,27 +641,6 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
             videoContent.isHidden = true
         } else {
             pause()
-        }
-    }
-
-    
-    func tapped(gesture:UITapGestureRecognizer) {
-        if keyboardUp {
-            commentBar.textField.resignFirstResponder()
-            return
-        }
-        
-        guard let _ = item else { return }
-        let tappedPoint = gesture.location(in: self)
-        let width = self.bounds.width
-        if tappedPoint.x < width * 0.25 {
-            prevItem()
-            prevView.alpha = 1.0
-            UIView.animate(withDuration: 0.3, animations: {
-                self.prevView.alpha = 0.0
-            })
-        } else {
-            nextItem()
         }
     }
     
@@ -726,7 +795,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
     
     
     public lazy var prevView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width * 0.45, height: self.bounds.height))
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width * 0.333, height: self.bounds.height))
         let gradient = CAGradientLayer()
         gradient.frame = view.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0)
@@ -734,7 +803,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         let dark = UIColor(white: 0.0, alpha: 0.5)
         gradient.colors = [dark.cgColor, UIColor.clear.cgColor]
         view.layer.insertSublayer(gradient, at: 0)
-        view.isUserInteractionEnabled = false
+        view.isUserInteractionEnabled = true
         view.alpha = 0.0
         return view
     }()
@@ -743,7 +812,7 @@ public class StoryViewController: UICollectionViewCell, StoryProtocol, PostHeade
         var view = UINib(nibName: "PostHeaderView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostHeaderView
         let width: CGFloat = (UIScreen.main.bounds.size.width)
         let height: CGFloat = (UIScreen.main.bounds.size.height)
-        view.frame = CGRect(x: 0, y: 16, width: width, height: view.frame.height)
+        view.frame = CGRect(x: 0, y: 12, width: width, height: view.frame.height)
         return view
     }()
     
@@ -818,7 +887,7 @@ extension StoryViewController: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
+        return newLength <= maxCommentLength // Bool
     }
 }
 

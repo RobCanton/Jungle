@@ -52,7 +52,7 @@ class LocationService: NSObject {
         radiusRef.setValue(radius) { error, ref in
             
         }
-        requestNearbyLocations()
+        
     }
     
     func requestNearbyLocations() {
@@ -60,6 +60,7 @@ class LocationService: NSObject {
         guard let lastLocation = gps_service?.getLastLocation() else { return }
         let uid = mainStore.state.userState.uid
         let apiRef = ref.child("users/location/coordinates/\(uid)")
+        print("requestNearbyLocations!")
         apiRef.setValue([
             "lat": lastLocation.coordinate.latitude,
             "lon": lastLocation.coordinate.longitude,
@@ -190,15 +191,12 @@ class LocationService: NSObject {
         let storyRef = Database.database().reference().child("cities/posts/\(key)")
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         let timestamp = yesterday.timeIntervalSince1970 * 1000
-        print("CITY REF")
-        print("cities/posts/\(key)")
         storyRef.queryOrderedByValue().queryStarting(atValue: timestamp).observeSingleEvent(of: .value, with: { snapshot in
             var story:CityStory?
             var postKeys = [(String,Double)]()
             
             for child in snapshot.children {
               
-                print("YEA YEA")
                 let childSnap = child as! DataSnapshot
                 print(childSnap)
                 if let timestamp = childSnap.value as? Double {

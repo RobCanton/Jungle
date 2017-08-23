@@ -58,6 +58,8 @@
 		B0550DA91E91EE25007DAAAC /* UsersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550DA61E91EE20007DAAAC /* UsersListViewController.swift */; };
 		B0550DAA1E91EE25007DAAAC /* UserViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550DA71E91EE21007DAAAC /* UserViewCell.swift */; };
 		B0550DAB1E91EE25007DAAAC /* UserViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0550DA81E91EE21007DAAAC /* UserViewCell.xib */; };
+		B05E67A51F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B05E67A41F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib */; };
+		B05E67A71F48AC81002D2DAC /* LoadMoreCommentsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05E67A61F48AC81002D2DAC /* LoadMoreCommentsOverlayView.swift */; };
 		B05F13F71EF46D8F008C5B34 /* CollectionDividerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B05F13F61EF46D8F008C5B34 /* CollectionDividerView.xib */; };
 		B05F13F91EF46DAC008C5B34 /* CollectionDividerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05F13F81EF46DAC008C5B34 /* CollectionDividerView.swift */; };
 		B06BFD731ED2D4360052EC08 /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06BFD721ED2D4360052EC08 /* MessageService.swift */; };
@@ -126,6 +128,9 @@
 		B0B0E3BE1EC24EC7005DC0C1 /* HomeStateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */; };
 		B0C648531F1474F900D5EB2E /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C648521F1474F800D5EB2E /* APIService.swift */; };
 		B0C648551F14AE1A00D5EB2E /* AnonObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C648541F14AE1A00D5EB2E /* AnonObject.swift */; };
+		B0C7077A1F4DF3D900B81644 /* HomieViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C707791F4DF3D900B81644 /* HomieViewController.swift */; };
+		B0C7077C1F4E061B00B81644 /* HomeTabHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C7077B1F4E061B00B81644 /* HomeTabHeaderView.xib */; };
+		B0C7077E1F4E07AC00B81644 /* HomeTabHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C7077D1F4E07AC00B81644 /* HomeTabHeaderView.swift */; };
 		B0C867831EF26D0C00BE7F14 /* GuardView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0C867821EF26D0C00BE7F14 /* GuardView.xib */; };
 		B0C86D311E7FC6B40067E004 /* Listeners.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D301E7FC6B40067E004 /* Listeners.swift */; };
 		B0C86D331E805DC50067E004 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C86D321E805DC50067E004 /* ChatViewController.swift */; };
@@ -178,6 +183,9 @@
 		B0F2A18D1EE8A39E004857CA /* PlaceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A18C1EE8A39E004857CA /* PlaceViewController.swift */; };
 		B0F2A1901EE8A90F004857CA /* PlaceHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F2A18E1EE8A90F004857CA /* PlaceHeaderView.swift */; };
 		B0F2A1911EE8A90F004857CA /* PlaceHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F2A18F1EE8A90F004857CA /* PlaceHeaderView.xib */; };
+		B0F5F74F1F44CAD400CE7496 /* EmptyMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F5F74E1F44CAD400CE7496 /* EmptyMessagesView.swift */; };
+		B0F5F7511F44CAE700CE7496 /* EmptyMessagesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F5F7501F44CAE700CE7496 /* EmptyMessagesView.xib */; };
+		B0F5F7531F450EF400CE7496 /* MyProfileHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0F5F7521F450EF400CE7496 /* MyProfileHeaderView.xib */; };
 		B0F8945D1E7B216500E490C4 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8945C1E7B216500E490C4 /* UserService.swift */; };
 		B0F8946A1E7B7E1500E490C4 /* CommentsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F894691E7B7E1400E490C4 /* CommentsViewController.swift */; };
 		B0F8946D1E7B9D5A00E490C4 /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F8946B1E7B9D5A00E490C4 /* CommentCell.swift */; };
@@ -258,6 +266,8 @@
 		B0550DA61E91EE20007DAAAC /* UsersListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UsersListViewController.swift; sourceTree = "<group>"; };
 		B0550DA71E91EE21007DAAAC /* UserViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewCell.swift; sourceTree = "<group>"; };
 		B0550DA81E91EE21007DAAAC /* UserViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserViewCell.xib; sourceTree = "<group>"; };
+		B05E67A41F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadMoreCommentsOverlayView.xib; sourceTree = "<group>"; };
+		B05E67A61F48AC81002D2DAC /* LoadMoreCommentsOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadMoreCommentsOverlayView.swift; sourceTree = "<group>"; };
 		B05F13F61EF46D8F008C5B34 /* CollectionDividerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CollectionDividerView.xib; sourceTree = "<group>"; };
 		B05F13F81EF46DAC008C5B34 /* CollectionDividerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionDividerView.swift; sourceTree = "<group>"; };
 		B06BFD721ED2D4360052EC08 /* MessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageService.swift; sourceTree = "<group>"; };
@@ -328,6 +338,9 @@
 		B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeStateController.swift; sourceTree = "<group>"; };
 		B0C648521F1474F800D5EB2E /* APIService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		B0C648541F14AE1A00D5EB2E /* AnonObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnonObject.swift; sourceTree = "<group>"; };
+		B0C707791F4DF3D900B81644 /* HomieViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomieViewController.swift; sourceTree = "<group>"; };
+		B0C7077B1F4E061B00B81644 /* HomeTabHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HomeTabHeaderView.xib; sourceTree = "<group>"; };
+		B0C7077D1F4E07AC00B81644 /* HomeTabHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeTabHeaderView.swift; sourceTree = "<group>"; };
 		B0C867821EF26D0C00BE7F14 /* GuardView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GuardView.xib; sourceTree = "<group>"; };
 		B0C86D301E7FC6B40067E004 /* Listeners.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Listeners.swift; sourceTree = "<group>"; };
 		B0C86D321E805DC50067E004 /* ChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
@@ -380,6 +393,9 @@
 		B0F2A18C1EE8A39E004857CA /* PlaceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaceViewController.swift; sourceTree = "<group>"; };
 		B0F2A18E1EE8A90F004857CA /* PlaceHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaceHeaderView.swift; sourceTree = "<group>"; };
 		B0F2A18F1EE8A90F004857CA /* PlaceHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlaceHeaderView.xib; sourceTree = "<group>"; };
+		B0F5F74E1F44CAD400CE7496 /* EmptyMessagesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmptyMessagesView.swift; sourceTree = "<group>"; };
+		B0F5F7501F44CAE700CE7496 /* EmptyMessagesView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EmptyMessagesView.xib; sourceTree = "<group>"; };
+		B0F5F7521F450EF400CE7496 /* MyProfileHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MyProfileHeaderView.xib; sourceTree = "<group>"; };
 		B0F8945C1E7B216500E490C4 /* UserService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		B0F894691E7B7E1400E490C4 /* CommentsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentsViewController.swift; sourceTree = "<group>"; };
 		B0F8946B1E7B9D5A00E490C4 /* CommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
@@ -563,6 +579,8 @@
 				B0C86D3A1E807B9C0067E004 /* ConversationViewCell.xib */,
 				B0C86D3D1E80831F0067E004 /* ConversationCell.swift */,
 				B0C86D3E1E80831F0067E004 /* ConversationCell.xib */,
+				B0F5F74E1F44CAD400CE7496 /* EmptyMessagesView.swift */,
+				B0F5F7501F44CAE700CE7496 /* EmptyMessagesView.xib */,
 			);
 			name = Messages;
 			sourceTree = "<group>";
@@ -570,8 +588,11 @@
 		B0C86D431E80B7820067E004 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				B0C707791F4DF3D900B81644 /* HomieViewController.swift */,
 				B093FFB01E790D5E00011B43 /* HomeViewController.swift */,
 				B0B0E3BD1EC24EC7005DC0C1 /* HomeStateController.swift */,
+				B0C7077D1F4E07AC00B81644 /* HomeTabHeaderView.swift */,
+				B0C7077B1F4E061B00B81644 /* HomeTabHeaderView.xib */,
 				B0C86D481E80B9440067E004 /* UserStoryCollectionViewCell.swift */,
 				B0C86D491E80B9440067E004 /* UserStoryCollectionViewCell.xib */,
 				B03F39241F3413CB00E2FBD7 /* KingCollectionViewCell.swift */,
@@ -652,6 +673,8 @@
 				B0DF82431EDFC7EA00461DD8 /* StoryInfoView.xib */,
 				B0DF823C1EDFB0CB00461DD8 /* CommentsOverlayTableView.swift */,
 				B0DF823A1EDFB0BA00461DD8 /* CommentsOverlayTableView.xib */,
+				B05E67A61F48AC81002D2DAC /* LoadMoreCommentsOverlayView.swift */,
+				B05E67A41F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib */,
 				B0AB4E2D1EFC6C09008E875A /* PostMetaTableViewController.swift */,
 				B08B16B61F42919600300145 /* CommentsSortingPickerView.swift */,
 				B08B16B41F428F3F00300145 /* CommentsSortingPickerView.xib */,
@@ -733,6 +756,7 @@
 				B0F894951E7C528800E490C4 /* UserProfileViewController.swift */,
 				B0F894971E7C717F00E490C4 /* ProfileHeaderView.swift */,
 				B0F894981E7C717F00E490C4 /* ProfileHeaderView.xib */,
+				B0F5F7521F450EF400CE7496 /* MyProfileHeaderView.xib */,
 				B01D4ED91F073EEE00A0FBFA /* BadgeCell.swift */,
 				B01D4EDA1F073EEE00A0FBFA /* BadgeCell.xib */,
 				B07169AC1E838C6400AF6A41 /* EditProfileViewController.swift */,
@@ -844,12 +868,14 @@
 				B093FFA11E790CD500011B43 /* LaunchScreen.storyboard in Resources */,
 				B03F39271F3413CB00E2FBD7 /* KingCollectionViewCell.xib in Resources */,
 				B0CBE0581EAE8D4100D6FF06 /* FollowingPhotoCell.xib in Resources */,
+				B05E67A51F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib in Resources */,
 				B0F2A1801EE758A7004857CA /* BannerView.xib in Resources */,
 				B05F13F71EF46D8F008C5B34 /* CollectionDividerView.xib in Resources */,
 				B0C86D471E80B7F90067E004 /* FollowingHeader.xib in Resources */,
 				B0CC880A1F2AE34200F974A6 /* PostSendOptionsBar.xib in Resources */,
 				B0DF823B1EDFB0BA00461DD8 /* CommentsOverlayTableView.xib in Resources */,
 				B0F2A1861EE7AC00004857CA /* SendTableHeaderView.xib in Resources */,
+				B0F5F7531F450EF400CE7496 /* MyProfileHeaderView.xib in Resources */,
 				B08B16B51F428F4000300145 /* CommentsSortingPickerView.xib in Resources */,
 				B0F2A18A1EE7C9D1004857CA /* SendSingleLineTableViewCell.xib in Resources */,
 				B093FFC71E790F6800011B43 /* GoogleService-Info(OLD).plist in Resources */,
@@ -885,6 +911,7 @@
 				B0F894A01E7E3E9B00E490C4 /* MyProfileViewController.storyboard in Resources */,
 				B0A6FCDD1EC45AB4009933F8 /* EmptyCollectionHeader.xib in Resources */,
 				B07313C31EA69FCA00405F06 /* SortOptionsView.xib in Resources */,
+				B0F5F7511F44CAE700CE7496 /* EmptyMessagesView.xib in Resources */,
 				B08B16B31F41F28600300145 /* LoadMoreTableView.xib in Resources */,
 				B003D7E51ED6C32300256FBB /* CommentViewCell.xib in Resources */,
 				B093FFCD1E79135A00011B43 /* PhotoCell.xib in Resources */,
@@ -893,6 +920,7 @@
 				B0F894721E7BA68A00E490C4 /* CommentBar.xib in Resources */,
 				B0CC88061F2ACED200F974A6 /* LocationPickerView.xib in Resources */,
 				B01D4EE01F0B68FD00A0FBFA /* NotificationBadgeCell.xib in Resources */,
+				B0C7077C1F4E061B00B81644 /* HomeTabHeaderView.xib in Resources */,
 				B01D4EDC1F073EEE00A0FBFA /* BadgeCell.xib in Resources */,
 				B0A053E61EAACC3000922AAC /* PostFooterView.xib in Resources */,
 			);
@@ -1009,6 +1037,7 @@
 				B0550DA91E91EE25007DAAAC /* UsersListViewController.swift in Sources */,
 				B0F894961E7C528800E490C4 /* UserProfileViewController.swift in Sources */,
 				B093FFCF1E791F4E00011B43 /* Extensions.swift in Sources */,
+				B0F5F74F1F44CAD400CE7496 /* EmptyMessagesView.swift in Sources */,
 				B0C86D421E8098850067E004 /* MasterNavigationController.swift in Sources */,
 				B0C86D381E8078800067E004 /* ConversationViewCell.swift in Sources */,
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
@@ -1037,6 +1066,7 @@
 				B0550D9E1E8E21C4007DAAAC /* MinoruTextField.swift in Sources */,
 				B0DF82351EDD1B6500461DD8 /* SignUpProfilePictureViewController.swift in Sources */,
 				B0F2A1891EE7C9D1004857CA /* SendSingleLineTableViewCell.swift in Sources */,
+				B0C7077A1F4DF3D900B81644 /* HomieViewController.swift in Sources */,
 				B0EB324D1F05AF6D00CBCCF7 /* Comment.swift in Sources */,
 				B093FFC01E790D5E00011B43 /* SendProfileViewCell.swift in Sources */,
 				B093FFC21E790D5E00011B43 /* Story.swift in Sources */,
@@ -1086,7 +1116,9 @@
 				B0CC88021F2AC4B200F974A6 /* PostEditOptionsBar.swift in Sources */,
 				B07313C51EA69FDE00405F06 /* SortOptionsView.swift in Sources */,
 				B0AE229C1E7A509E00141709 /* PostHeaderView.swift in Sources */,
+				B0C7077E1F4E07AC00B81644 /* HomeTabHeaderView.swift in Sources */,
 				B07169B01E83B4D600AF6A41 /* ProfileTabHeader.swift in Sources */,
+				B05E67A71F48AC81002D2DAC /* LoadMoreCommentsOverlayView.swift in Sources */,
 				B0550D9D1E8E21C4007DAAAC /* MadokaTextField.swift in Sources */,
 				B0F894A61E7F250F00E490C4 /* MainTabBarController.swift in Sources */,
 				B08FBE021EF24C8C00F29DF4 /* AuthService.swift in Sources */,

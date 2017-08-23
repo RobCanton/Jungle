@@ -133,7 +133,7 @@
                     </view>
                 </subviews>
             </view>
-            <color key="backgroundColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="Snt-IH-M67" firstAttribute="centerX" secondItem="EiZ-pM-Kdf" secondAttribute="centerX" id="6Gb-ux-hJn"/>
                 <constraint firstItem="gA3-5I-6cL" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="6Rd-lk-N2z"/>

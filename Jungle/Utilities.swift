@@ -75,12 +75,12 @@ func downloadImage(withUrl _url:String, check:Int, completion: @escaping (_ imag
                 return completion(nil, false, check)
             }
             DispatchQueue.main.async {
-                if let downloadedImage = UIImage(data: data!) {
+                if let d = data, let downloadedImage = UIImage(data: d) {
                     imageCache.setObject(downloadedImage, forKey: _url as NSString)
+                    return completion(downloadedImage, false, check)
                 }
-                
-                let image = UIImage(data: data!)
-                return completion(image!, false, check)
+                return completion(nil, false, check)
+
             }
             
     }).resume()

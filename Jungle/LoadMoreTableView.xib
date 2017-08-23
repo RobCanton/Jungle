@@ -17,9 +17,6 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="K16-d8-fkM">
                     <rect key="frame" x="2" y="2" width="449" height="56"/>
                     <subviews>
-                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="ROj-kP-xIr">
-                            <rect key="frame" x="215" y="18" width="20" height="20"/>
-                        </activityIndicatorView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="View More" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5ru-jf-jnY">
                             <rect key="frame" x="187" y="19" width="75.5" height="18"/>
                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
@@ -30,16 +27,19 @@
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstItem="5ru-jf-jnY" firstAttribute="centerY" secondItem="K16-d8-fkM" secondAttribute="centerY" id="7sm-UK-tg6"/>
-                        <constraint firstItem="ROj-kP-xIr" firstAttribute="centerX" secondItem="5ru-jf-jnY" secondAttribute="centerX" id="glF-fT-p0V"/>
-                        <constraint firstItem="ROj-kP-xIr" firstAttribute="centerY" secondItem="5ru-jf-jnY" secondAttribute="centerY" id="kSI-Cs-1GI"/>
                         <constraint firstItem="5ru-jf-jnY" firstAttribute="centerX" secondItem="K16-d8-fkM" secondAttribute="centerX" id="l3d-r8-yLm"/>
                     </constraints>
                 </view>
+                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="ROj-kP-xIr">
+                    <rect key="frame" x="216" y="20" width="20" height="20"/>
+                </activityIndicatorView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="K16-d8-fkM" secondAttribute="bottom" constant="2" id="1Xp-wO-aSz"/>
                 <constraint firstAttribute="trailing" secondItem="K16-d8-fkM" secondAttribute="trailing" constant="2" id="8NL-hG-ZWV"/>
                 <constraint firstItem="K16-d8-fkM" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="2" id="JGd-LN-7QC"/>
+                <constraint firstItem="ROj-kP-xIr" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="R1M-Uy-PSH"/>
+                <constraint firstItem="ROj-kP-xIr" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="RH4-nt-fLZ"/>
                 <constraint firstItem="K16-d8-fkM" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="2" id="fJJ-ZX-V3a"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>

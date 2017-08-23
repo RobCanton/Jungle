@@ -260,6 +260,7 @@ class StoryItem: NSObject, NSCoding {
         
         if removeIndex != nil {
             comments.remove(at: removeIndex!)
+            numComments -= 1
         }
         
     }

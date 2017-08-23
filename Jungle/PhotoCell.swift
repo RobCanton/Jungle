@@ -184,6 +184,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
     
     
     func setPrivate(_ on:Bool) {
+        
         privateLock?.removeFromSuperview()
         privateLabel?.removeFromSuperview()
         if on {
@@ -195,7 +196,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             privateLabel?.font = UIFont.systemFont(ofSize: 10.0, weight: UIFontWeightRegular)
             privateLabel?.textColor = UIColor.white
             privateLabel?.text = "Hidden"
-            
             self.addSubview(privateLabel!)
             self.addSubview(privateLock!)
         }
@@ -224,48 +224,12 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         let likesImage = UIImage(named: "liked")
         let commentsImage = UIImage(named: "comments_filled")
         
-        if numLikes > 0 {
-            self.firstLabel.text = getNumericShortesthandString(numLikes)
-            self.firstIcon.image = likesImage
-            self.firstIcon.isHidden = false
-            self.firstLabel.isHidden = false
-            
-            self.secondLabel.text = getNumericShortesthandString(numComments)
-            
-            if numComments > 0 {
-                self.secondIcon.image = commentsImage
-                self.secondIcon.isHidden = false
-                self.secondLabel.isHidden = false
-                
-            } else {
-                self.secondIcon.image = nil
-                self.secondIcon.isHidden = true
-                self.secondLabel.isHidden = true
-            }
-        } else {
-            self.firstLabel.text = getNumericShortesthandString(numComments)
-            self.secondLabel.text = nil
-            if numComments > 0 {
-                self.firstIcon.image = commentsImage
-                self.firstIcon.isHidden = false
-                self.firstLabel.isHidden = false
-            } else {
-                self.firstIcon.image = nil
-                self.firstIcon.isHidden = true
-                self.firstLabel.isHidden = true
-            }
-            
-            self.secondIcon.image = nil
-            self.secondIcon.isHidden = true
-            self.secondLabel.isHidden = true
-        }
-        
         captionBottom.constant = numLikes == 0 && numComments == 0 ? 4 : 20
         
         self.colorView.isHidden = numLikes == 0 && numComments == 0 && (post.caption == nil || post.caption == "") ? true : false
         self.gradient?.removeFromSuperlayer()
         self.gradient = CAGradientLayer()
-        //self.gradient!.frame = self.colorView.bounds
+        self.gradient!.frame = self.colorView.bounds
         self.gradient!.locations = [0.0, 1.0]
         self.gradient!.startPoint = CGPoint(x: 0, y: 0)
         self.gradient!.endPoint = CGPoint(x: 0, y: 1)
@@ -277,14 +241,63 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
         //self.colorView.layer.drawsAsynchronously = true
 
         guardView.isHidden = !post.shouldBlock
-        captionLabel.text = post.caption
-        
+        self.captionLabel.text = nil
+        self.firstLabel.text = nil
+        self.firstIcon.image = nil
+        self.secondLabel.text = nil
+        self.secondIcon.image = nil
         
         UploadService.retrieveImage(withCheck: self.check, key: post.key, url: post.downloadUrl) { _check, image, fromFile in
 
             if self.check != _check { return }
-                
+            
+            if fromFile {
+                self.imageView.alpha = 1.0
+            } else {
+                self.imageView.alpha = 0.0
+                UIView.animate(withDuration: 0.15, animations: {
+                    self.imageView.alpha = 1.0
+                })
+            }
+            
             self.imageView.image = image
+            self.captionLabel.text = post.caption
+            
+            if numLikes > 0 {
+                self.firstLabel.text = getNumericShortesthandString(numLikes)
+                self.firstIcon.image = likesImage
+                self.firstIcon.isHidden = false
+                self.firstLabel.isHidden = false
+                
+                self.secondLabel.text = getNumericShortesthandString(numComments)
+                
+                if numComments > 0 {
+                    self.secondIcon.image = commentsImage
+                    self.secondIcon.isHidden = false
+                    self.secondLabel.isHidden = false
+                    
+                } else {
+                    self.secondIcon.image = nil
+                    self.secondIcon.isHidden = true
+                    self.secondLabel.isHidden = true
+                }
+            } else {
+                self.firstLabel.text = getNumericShortesthandString(numComments)
+                self.secondLabel.text = nil
+                if numComments > 0 {
+                    self.firstIcon.image = commentsImage
+                    self.firstIcon.isHidden = false
+                    self.firstLabel.isHidden = false
+                } else {
+                    self.firstIcon.image = nil
+                    self.firstIcon.isHidden = true
+                    self.firstLabel.isHidden = true
+                }
+                
+                self.secondIcon.image = nil
+                self.secondIcon.isHidden = true
+                self.secondLabel.isHidden = true
+            }
             
             if let color = post.getColor(), !self.colorView.isHidden {
                 self.gradient!.colors = [UIColor.clear.cgColor, color.withAlphaComponent(0.82).cgColor]

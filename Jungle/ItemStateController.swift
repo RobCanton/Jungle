@@ -134,28 +134,34 @@ class ItemStateController {
         commentsRef = UserService.ref.child("uploads/comments/\(item.key)")
 
         commentsRef?.queryOrdered(byChild: "timestamp").queryLimited(toLast: limit).observe(.childAdded, with: { snapshot in
-            let dict = snapshot.value as! [String:Any]
+
             let key = snapshot.key
-            let author = dict["author"] as! String
-            let text = dict["text"] as! String
-            let timestamp = dict["timestamp"] as! Double
-            var numLikes = 0
-            if let likes = dict["likes"] as? Int {
-                numLikes = likes
+            if let dict = snapshot.value as? [String:Any],
+                let author = dict["author"] as? String,
+                let timestamp = dict["timestamp"] as? Double,
+                let text = dict["text"] as? String
+            {
+                var numLikes = 0
+                if let likes = dict["likes"] as? Int {
+                    numLikes = likes
+                }
+                
+                if let anon = dict["anon"] as? [String:Any] {
+                    if let adjective = anon["adjective"] as? String,
+                        let animal = anon["animal"] as? String,
+                        let color = anon["color"] as? String {
+                        let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
+                        item.addComment(comment)
+                    }
+                    self.delegate?.itemStateDidChange(comments: item.comments)
+                } else {
+                    let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes)
+                    item.addComment(comment)
+                    self.delegate?.itemStateDidChange(comments: item.comments)
+                }
+            
             }
             
-            if let anon = dict["anon"] as? [String:Any] {
-                let adjective = anon["adjective"] as! String
-                let animal = anon["animal"] as! String
-                let color = anon["color"] as! String
-                let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes, adjective: adjective, animal: animal, colorHexcode: color)
-                item.addComment(comment)
-                self.delegate?.itemStateDidChange(comments: item.comments)
-            } else {
-                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes: numLikes)
-                item.addComment(comment)
-                self.delegate?.itemStateDidChange(comments: item.comments)
-            }
             
         })
 
@@ -176,32 +182,38 @@ class ItemStateController {
                 
                 for commentChild in snapshot.children {
                     let commentSnap = commentChild as! DataSnapshot
-                    let dict = commentSnap.value as! [String:Any]
-                    let author = dict["author"] as! String
-                    let timestamp = dict["timestamp"] as! Double
-                    let text = dict["text"] as! String
-                    
-                    var numLikes = 0
-                    if let likes = dict["likes"] as? Int {
-                        numLikes = likes
-                    }
-                    
-                    if timestamp != endTimestamp {
-                        let key = commentSnap.key
-                        
-                        if let anon = dict["anon"] as? [String:Any] {
-                            let adjective = anon["adjective"] as! String
-                            let animal = anon["animal"] as! String
-                            let color = anon["color"] as! String
-                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
-                            commentBatch.append(comment)
-                        } else {
-                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
-                            commentBatch.append(comment)
+                    if let dict = commentSnap.value as? [String:Any],
+                        let author = dict["author"] as? String,
+                        let timestamp = dict["timestamp"] as? Double,
+                        let text = dict["text"] as? String
+                    {
+                       
+                        var numLikes = 0
+                        if let likes = dict["likes"] as? Int {
+                            numLikes = likes
                         }
                         
+                        if timestamp != endTimestamp {
+                            let key = commentSnap.key
+                            
+                            if let anon = dict["anon"] as? [String:Any] {
+                                if let adjective = anon["adjective"] as? String,
+                                    let animal = anon["animal"] as? String,
+                                    let color = anon["color"] as? String {
+                                    let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
+                                    commentBatch.append(comment)
+                                }
+                            } else {
+                                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
+                                commentBatch.append(comment)
+                            }
+                            
+                            
+                        }
                         
                     }
+                    
+                    
                 }
                 
                 if commentBatch.count > 0 {

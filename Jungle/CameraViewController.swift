@@ -17,6 +17,7 @@ protocol CameraDelegate:class {
     func hideEditOptions()
     func takingPhoto()
     func takingVideo()
+    func cameraReady()
 }
 
 class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegate, UIGestureRecognizerDelegate {
@@ -75,8 +76,12 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
                 playerLayer?.removeFromSuperlayer()
                 playerLayer?.player = nil
                 playerLayer = nil
+                delegate?.hideEditOptions()
+                delegate?.showCameraOptions()
+                recordBtnRef.isHidden = false
                 break
             case .Initiating:
+                print("Initiating")
                 reloadCamera()
                 break
             case .Running:
@@ -179,16 +184,24 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
                 if (captureSession?.canAddOutput(stillImageOutput) != nil) {
                     captureSession?.addOutput(stillImageOutput)
                     
-                    previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-                    previewLayer?.session.usesApplicationAudioSession = false
+                    DispatchQueue.global(qos: .background).async {
+                        self.captureSession?.startRunning()
+                        
+                        DispatchQueue.main.async {
+                            self.previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+                            self.previewLayer?.session.usesApplicationAudioSession = false
+                            
+                            self.previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+                            self.previewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
+                            self.previewLayer?.frame = self.cameraOutputView.bounds
+                            self.cameraOutputView.layer.addSublayer(self.previewLayer!)
+                            self.cameraState = .Running
+                            self.delegate?.cameraReady()
+                        }
+
+                    }
                     
-                    previewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
-                    previewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
-                    previewLayer?.frame = cameraOutputView.bounds
-                    cameraOutputView.layer.addSublayer(previewLayer!)
-                    captureSession?.startRunning()
                     
-                    cameraState = .Running
                 }
             }
             

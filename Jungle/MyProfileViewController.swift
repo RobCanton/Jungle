@@ -11,7 +11,9 @@ import ReSwift
 import View2ViewTransition
 import Firebase
 
-
+enum MyPostsMode {
+    case publicPosts, anonymousPosts
+}
 
 class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UINavigationControllerDelegate, UICollectionViewDelegateFlowLayout, EditProfileProtocol {
     
@@ -22,6 +24,8 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     var posts = [StoryItem]()
     var postKeys = [String]()
+    var anonPosts = [StoryItem]()
+    var anonPostKeys = [String]()
     var collectionView:UICollectionView!
     var user:User?
     
@@ -29,6 +33,8 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     var statusBarShouldHide = false
     var status:FollowingStatus = .None
     var tabHeader:ProfileTabHeader!
+    
+    var mode = MyPostsMode.publicPosts
     
     override var prefersStatusBarHidden: Bool
         {
@@ -44,6 +50,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         itemSideLength = (UIScreen.main.bounds.width - 2.0)/3.0
         self.automaticallyAdjustsScrollViewInsets = false
         
+        mode = userState.anonMode ? .anonymousPosts : .publicPosts
         screenSize = self.view.frame
         screenWidth = screenSize.width
         screenHeight = screenSize.height
@@ -64,7 +71,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         let nib = UINib(nibName: "PhotoCell", bundle: nil)
         collectionView.register(nib, forCellWithReuseIdentifier: cellIdentifier)
         
-        let headerNib = UINib(nibName: "ProfileHeaderView", bundle: nil)
+        let headerNib = UINib(nibName: "MyProfileHeaderView", bundle: nil)
         
         self.collectionView.register(headerNib, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView")
         
@@ -90,9 +97,26 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         
         
         listenToPosts()
+        getAnonPosts()
     }
     
     
+    func controlDidChange(_ _mode:MyPostsMode) {
+        if self.mode == _mode { return }
+        self.mode = _mode
+        switch mode {
+        case .publicPosts:
+            //mainStore.dispatch(GoPublic())
+            self.mode = .publicPosts
+            break
+        case .anonymousPosts:
+            //mainStore.dispatch(GoAnonymous())
+            self.mode = .anonymousPosts
+            break
+        }
+        self.collectionView.reloadData()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
@@ -104,7 +128,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         listenToPosts()
-        
+        getAnonPosts()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -140,30 +164,11 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
                 }
             }
             
-            self.getAnonPosts(postKeys)
+            self.downloadStory(postKeys: postKeys)
         })
     }
     
-    func getAnonPosts(_ publicPosts:[String]) {
-        guard let userId = uid else { return }
-        let anonPostsRef = UserService.ref.child("users/uploads/anon/\(userId)")
-        anonPostsRef.observeSingleEvent(of: .value, with: { snapshot in
-            var anonPostKeys = [String]()
-            if snapshot.exists() {
-                let keys = snapshot.value as! [String:AnyObject]
-                for (key, _) in keys {
-                    anonPostKeys.append(key)
-                }
-            }
-            self.postKeys = publicPosts
-            self.postKeys.append(contentsOf: anonPostKeys)
-            self.downloadStory(postKeys: self.postKeys)
-        })
-    }
     
-    func stopListeningToPosts() {
-        postsRef?.removeAllObservers()
-    }
     
     func downloadStory(postKeys:[String]) {
         if postKeys.count > 0 {
@@ -178,6 +183,41 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
             self.collectionView.reloadData()
         }
     }
+    
+    func getAnonPosts() {
+        guard let userId = uid else { return }
+        let anonPostsRef = UserService.ref.child("users/uploads/anon/\(userId)")
+        anonPostsRef.observeSingleEvent(of: .value, with: { snapshot in
+            var anonPostKeys = [String]()
+            if snapshot.exists() {
+                let keys = snapshot.value as! [String:AnyObject]
+                for (key, _) in keys {
+                    anonPostKeys.append(key)
+                }
+            }
+            
+            self.downloadAnonPosts(postKeys: anonPostKeys)
+        })
+    }
+    
+    func downloadAnonPosts(postKeys:[String]) {
+        if postKeys.count > 0 {
+            UploadService.downloadStory(postKeys: postKeys, completion: { story in
+                
+                self.anonPosts = story.sorted(by: { return $0 > $1 })
+                self.collectionView!.reloadData()
+            })
+        } else {
+            self.anonPosts = [StoryItem]()
+            self.collectionView.reloadData()
+        }
+    }
+    
+    func stopListeningToPosts() {
+        postsRef?.removeAllObservers()
+    }
+    
+    
     
     var presentingEmptyConversation = false
     
@@ -203,8 +243,10 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionElementKindSectionHeader {
-            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! ProfileHeaderView
+            let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath as IndexPath) as! MyProfileHeaderView
             view.setupHeader(_user:self.user, status: .CurrentUser, delegate: self)
+            view.setupControl(mode)
+            view.controlHandler = controlDidChange
             return view
         }
         
@@ -212,7 +254,7 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64
+        let staticHeight:CGFloat = 12 + 72 + 12 + 21 + 8 + 38 + 2 + 64 + 44 + 2
         
         if user != nil {
             let bio = user!.bio
@@ -230,15 +272,25 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return posts.count
+        switch mode {
+        case .publicPosts:
+            return posts.count
+        case .anonymousPosts:
+            return anonPosts.count
+        }
+        
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
-        let post = posts[indexPath.item]
-        cell.setupCell(withPost: post)
-        cell.setPrivate(post.anon != nil)
+        
+        switch mode {
+        case .publicPosts:
+            cell.setupCell(withPost: posts[indexPath.item])
+        case .anonymousPosts:
+            cell.setupCell(withPost: anonPosts[indexPath.item])
+        }
         return cell
     }
     
@@ -246,8 +298,16 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
         
         self.selectedIndexPath = indexPath
+
+        switch mode {
+        case .publicPosts:
+            globalMainInterfaceProtocol?.presentProfileStory(posts: posts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            break
+        case .anonymousPosts:
+            globalMainInterfaceProtocol?.presentProfileStory(posts: anonPosts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+            break
+        }
         
-        globalMainInterfaceProtocol?.presentProfileStory(posts: posts, destinationIndexPath: indexPath, initialIndexPath: indexPath)
         
         collectionView.deselectItem(at: indexPath, animated: true)
     }
@@ -266,8 +326,8 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
     var selectedIndexPath: IndexPath = IndexPath(item: 0, section: 0)
     
     
-    func getHeaderView() -> ProfileHeaderView? {
-        if let header = collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? ProfileHeaderView {
+    func getHeaderView() -> MyProfileHeaderView? {
+        if let header = collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: 0)) as? MyProfileHeaderView {
             return header
         }
         return nil

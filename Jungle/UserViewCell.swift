@@ -51,6 +51,14 @@ class UserViewCell: UITableViewCell {
         self.followButton.isHidden = true
         self.usernameLabel.text = anon.anonName
         self.usernameLabel.textColor = darkerColorForColor(color: anon.color)
+        let darkerColor = darkerColorForColor(color: anon.color)
+        if let aid = userState.anonID, let anonAID = anon.aid, aid == anonAID {
+            self.usernameLabel.setAnonymousName(anonName: anon.anonName, color: darkerColor, suffix: "[YOU]", largeFont: UIFontWeightMedium, smallFont: UIFontWeightLight, fontSize: 16.0)
+        } else {
+            self.usernameLabel.text = anon.anonName
+            self.usernameLabel.textColor = darkerColorForColor(color: darkerColor)
+            self.usernameLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+        }
         UploadService.retrieveAnonImage(withCheck: check, withName: anon.animal) { check, image, fromFile in
             if check == self.check {
                 self.contentImageView.image = image

@@ -94,7 +94,7 @@ class CityViewController: UIViewController, StoreSubscriber, UICollectionViewDel
     
     func getPosts() {
         let ref = UserService.ref.child("cities/posts/\(region.key)")
-        ref.queryOrdered(byChild: "t").queryLimited(toLast: 60).observeSingleEvent(of: .value, with: { snapshot in
+        ref.queryOrderedByValue().queryLimited(toLast: 60).observeSingleEvent(of: .value, with: { snapshot in
             var postKeys = [String]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot

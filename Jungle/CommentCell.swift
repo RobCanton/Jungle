@@ -43,10 +43,7 @@ class CommentCell: UITableViewCell {
         commentLabel.enabledTypes = [.mention]
         commentLabel.customColor[ActiveType.mention] = accentColor
         commentLabel.handleMentionTap { mention in
-            
-            let controller = UserProfileViewController()
-            controller.username = mention
-            globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+            self.delegate?.commentMentionTapped(mention)
         }
     
        

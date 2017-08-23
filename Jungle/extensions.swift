@@ -287,6 +287,25 @@ extension UILabel {
         
     }
     
+    func setAnonymousName(anonName:String, color:UIColor, suffix:String, largeFont:CGFloat, smallFont:CGFloat, fontSize:CGFloat) {
+        let str = "\(anonName) \(suffix)"
+        var attributes: [String: AnyObject] = [
+            NSForegroundColorAttributeName: color,
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize - 2.0, weight: smallFont)
+        ]
+        
+        let title = NSMutableAttributedString(string: str, attributes: attributes) //1
+        var a: [String: AnyObject] = [
+            NSForegroundColorAttributeName: color,
+            NSFontAttributeName : UIFont.systemFont(ofSize: fontSize, weight: largeFont),
+            ]
+        
+        title.addAttributes(a, range: NSRange(location: 0, length: anonName.characters.count))
+        
+        self.attributedText = title
+        
+    }
+    
 
     public class func size(withText text: String, forWidth width: CGFloat, withFont font: UIFont) -> CGSize {
         let measurementLabel = UILabel()
@@ -445,7 +464,23 @@ func darkerColorForColor(color: UIColor) -> UIColor {
 
 extension UIButton {
     
-
+    private func imageWithColor(color: UIColor) -> UIImage {
+        let rect = CGRect(x: 0.0,y: 0.0,width: 1.0,height: 1.0)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext()
+        
+        context!.setFillColor(color.cgColor)
+        context!.fill(rect)
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image!
+    }
+    
+    func setBackgroundColor(color: UIColor, forUIControlState state: UIControlState) {
+        self.setBackgroundImage(imageWithColor(color: color), for: state)
+    }
     
     func setGradient(colorA:UIColor, colorB: UIColor) {
         let gradient = CAGradientLayer()

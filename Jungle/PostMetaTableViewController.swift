@@ -65,7 +65,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.addNavigationBarBackdrop()
+        
         navigationController?.navigationBar.tintColor = UIColor.black
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
         view.backgroundColor = UIColor.white
@@ -91,8 +91,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         
         
-        
-        tableView = UITableView(frame:  CGRect(x: 0,y: navHeight, width: view.frame.width,height: view.frame.height - navHeight - 50.0))
+        tableView = UITableView(frame:  CGRect(x: 0,y: 0, width: view.frame.width,height: view.frame.height - 50.0))
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = UIColor(white:0.96, alpha: 1.0)
@@ -136,7 +135,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 250))
         
-        tableView.reloadData()
+        self.sortComments()
 
         
         view.addSubview(commentBar)
@@ -153,6 +152,8 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
         fetchLikes()
         
+        self.addNavigationBarBackdrop()
+        
     }
     
 
@@ -167,7 +168,8 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         switch sort {
         case .date:
             self.titleButton.setTitle("Comments", for: .normal)
-            self.comments = item.comments
+            self.comments = item.comments.sorted(by: { $0 < $1})
+            
             print("NUM COMMENTS: \(self.comments.count) | TOTAL: \(item.numComments)")
 
             self.tableView.tableHeaderView = comments.count < item.numComments ? loadMore : UIView()
@@ -175,6 +177,12 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             
             break
         case .popularity:
+            self.topComments.sort(by: {
+                if $0.numLikes == $1.numLikes {
+                    return $0 < $1
+                }
+                return $0.numLikes > $1.numLikes
+            })
             self.titleButton.setTitle("Top Comments", for: .normal)
 
             self.tableView.tableHeaderView = UIView()
@@ -187,6 +195,8 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             self.tableView.tableFooterView = UIView()
             break
         }
+        
+        self.tableView.reloadData()
 
     }
     
@@ -195,14 +205,14 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         self.navigationController?.navigationBar.barStyle = .default
         navigationController?.setNavigationBarHidden(false, animated: true)
         
+        notificationsButton.isEnabled = false
+        notificationsMutedButton.isEnabled = false
+        
         previousDelegate = itemStateController.delegate
         itemStateController.delegate = self
         
 
         sortComments()
-        
-        self.tableView.reloadData()
-        
         
         if let index = initialIndex {
             print("has initial index")
@@ -225,6 +235,9 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillAppear), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector:#selector(keyboardWillDisappear), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
+        notificationsButton.isEnabled = true
+        notificationsMutedButton.isEnabled = true
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -241,7 +254,9 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func newState(state: AppState) {
-       
+        if sort == .likes {
+            tableView.reloadData()
+        }
     }
     
     var sort:CommentsSortedBy = .date
@@ -252,27 +267,24 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
-        let dateStr = sort == .date ?  "• Newest Comments" :  "Newest Comments"
-        let popularitryStr = sort == .popularity ?  "• Top Comments" :  "Top Comments"
-        let likesStr = sort == .likes ?  "• Likes" :  "Likes"
+        let dateStr = sort == .date ?  "  Newest Comments •" :  "Newest Comments"
+        let popularitryStr = sort == .popularity ?  "  Top Comments •" :  "Top Comments"
+        let likesStr = sort == .likes ?  "  Likes •" :  "Likes"
         alert.addAction(UIAlertAction(title: dateStr, style: .default, handler: { _ in
             self.sort = .date
             self.sortComments()
-            self.tableView.reloadData()
             self.scrollBottom(animated: false)
         }))
         
         alert.addAction(UIAlertAction(title: popularitryStr, style: .default, handler: { _ in
             self.sort = .popularity
             self.sortComments()
-            self.tableView.reloadData()
             self.scrollToTop(animated: false)
         }))
         
         alert.addAction(UIAlertAction(title: likesStr, style: .default, handler: { _ in
             self.sort = .likes
             self.sortComments()
-            self.tableView.reloadData()
             self.scrollToTop(animated: false)
         }))
 
@@ -315,7 +327,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
                         }
                         self.likers = _likers
                         if self.sort == .likes {
-                           self.tableView.reloadData()
+                           self.sortComments()
                         }
                         
                         print("LIKES RESPONSE: \(likes)")
@@ -344,30 +356,34 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
                 for commentChild in snapshot.children {
                     let commentSnap = commentChild as! DataSnapshot
                     let key = commentSnap.key
-                    let dict = commentSnap.value as! [String:Any]
-                    let author = dict["author"] as! String
-                    let timestamp = dict["timestamp"] as! Double
-                    let text = dict["text"] as! String
-                    
-                    var numLikes = 0
-                    if let likes = dict["likes"] as? Int {
-                        numLikes = likes
-                    }
-                    
-                    if !self.topCommentsContains(key: key) {
-                        
-                        if let anon = dict["anon"] as? [String:Any] {
-                            let adjective = anon["adjective"] as! String
-                            let animal = anon["animal"] as! String
-                            let color = anon["color"] as! String
-                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
-                            commentBatch.insert(comment, at: 0)
-                        } else {
-                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
-                            commentBatch.insert(comment, at: 0)
-                            
+                    if let dict = commentSnap.value as? [String:Any],
+                        let author = dict["author"] as? String,
+                        let timestamp = dict["timestamp"] as? Double,
+                        let text = dict["text"] as? String
+                    {
+                        var numLikes = 0
+                        if let likes = dict["likes"] as? Int {
+                            numLikes = likes
                         }
+                        
+                        if !self.topCommentsContains(key: key) {
+                            
+                            if let anon = dict["anon"] as? [String:Any] {
+                                if let adjective = anon["adjective"] as? String,
+                                    let animal = anon["animal"] as? String,
+                                    let color = anon["color"] as? String {
+                                    let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
+                                    commentBatch.insert(comment, at: 0)
+                                }
+                            } else {
+                                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
+                                commentBatch.insert(comment, at: 0)
+                                
+                            }
+                        }
+                        
                     }
+                    
                 }
                 
                 if commentBatch.count > 0 {
@@ -376,7 +392,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             }
             
             self.sortComments()
-            self.tableView.reloadData()
             self.loadMore.stopLoadAnimation()
             
         })
@@ -405,32 +420,36 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
                 for commentChild in snapshot.children {
                     let commentSnap = commentChild as! DataSnapshot
                     let key = commentSnap.key
-                    let dict = commentSnap.value as! [String:Any]
-                    let author = dict["author"] as! String
-                    let timestamp = dict["timestamp"] as! Double
-                    let text = dict["text"] as! String
+                    if let dict = commentSnap.value as? [String:Any],
+                        let author = dict["author"] as? String,
+                        let timestamp = dict["timestamp"] as? Double,
+                        let text = dict["text"] as? String
+                    {
                     
-                    var numLikes = 0
-                    if let likes = dict["likes"] as? Int {
-                        numLikes = likes
-                    }
-                    
-                    if !self.topCommentsContains(key: key) {
+                        var numLikes = 0
+                        if let likes = dict["likes"] as? Int {
+                            numLikes = likes
+                        }
                         
-                        if let anon = dict["anon"] as? [String:Any] {
-                            let adjective = anon["adjective"] as! String
-                            let animal = anon["animal"] as! String
-                            let color = anon["color"] as! String
-                            let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
-                            commentBatch.insert(comment, at: 0)
-                        } else {
-                            let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
-                            commentBatch.insert(comment, at: 0)
+                        if !self.topCommentsContains(key: key) {
+                            
+                            if let anon = dict["anon"] as? [String:Any] {
+                                if let adjective = anon["adjective"] as? String,
+                                    let animal = anon["animal"] as? String,
+                                    let color = anon["color"] as? String {
+                                    let comment = AnonymousComment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes, adjective: adjective, animal: animal, colorHexcode: color)
+                                    commentBatch.insert(comment, at: 0)
+                                }
+
+                            } else {
+                                let comment = Comment(key: key, author: author, text: text, timestamp: timestamp, numLikes:numLikes)
+                                commentBatch.insert(comment, at: 0)
+                                
+                            }
                             
                         }
                         
                     }
-                    
                 }
                 
                 if commentBatch.count > 0 {
@@ -440,18 +459,22 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             }
 
             self.sortComments()
-            self.tableView.reloadData()
             self.loadMore.stopLoadAnimation()
             
         })
     }
+    
+
 
     
     func handleRefresh() {
         if sort == .date {
-            let firstComment = comments[0]
-            lastKey = firstComment.key
-            itemStateController.retrievePreviousComments()
+            if comments.count > 0 {
+                let firstComment = comments[0]
+                lastKey = firstComment.key
+                itemStateController.retrievePreviousComments()
+            }
+            
         } else {
             self.retrievePreviousTopComments()
         }
@@ -474,7 +497,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         
        sortComments()
         
-        self.tableView.reloadData()
         scrollBottom(animated: false)
     }
     
@@ -486,7 +508,6 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             
             sortComments()
             
-            self.tableView.reloadData()
             if lastKey != nil {
                 var scrollToIndex:IndexPath?
                 for i in 0..<comments.count {
@@ -579,7 +600,7 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
         let text = comment.text
         let width = tableView.frame.width - (8 + 36 + 8 + 48)
         let size =  UILabel.size(withText: text, forWidth: width, withFont: UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightRegular))
-        let height2 = size.height + 12 + 6 + 18 + 4 + 22 + 2 // +8 for some bio padding
+        let height2 = size.height + 12 + 6 + 18 + 4 + 22 + 8 // +8 for some bio padding
         return height2
     }
     
@@ -590,9 +611,11 @@ class PostMetaTableViewController: UIViewController, UITableViewDelegate, UITabl
             if let uid = likers[indexPath.row] as? String {
                 cell.setupUser(uid: uid)
                 cell.selectionStyle = .default
+                cell.delegate = self
             } else if let anon = likers[indexPath.row] as? AnonObject {
                 cell.setupAnon(anon)
                 cell.selectionStyle = .default
+                cell.delegate = nil
             }
             
             cell.delegate = self
@@ -764,8 +787,8 @@ extension PostMetaTableViewController: UserCellProtocol {
 extension PostMetaTableViewController: CommentCellProtocol {
     
     func commentAuthorTapped(_ comment:Comment) {
-        if let _ = comment as? AnonymousComment {
-            showAnonOptions(comment.author)
+        if let anon = comment as? AnonymousComment {
+            showAnonOptions(comment.author, anon.anonName)
         } else {
             let controller = UserProfileViewController()
             controller.uid = comment.author
@@ -807,7 +830,29 @@ extension PostMetaTableViewController: CommentCellProtocol {
             commentBar.textField.text = "@\(username) "
             commentBar.textField.becomeFirstResponder()
         }
-
+    }
+    
+    func commentMentionTapped(_ mention: String) {
+        
+        for comment in comments {
+            if let anon = comment as? AnonymousComment {
+                if anon.anonName == mention {
+                    return showAnonOptions(anon.author, anon.anonName)
+                }
+            }
+        }
+        
+        for comment in topComments {
+            if let anon = comment as? AnonymousComment {
+                if anon.anonName == mention {
+                    return showAnonOptions(anon.author, anon.anonName)
+                }
+            }
+        }
+        
+        let controller = UserProfileViewController()
+        controller.username = mention
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
     func showDeleteCommentAlert(_ comment:Comment) {
@@ -831,7 +876,7 @@ extension PostMetaTableViewController: CommentCellProtocol {
                         self.topComments.remove(at: removeIndex!)
                     }
                     
-                    self.tableView.reloadData()
+                    self.sortComments()
                 }
             })
         }))
@@ -840,19 +885,14 @@ extension PostMetaTableViewController: CommentCellProtocol {
         self.present(alert, animated: true, completion: nil)
     }
     
-    func showAnonOptions(_ aid: String) {
+    func showAnonOptions(_ aid: String, _ anonName:String) {
 
         if let my_aid = userState.anonID, my_aid != aid {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let actionSheet = UIAlertController(title: anonName, message: nil, preferredStyle: .actionSheet)
             let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
 
             }
             actionSheet.addAction(cancelActionButton)
-            
-//            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
-//                
-//            }
-//            actionSheet.addAction(messageAction)
             
             let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
                 UserService.blockAnonUser(aid: aid) { success in }
@@ -914,13 +954,28 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
         let info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
+        let contentHeight = tableView.contentSize.height
+        let tableHeight = tableView.frame.height
+
         self.commentBar.setKeyboardUp(true)
-        
+
         UIView.animate(withDuration: 0.1, animations: { () -> Void in
             let height = self.view.frame.height
             let textViewFrame = self.commentBar.frame
             let textViewY = height - keyboardFrame.height - textViewFrame.height
+            
             self.commentBar.frame = CGRect(x: 0,y: textViewY,width: textViewFrame.width,height: textViewFrame.height)
+            let jeez = height - keyboardFrame.height - textViewFrame.height - 44 - 20.0
+            if contentHeight > (jeez) {
+                let diff = contentHeight - jeez
+
+                var y = self.tableView.frame.origin.y - diff
+                if contentHeight > tableHeight {
+                    y = textViewY - self.tableView.frame.height
+                }
+
+                self.tableView.frame = CGRect(x: 0, y: y, width: self.tableView.frame.width, height: self.tableView.frame.height)
+            }
             
             self.commentBar.sendButton.alpha = 1.0
             self.commentBar.activityIndicator.alpha = 1.0
@@ -945,6 +1000,9 @@ extension PostMetaTableViewController: CommentItemBarProtocol {
             self.commentBar.userImageView.alpha = 0.35
             self.commentBar.sendButton.alpha = 0.5
             self.commentBar.activityIndicator.alpha = 0.0
+            
+            
+            self.tableView.frame = CGRect(x: 0, y: textViewStart - self.tableView.frame.height, width: self.tableView.frame.width, height: self.tableView.frame.height)
         })
         
     }
@@ -959,6 +1017,6 @@ extension PostMetaTableViewController: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
+        return newLength <= maxCommentLength // Bool
     }
 }

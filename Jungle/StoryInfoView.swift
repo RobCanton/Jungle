@@ -22,6 +22,7 @@ class StoryInfoView: UIView {
     @IBOutlet weak var backgroundBlur: UIVisualEffectView!
     @IBOutlet weak var usernameTopConstraint: NSLayoutConstraint!
     
+   //@IBOutlet weak var backView: UIView!
     @IBOutlet weak var verifiedBadge: UIImageView!
     
     @IBOutlet weak var pinImage: UIImageView!
@@ -31,6 +32,12 @@ class StoryInfoView: UIView {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        //backgroundBlur.layer.cornerRadius = 8.0
+        //backgroundBlur.clipsToBounds = true
+        
+        //backView.layer.cornerRadius = 8.0
+        //backView.clipsToBounds = true
         
         usernameLabel.applyShadow(radius: 0.25, opacity: 0.25, height: 0.25, shouldRasterize: true)
         captionLabel.applyShadow(radius: 0.25, opacity: 0.25, height: 0.25, shouldRasterize: true)

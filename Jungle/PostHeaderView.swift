@@ -173,9 +173,9 @@ class PostHeaderView: UIView {
         let numViews = item.numViews
         let numComments = item.numComments
         
-        viewsLabel.text = getNumericShorthandString(numViews)
-        likesLabel.text = getNumericShorthandString(numLikes)
-        commentsLabel.text = getNumericShorthandString(numComments)
+        viewsLabel.text = numViews > 0 ? getNumericShorthandString(numViews) : "0"
+        likesLabel.text = numLikes > 0 ? getNumericShorthandString(numLikes) : "0"
+        commentsLabel.text = numComments > 0 ? getNumericShorthandString(numComments) : "0"
         
         if numViews == 0 ||  !isCurrentUser {
             stackView.remove(view: viewsView)

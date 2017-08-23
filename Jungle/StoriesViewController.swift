@@ -18,7 +18,7 @@ protocol PopupProtocol: class {
     func showRegion(_ region:City)
     func dismissPopup(_ animated:Bool)
     func keyboardStateChange(_ up:Bool)
-    func showAnonOptions(_ aid:String)
+    func showAnonOptions(_ aid:String, _ anonName:String)
     func showPostLikes()
     func showPostComments(_ indexPath:IndexPath?)
     
@@ -35,6 +35,8 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var longPressGR:TimedLongPressGestureRecognizer!
     var firstCell = true
+    
+    var clearItemObservers = true
     
     var currentIndexPath:IndexPath?
     {
@@ -73,6 +75,7 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         automaticallyAdjustsScrollViewInsets = false
          globalMainInterfaceProtocol?.statusBar(hide: true, animated: false)
         
+        clearItemObservers = true
         getCurrentCell()?.isCurrentItem = true
         getCurrentCell()?.resume()
 
@@ -83,8 +86,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             for gestureRecognizer in gestureRecognizers {
                 if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
                     panGestureRecognizer.delegate = self
-                    longPressGR.require(toFail: panGestureRecognizer)
-                    longPressGR.require(toFail: collectionView.panGestureRecognizer)
                 }
             }
         }
@@ -107,6 +108,10 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         for cell in collectionView.visibleCells as! [StoryViewController] {
             cell.cleanUp()
+            
+            if clearItemObservers {
+                cell.cleanItem()
+            }
         }
         
     }
@@ -144,12 +149,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.reloadData()
         
         view.addSubview(collectionView)
-                longPressGR = TimedLongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        longPressGR.minimumPressDuration = 0.0
-        
-        longPressGR.delegate = self
-        
-        self.view.addGestureRecognizer(longPressGR)
         
     }
     
@@ -161,48 +160,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
         getCurrentCell()?.setOverlays()
     }
     
-    func handleLongPress(gestureReconizer: TimedLongPressGestureRecognizer) {
-        
-        guard let cell = getCurrentCell() else { return }
-        let tappedPoint = gestureReconizer.location(in: view)
-        
-        let prevItem = tappedPoint.x < view.frame.width * 0.25
-        if gestureReconizer.state == .began {
-            gestureReconizer.startTime = Date()
-            if prevItem {
-                cell.prevView.alpha = 1.0
-            } else {
-                
-            }
-        }
-        if gestureReconizer.state == .changed {
-             let duration = Date().timeIntervalSince(gestureReconizer.startTime!)
-            if duration >= 0.5 {
-                cell.focus(true)
-            }
-        }
-        if gestureReconizer.state == UIGestureRecognizerState.ended {
-            let duration = Date().timeIntervalSince(gestureReconizer.startTime!)
-            if prevItem {
-                UIView.animate(withDuration: 0.3, animations: {
-                    cell.prevView.alpha = 0.0
-                })
-            }
-            if duration < 0.5 {
-                if cell.keyboardUp {
-                    //cell.commentBar.textField.resignFirstResponder()
-                    return
-                }
-                if prevItem {
-                  cell.prevItem()
-                } else {
-                    cell.nextItem()
-                }
-            } else {
-                cell.focus(false)
-            }
-        }
-    }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
@@ -240,14 +197,6 @@ class StoriesViewController: UIViewController, UICollectionViewDelegate, UIColle
             }
             
             return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
-        }
-        
-        if let _ = gestureRecognizer as? UILongPressGestureRecognizer  {
-            if keyboardUp {
-                return false
-            }
-            let goodzone = point.y < commentsTopY && point.y > authorBottomY
-            return goodzone
         }
         
         return false
@@ -359,21 +308,17 @@ extension StoriesViewController: PopupProtocol {
         }
     }
     
-    func showAnonOptions(_ aid: String) {
+    func showAnonOptions(_ aid: String, _ anonName:String) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
         cell.pause()
         if let my_aid = userState.anonID, my_aid != aid {
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let actionSheet = UIAlertController(title: anonName, message: nil, preferredStyle: .actionSheet)
             let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
                 cell.resume()
             }
             actionSheet.addAction(cancelActionButton)
             
-            //            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
-            //
-            //            }
-            //            actionSheet.addAction(messageAction)
             
             let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
                 UserService.blockAnonUser(aid: aid) { success in
@@ -440,6 +385,7 @@ extension StoriesViewController: PopupProtocol {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
+        clearItemObservers = false
         let controller = PostMetaTableViewController()
         controller.item = item
         controller.sort = .likes
@@ -449,12 +395,15 @@ extension StoriesViewController: PopupProtocol {
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
     
+    
     func showPostComments(_ indexPath:IndexPath?) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.item else { return }
         if let nav = self.navigationController {
             nav.delegate = nil
         }
+        clearItemObservers = false
+        
         let controller = PostMetaTableViewController()
         controller.item = item
         controller.sort = .date
@@ -464,6 +413,7 @@ extension StoriesViewController: PopupProtocol {
         controller.commentBar.isUserInteractionEnabled = false
         globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
     }
+    
     
     func showMore() {
         guard let cell = getCurrentCell() else { return }

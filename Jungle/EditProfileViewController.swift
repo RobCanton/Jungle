@@ -235,11 +235,9 @@ class EditProfileViewController: UITableViewController, UIPickerViewDelegate{
         if let index = selectedBadgeIndex {
             let badge = _badges[index.item]
             basicProfileObj["badge"] = badge.key
-            print("YUHNUTs")
             
         } else {
-            print("WHY")
-            basicProfileObj["badge"]  = ""
+            basicProfileObj["badge"]  = "NONE"
         }
         
         let uid = mainStore.state.userState.uid

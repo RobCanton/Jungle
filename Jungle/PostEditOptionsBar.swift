@@ -65,4 +65,5 @@ class PostEditOptionsBar: UIView {
     @IBAction func handleCaption(_ sender: Any) {
         delegate?.editCaption()
     }
+    
 }

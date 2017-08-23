@@ -51,7 +51,7 @@ extension MainViewController: MainInterfaceProtocol {
     }
     
     func presentHomeScreen(animated: Bool) {
-        cameraView.cameraState = .Initiating
+        //cameraView.cameraState = .Initiating
         scrollView.setContentOffset(CGPoint(x: 0, y: view.frame.height * 1.0), animated: animated)
         mainTabBar.selectedIndex = 0
         scrollView.isScrollEnabled = false
@@ -63,7 +63,8 @@ extension MainViewController: MainInterfaceProtocol {
     }
     
     func fetchAllStories() {
-        places.state.fetchAll()
+        //places?.state.fetchAll()
+        homie?.state.fetchAll()
         LocationService.sharedInstance.requestNearbyLocations()
         
     }
@@ -86,6 +87,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     fileprivate var mainTabBar:MainTabBarController!
     
     fileprivate var places:HomeViewController!
+    fileprivate var homie:HomieViewController!
     fileprivate var messages:MessagesViewController!
     fileprivate var notifications:NotificationsViewController!
     fileprivate var profile:MyProfileViewController!
@@ -241,7 +243,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         
         
         let nav1 = mainTabBar.viewControllers![0] as! UINavigationController
-        places = nav1.viewControllers[0] as! HomeViewController
+        homie = nav1.viewControllers[0] as! HomieViewController
         
         let nav2 = mainTabBar.viewControllers![1] as! UINavigationController
         messages = nav2.viewControllers[0] as! MessagesViewController
@@ -279,7 +281,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         scrollView.isScrollEnabled = false
         
         flashView = UIView(frame: view.bounds)
-        flashView.backgroundColor = UIColor.black
+        flashView.backgroundColor = UIColor.white
         flashView.alpha = 0.0
         
         view.addSubview(flashView)
@@ -306,12 +308,10 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         
         if gps_service == nil {
             gps_service = GPSService(["MainViewController":self])
-            gps_service.startUpdatingLocation()
-            
-            places.gps_service = gps_service
+            homie.gps_service = gps_service
             LocationService.sharedInstance.gps_service = gps_service
             
-           
+            gps_service.startUpdatingLocation()
         }
         
         if message_service == nil {
@@ -496,8 +496,8 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         
         if (verified && locationPermission && cameraPermission && microphonePermission) {
             messageWrapper.hideAll()
-            scrollView.isScrollEnabled = true
-            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+            mainTabBar.view.isUserInteractionEnabled = false
+            cameraView.cameraState = .Initiating
         }
     }
     
@@ -509,7 +509,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
-        self.navigationController?.navigationBar.barStyle = .black
+        self.navigationController?.navigationBar.barStyle = .default
         self.navigationController?.view.backgroundColor = UIColor.clear
         self.activateNavbar(false)
         if cameraView.cameraState == .PhotoTaken || cameraView.cameraState == .VideoTaken {
@@ -519,16 +519,17 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         
         if self.navigationController?.delegate === transitionController {
             if mainTabBar.selectedIndex == 0 {
-                places.shouldDelayLoad = true
+                //places.shouldDelayLoad = true
             }
         }
         textView.resignFirstResponder()
+
         
     }
     
     func newState(state: AppState) {
         if !state.userState.isAuth {
-            places.state.clear()
+            //places.state.clear()
             message_service.clear()
             notification_service.clear()
             mainStore.unsubscribe(self)
@@ -568,6 +569,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         } else {
             statusBar(hide: false, animated: true)
         }
+
     }
     
     
@@ -707,7 +709,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         homeButton.alpha = multiple * 0.5
         
         if alpha < 0.98 && cameraView.cameraState == .Off{
-            cameraView.cameraState = .Initiating
+            //cameraView.cameraState = .Initiating
         }
         
     }
@@ -716,6 +718,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
         let height = UIScreen.main.bounds.height
         let y = scrollView.contentOffset.y
         if y < height {
+            mainTabBar.view.isUserInteractionEnabled = true
             globalMainInterfaceProtocol?.fetchAllStories()
             setToCameraMode()
             scrollView.isScrollEnabled = true
@@ -771,7 +774,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         get {
-            return .lightContent
+            return .default
         }
     }
     
@@ -893,7 +896,7 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
             UIView.animate(withDuration: 0.25, animations: {
                 self.flashView.alpha = 0.0
             }, completion: { result in
-                self.flashView.backgroundColor = UIColor.black
+                self.flashView.backgroundColor = UIColor.white
             })
         })
     }
@@ -953,12 +956,15 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
 
     
     func hideEditOptions() {
+        editOptionsBar.setLocationName(nil)
         editOptionsBar.removeFromSuperview()
         sendOptionsBar.removeFromSuperview()
         editOptionsBar.delegate = nil
         sendOptionsBar.delegate = nil
         textView.isUserInteractionEnabled = false
         textView.removeFromSuperview()
+        
+        
         self.view.removeGestureRecognizer(textViewTapGesture)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -986,6 +992,12 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         }
     }
     
+    func cameraReady() {
+        
+        scrollView.isScrollEnabled = true
+        scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+    }
+    
     func recordButtonTapped() {
         switch screenMode {
         case .Camera:
@@ -995,8 +1007,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         case .Main:
             
             if isCameraPermitted() {
-                scrollView.isScrollEnabled = true
-                scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+                mainTabBar.view.isUserInteractionEnabled = false
+                cameraView.cameraState = .Initiating
             }
             
             break
@@ -1211,9 +1223,11 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     }
     
     func sent() {
-        cameraView.cameraState = .Initiating
+        cameraView.cameraState = .Off
+        mainTabBar.view.isUserInteractionEnabled = true
         presentHomeScreen(animated: false)
         scrollView.isScrollEnabled = false
+        screenMode = .Main
     }
 
     
@@ -1263,7 +1277,6 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
         
         textView.center = CGPoint(x: textView.center.x, y: textView.center.y - change)
         self.textViewCenter = CGPoint(x: textViewCenter.x, y: textViewCenter.y - change / 2)
-        print("TextViewCenter: \(textViewCenter)")
     }
     
     public func textViewDidChange(_ textView: UITextView) {
@@ -1503,13 +1516,17 @@ extension MainViewController: View2ViewTransitionPresenting {
 
 extension MainViewController: GPSServiceProtocol {
     func tracingLocation(_ currentLocation: CLLocation) {}
-    func significantLocationUpdate( _ location: CLLocation) {}
+    func significantLocationUpdate( _ location: CLLocation) {
+        print("LOCATION UPDATED")
+        //places?.state.getNearby()
+        homie?.state.getNearby()
+    }
     func tracingLocationDidFailWithError(_ error: NSError) {}
     func nearbyPlacesUpdate(_ likelihoods:[GMSPlaceLikelihood]) {}
     func horizontalAccuracyUpdated(_ accuracy:Double?) {}
     func authorizationDidChange(_ status: CLAuthorizationStatus) {
-        places?.collectionView?.reloadData()
-        
+        //places?.collectionView?.reloadData()
+        homie?.collectionView?.reloadData()
         if status == .authorizedAlways || status == .authorizedWhenInUse {
             self.cameraPermissionsView?.removeLocationView()
             
@@ -1517,7 +1534,6 @@ extension MainViewController: GPSServiceProtocol {
                 self.checkCameraPermissions()
                 requestingLocationAuthorization = false
             }
-            
         }
         
     }

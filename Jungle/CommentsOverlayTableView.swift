@@ -13,7 +13,7 @@ protocol CommentsTableProtocol:class {
     func showUser(_ uid:String)
     func refreshPulled()
     func showPostComments(_ indexPath:IndexPath?)
-    func showAnonOptions(_ aid:String)
+    func showAnonOptions(_ aid:String, _ anonName:String)
 }
 
 class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSource, CommentCellProtocol {
@@ -24,7 +24,6 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     var divider:UIView!
     var hasCaption = false
     
-    var refreshControl: UIRefreshControl!
     
     weak var delegate:CommentsTableProtocol?
     weak var itemRef:StoryItem?
@@ -42,7 +41,7 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     
     func commentAuthorTapped(_ comment:Comment) {
         if let anon = comment as? AnonymousComment {
-            delegate?.showAnonOptions(anon.author)
+            delegate?.showAnonOptions(anon.author, anon.anonName)
         } else {
             delegate?.showUser(comment.author)
         }
@@ -56,7 +55,25 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         
     }
     
+    func commentMentionTapped(_ mention: String) {
+        
+        for comment in comments {
+            if let anon = comment as? AnonymousComment {
+                if anon.anonName == mention {
+                    delegate?.showAnonOptions(anon.author, anon.anonName)
+                    return
+                }
+            }
+        }
+        
+        let controller = UserProfileViewController()
+        controller.username = mention
+        globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+    }
+    
     var header:UIView!
+    var viewMore:LoadMoreCommentsOverlayView!
+    
     func setup() {
         self.clipsToBounds = true
         let gradient = CAGradientLayer()
@@ -79,41 +96,45 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
         header = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 0))
         header.backgroundColor = UIColor.green
 
+        viewMore = UINib(nibName: "LoadMoreCommentsOverlayView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! LoadMoreCommentsOverlayView
+        viewMore.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 60)
+        viewMore.isUserInteractionEnabled = true
         
-        tableView.tableHeaderView = UIView(frame:CGRect(x:0,y:0,width:tableView.frame.width, height: 8.0))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleRefresh))
+        viewMore.addGestureRecognizer(tap)
+        
+        tableView.tableHeaderView = viewMore
         tableView.showsVerticalScrollIndicator = false
         tableView.tableFooterView = UIView()
         tableView.keyboardDismissMode = .onDrag
         
-        
-
         self.addSubview(tableView)
         
         divider = UIView(frame: CGRect(x: 8,y: frame.height-1, width: frame.width-16, height: 1))
-        divider.backgroundColor = UIColor(white: 1.0, alpha: 0.5)
+        divider.backgroundColor = UIColor(white: 1.0, alpha: 0.75)
         divider.isHidden = true
         self.addSubview(divider)
         
         reloadTable()
         scrollBottom(animated: false)
-        
-        refreshControl = UIRefreshControl()
-        refreshControl.tintColor = UIColor.white
-        refreshControl.backgroundColor = UIColor.clear
 
-        refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
-        tableView.addSubview(self.refreshControl)
     }
     
     var lastKey:String?
+    
     func handleRefresh() {
+        viewMore.startLoadAnimation()
         delegate?.refreshPulled()
         let firstComment = comments[0]
         lastKey = firstComment.key
     }
     
-    func setTableComments(item:StoryItem, comments:[Comment], animated:Bool)
+    func setTableComments(item:StoryItem, comments:[Comment], animated:Bool, delayViewMore:Bool)
     {
+        //if delayViewMore {
+            //viewMore.delay()
+        //}
+        viewMore.stopLoadAnimation()
         self.itemRef = item
         self.comments = comments
         divider.isHidden = hasCaption || comments.count == 0
@@ -122,9 +143,10 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
     }
     
     func endRefreshing(comments: [Comment], didRetrievePreviousComments: Bool) {
+        print("endRefreshing")
         
-        self.refreshControl.endRefreshing()
         if didRetrievePreviousComments {
+            print("didRetrievePreviousComments")
             self.comments = comments
             divider.isHidden = hasCaption || comments.count == 0
             reloadTable()
@@ -144,8 +166,8 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
                 
             }
         } else {
-            self.refreshControl.isEnabled = false
-            self.refreshControl.removeFromSuperview()
+            print("DID NOT: RetrievePreviousComments")
+            viewMore.stopLoadAnimation()
         }
     }
     
@@ -155,6 +177,12 @@ class CommentsOverlayTableView: UIView, UITableViewDelegate, UITableViewDataSour
             header.frame = CGRect(x: 0, y: 0, width: header.frame.width, height: 30)
         } else {
             header.frame = CGRect(x: 0, y: 0, width: header.frame.width, height:0)
+        }
+        
+        if let item = itemRef {
+            tableView.tableHeaderView = comments.count < item.numComments && comments.count >= 16 ? viewMore : UIView(frame:CGRect(x: 0, y: 0, width: tableView.frame.width, height: 12.0))
+        } else {
+            tableView.tableHeaderView = UIView(frame:CGRect(x: 0, y: 0, width: tableView.frame.width, height: 12.0))
         }
         
         tableView.reloadData()

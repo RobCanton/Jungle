@@ -9,13 +9,16 @@
 import Foundation
 import Firebase
 import ReSwift
+import Alamofire
 
 protocol HomeProtocol: class {
     func update(_ section: HomeSection?)
+    func retrievingNearbyPosts(_ isRetrieving:Bool)
 }
 
 class HomeStateController: StoreSubscriber {
     weak var delegate:HomeProtocol?
+    weak var gps_service:GPSService?
     
     private(set) var myStory:UserStory?
     
@@ -55,6 +58,11 @@ class HomeStateController: StoreSubscriber {
     fileprivate var nearbyCitiesRef:DatabaseReference?
     fileprivate var recentPlacesRef:DatabaseReference?
     
+    private(set) var retrievingNearbyPosts = false {
+        didSet {
+            delegate?.retrievingNearbyPosts(retrievingNearbyPosts)
+        }
+    }
     private(set) var viewedPosts = [String:Double]()
     
     init(delegate:HomeProtocol)
@@ -113,11 +121,51 @@ class HomeStateController: StoreSubscriber {
     func fetchAll() {
         mainStore.subscribe(self)
         observeMyStory()
-        observeNearbyCities()
+        //observeNearbyCities()
         //observeNearbyPlaces()
-        observeNearbyPosts()
+        getNearby()
+        //observeNearbyPosts()
         observePopularPosts()
         observeViewed()
+    }
+    
+    func getNearby() {
+        guard let gps = gps_service else { return }
+        guard let loc = gps.getLastLocation() else { return }
+        let rad = LocationService.sharedInstance.radius
+        retrievingNearbyPosts = true
+        UserService.getHTTPSHeaders() { HTTPHeaders in
+            guard let headers = HTTPHeaders else { return }
+            
+            
+            let lat = loc.coordinate.latitude
+            let lon = loc.coordinate.longitude
+            let params = "?lat=\(lat)&lon=\(lon)&rad=\(rad)"
+            print("getNearby: \(params)")
+            Alamofire.request("\(API_ENDPOINT)/nearby/\(params)", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                DispatchQueue.main.async {
+                    if let json = response.result.value as? [String:Any],
+                        let success = json["success"] as? Bool,
+                        let posts = json["posts"] as? [String],
+                        let cities = json["cities"] as? [String:Double] {
+                        
+                        print("JSON: \(json)")
+                        if !success {
+                            return print("ERROR")
+                        }
+                        
+                        print("POSTS: \(posts)")
+                        self.downloadPosts(posts)
+                        self.downloadNearbyCityStories(cities)
+                        
+                    } else {
+                        print("ERROR")
+                    }
+                }
+            }
+
+        }
+
     }
     
     func observeViewed() {
@@ -267,6 +315,7 @@ class HomeStateController: StoreSubscriber {
                     count = -1
                     
                     self.nearbyPosts = nearbyPosts.sorted(by: { return $0 > $1 })
+
                     //DispatchQueue.main.async {
                         self.delegate?.update(.nearby)
                     //}
@@ -295,6 +344,7 @@ class HomeStateController: StoreSubscriber {
     
     fileprivate func downloadNearbyCityStories(_ cities:[String:Double]) {
         var cityStories = [CityStory]()
+        self.retrievingNearbyPosts = false
         if cities.count == 0 {
             self.nearbyCityStories = cityStories
             delegate?.update(.places)
@@ -400,6 +450,9 @@ class HomeStateController: StoreSubscriber {
                     count = -1
                     
                     self.popularPosts = popularPosts.sorted(by: { return $0.popularity > $1.popularity })
+//                    if self.popularPosts.count >= 4 {
+//                        swap(&self.popularPosts[2], &self.popularPosts[3])
+//                    }
                    self.sortPopularPosts()
                 }
                 

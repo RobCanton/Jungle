@@ -23,6 +23,7 @@ class LoadMoreTableView: UITableViewHeaderFooterView {
     func stopLoadAnimation() {
         label.isHidden = false
         self.activityIndicator.stopAnimating()
+        
     }
 
 }

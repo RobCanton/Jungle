@@ -38,6 +38,10 @@ class NotificationTableViewCell: UITableViewCell {
         let type = notification.type
         if type != .comment && type != .comment_also && type != .comment_to_sub &&  type != .like && type != .mention { return }
         self.notification = notification
+        postImageView.image = nil
+        userImageView.image = nil
+        messageLabel.text = nil
+        userImageView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
         userTap = UITapGestureRecognizer(target: self, action: #selector(userTapped))
         

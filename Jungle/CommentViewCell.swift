@@ -53,10 +53,7 @@ class DetailedCommentCell: UITableViewCell {
         commentLabel.enabledTypes = [.mention]
         commentLabel.customColor[ActiveType.mention] = accentColor
         commentLabel.handleMentionTap { mention in
-            
-            let controller = UserProfileViewController()
-            controller.username = mention
-            globalMainInterfaceProtocol?.navigationPush(withController: controller, animated: true)
+            self.delegate?.commentMentionTapped(mention)
         }
         
         
@@ -238,7 +235,12 @@ class DetailedCommentCell: UITableViewCell {
     
     @IBAction func replyTapped(_ sender: Any) {
         guard let comment = self.comment else { return }
-        guard let username = self.authorLabel.text else { return }
-        delegate?.commentReplyTapped(comment, username)
+        if let anonComment = comment as? AnonymousComment {
+            delegate?.commentReplyTapped(comment, anonComment.anonName)
+        } else {
+            guard let username = self.authorLabel.text else { return }
+            delegate?.commentReplyTapped(comment, username)
+        }
+
     }
 }

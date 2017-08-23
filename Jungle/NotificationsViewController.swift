@@ -24,6 +24,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
     weak var notification_service:NotificationService?
     
     var tableView:UITableView!
+    var emptyView:EmptyMessagesView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,10 +61,20 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 68))
         tableView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
         
+        emptyView = UINib(nibName: "EmptyMessagesView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! EmptyMessagesView
+        
+        let msg = "Notifications that you recieve from new followers, comments, & likes will be shown here."
+        let size = UILabel.size(withText: msg, forWidth: tableView.frame.width - (24 + 16), withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium))
+        emptyView.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: size.height + 16 + 16 + 12 + 12 + 8 + emptyView.titleLabel.frame.height)
+        emptyView.titleLabel.text = "No notifications."
+        emptyView.detailLabel.text = msg
+        
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
         //getAllNotifications()
+        tableView.tableHeaderView = notifications.count == 0 ? emptyView : UIView()
         tableView.reloadData()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -101,6 +112,7 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
                 if count >= notificationsDict.count {
                     count = -1
                     self.notifications = tempNotifications.sorted(by: { $0 > $1 })
+                    self.tableView.tableHeaderView = self.notifications.count == 0 ? self.emptyView : UIView()
                     self.tableView.reloadData()
                     self.refreshIndicator.stopAnimating()
                 }
@@ -181,6 +193,29 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         
         tableView.deselectRow(at: indexPath, animated: true)
         
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+
+       let notification = notifications[indexPath.row]
+        
+        var action:UITableViewRowAction!
+
+        action = UITableViewRowAction(style: .normal, title: "Remove") { (rowAction, indexPath) in
+            //self.showDeleteCommentAlert(self.comments[indexPath.row])
+            UserService.ref.child("users/notifications/\(userState.uid)/\(notification.key)").removeValue() { error, ref in
+                if error != nil {
+                    Alerts.showStatusFailAlert(inWrapper: nil, withMessage: "Unable to remove notification.")
+                } else {
+                    Alerts.showStatusSuccessAlert(inWrapper: nil, withMessage: "Notification removed!")
+                }
+                
+                
+            }
+        }
+        action.backgroundColor = errorColor.withAlphaComponent(0.75)
+
+        return [action]
     }
     
     func showUser(_ uid:String) {

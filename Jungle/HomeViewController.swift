@@ -72,6 +72,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         titleLabel.textAlignment = .center
         header.addSubview(titleLabel)
         
+        let bar = UIView(frame: CGRect(x: 0, y: header.bounds.height - 1, width: header.bounds.width, height: 1.0))
+        bar.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+        
+        
         
         let optionsButton = UIButton(frame: CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
         optionsButton.setImage(UIImage(named: "sorting"), for: .normal)
@@ -154,6 +158,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         refreshControl.beginRefreshing()
         
         state = HomeStateController(delegate:self)
+        state.gps_service = gps_service
         
         messageWrapper = SwiftMessages()
     }
@@ -198,6 +203,10 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         refreshControl.endRefreshing()
         return self.collectionView.reloadData()
 
+    }
+    
+    func retrievingNearbyPosts(_ isRetrieving:Bool) {
+        homeHeader?.setEmptyViewLoading(isRetrieving)
     }
     
     func handleRefresh() {
@@ -274,6 +283,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         }
         
         let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
+        sortOptionsView.radiusChangedHandler = handleRadiusChange
         let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 180)
         let messageView = BaseView(frame: f)
         messageView.installContentView(sortOptionsView)
@@ -286,6 +296,11 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         config.dimMode = .gray(interactive: true)
         config.interactiveHide = false
         messageWrapper.show(config: config, view: messageView)
+    }
+    
+    func handleRadiusChange(_ radius:Int) {
+        LocationService.sharedInstance.setSearchRadius(radius)
+        state.getNearby()
     }
     
     

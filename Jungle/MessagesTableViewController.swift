@@ -27,7 +27,7 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
     
     var userSearchResults = [String]()
     
-    
+    var emptyView:EmptyMessagesView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +43,8 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         //view.addSubview(label)
         
         
+        
+        
         tableView = UITableView(frame: CGRect(x: 0,y: 44,width: view.frame.width ,height: view.frame.height - 44))
         
         let nib2 = UINib(nibName: "UserViewCell", bundle: nil)
@@ -55,6 +57,13 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
         tableView.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+        
+        emptyView = UINib(nibName: "EmptyMessagesView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! EmptyMessagesView
+        
+        let msg = "Send a direct message to someone to start a conversation!"
+        let size = UILabel.size(withText: msg, forWidth: tableView.frame.width - (24 + 16), withFont: UIFont.systemFont(ofSize: 14.0, weight: UIFontWeightMedium))
+        emptyView.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: size.height + 16 + 16 + 12 + 12 + 8 + emptyView.titleLabel.frame.height)
+        emptyView.detailLabel.text = msg
         
         view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
@@ -103,7 +112,9 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         
     }
     
+    
     func newState(state: AppState) {
+        self.tableView.tableHeaderView = conversations.count == 0 && !searchMode ? emptyView : UIView()
         self.tableView.reloadData()
     }
     
@@ -114,6 +125,7 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
     func conversationsUpdated(_ conversations: [Conversation]) {
         print("DEM CONVOS UPDATED")
         self.conversations = conversations
+        self.tableView.tableHeaderView = conversations.count == 0 && !searchMode ? emptyView : UIView()
         tableView.reloadData()
     }
     

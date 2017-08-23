@@ -16,10 +16,12 @@ protocol NotificationServiceProtocol:ServiceProtocol {
 }
 
 
+
 class NotificationService: Service, UNUserNotificationCenterDelegate {
     
     private(set) var notifications:[String:Bool]!
     private(set) var cache:NSCache<NSString, AnyObject>!
+
     
     override init(_ subscribers:[String:ServiceProtocol]) {
         super.init(subscribers)
@@ -88,11 +90,11 @@ class NotificationService: Service, UNUserNotificationCenterDelegate {
     
     internal func getNotification(_ key:String, completion: @escaping((_ notification:Notification?, _ fromCache: Bool)->())) {
         
-        if let cachedNotification = cache.object(forKey: "notification-\(key)" as NSString) as? Notification {
-            if cachedNotification.type != .comment || cachedNotification.type != .comment_also || cachedNotification.type != .comment_to_sub  {
-                return completion(cachedNotification, true)
-            }
-        }
+//        if let cachedNotification = cache.object(forKey: "notification-\(key)" as NSString) as? Notification {
+//            if cachedNotification.type != .comment || cachedNotification.type != .comment_also || cachedNotification.type != .comment_to_sub  {
+//                return completion(cachedNotification, true)
+//            }
+//        }
         
         let ref = Database.database().reference()
         let notificationsRef = ref.child("notifications/\(key)")
@@ -117,7 +119,7 @@ class NotificationService: Service, UNUserNotificationCenterDelegate {
                 } else {
                     notification = Notification(key: key, type: type, date: date, sender: sender, postKey: postKey, text: text, count: count)
                 }
-                self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
+                //self.cache.setObject(notification!, forKey: "notification-\(key)" as NSString)
             } else {
                 print("Notification doesn't exist")
             }

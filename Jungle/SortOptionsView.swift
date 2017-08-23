@@ -19,6 +19,8 @@ class SortOptionsView: UIView {
     @IBOutlet weak var slider: TGPDiscreteSlider!
     @IBOutlet weak var sliderLabels: TGPCamelLabels!
     
+    var radiusChangedHandler:((_ radius:Int)->())?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -59,7 +61,7 @@ class SortOptionsView: UIView {
         let value = Int(sender.value)
         sliderLabels?.value = UInt(value)
         let distance = Config.ranges[value].distance
-        LocationService.sharedInstance.setSearchRadius(distance)
+        radiusChangedHandler?(distance)
         print("Range changed")
     }
 

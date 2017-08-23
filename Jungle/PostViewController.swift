@@ -56,6 +56,35 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         
         /* Item State Controller */
         itemStateController = ItemStateController()
+        
+        let press = UILongPressGestureRecognizer(target: self, action: #selector(pressed))
+        press.minimumPressDuration = 0.5
+        press.delaysTouchesBegan = true
+        self.addGestureRecognizer(press)
+    }
+    
+    func pressed(_ gesture:UILongPressGestureRecognizer) {
+        if keyboardUp { return }
+        switch gesture.state {
+        case .began:
+            UIView.animate(withDuration: 0.35, animations: {
+                self.headerView.alpha = 0.0
+                self.commentsView.alpha = 0.0
+                self.infoView.alpha = 0.0
+                self.commentBar.alpha = 0.0
+            })
+            break
+        case .ended:
+            UIView.animate(withDuration: 0.35, animations: {
+                self.headerView.alpha = 1.0
+                self.commentsView.alpha = 1.0
+                self.infoView.alpha = 1.0
+                self.commentBar.alpha = 1.0
+            })
+            break
+        default:
+            break
+        }
     }
     
     func preparePost(_ post:StoryItem, cellIndex: Int) {
@@ -109,7 +138,7 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         self.infoView.setInfo(item)
         self.infoView.delegate = self
         
-        commentsView.setTableComments(item:item, comments: item.comments, animated: false)
+        commentsView.setTableComments(item:item, comments: item.comments, animated: false, delayViewMore: true)
         commentBar.textField.delegate = self
         commentBar.delegate = self
         
@@ -132,10 +161,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     func itemStateDidChange(comments: [Comment]) {
         //self.headerView.setNumComments(comments.count)
         guard let item = self.storyItem else { return }
-        self.commentsView.setTableComments(item:item, comments: comments, animated: true)
+        self.commentsView.setTableComments(item:item, comments: comments, animated: true, delayViewMore: false)
     }
     
     func itemStateDidChange(comments: [Comment], didRetrievePreviousComments: Bool) {
+        print("itemStateDidChange")
         commentsView.endRefreshing(comments: comments, didRetrievePreviousComments: didRetrievePreviousComments)
     }
     
@@ -223,9 +253,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         if like {
             UploadService.addLike(post: item)
             item.addLike(mainStore.state.userState.uid)
+            headerView.setNumLikes(item.numLikes + 1)
         } else {
             UploadService.removeLike(post: item)
             item.removeLike(mainStore.state.userState.uid)
+            headerView.setNumLikes(item.numLikes - 1)
         }
     }
     
@@ -240,17 +272,16 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
     
     func showAuthor() {
         guard let item = self.storyItem else { return }
-        if let _ = item.anon {
+        if let anon = item.anon {
             print("HMM")
-            delegate?.showAnonOptions(item.authorId)
+            delegate?.showAnonOptions(item.authorId, anon.anonName)
         } else {
             delegate?.showUser(item.authorId)
         }
     }
     
-    func showAnonOptions(_ aid:String) {
-        print("showAnonOptions")
-        delegate?.showAnonOptions(aid)
+    func showAnonOptions(_ aid:String, _ anonName:String) {
+        delegate?.showAnonOptions(aid, anonName)
     }
     
     
@@ -365,7 +396,6 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         destroyVideoPlayer()
         commentBar.reset()
         delegate = nil
-        storyItem = nil
         
         isCurrentItem = false
         
@@ -374,6 +404,11 @@ public class PostViewController: UICollectionViewCell, PostHeaderProtocol, PostF
         commentBar.delegate = nil
         //itemStateController.removeAllObservers()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    func cleanItem() {
+        storyItem = nil
+        itemStateController.removeAllObservers()
     }
     
     func reset() {
@@ -585,6 +620,6 @@ extension PostViewController: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.characters.count + string.characters.count - range.length
-        return newLength <= 140 // Bool
+        return newLength <= maxCommentLength // Bool
     }
 }

@@ -25,7 +25,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var statusBarShouldHide = false
     var shouldScrollToBottom = false
-    
+    var clearItemObservers = true
     var currentIndexPath:IndexPath?
     {
         willSet {
@@ -83,6 +83,7 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         getCurrentCell()?.isCurrentItem = true
         getCurrentCell()?.resume()
         
+        clearItemObservers = true
         
         if let gestureRecognizers = self.view.gestureRecognizers {
             for gestureRecognizer in gestureRecognizers {
@@ -107,8 +108,13 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         
+        
         for cell in collectionView.visibleCells as! [PostViewController] {
             cell.cleanUp()
+            
+            if clearItemObservers {
+                cell.cleanItem()
+            }
         }
     }
     
@@ -296,21 +302,17 @@ extension GalleryViewController: PopupProtocol {
         }
     }
     
-    func showAnonOptions(_ aid: String) {
+    func showAnonOptions(_ aid: String, _ anonName:String) {
         guard let cell = getCurrentCell() else { return }
         guard let item = cell.storyItem else { return }
         if let my_aid = userState.anonID, my_aid != aid {
             cell.pause()
-            let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            let actionSheet = UIAlertController(title: anonName, message: nil, preferredStyle: .actionSheet)
             let cancelActionButton: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
                 cell.resume()
             }
             actionSheet.addAction(cancelActionButton)
             
-//            let messageAction: UIAlertAction = UIAlertAction(title: "Send Message", style: .default) { action -> Void in
-//                
-//            }
-//            actionSheet.addAction(messageAction)
             
             let blockAction: UIAlertAction = UIAlertAction(title: "Block", style: .destructive) { action -> Void in
                 UserService.blockAnonUser(aid: aid) { success in
@@ -374,6 +376,9 @@ extension GalleryViewController: PopupProtocol {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
+        
+        clearItemObservers = false
+        
         let controller = PostMetaTableViewController()
         controller.item = item
         controller.sort = .likes
@@ -389,6 +394,9 @@ extension GalleryViewController: PopupProtocol {
         if let nav = self.navigationController {
             nav.delegate = nil
         }
+        
+        clearItemObservers = false
+        
         let controller = PostMetaTableViewController()
         controller.item = item
         controller.sort = .date

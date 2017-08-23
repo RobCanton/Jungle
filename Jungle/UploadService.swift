@@ -267,6 +267,13 @@ class UploadService {
         guard let image = upload.image else { return }
         
         let uid = userState.uid
+        var author = mainStore.state.userState.uid
+        let aid = userState.anonID
+        if userState.anonMode && aid == nil { return }
+        
+        if userState.anonMode && aid != nil {
+            author = aid!
+        }
         Alerts.showStatusProgressAlert(inWrapper: sm, withMessage: "Uploading...")
         
         let avgColor = image.areaAverage()
@@ -281,7 +288,7 @@ class UploadService {
             
             // Upload file and metadata to the object
             let storageRef = Storage.storage().reference()
-            let uploadTask = storageRef.child("user_uploads/\(uid)/\(uploadKey).jpg").putData(data, metadata: metadata) { metadata, error in
+            let uploadTask = storageRef.child("user_uploads/\(author)/\(uploadKey).jpg").putData(data, metadata: metadata) { metadata, error in
                 
                 if (error != nil) {
                     return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to upload.")
@@ -607,7 +614,35 @@ class UploadService {
     static var numConsequtiveComments = 0
     static func addComment(post:StoryItem, comment:String, completion: @escaping ((_ success:Bool)->())) {
         if comment == "" { return }
-        let ref = Database.database().reference()
+        
+        if !UserService.isEmailVerified {
+            completion(false)
+            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
+        
+        if isBlocked(post.authorId) {
+            completion(false)
+            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their posts.")
+        }
+        
+        let now = Date()
+        if let lastDate = lastCommentTime  {
+            let timeSinceLastComment = now.timeIntervalSince(lastDate)
+
+            if timeSinceLastComment < 10.0 {
+                numConsequtiveComments += 1
+                
+                if numConsequtiveComments >= 3 {
+                    lastCommentTime = Date()
+                    completion(false)
+                    return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Whoa slow down there! 😉")
+                }
+                
+            } else {
+                numConsequtiveComments = 0
+            }
+        }
+
         
         UserService.getHTTPSHeaders() { HTTPHeaders in
             guard let headers = HTTPHeaders else { return }
@@ -631,96 +666,22 @@ class UploadService {
                 DispatchQueue.main.async {
                     if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool {
                         
-                        print("COMMENT RESPONSE: \(json)")
-                        return completion(success)
+                        if success {
+                            lastCommentTime = Date()
+                            return completion(success)
+                        } else {
+                            Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
+                            return completion(success)
+                        }
+                        
                         
                     } else {
-                        print("ERROR!")
+                        Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
                         return completion(false)
                     }
                 }
             }
         }
-//        
-//        
-//        if !UserService.isEmailVerified {
-//            completion(false)
-//            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
-//        }
-//        
-//        if isBlocked(post.authorId) {
-//            completion(false)
-//            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to comment on their posts.")
-//        }
-        
-//        let now = Date()
-//        if let lastDate = lastCommentTime  {
-//            let timeSinceLastComment = now.timeIntervalSince(lastDate)
-//            print("Time since last comment: \(timeSinceLastComment)")
-//            if timeSinceLastComment < 10.0 {
-//                numConsequtiveComments += 1
-//                
-//                if numConsequtiveComments >= 3 {
-//                    lastCommentTime = Date()
-//                    completion(false)
-//                    return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Whoa slow down there! 😉")
-//                }
-//                
-//            } else {
-//                numConsequtiveComments = 0
-//            }
-//        }
-        
-//        let uid = mainStore.state.userState.uid
-//        if userState.anonMode, let aid = userState.anonID {
-//            
-//            let uploadRef = ref.child("api/requests/anon_comment/\(uid)/\(post.key)").childByAutoId()
-//            let path = "api/requests/anon_comment/\(uid)/\(post.key)/\(uploadRef.key)"
-//            
-//            let updateObject = [
-//                "\(path)/aid" : aid,
-//                "\(path)/text" : comment,
-//                "\(path)/timestamp" : [".sv":"timestamp"],
-//                "uploads/subscribers/\(post.key)/\(uid)": true
-//                ] as [String:Any]
-//            
-//            
-//            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
-//                
-//                if error != nil {
-//                    print("ERROR: \(error)")
-//                    completion(false)
-//                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
-//                } else {
-//                    lastCommentTime = Date()
-//                    completion(true)
-//                }
-//            })
-//            
-//        } else {
-//            let uploadRef = ref.child("uploads/comments/\(post.key)").childByAutoId()
-//            let path = "uploads/comments/\(post.key)/\(uploadRef.key)"
-//            
-//            let updateObject = [
-//                "\(path)/author" : uid,
-//                "\(path)/text" : comment,
-//                "\(path)/timestamp" : [".sv":"timestamp"],
-//                "uploads/subscribers/\(post.key)/\(uid)": true
-//                ] as [String:Any]
-//            
-//            
-//            ref.updateChildValues(updateObject, withCompletionBlock: { error, ref in
-//                
-//                if error != nil {
-//                    print("ERROR: \(error)")
-//                    completion(false)
-//                    return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add comment.")
-//                } else {
-//                    lastCommentTime = Date()
-//                    completion(true)
-//                }
-//            })
-//        }
         
     }
     
@@ -773,6 +734,14 @@ class UploadService {
     
     static func addLike(post:StoryItem) {
         
+        if !UserService.isEmailVerified {
+            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
+        }
+        
+        if isBlocked(post.authorId) {
+            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to like their post.")
+        }
+        
         UserService.getHTTPSHeaders() { HTTPHeaders in
             guard let headers = HTTPHeaders else { return }
             
@@ -793,43 +762,19 @@ class UploadService {
                 DispatchQueue.main.async {
                     if let json = response.result.value as? [String:Any], let success = json["success"] as? Bool {
                         
-                        print("COMMENT RESPONSE: \(json)")
-                        return
+                        if success {
+                            
+                        } else {
+                            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
+                        }
                         
                     } else {
-                        print("ERROR!")
-                        return
+                        return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
                     }
                 }
             }
         }
         
-//        if !UserService.isEmailVerified {
-//            return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Please verify your email address!")
-//        }
-//        
-//        if isBlocked(post.authorId) {
-//            return Alerts.showStatusWarningAlert(inWrapper: sm, withMessage: "Unblock this user to like their post.")
-//        }
-//        
-//        let ref = Database.database().reference()
-//        let uid = mainStore.state.userState.uid
-//        
-//        
-//        if uid == post.authorId { return }
-//        if post.likes[uid] != nil { return }
-//        
-//        let updateObject = [
-//            "users/liked/\(uid)/\(post.key)": true,
-//            "uploads/likes/\(post.key)/\(uid)/anon": userState.anonMode,
-//            "uploads/likes/\(post.key)/\(uid)/t": [".sv":"timestamp"]
-//            ] as [String : Any]
-//        
-//        ref.updateChildValues(updateObject) { error, ref in
-//            if error != nil {
-//                return Alerts.showStatusFailAlert(inWrapper: sm, withMessage: "Unable to add like.")
-//            }
-//        }
     }
     
     static func removeLike(post:StoryItem) {

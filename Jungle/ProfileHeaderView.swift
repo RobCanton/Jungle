@@ -16,6 +16,68 @@ protocol ProfileHeaderProtocol:class {
     func changeFollowStatus()
 }
 
+class MyProfileHeaderView: ProfileHeaderView {
+    @IBOutlet weak var controlContainer: UIView!
+    @IBOutlet weak var publicButton: UIButton!
+    @IBOutlet weak var anonymousButton: UIButton!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        anonymousButton.setTitleColor(UIColor.black, for: .disabled)
+        anonymousButton.setTitleColor(UIColor.gray, for: .focused)
+        anonymousButton.setTitleColor(UIColor.gray, for: .highlighted)
+        anonymousButton.setTitleColor(UIColor.gray, for: .selected)
+        anonymousButton.setTitleColor(UIColor.lightGray, for: .normal)
+        
+//        anonymousButton.setBackgroundColor(color: UIColor.white, forUIControlState: .normal)
+//        anonymousButton.setBackgroundColor(color: UIColor.white, forUIControlState: .focused)
+//        anonymousButton.setBackgroundColor(color: UIColor.white, forUIControlState: .highlighted)
+//        anonymousButton.setBackgroundColor(color: UIColor.white, forUIControlState: .selected)
+//        anonymousButton.setBackgroundColor(color: UIColor.gray, forUIControlState: .disabled)
+        
+        publicButton.setTitleColor(UIColor.black, for: .disabled)
+        publicButton.setTitleColor(UIColor.gray, for: .focused)
+        publicButton.setTitleColor(UIColor.gray, for: .highlighted)
+        publicButton.setTitleColor(UIColor.gray, for: .selected)
+        publicButton.setTitleColor(UIColor.lightGray, for: .normal)
+        
+//        publicButton.setBackgroundColor(color: UIColor.white, forUIControlState: .normal)
+//        publicButton.setBackgroundColor(color: UIColor.white, forUIControlState: .focused)
+//        publicButton.setBackgroundColor(color: UIColor.white, forUIControlState: .highlighted)
+//        publicButton.setBackgroundColor(color: UIColor.white, forUIControlState: .selected)
+//        publicButton.setBackgroundColor(color: UIColor.gray, forUIControlState: .disabled)
+        
+    }
+    
+    var controlHandler:((_ mode: MyPostsMode)->())?
+    
+
+
+    func setupControl(_ mode:MyPostsMode) {
+        print("SETUP CONTROL")
+        if mode == .anonymousPosts {
+            anonymousButton.isEnabled = false
+            publicButton.isEnabled = true
+        } else {
+            anonymousButton.isEnabled = true
+            publicButton.isEnabled = false
+        }
+    }
+    
+    @IBAction func anonymousTapped(_ sender: Any) {
+        controlHandler?(.anonymousPosts)
+        print("ANON TAPPED")
+    }
+
+    @IBAction func publicTapped(_ sender: Any) {
+        controlHandler?(.publicPosts)
+        print("ANON PUBLIC TAPPED")
+    }
+    
+    
+    
+}
+
 class ProfileHeaderView: UICollectionReusableView {
 
     @IBOutlet weak var imageView: UIImageView!
@@ -118,17 +180,6 @@ class ProfileHeaderView: UICollectionReusableView {
         delegate?.showFollowing()
     }
     
-    @IBAction func handleFollowButton(_ sender: UIButton) {
-        
-        sender.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
-        
-        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .curveEaseOut, animations: {
-            sender.transform = CGAffineTransform.identity
-        }, completion: nil)
-        
-        delegate?.changeFollowStatus()
-    }
-    
     @IBAction func buttonTouchCancel(_ sender: UIButton) {
         sender.transform = CGAffineTransform.identity
     }
@@ -158,10 +209,7 @@ class ProfileHeaderView: UICollectionReusableView {
         }
     }
     
-    
-    @IBAction func handleEditButtonTouchUpInside(_ sender: Any) {
-        delegate?.showEditProfile()
-    }
+
     
     func setUserStatus(status:FollowingStatus) {
         switch status {

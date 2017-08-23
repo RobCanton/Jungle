@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import NVActivityIndicatorView
 
 class CameraButton: UIView {
     
@@ -22,6 +23,7 @@ class CameraButton: UIView {
     var tappedHandler:(()->())?
     var pressedHandler:((_ state:UIGestureRecognizerState)->())?
     
+    var activityView:UIActivityIndicatorView!
     
     override init(frame:CGRect) {
         super.init(frame:frame)
@@ -82,9 +84,19 @@ class CameraButton: UIView {
         addSubview(redCircle)
         addSubview(ring)
         addSubview(progresser)
-        addSubview(interactionView)
+        
         
         self.transform = CGAffineTransform(scaleX: 0.70, y: 0.70)
+        let sideLength = self.bounds.width + 20.0
+        let margin:CGFloat = 0.0
+        let activityFrame = CGRect(x: 4.0, y: 4.0, width: sideLength - margin * 2.0, height: sideLength - margin * 2.0)
+        activityView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        activityView.frame = activityFrame
+        activityView.center = self.center
+        activityView.transform = CGAffineTransform(scaleX: 1.70, y: 1.70)
+        addSubview(activityView)
+        
+        addSubview(interactionView)
         
     }
     
