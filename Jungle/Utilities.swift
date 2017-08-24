@@ -165,10 +165,8 @@ func getNumericShortesthandString(_ number:Int) -> String {
 }
 
 func getDistanceString(distance:Double) -> String {
-    if distance < 0.5 {
-        // meters
-        let meters = Int(round(distance * 1000)/1)
-        return "\(meters) m"
+    if distance < 15 {
+        return "Nearby"
     } else {
         let rounded = Int(distance)//Double(round(10*distance)/10)
         return "\(rounded) km"

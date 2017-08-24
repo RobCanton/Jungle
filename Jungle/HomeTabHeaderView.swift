@@ -15,6 +15,7 @@ enum HomeMode {
 
 protocol HomeTabHeaderProtocol:class {
     func modeChange(_ mode:HomeMode)
+    func showSortOptions()
 }
 
 class HomeTabHeaderView:UIView {
@@ -22,6 +23,7 @@ class HomeTabHeaderView:UIView {
     @IBOutlet weak var controlView: UIView!
     @IBOutlet weak var homeButton: UIButton!
     @IBOutlet weak var popularButton: UIButton!
+    @IBOutlet weak var sortButton: UIButton!
     
     weak var delegate:HomeTabHeaderProtocol?
     
@@ -61,15 +63,22 @@ class HomeTabHeaderView:UIView {
         delegate?.modeChange(.popular)
     }
     
+    @IBAction func sortOptionsTapped(_ sender: Any) {
+        delegate?.showSortOptions()
+    }
+    
     func setState(_ mode:HomeMode) {
         switch mode {
         case .home:
             homeButton.isEnabled = false
             popularButton.isEnabled = true
+            sortButton.isEnabled = true
             break
         case .popular:
+            
             homeButton.isEnabled = true
             popularButton.isEnabled = false
+            sortButton.isEnabled = false
             break
         }
     }
@@ -78,6 +87,8 @@ class HomeTabHeaderView:UIView {
         var sliderFrame = slider.frame
         sliderFrame.origin.x = (sliderFrame.width) * percent
         slider.frame = sliderFrame
+        sortButton.alpha = 1.0 - percent
+        
     }
     
     func switchAnonMode() {

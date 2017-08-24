@@ -14,7 +14,7 @@ import MapKit
 import SwiftMessages
 
 
-class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, HomeProtocol, HomeTabHeaderProtocol {
+class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionViewDelegate, UICollectionViewDataSource, HomeProtocol, HomeTabHeaderProtocol, HomeHeaderProtocol {
     var state:HomeStateController!
     
     
@@ -46,6 +46,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
     var placesHeader:FollowingHeader?
     
     var refreshControl:UIRefreshControl!
+    var popularRefreshControl:UIRefreshControl!
     
     var anonButton:UIButton!
     
@@ -77,7 +78,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         header.delegate = self
         view.addSubview(header)
         
-        pageScrollView = UIScrollView(frame: CGRect(x: 0, y: header.frame.height, width: view.bounds.width, height: view.bounds.height - header.frame.height - 49.0))
+        pageScrollView = UIScrollView(frame: CGRect(x: 0, y: header.frame.height, width: view.bounds.width, height: view.bounds.height - header.frame.height))
         pageScrollView.showsHorizontalScrollIndicator = false
         pageScrollView.bounces = true
         pageScrollView.delegate = self
@@ -139,6 +140,18 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         
         homePage.addSubview(collectionView)
         
+        refreshControl = UIRefreshControl()
+        refreshControl.tintColor = UIColor.gray
+        refreshControl.backgroundColor = UIColor.clear
+        
+        refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        collectionView.addSubview(self.refreshControl)
+        
+        //LocationService.sharedInstance.delegate = self
+        
+        self.collectionView.reloadData()
+        refreshControl.beginRefreshing()
+        
         
         let popularLayout = TRMosaicLayoutVertical()
         popularLayout.delegate = self
@@ -157,8 +170,17 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         
         popularPage.addSubview(popularCollectionView)
         
+        popularRefreshControl = UIRefreshControl()
+        popularRefreshControl.tintColor = UIColor.gray
+        popularRefreshControl.backgroundColor = UIColor.clear
+        
+        popularRefreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        popularCollectionView.addSubview(self.popularRefreshControl)
+        
         state = HomeStateController(delegate:self)
         state.gps_service = gps_service
+        
+        messageWrapper = SwiftMessages()
         
     }
     
@@ -173,33 +195,58 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        state.delegate = self
+        update(nil)
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        state.delegate = nil
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         mainStore.unsubscribe(self)
+        state.delegate = nil
         
     }
     
     func newState(state: AppState) {
-        
+        header.showCurrentAnonMode()
     }
     
     func update(_ section:HomeSection?) {
         print("state: \(state.nearbyPosts)")
-        //refreshControl.endRefreshing()
-        self.collectionView.reloadData()
-        self.popularCollectionView.reloadData()
+        
+        if let s = section {
+            if s == .popular {
+                popularRefreshControl.endRefreshing()
+                self.popularCollectionView.reloadData()
+            } else {
+                refreshControl.endRefreshing()
+                self.collectionView.reloadData()
+            }
+        } else {
+            refreshControl.endRefreshing()
+            popularRefreshControl.endRefreshing()
+            self.collectionView.reloadData()
+            self.popularCollectionView.reloadData()
+        }
+
         
     }
     
     func retrievingNearbyPosts(_ isRetrieving:Bool) {
-        //homeHeader?.setEmptyViewLoading(isRetrieving)
+        homeHeader?.setEmptyViewLoading(isRetrieving)
+    }
+    
+    func handleRefresh(_ sender: UIRefreshControl) {
+        if sender === refreshControl {
+            state.getNearby()
+        } else if sender === popularRefreshControl {
+            state.observePopularPosts()
+        }
+        
     }
     
     func modeChange(_ mode:HomeMode) {
@@ -211,7 +258,89 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
             pageScrollView.setContentOffset(CGPoint(x: pageScrollView.bounds.width, y: 0), animated: true)
             break
         }
+    }
+    
+    func authorizeGPS() {
+        let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
+        messageView.configureBackgroundView(width: 250)
+        messageView.configureContent(title: "Enable location services", body: "Your location will be used to show you nearby posts and let you share posts with people near you.", iconImage: nil, iconText: "🌎", buttonImage: nil, buttonTitle: "Enable Location") { _ in
+            self.enableLocationTapped()
+            self.messageWrapper.hide()
+        }
         
+        let button = messageView.button!
+        button.backgroundColor = accentColor
+        button.titleLabel!.font = UIFont.systemFont(ofSize: 16.0, weight: UIFontWeightMedium)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.contentEdgeInsets = UIEdgeInsets(top: 12.0, left: 16.0, bottom: 12.0, right: 16.0)
+        button.sizeToFit()
+        button.layer.cornerRadius = messageView.button!.bounds.height / 2
+        button.clipsToBounds = true
+        
+        button.setGradient(colorA: lightAccentColor, colorB: accentColor)
+        
+        messageView.backgroundView.backgroundColor = UIColor.init(white: 0.97, alpha: 1)
+        messageView.backgroundView.layer.cornerRadius = 12
+        var config = SwiftMessages.defaultConfig
+        config.presentationStyle = .center
+        config.duration = .forever
+        config.dimMode = .blur(style: .dark, alpha: 1.0, interactive: true)
+        config.presentationContext  = .window(windowLevel: UIWindowLevelStatusBar)
+        self.messageWrapper.show(config: config, view: messageView)
+    }
+    
+    func enableLocationTapped() {
+        
+        let status = gps_service.authorizationStatus()
+        switch status {
+        case .authorizedAlways:
+            break
+        case .authorizedWhenInUse:
+            break
+        case .denied:
+            if #available(iOS 10.0, *) {
+                let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)! as URL
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            } else {
+                let alert = UIAlertController(title: "Go to Settings", message: "Please minimize Jungle and go to your settings to enable location services.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            }
+            break
+        case .notDetermined:
+            gps_service.requestAuthorization()
+            break
+        case .restricted:
+            break
+        }
+    }
+    
+    func showSortOptions() {
+        
+        let status = gps_service.authorizationStatus()
+        if status != .authorizedAlways && status != .authorizedWhenInUse {
+            return authorizeGPS()
+        }
+        
+        let sortOptionsView = UINib(nibName: "SortOptionsView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! SortOptionsView
+        sortOptionsView.radiusChangedHandler = handleRadiusChange
+        let f = CGRect(x: 0, y: 0, width: view.frame.width, height: 180)
+        let messageView = BaseView(frame: f)
+        messageView.installContentView(sortOptionsView)
+        messageView.preferredHeight = 180
+        messageView.configureDropShadow()
+        var config = SwiftMessages.defaultConfig
+        config.presentationContext = .window(windowLevel: UIWindowLevelStatusBar)
+        config.duration = .forever
+        config.presentationStyle = .bottom
+        config.dimMode = .gray(interactive: true)
+        config.interactiveHide = false
+        messageWrapper.show(config: config, view: messageView)
+    }
+    
+    func handleRadiusChange(_ radius:Int) {
+        LocationService.sharedInstance.setSearchRadius(radius)
+        state.getNearby()
     }
     
     
@@ -220,7 +349,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         if kind == UICollectionElementKindSectionHeader && collectionView === self.collectionView {
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "homeHeaderView", for: indexPath as IndexPath) as! HomeHeaderView
             homeHeader = view
-            //view.delegate = self
+            view.delegate = self
             view.setup(_state: state, isLocationEnabled: gps_service.isAuthorized())
             return view
         }
@@ -234,15 +363,12 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
             return CGSize.zero
         }
         let bannerHeight:CGFloat = 32
-        let collectionViewHeight:CGFloat = itemSize.height * 0.72
+        let collectionViewHeight:CGFloat = itemSize.height * 0.74
         
         var verticalHeight:CGFloat = 0
         let gpsAuthorized = gps_service.isAuthorized()
-        
-        verticalHeight += state.unseenFollowingStories.count > 0 || state.watchedFollowingStories.count > 0 ? bannerHeight + collectionViewHeight : 0
-        verticalHeight += false ? bannerHeight + 320 : 0
-        verticalHeight += state.nearbyCityStories.count > 0 ? bannerHeight + collectionViewHeight : 0
-        verticalHeight += bannerHeight
+
+        verticalHeight += state.hasHeaderPosts ? collectionViewHeight + bannerHeight + 16.0: 0
         verticalHeight += !gpsAuthorized ? 140 : 0
         verticalHeight += state.nearbyPosts.count == 0 && gpsAuthorized ? 130 : 0
         
@@ -279,7 +405,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
             
             cell.viewMore(false)
             cell.setupCell(withPost: state.popularPosts[indexPath.row])
-            
+            cell.setCrownStatus(index: indexPath.item)
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath as IndexPath) as! PhotoCell
@@ -288,6 +414,27 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
             cell.setupCell(withPost: state.nearbyPosts[indexPath.row])
             
             return cell
+        }
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView === self.collectionView {
+            let _ = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PhotoCell
+            
+            let dest = IndexPath(item: indexPath.item, section: 0)
+            
+            globalMainInterfaceProtocol?.presentNearbyPost(presentationType: .homeCollection, posts: state.nearbyPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
+            
+            collectionView.deselectItem(at: indexPath, animated: true)
+        } else if collectionView === self.popularCollectionView {
+            let _ = collectionView.dequeueReusableCell(withReuseIdentifier: "popularCell", for: indexPath) as! PhotoCell
+            
+            let dest = IndexPath(item: indexPath.item, section: 0)
+            
+            globalMainInterfaceProtocol?.presentNearbyPost(presentationType: .popular, posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
+            
+            collectionView.deselectItem(at: indexPath, animated: true)
         }
         
     }
@@ -324,7 +471,7 @@ extension HomieViewController: TRMosaicLayoutVerticalDelegate {
     
     func collectionView(_ collectionView:UICollectionView, mosaicCellSizeTypeAtIndexPath indexPath:IndexPath) -> TRMosaicCellType {
         // I recommend setting every third cell as .Big to get the best layout
-        return indexPath.item % 6 == 0 ? TRMosaicCellType.big : TRMosaicCellType.small
+        return indexPath.item % 3 == 0 ? TRMosaicCellType.big : TRMosaicCellType.small
     }
     
     func collectionView(_ collectionView:UICollectionView, layout collectionViewLayout: TRMosaicLayoutVertical, insetAtSection:Int) -> UIEdgeInsets {

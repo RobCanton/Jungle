@@ -12,20 +12,15 @@ import Firebase
 import NVActivityIndicatorView
 
 class FirstViewController:UIViewController {
-    
-    @IBOutlet weak var viewBackdrop: UIView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        viewBackdrop.layer.cornerRadius = 16.0
-        viewBackdrop.clipsToBounds = true
         
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         get {
-            return .lightContent
+            return .default
         }
     }
     

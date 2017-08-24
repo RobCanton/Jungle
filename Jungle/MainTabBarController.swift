@@ -33,6 +33,10 @@ class MainTabBarController: UITabBarController, StoreSubscriber, MessageServiceP
         self.tabBar.backgroundImage = UIImage()
         self.tabBar.shadowImage = UIImage()
         
+        let bar = UIView(frame: CGRect(x: 0, y: 0, width: tabBar.frame.width, height: 0.5))
+        bar.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
+        tabBar.addSubview(bar)
+        
         let tabBarItem1 = tabBar.items![0] as UITabBarItem
         let tabBarItem2 = tabBar.items![1] as UITabBarItem
         let tabBarItem4 = tabBar.items![3] as UITabBarItem

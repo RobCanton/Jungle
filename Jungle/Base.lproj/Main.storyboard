@@ -155,39 +155,45 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="92B-NR-T4W">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nqy-zG-FHm">
-                                <rect key="frame" x="0.0" y="577" width="375" height="90"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <view alpha="0.94999999999999996" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MdI-AZ-gV5">
+                                <rect key="frame" x="0.0" y="64" width="375" height="0.5"/>
+                                <color key="backgroundColor" white="0.79882211546923076" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="90" id="Kuu-C9-jIz"/>
+                                    <constraint firstAttribute="height" constant="0.5" id="bVz-Be-WDu"/>
                                 </constraints>
                             </view>
+                            <view alpha="0.94999998807907104" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1Lq-Hs-fJl">
+                                <rect key="frame" x="0.0" y="618" width="375" height="0.5"/>
+                                <color key="backgroundColor" white="0.79882211550000004" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="0.5" id="zE2-Jf-Xzd"/>
+                                </constraints>
+                            </view>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="Cqv-NN-E32">
+                                <rect key="frame" x="177" y="323" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
-                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="92B-NR-T4W" firstAttribute="top" secondItem="Qum-N5-5Y8" secondAttribute="bottom" id="5gF-qr-Wcd"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="92B-NR-T4W" secondAttribute="bottom" id="BBh-X6-qcf"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="nqy-zG-FHm" secondAttribute="bottom" id="D2l-Qw-EKQ"/>
-                            <constraint firstAttribute="trailing" secondItem="nqy-zG-FHm" secondAttribute="trailing" id="EJ6-Na-DXc"/>
-                            <constraint firstAttribute="trailing" secondItem="92B-NR-T4W" secondAttribute="trailing" id="YQu-hl-nKL"/>
-                            <constraint firstItem="92B-NR-T4W" firstAttribute="leading" secondItem="HOB-iC-qzm" secondAttribute="leading" id="cLJ-n1-WfJ"/>
-                            <constraint firstItem="nqy-zG-FHm" firstAttribute="leading" secondItem="HOB-iC-qzm" secondAttribute="leading" id="g2L-Ow-SAR"/>
+                            <constraint firstAttribute="trailing" secondItem="MdI-AZ-gV5" secondAttribute="trailing" id="9Re-xn-agV"/>
+                            <constraint firstItem="MdI-AZ-gV5" firstAttribute="top" secondItem="HOB-iC-qzm" secondAttribute="topMargin" constant="63.5" id="Bfb-NF-rNA"/>
+                            <constraint firstItem="Cqv-NN-E32" firstAttribute="centerX" secondItem="HOB-iC-qzm" secondAttribute="centerX" id="Hd0-U5-enB"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="1Lq-Hs-fJl" secondAttribute="bottom" constant="48.5" id="dcm-1a-hbH"/>
+                            <constraint firstItem="1Lq-Hs-fJl" firstAttribute="leading" secondItem="HOB-iC-qzm" secondAttribute="leading" id="iSe-AX-Zb4"/>
+                            <constraint firstItem="Cqv-NN-E32" firstAttribute="centerY" secondItem="HOB-iC-qzm" secondAttribute="centerY" id="j6J-rq-hla"/>
+                            <constraint firstItem="MdI-AZ-gV5" firstAttribute="leading" secondItem="HOB-iC-qzm" secondAttribute="leading" id="k90-kk-lvL"/>
+                            <constraint firstAttribute="trailing" secondItem="1Lq-Hs-fJl" secondAttribute="trailing" id="pbL-xC-aQv"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="0lw-se-k8q"/>
                     <connections>
-                        <outlet property="viewBackdrop" destination="92B-NR-T4W" id="a4A-in-xgm"/>
                         <segue destination="oBN-dw-hMT" kind="show" identifier="toLoginScreen" animates="NO" id="ZfF-9u-eMF"/>
-                        <segue destination="H6M-M2-RCL" kind="presentation" identifier="login" modalTransitionStyle="crossDissolve" id="wJr-0f-lqO"/>
+                        <segue destination="H6M-M2-RCL" kind="presentation" identifier="login" animates="NO" id="wJr-0f-lqO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2yg-fL-R4B" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1287" y="531"/>
+            <point key="canvasLocation" x="3164" y="530.28485757121439"/>
         </scene>
         <!--Login View Controller-->
         <scene sceneID="Wof-ag-FMp">
@@ -412,7 +418,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MqN-L3-DIF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2924" y="660"/>
+            <point key="canvasLocation" x="4802.3999999999996" y="659.82008995502258"/>
         </scene>
         <!--Main View Controller-->
         <scene sceneID="Jgl-e2-jWK">
@@ -431,7 +437,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EXc-c5-O3O" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4726" y="27"/>
+            <point key="canvasLocation" x="6604" y="26.53673163418291"/>
         </scene>
         <!--Send To-->
         <scene sceneID="4nl-gc-Fed">
@@ -496,7 +502,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c7P-tJ-uGx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="8896.7999999999993" y="590.55472263868069"/>
+            <point key="canvasLocation" x="10775.200000000001" y="590.55472263868069"/>
         </scene>
         <!--Main Tab Bar Controller-->
         <scene sceneID="2Ds-Qs-ygB">
@@ -1013,7 +1019,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="k31-4k-bdU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4054" y="27"/>
+            <point key="canvasLocation" x="5932" y="26.53673163418291"/>
         </scene>
         <!--Create Account View Controller-->
         <scene sceneID="4QL-Xu-qHC">
@@ -1159,7 +1165,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W8x-Rn-NUq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3178.4000000000001" y="-57.121439280359823"/>
+            <point key="canvasLocation" x="5056.8000000000002" y="-57.121439280359823"/>
         </scene>
         <!--Password Recovery View Controller-->
         <scene sceneID="6AP-it-PfX">
@@ -1266,7 +1272,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="D7w-fz-sTk" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1895" y="-90"/>
+            <point key="canvasLocation" x="3772" y="-90.404797601199405"/>
         </scene>
         <!--Sign Up Name View Controller-->
         <scene sceneID="Y8O-6v-Kmg">
@@ -1411,7 +1417,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="50s-Ga-HhT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3629.5999999999999" y="659.82008995502258"/>
+            <point key="canvasLocation" x="5508" y="659.82008995502258"/>
         </scene>
         <!--Sign Up Birthday View Controller-->
         <scene sceneID="gdF-Re-MtD">
@@ -1531,7 +1537,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3TD-xt-KhK" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="zAw-IY-J8j" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="4332" y="660"/>
+            <point key="canvasLocation" x="6210.3999999999996" y="659.82008995502258"/>
         </scene>
         <!--Sign Up Username View Controller-->
         <scene sceneID="WPh-94-KJz">
@@ -1668,7 +1674,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rHN-D3-zL6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5005.6000000000004" y="659.82008995502258"/>
+            <point key="canvasLocation" x="6884" y="659.82008995502258"/>
         </scene>
         <!--Sign Up Profile Picture View Controller-->
         <scene sceneID="Z0g-nr-fuS">
@@ -1740,7 +1746,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="apg-yH-4Qd" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="r8u-zV-rcY" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="7386" y="654"/>
+            <point key="canvasLocation" x="9263.2000000000007" y="653.52323838080963"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="tSE-2H-Ury">
@@ -1771,7 +1777,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ybc-yb-XNw" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="8060" y="635.53223388305855"/>
+            <point key="canvasLocation" x="9938.3999999999996" y="635.53223388305855"/>
         </scene>
         <!--Sign Up Password View Controller-->
         <scene sceneID="jET-Vs-cr2">
@@ -1890,7 +1896,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gHL-ff-dZM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5696.8000000000002" y="653.52323838080963"/>
+            <point key="canvasLocation" x="7575.1999999999998" y="653.52323838080963"/>
         </scene>
         <!--Sign Up Phone View Controller-->
         <scene sceneID="jru-xx-Ndj">
@@ -2019,7 +2025,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q4b-hC-oc6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6478" y="-10"/>
+            <point key="canvasLocation" x="8356" y="-10.344827586206897"/>
         </scene>
         <!--Sign Up Phone Country View Controller-->
         <scene sceneID="xHN-oN-Xv0">
@@ -2084,7 +2090,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="q2Y-Ao-PBV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7166" y="-10"/>
+            <point key="canvasLocation" x="9044" y="-10.344827586206897"/>
         </scene>
         <!--Sign Up Phone Code View Controller-->
         <scene sceneID="HWa-PP-6pd">
@@ -2180,7 +2186,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="D6p-Oz-aYf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7858" y="-10"/>
+            <point key="canvasLocation" x="9735.2000000000007" y="-10.344827586206897"/>
         </scene>
         <!--Sign Up Email View Controller-->
         <scene sceneID="zFK-8R-QiR">
@@ -2289,7 +2295,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jdx-8V-wQc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6461.6000000000004" y="653.52323838080963"/>
+            <point key="canvasLocation" x="8340" y="653.52323838080963"/>
         </scene>
     </scenes>
     <resources>
@@ -2307,6 +2313,6 @@
         <image name="profile" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="mtz-34-6DA"/>
+        <segue reference="wJr-0f-lqO"/>
     </inferredMetricsTieBreakers>
 </document>

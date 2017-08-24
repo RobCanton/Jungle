@@ -42,7 +42,9 @@ class MessagesViewController: RoundedViewController, StoreSubscriber, UITableVie
         label.center = CGPoint(x: view.frame.width/2, y: 22)
         //view.addSubview(label)
         
-        
+        let bar = UIView(frame: CGRect(x: 0, y: 43.5, width: view.frame.width, height:0.5))
+        bar.backgroundColor = UIColor(white: 0.80, alpha: 1.0)
+        view.addSubview(bar)
         
         
         tableView = UITableView(frame: CGRect(x: 0,y: 44,width: view.frame.width ,height: view.frame.height - 44))

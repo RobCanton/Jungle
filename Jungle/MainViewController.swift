@@ -728,6 +728,7 @@ class MainViewController: UIViewController, StoreSubscriber, UIScrollViewDelegat
             gps_service.setAccurateGPS(false)
             screenMode = .Main
             cameraView.cameraState = .Off
+            VolumeBar.sharedInstance.start()
         }
     }
     
@@ -993,7 +994,8 @@ extension MainViewController: CameraDelegate, UITextViewDelegate, EditOptionsBar
     }
     
     func cameraReady() {
-        
+        VolumeBar.sharedInstance.stop()
+        self.navigationController?.navigationBar.barStyle = .default
         scrollView.isScrollEnabled = true
         scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
     }
@@ -1358,22 +1360,21 @@ extension MainViewController: View2ViewTransitionPresenting {
         let i =  IndexPath(row: indexPath.item, section: 0)
         switch presentationType {
         case .homeCollection:
-            let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath)! as! PhotoCell
+            let cell: PhotoCell = homie.collectionView!.cellForItem(at: indexPath)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
             return convertedFrame
         case .popular:
-            guard let headerCollectionView = places.homeHeader?.popularCollectionView else { return CGRect.zero }
-            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? PhotoCell else { return CGRect.zero }
+            let cell: PhotoCell = homie.popularCollectionView!.cellForItem(at: indexPath)! as! PhotoCell
             let convertedFrame = cell.imageView.convert(cell.imageView.frame, to: self.view)
-            return CGRect(x: convertedFrame.origin.x, y: convertedFrame.origin.y, width: convertedFrame.width, height: convertedFrame.height)
-
-        case .following:
-            guard let headerCollectionView = places.homeHeader?.followingCollectionView else { return CGRect.zero }
-            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
-            let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
+        case .following:
+            return CGRect.zero
+//            guard let headerCollectionView = places.homeHeader?.followingCollectionView else { return CGRect.zero }
+//            guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
+//            let convertedFrame = cell.convert(cell.container.frame, to: self.view)
+//            return convertedFrame
         case .places:
-            guard let headerCollectionView = places.homeHeader?.placesCollectionView else { return CGRect.zero }
+            guard let headerCollectionView = homie.homeHeader?.collectionView else { return CGRect.zero }
             guard let cell = headerCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return CGRect.zero }
             let convertedFrame = cell.convert(cell.container.frame, to: self.view)
             return convertedFrame
@@ -1394,25 +1395,25 @@ extension MainViewController: View2ViewTransitionPresenting {
     
     func initialView(_ userInfo: [String: AnyObject]?, isPresenting: Bool) -> UIView {
         let indexPath: IndexPath = userInfo!["initialIndexPath"] as! IndexPath
-        let i = IndexPath(row: indexPath.item, section: 0)
         switch presentationType {
         case .homeCollection:
-            guard let cell: PhotoCell = places.collectionView!.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
+            guard let cell: PhotoCell = homie.collectionView!.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
             return cell
         case .popular:
-            guard let cell = places.homeHeader?.popularCollectionView.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
+            guard let cell: PhotoCell = homie.popularCollectionView!.cellForItem(at: indexPath) as? PhotoCell else { return UIView() }
             return cell
         case .following:
-            guard let cell = places.homeHeader?.followingCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
-            return cell.container
+            return UIView()
+            //guard let cell = places.homeHeader?.followingCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+            //return cell.container
         case .places:
-            guard let cell = places.homeHeader?.placesCollectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
+            guard let cell = homie.homeHeader?.collectionView.cellForItem(at: indexPath) as? FollowingPhotoCell else { return UIView() }
             return cell.container
         case .notificationTable:
             let cell: NotificationTableViewCell = notifications.tableView.cellForRow(at: indexPath)! as! NotificationTableViewCell
             return cell.postImageView
         case .profileCollection:
-            guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: i) as? PhotoCell else {
+            guard let cell: PhotoCell = profile.collectionView!.cellForItem(at: indexPath) as? PhotoCell else {
                 return UIView()
             }
             return cell
@@ -1426,38 +1427,36 @@ extension MainViewController: View2ViewTransitionPresenting {
         if !isPresenting {
             switch presentationType {
             case .homeCollection:
-                if !places.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
-                    places.collectionView!.reloadData()
-                    places.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
-                    places.collectionView!.layoutIfNeeded()
+                if !homie.collectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                    homie.collectionView!.reloadData()
+                    homie.collectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                    homie.collectionView!.layoutIfNeeded()
                 }
                 break
             case .popular:
-                if let bannerCollectionView = places.homeHeader?.popularCollectionView {
-                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
-                        bannerCollectionView.reloadData()
-                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-                        bannerCollectionView.layoutIfNeeded()
-                    }
+                if !homie.popularCollectionView!.indexPathsForVisibleItems.contains(indexPath) {
+                    homie.popularCollectionView!.reloadData()
+                    homie.popularCollectionView!.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                    homie.popularCollectionView!.layoutIfNeeded()
                 }
                 break
             case .following:
-                if let bannerCollectionView = places.homeHeader?.followingCollectionView {
-                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
-                        bannerCollectionView.reloadData()
-                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-                        bannerCollectionView.layoutIfNeeded()
-                    }
-                }
+//                if let bannerCollectionView = places.homeHeader?.followingCollectionView {
+//                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
+//                        bannerCollectionView.reloadData()
+//                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+//                        bannerCollectionView.layoutIfNeeded()
+//                    }
+//                }
                 break
             case .places:
-                if let bannerCollectionView = places.homeHeader?.placesCollectionView {
-                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
-                        bannerCollectionView.reloadData()
-                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-                        bannerCollectionView.layoutIfNeeded()
-                    }
-                }
+//                if let bannerCollectionView = homie.homeHeader?.collectionView {
+//                    if !bannerCollectionView.indexPathsForVisibleItems.contains(indexPath) {
+//                        bannerCollectionView.reloadData()
+//                        bannerCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+//                        bannerCollectionView.layoutIfNeeded()
+//                    }
+//                }
                 break
             case .notificationTable:
                 break
@@ -1479,26 +1478,26 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func topView() -> UIView {
-        if presentationType == .homeCollection || presentationType == .popular || presentationType == .following || presentationType == .places {
-            if let view = places.header.snapshotImageTransparent() {
-                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
-                topView.backgroundColor = UIColor.black
-                
-                let bottomEdge = UIView(frame: CGRect(x: 0, y: topView.frame.height - 32.0, width: topView.frame.width, height: 32.0))
-                bottomEdge.backgroundColor = UIColor.white
-                
-                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
-                white.backgroundColor = UIColor.white
-                white.layer.cornerRadius = 16.0
-                white.clipsToBounds = true
-                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
-                t.image = view
-                topView.addSubview(bottomEdge)
-                topView.addSubview(white)
-                topView.addSubview(t)
-                return topView
-            }
-        }
+//        if presentationType == .homeCollection || presentationType == .popular || presentationType == .following || presentationType == .places {
+//            if let view = places.header.snapshotImageTransparent() {
+//                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
+//                topView.backgroundColor = UIColor.black
+//                
+//                let bottomEdge = UIView(frame: CGRect(x: 0, y: topView.frame.height - 32.0, width: topView.frame.width, height: 32.0))
+//                bottomEdge.backgroundColor = UIColor.white
+//                
+//                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
+//                white.backgroundColor = UIColor.white
+//                white.layer.cornerRadius = 16.0
+//                white.clipsToBounds = true
+//                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
+//                t.image = view
+//                topView.addSubview(bottomEdge)
+//                topView.addSubview(white)
+//                topView.addSubview(t)
+//                return topView
+//            }
+//        }
 
         return UIView()
     }

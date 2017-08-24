@@ -80,7 +80,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         let optionsButton = UIButton(frame: CGRect(x: view.frame.width - 44.0, y: 0.0, width: 44.0, height: 44.0))
         optionsButton.setImage(UIImage(named: "sorting"), for: .normal)
         optionsButton.tintColor = UIColor.black
-        optionsButton.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
+        optionsButton.addTarget(self, action: #selector(showSortOptions), for: .touchUpInside)
         header.addSubview(optionsButton)
         
         view.addSubview(header)
@@ -213,10 +213,6 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         state.fetchAll()
     }
     
-    func increaseRadiusTapped() {
-        handleOptions()
-    }
-    
     func authorizeGPS() {
         let messageView: MessageView = MessageView.viewFromNib(layout: .CenteredView)
         messageView.configureBackgroundView(width: 250)
@@ -272,9 +268,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
         }
     }
     
-    
-    
-    func handleOptions() {
+    func showSortOptions() {
         
         let status = gps_service.authorizationStatus()
         if status != .authorizedAlways && status != .authorizedWhenInUse {

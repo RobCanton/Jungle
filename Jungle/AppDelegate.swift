@@ -82,8 +82,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
             print("User State change")
         }
-        
-        
+
         if #available(iOS 10, *) {
             UITabBarItem.appearance().badgeColor = infoColor
         }
@@ -117,6 +116,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         createDirectory("user_content")
         
         Config.getRanges()
+        
+        VolumeBar.sharedInstance.start()
+        
+        VolumeBar.sharedInstance.animationStyle = .fade
         return true
     }
     

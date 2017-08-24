@@ -10,7 +10,7 @@ import UIKit
 
 
 protocol HomeHeaderProtocol: class {
-    func increaseRadiusTapped()
+    func showSortOptions()
     func enableLocationTapped()
 }
 
@@ -19,33 +19,22 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
 
     var itemSideLength:CGFloat!
     let contentWidth = 100
+    
+    @IBOutlet weak var topGapView: UIView!
     @IBOutlet weak var stackView: UIStackView!
-    @IBOutlet weak var followingCollectionView: UICollectionView!
-    @IBOutlet weak var popularCollectionView: UICollectionView!
-    @IBOutlet weak var placesCollectionView: UICollectionView!
-    
-    @IBOutlet weak var followingHeader: UIView!
-    @IBOutlet weak var popularHeader: UIView!
-    @IBOutlet weak var placesHeader: UIView!
+
+    @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var recentHeader: UIView!
-    
-    @IBOutlet weak var followingLabel: UILabel!
-    @IBOutlet weak var popularLabel: UILabel!
-    @IBOutlet weak var placesLabel: UILabel!
     @IBOutlet weak var recentLabel: UILabel!
-    
     @IBOutlet weak var locationSettingsView: UIView!
     @IBOutlet weak var locationSettingsButton: UIButton!
     @IBOutlet weak var locationSettingsBackground: UIView!
-    
     @IBOutlet weak var emptyView: UIView!
     @IBOutlet weak var emptyButton: UIButton!
     @IBOutlet weak var emptyBackground: UIView!
     @IBOutlet weak var empyStackView: UIStackView!
     @IBOutlet weak var emptyActivityIndicator: UIActivityIndicatorView!
-    
-    @IBOutlet weak var popularPageControl: UIPageControl!
-    
+
     var state:HomeStateController!
     
     weak var delegate:HomeHeaderProtocol?
@@ -53,51 +42,30 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.72
-        let followingLayout = UICollectionViewFlowLayout()
-        followingLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        followingLayout.itemSize = getStoryItemSize()
-        followingLayout.minimumInteritemSpacing = 0.0
-        followingLayout.minimumLineSpacing = 0.0
-        followingLayout.scrollDirection = .horizontal
-        
-        followingCollectionView.setCollectionViewLayout(followingLayout, animated: false)
-        
+        itemSideLength = ((UIScreen.main.bounds.width - 4.0)/3.0) * 0.74
+
         let nib = UINib(nibName: "FollowingPhotoCell", bundle: nil)
-        followingCollectionView.register(nib, forCellWithReuseIdentifier: "storyCell")
+        collectionView.register(nib, forCellWithReuseIdentifier: "storyCell")
         
         let gapHeader = UINib(nibName: "GapCollectionHeader", bundle: nil)
-        followingCollectionView.register(gapHeader, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView")
-        
-        followingCollectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
-        followingCollectionView.backgroundColor = UIColor.white
-        followingCollectionView.showsHorizontalScrollIndicator = false
+        collectionView.register(gapHeader, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView")
         
         
-        let layout = popularCollectionView.collectionViewLayout as! TRMosaicHorizontalLayout
-        layout.delegate = self
+        let layout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.itemSize = getStoryItemSize()
+        layout.minimumInteritemSpacing = 0.0
+        layout.minimumLineSpacing = 0.0
+        layout.scrollDirection = .horizontal
         
-        let PhotoCell = UINib(nibName: "PhotoCell", bundle: nil)
-        popularCollectionView.register(PhotoCell, forCellWithReuseIdentifier: "popularCell")
+        collectionView.setCollectionViewLayout(layout, animated: false)
         
-        let placesLayout = UICollectionViewFlowLayout()
-        placesLayout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        placesLayout.itemSize = getStoryItemSize()
-        placesLayout.minimumInteritemSpacing = 0.0
-        placesLayout.minimumLineSpacing = 0.0
-        placesLayout.scrollDirection = .horizontal
+        collectionView.register(nib, forCellWithReuseIdentifier: "storyCell")
         
-        placesCollectionView.setCollectionViewLayout(placesLayout, animated: false)
+        collectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
+        collectionView.backgroundColor = UIColor.white
+        collectionView.showsHorizontalScrollIndicator = false
         
-        placesCollectionView.register(nib, forCellWithReuseIdentifier: "storyCell")
-        
-        placesCollectionView.contentInset = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
-        placesCollectionView.backgroundColor = UIColor.white
-        placesCollectionView.showsHorizontalScrollIndicator = false
-        
-        followingLabel.setKerning(withText: "FOLLOWING", 1.15)
-        popularLabel.setKerning(withText: "POPULAR", 1.15)
-        placesLabel.setKerning(withText: "PLACES", 1.15)
         recentLabel.setKerning(withText: "RECENT", 1.15)
         
         locationSettingsButton.layer.cornerRadius = locationSettingsButton.bounds.height / 2
@@ -133,43 +101,25 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         
         emptyBackground.layer.cornerRadius = 8.0
         emptyBackground.clipsToBounds = true
-        
-        popularPageControl.applyShadow(radius: 8.0, opacity: 1.0, height: 0.0, shouldRasterize: false)
-        
+
     }
     
     func resetStack() {
         for view in stackView.arrangedSubviews {
             stackView.removeArrangedSubview(view)
         }
-        
-        stackView.addArrangedSubview(followingHeader)
-        stackView.addArrangedSubview(followingCollectionView)
-        stackView.addArrangedSubview(popularHeader)
-        stackView.addArrangedSubview(popularCollectionView)
-        stackView.addArrangedSubview(placesHeader)
-        stackView.addArrangedSubview(placesCollectionView)
+        stackView.addArrangedSubview(topGapView)
+        stackView.addArrangedSubview(collectionView)
         stackView.addArrangedSubview(recentHeader)
         stackView.addArrangedSubview(locationSettingsView)
         stackView.addArrangedSubview(emptyView)
         
-        
-        followingHeader.isHidden = false
-        followingCollectionView.isHidden = false
-        popularHeader.isHidden = false
-        popularCollectionView.isHidden = false
-        placesHeader.isHidden = false
-        placesCollectionView.isHidden = false
+        collectionView.isHidden = false
         recentHeader.isHidden = false
         locationSettingsView.isHidden = false
         emptyView.isHidden = false
         
-        followingHeader.isUserInteractionEnabled = true
-        followingCollectionView.isUserInteractionEnabled = true
-        popularHeader.isUserInteractionEnabled = true
-        popularCollectionView.isUserInteractionEnabled = true
-        placesHeader.isUserInteractionEnabled = true
-        placesCollectionView.isUserInteractionEnabled = true
+        collectionView.isUserInteractionEnabled = true
         recentHeader.isUserInteractionEnabled = true
         locationSettingsView.isUserInteractionEnabled = true
         emptyView.isUserInteractionEnabled = true
@@ -188,33 +138,14 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         
         resetStack()
         
-        followingCollectionView.delegate = self
-        followingCollectionView.dataSource = self
-        followingCollectionView.reloadData()
-        
-        popularCollectionView.delegate = self
-        popularCollectionView.dataSource = self
-        popularCollectionView.reloadData()
-        
-       
-        
-        placesCollectionView.delegate = self
-        placesCollectionView.dataSource = self
-        placesCollectionView.reloadData()
-        
-        
-        removeStackView(view: popularHeader)
-        removeStackView(view: popularCollectionView)
-        removeStackView(view: placesHeader)
-        
-        if state.unseenFollowingStories.count == 0 && state.watchedFollowingStories.count == 0 {
-            removeStackView(view: followingHeader)
-            removeStackView(view: followingCollectionView)
-        }
-        
-        if state.nearbyCityStories.count == 0 {
-            removeStackView(view: placesHeader)
-            removeStackView(view: placesCollectionView)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.reloadData()
+
+        if !state.hasHeaderPosts {
+            removeStackView(view: topGapView)
+            removeStackView(view: collectionView)
+            removeStackView(view: recentHeader)
         }
         
         if isLocationEnabled {
@@ -234,7 +165,7 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
     }
     
     @IBAction func increaseRadius(_ sender: Any) {
-        delegate?.increaseRadiusTapped()
+        delegate?.showSortOptions()
     }
     
     
@@ -244,149 +175,108 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
             let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "gapHeaderView", for: indexPath as IndexPath) as! GapCollectionHeader
             return view
         }
-        
+//
         return UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        
-        if collectionView === followingCollectionView && section == 1 && state.watchedFollowingStories.count > 0 && state.unseenFollowingStories.count > 0 {
-            return CGSize(width: 12.0, height: itemSideLength * 1.25)
+        let size = CGSize(width: 8.0, height: itemSideLength * 1.25)
+        switch section {
+        case 0:
+            return CGSize.zero
+        case 1:
+            return state.unseenFollowingStories.count > 0 && state.nearbyCityStories.count > 0 ? size : CGSize.zero
+        case 2:
+            return state.nearbyCityStories.count > 0 && state.watchedFollowingStories.count > 0 ? size : CGSize.zero
+        default:
+            return CGSize.zero
         }
-        return CGSize.zero
+        
         
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch collectionView {
-        case followingCollectionView:
-            if section == 0 {
-                return state.unseenFollowingStories.count
-            } else {
-                return state.watchedFollowingStories.count
-            }
-        case popularCollectionView:
-            return 0
-        case placesCollectionView:
+        switch section {
+        case 0:
+            return state.unseenFollowingStories.count
+        case 1:
             return state.nearbyCityStories.count
+        case 2:
+            return state.watchedFollowingStories.count
         default:
             return 0
         }
         
+
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "storyCell", for: indexPath) as! FollowingPhotoCell
         
-        switch collectionView {
-        case followingCollectionView:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "storyCell", for: indexPath) as! FollowingPhotoCell
-            if indexPath.section == 0 {
-                let story = state.unseenFollowingStories[indexPath.item]
-                cell.setupCell(withUserStory: story, showDot: false)
-            } else {
-                let story = state.watchedFollowingStories[indexPath.item]
-                cell.setupCell(withUserStory: story, showDot: false)
-            }
-            return cell
-        case popularCollectionView:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "popularCell", for: indexPath) as! PhotoCell
-            cell.setNeedsLayout()
-            cell.layoutIfNeeded()
-            cell.setupCell(withPost: state.popularPosts[indexPath.row])
-            cell.setCrownStatus(index: indexPath.item)
-            cell.viewMore(false)
-            return cell
-        case placesCollectionView:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "storyCell", for: indexPath) as! FollowingPhotoCell
+        switch indexPath.section {
+        case 0:
+            let story = state.unseenFollowingStories[indexPath.item]
+            cell.setupCell(withUserStory: story, showDot: false)
+            cell.alpha = 1.0
+            break
+        case 1:
             let story = state.nearbyCityStories[indexPath.item]
             cell.setupCell(withCityStory: story)
-            return cell
-            
+            cell.alpha = 1.0
+            break
+        case 2:
+            let story = state.watchedFollowingStories[indexPath.item]
+            cell.setupCell(withUserStory: story, showDot: false)
+            cell.alpha = 0.60
+            break
         default:
-            return collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+            break
         }
+        
+        return cell
         
         
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        switch collectionView {
-        case followingCollectionView:
-            if indexPath.section == 0 {
-                let story = state.unseenFollowingStories[indexPath.row]
-                story.determineState()
-                
-                if story.state == .contentLoaded {
-                    globalMainInterfaceProtocol?.presentBannerStory(presentationType: .following, stories: state.unseenFollowingStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
-                } else {
-                    story.downloadFirstItem()
-                }
-            } else {
-                let story = state.watchedFollowingStories[indexPath.row]
-                story.determineState()
-                if story.state == .contentLoaded {
-                    let dest = IndexPath(item: indexPath.item, section: 0)
-                    globalMainInterfaceProtocol?.presentBannerStory( presentationType: .following, stories: state.watchedFollowingStories, destinationIndexPath: dest, initialIndexPath: indexPath)
-                } else {
-                    story.downloadFirstItem()
-                }
-            }
-            break
-        case popularCollectionView:
-            
-            let dest = IndexPath(item: indexPath.item, section: 0)
-            globalMainInterfaceProtocol?.presentNearbyPost(presentationType: .popular, posts: state.popularPosts, destinationIndexPath: dest, initialIndexPath: indexPath)
-            
-            break
-        case placesCollectionView:
-            let story = state.nearbyCityStories[indexPath.row]
+        switch indexPath.section {
+        case 0:
+            let story = state.unseenFollowingStories[indexPath.item]
             story.determineState()
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.nearbyCityStories, destinationIndexPath: indexPath, initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.unseenFollowingStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
             } else {
                 story.downloadFirstItem()
             }
-
+            break
+        case 1:
+            let story = state.nearbyCityStories[indexPath.item]
+            story.determineState()
+            if story.state == .contentLoaded {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.nearbyCityStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
+            } else {
+                story.downloadFirstItem()
+            }
+            break
+        case 2:
+            let story = state.watchedFollowingStories[indexPath.item]
+            story.determineState()
+            if story.state == .contentLoaded {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.watchedFollowingStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
+            } else {
+                story.downloadFirstItem()
+            }
             break
         default:
             break
         }
+        
+    }
 
-        
-    }
-    
-    var pageControlVisible = false
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView === popularCollectionView {
-            if !pageControlVisible {
-                pageControlVisible = true
-                 UIView.animate(withDuration: 0.25, animations: {
-                    self.popularPageControl.alpha = 1.0
-                })
-            }
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        
-        if scrollView === popularCollectionView {
-            let currentPage = Int(ceil(popularCollectionView.contentOffset.x / popularCollectionView.frame.size.width))
-            popularPageControl.currentPage = currentPage
-            pageControlVisible = false
-            UIView.animate(withDuration: 0.25, delay: 0.75, options: .curveLinear, animations: {
-                self.popularPageControl.alpha = 0.0
-            }, completion: nil)
-        }
-    }
-    
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        scrollViewDidEndDecelerating(scrollView)
-    }
-    
+
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return collectionView === followingCollectionView ? 2 : 1
+        return 3
     }
     
     func getStoryItemSize() -> CGSize {
@@ -403,22 +293,6 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         }
     }
         
-}
-
-extension HomeHeaderView: TRMosaicHorizontalLayoutDelegate {
-
-    
-    func collectionView(_ collectionView:UICollectionView, mosaicCellSizeTypeAtIndexPath indexPath:IndexPath) -> TRMosaicCellType {
-        return indexPath.item == 0 ? TRMosaicCellType.big : TRMosaicCellType.small
-    }
-    
-    func collectionView(_ collectionView:UICollectionView, layout collectionViewLayout: TRMosaicHorizontalLayout, insetAtSection:Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
-    }
-    
-    func widthForSmallMosaicCell() -> CGFloat {
-        return popularCollectionView.bounds.width / 3
-    }
 }
 
 

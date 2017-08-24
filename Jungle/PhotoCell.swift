@@ -67,14 +67,20 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             crown.isHidden = false
             crownLabel.isHidden = true
             
+            self.crown.applyShadow(radius: 8.0, opacity: 1.0, height: 0.0, shouldRasterize: false)
+            self.crown.layer.shadowColor = UIColor.clear.cgColor
+
+        } else {
+            crownLabel.isHidden = true
+            crown.isHidden = true
+        }
+        
+        if index % 3 == 0 {
+            
             captionLabel.font = UIFont.systemFont(ofSize: 17.0, weight: UIFontWeightSemibold)
             captionLabel.numberOfLines = 3
             
-            self.crown.applyShadow(radius: 8.0, opacity: 1.0, height: 0.0, shouldRasterize: false)
-            self.crown.layer.shadowColor = UIColor.clear.cgColor
-            //self.gradient?.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 2 / 3, height: 320)
-            self.gradient?.removeFromSuperlayer() 
-            
+            self.gradient?.removeFromSuperlayer()
             //self.colorView.isHidden = numLikes == 0 && numComments == 0 ? true : false
             self.largeGradient?.removeFromSuperlayer()
             self.largeGradient = CAGradientLayer()
@@ -104,10 +110,7 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             
             self.largeGradient?.isHidden = true
             self.largeGradient?.removeFromSuperlayer()
-            
-            crownLabel.isHidden = true
-            crown.isHidden = true
-            
+
             captionLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
             captionLabel.numberOfLines = 2
             
@@ -120,7 +123,6 @@ class PhotoCell: UICollectionViewCell, StoryProtocol {
             if let post = post {
                 captionBottom.constant = post.numLikes == 0 && post.numComments == 0 ? 4 : 20
             }
-            
         }
 
     }

@@ -57,8 +57,11 @@ class MyProfileViewController: RoundedViewController, StoreSubscriber, UICollect
         
         tabHeader = UINib(nibName: "ProfileTabHeader", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! ProfileTabHeader
         tabHeader.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 44)
-        
         self.view.addSubview(tabHeader)
+        
+        let bar = UIView(frame: CGRect(x: 0, y: 43.5, width: view.frame.width, height:0.5))
+        bar.backgroundColor = UIColor(white: 0.80, alpha: 1.0)
+        view.addSubview(bar)
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)

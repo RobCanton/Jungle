@@ -131,8 +131,8 @@ struct Alerts {
     static func showStatusProgressAlert(inWrapper wrapper: SwiftMessages?, withMessage message: String){
 
         let alert = MessageView.viewFromNib(layout: .StatusLine)
-        alert.backgroundView.backgroundColor = UIColor.black
-        alert.bodyLabel?.textColor = UIColor.white
+        alert.backgroundView.backgroundColor = UIColor.white
+        alert.bodyLabel?.textColor = UIColor.black
         alert.configureContent(body: message)
         
         var config = SwiftMessages.defaultConfig

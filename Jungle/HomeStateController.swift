@@ -65,6 +65,12 @@ class HomeStateController: StoreSubscriber {
     }
     private(set) var viewedPosts = [String:Double]()
     
+    var hasHeaderPosts:Bool {
+        get {
+         return unseenFollowingStories.count > 0 || watchedFollowingStories.count > 0 || nearbyCityStories.count > 0
+        }
+    }
+    
     init(delegate:HomeProtocol)
     {
         self.delegate = delegate
@@ -177,8 +183,13 @@ class HomeStateController: StoreSubscriber {
         let alteredDate = tempCalendar.date(byAdding: .day, value: -1, to: now)!
         let oneDayAgoTimestamp = alteredDate.timeIntervalSince1970 * 1000
         
-        ref.queryOrderedByValue().queryStarting(atValue: oneDayAgoTimestamp).observe(.childAdded, with: { snapshot in
-            self.viewedPosts[snapshot.key] = snapshot.value as! Double
+        
+        ref.queryOrderedByValue().queryStarting(atValue: oneDayAgoTimestamp).observeSingleEvent(of: .value, with: { snapshot in
+            for child in snapshot.children {
+                let snap = child as! DataSnapshot
+                self.viewedPosts[snap.key] = snap.value as! Double
+            }
+            
             self.sortFollowingStories()
         })
         
@@ -412,10 +423,10 @@ class HomeStateController: StoreSubscriber {
         }
     }
     
-    fileprivate func observePopularPosts() {
+    func observePopularPosts() {
         popularRef?.removeAllObservers()
         popularRef = UserService.ref.child("uploads/popular/")
-        popularRef?.queryOrderedByValue().queryLimited(toLast: 25).observe(.value, with: { snapshot in
+        popularRef?.queryOrderedByValue().queryLimited(toLast: 90).observeSingleEvent(of: .value, with: { snapshot in
             var posts = [String:Double]()
             for child in snapshot.children {
                 let childSnap = child as! DataSnapshot

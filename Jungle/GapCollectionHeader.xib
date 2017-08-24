@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -18,7 +18,7 @@
                     <rect key="frame" x="0.0" y="0.0" width="56" height="158"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="J32-Ld-hCp">
-                            <rect key="frame" x="27.5" y="8" width="1" height="142"/>
+                            <rect key="frame" x="27.5" y="12" width="1" height="134"/>
                             <color key="backgroundColor" white="0.94941105769230771" alpha="1" colorSpace="calibratedWhite"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="1" id="ZbD-h1-Ois"/>
@@ -26,9 +26,9 @@
                         </view>
                     </subviews>
                     <constraints>
-                        <constraint firstItem="J32-Ld-hCp" firstAttribute="top" secondItem="38C-9U-USP" secondAttribute="top" constant="8" id="TLR-YT-nqb"/>
+                        <constraint firstItem="J32-Ld-hCp" firstAttribute="top" secondItem="38C-9U-USP" secondAttribute="top" constant="12" id="TLR-YT-nqb"/>
                         <constraint firstItem="J32-Ld-hCp" firstAttribute="centerX" secondItem="38C-9U-USP" secondAttribute="centerX" id="red-bf-OUa"/>
-                        <constraint firstAttribute="bottom" secondItem="J32-Ld-hCp" secondAttribute="bottom" constant="8" id="sNu-Cz-rPP"/>
+                        <constraint firstAttribute="bottom" secondItem="J32-Ld-hCp" secondAttribute="bottom" constant="12" id="sNu-Cz-rPP"/>
                     </constraints>
                 </view>
             </subviews>

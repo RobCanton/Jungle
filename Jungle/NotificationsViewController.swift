@@ -39,6 +39,10 @@ class NotificationsViewController: RoundedViewController, UITableViewDelegate, U
         label.center = CGPoint(x: view.frame.width/2, y: 22)
         view.addSubview(label)
         
+        let bar = UIView(frame: CGRect(x: 0, y: 43.5, width: view.frame.width, height:0.5))
+        bar.backgroundColor = UIColor(white: 0.80, alpha: 1.0)
+        view.addSubview(bar)
+        
         refreshIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         refreshIndicator.frame = CGRect(x: view.frame.width - 44.0, y: 0, width: 44.0, height: 44.0)
         refreshIndicator.hidesWhenStopped = true

@@ -52,9 +52,6 @@ class SortOptionsView: UIView {
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(stopped(_:event:)), for: .touchUpOutside)
         
-        backgroundView.layer.cornerRadius = 8.0
-        backgroundView.clipsToBounds = true
-        
     }
     
     func stopped(_ sender: TGPDiscreteSlider, event:UIEvent) {

@@ -15,7 +15,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var colorView: UIView!
     @IBOutlet weak var timeLabel: UILabel!
-    
+
     var check:Int = 0
     var gradient:CAGradientLayer?
     var story:Story?
@@ -50,7 +50,12 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             })
             break
         case .contentLoaded:
-            self.timeLabel.text = story.date.timeStringSinceNow()
+            if let cityStory = story as? CityStory {
+                self.timeLabel.text = getDistanceString(distance: cityStory.distance)
+            } else {
+                self.timeLabel.text = story.date.timeStringSinceNow()
+            }
+
             UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut, animations: {
                 self.transform = CGAffineTransform.identity
             }, completion: { _ in
@@ -74,7 +79,8 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.nameLabel.text = ""
         self.timeLabel.text = ""
         self.colorView.alpha = 0.0
-
+        self.nearbyIcon.isHidden = true
+        self.timeLabelLeading.constant = 4.0
         
         getUser(withCheck: check, uid: story.uid, completion: { check, user in
             if self.check != check { return }
@@ -127,10 +133,15 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
             
         })
     }
+    //@IBOutlet weak var nearbyIcon: UIView!
+    @IBOutlet weak var nearbyIcon: UIImageView!
+    @IBOutlet weak var timeLabelLeading: NSLayoutConstraint!
     
     func setupCell(withCityStory story:CityStory) {
         
-        
+        //nearbyIcon.cropToCircle()
+        //nearbyIcon.layer.borderColor = accentColor.cgColor
+        //nearbyIcon.layer.borderWidth = 1.0
         self.story = story
         self.story!.delegate = self
         self.story!.determineState()
@@ -140,16 +151,18 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
         self.nameLabel.text = ""
         self.timeLabel.text = ""
         self.colorView.alpha = 0.0
+        self.nearbyIcon.isHidden = false
+        self.timeLabelLeading.constant = 3.0 + 12.0 + 3.0
         
         LocationService.sharedInstance.getRegionInfo(withReturnKey: story.cityKey) { key, region in
             if key != story.cityKey { return }
             if region != nil {
-                self.nameLabel.text = region!.name
+                self.nameLabel.text = "\(region!.name)"
                 self.nameLabel.font = UIFont.systemFont(ofSize: 13.0, weight: UIFontWeightMedium)
             }
         }
-        
-        self.timeLabel.text = story.date.timeStringSinceNow()
+        //let distance = getDistanceString(distance: story.distance)
+        self.timeLabel.text = getDistanceString(distance: story.distance)
         self.imageView.image = nil
         self.colorView.backgroundColor = UIColor.clear
         
@@ -182,6 +195,7 @@ class FollowingPhotoCell: UICollectionViewCell, StoryProtocol {
                 self.colorView.alpha = photoCellColorAlpha
             }
             
+            self.nearbyIcon.applyShadow(radius: 2.5, opacity: 0.5, height: 1.0, shouldRasterize: true)
             self.nameLabel.applyShadow(radius: 2.5, opacity: 0.5, height: 1.0, shouldRasterize: true)
             self.timeLabel.applyShadow(radius: 2.5, opacity: 0.90, height: 1.0, shouldRasterize: true)
         })
