@@ -36,10 +36,21 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         }
     }
     
+    fileprivate let sectionInsets = UIEdgeInsets(top: 0.5, left: 0.5, bottom: 0.5, right: 0.5)
+    var itemSize:CGSize {
+        get {
+            let paddingSpace = sectionInsets.left * 6
+            let availableWidth = UIScreen.main.bounds.width - paddingSpace
+            let widthPerItem  = availableWidth/3
+            
+            return CGSize(width: widthPerItem,height: widthPerItem * 1.3)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navHeight = self.navigationController!.navigationBar.frame.height + 20.0
-        itemSideLength = (UIScreen.main.bounds.width - 3.0) / 3.0
+        
         self.automaticallyAdjustsScrollViewInsets = false
         navigationItem.backBarButtonItem = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         
@@ -54,10 +65,10 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
         screenHeight = screenSize.height
         
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
-        layout.itemSize = getItemSize()
-        layout.minimumInteritemSpacing = 1.5
-        layout.minimumLineSpacing = 1.5
+        layout.sectionInset = sectionInsets
+        layout.itemSize = itemSize
+        layout.minimumInteritemSpacing = 0.0
+        layout.minimumLineSpacing = 1.0
         
         collectionView = UICollectionView(frame: CGRect(x: 0,y: navHeight,width: view.frame.width,height: view.frame.height - navHeight), collectionViewLayout: layout)
         
@@ -212,12 +223,9 @@ class PlaceViewController: UIViewController, StoreSubscriber, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        return getItemSize()
+        return itemSize
     }
-    var itemSideLength:CGFloat!
-    func getItemSize() -> CGSize {
-        return CGSize(width: itemSideLength, height: itemSideLength * 1.3333)
-    }
+
     
     let transitionController: TransitionController = TransitionController()
     var selectedIndexPath: IndexPath = IndexPath(item: 0, section: 0)

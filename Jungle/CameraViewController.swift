@@ -211,10 +211,21 @@ class CameraViewController:UIViewController, AVCaptureFileOutputRecordingDelegat
     }
     
     func destroyCameraSession() {
-        captureSession?.stopRunning()
+
+        if captureSession != nil && audioInput != nil {
+            if !captureSession!.canAddInput(audioInput!) {
+                captureSession!.removeInput(audioInput!)
+            }
+            captureSession!.stopRunning()
+        }
+        
+
+        
         previewLayer?.removeFromSuperlayer()
         playerLayer?.player = nil
         playerLayer = nil
+        
+        
     }
     
     func destroyVideoPreview() {

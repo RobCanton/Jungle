@@ -293,7 +293,7 @@ class HomeViewController:RoundedViewController, UICollectionViewDelegate, UIColl
     }
     
     func handleRadiusChange(_ radius:Int) {
-        LocationService.sharedInstance.setSearchRadius(radius)
+        //LocationService.sharedInstance.setSearchRadius(radius)
         state.getNearby()
     }
     

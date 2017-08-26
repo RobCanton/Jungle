@@ -44,17 +44,7 @@ class LocationService: NSObject {
             }
         })
     }
-    
-    func setSearchRadius(_ newRadius: Int) {
-        radius = newRadius
-        let uid = mainStore.state.userState.uid
-        let radiusRef = ref.child("users/settings/\(uid)/radius")
-        radiusRef.setValue(radius) { error, ref in
-            
-        }
-        
-    }
-    
+
     func requestNearbyLocations() {
         
         guard let lastLocation = gps_service?.getLastLocation() else { return }

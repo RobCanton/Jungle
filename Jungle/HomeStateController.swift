@@ -45,6 +45,8 @@ class HomeStateController: StoreSubscriber {
     private(set) var nearbyPlaceStories = [LocationStory]()
     
     private(set) var nearbyCityStories = [CityStory]()
+    private(set) var unseenCityStories = [CityStory]()
+    private(set) var seenCityStories = [CityStory]()
     
     fileprivate var myStoryRef:DatabaseReference?
     fileprivate var followingRef:DatabaseReference?
@@ -144,8 +146,8 @@ class HomeStateController: StoreSubscriber {
             guard let headers = HTTPHeaders else { return }
             
             
-            let lat = loc.coordinate.latitude
-            let lon = loc.coordinate.longitude
+            let lat:Double = loc.coordinate.latitude
+            let lon:Double = loc.coordinate.longitude
             let params = "?lat=\(lat)&lon=\(lon)&rad=\(rad)"
             print("getNearby: \(params)")
             Alamofire.request("\(API_ENDPOINT)/nearby/\(params)", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
@@ -191,6 +193,7 @@ class HomeStateController: StoreSubscriber {
             }
             
             self.sortFollowingStories()
+            self.sortCityStories()
         })
         
     }
@@ -255,9 +258,6 @@ class HomeStateController: StoreSubscriber {
                     
                     self.followingStories = stories
                     self.sortFollowingStories()
-                   // DispatchQueue.main.async {
-                        //self.delegate?.update(.following)
-                    //}
                 }
             })
         }
@@ -358,7 +358,7 @@ class HomeStateController: StoreSubscriber {
         self.retrievingNearbyPosts = false
         if cities.count == 0 {
             self.nearbyCityStories = cityStories
-            delegate?.update(.places)
+            self.sortCityStories()
             return
         }
         var count = 0
@@ -370,13 +370,30 @@ class HomeStateController: StoreSubscriber {
                 count += 1
                 if count >= cities.count {
                     count = -1
-                    self.nearbyCityStories = cityStories.sorted(by: { return $0.distance < $1.distance })
-                    
-                    // DispatchQueue.main.async {
-                    self.delegate?.update(.places)
-                    // }
+                    self.nearbyCityStories = cityStories
+                    self.sortCityStories()
                 }
             }
+        }
+    }
+    
+    func sortCityStories() {
+        var unseenStories = [CityStory]()
+        var watchedStories = [CityStory]()
+        
+        for story in nearbyCityStories {
+            if story.hasViewed() {
+                watchedStories.append(story)
+            } else {
+                unseenStories.append(story)
+            }
+        }
+        
+        self.unseenCityStories = unseenStories.sorted(by: { return $0.distance < $1.distance })
+        self.seenCityStories = watchedStories.sorted(by: { return $0.distance < $1.distance })
+        
+        DispatchQueue.main.async {
+            self.delegate?.update(.places)
         }
     }
     

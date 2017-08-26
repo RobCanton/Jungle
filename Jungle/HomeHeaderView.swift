@@ -114,11 +114,13 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         stackView.addArrangedSubview(locationSettingsView)
         stackView.addArrangedSubview(emptyView)
         
+        topGapView.isHidden = false
         collectionView.isHidden = false
         recentHeader.isHidden = false
         locationSettingsView.isHidden = false
         emptyView.isHidden = false
         
+        topGapView.isUserInteractionEnabled = true
         collectionView.isUserInteractionEnabled = true
         recentHeader.isUserInteractionEnabled = true
         locationSettingsView.isUserInteractionEnabled = true
@@ -185,9 +187,11 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         case 0:
             return CGSize.zero
         case 1:
-            return state.unseenFollowingStories.count > 0 && state.nearbyCityStories.count > 0 ? size : CGSize.zero
+            return state.unseenFollowingStories.count > 0 && state.unseenCityStories.count > 0 ? size : CGSize.zero
         case 2:
-            return state.nearbyCityStories.count > 0 && state.watchedFollowingStories.count > 0 ? size : CGSize.zero
+            return (state.unseenFollowingStories.count > 0 || state.unseenCityStories.count > 0) && state.watchedFollowingStories.count > 0 ? size : CGSize.zero
+        case 3:
+            return (state.unseenFollowingStories.count > 0 || state.unseenCityStories.count > 0 || state.watchedFollowingStories.count > 0) && state.seenCityStories.count > 0 ? size : CGSize.zero
         default:
             return CGSize.zero
         }
@@ -200,9 +204,11 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
         case 0:
             return state.unseenFollowingStories.count
         case 1:
-            return state.nearbyCityStories.count
+            return state.unseenCityStories.count
         case 2:
             return state.watchedFollowingStories.count
+        case 3:
+            return state.seenCityStories.count
         default:
             return 0
         }
@@ -220,14 +226,19 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
             cell.alpha = 1.0
             break
         case 1:
-            let story = state.nearbyCityStories[indexPath.item]
+            let story = state.unseenCityStories[indexPath.item]
             cell.setupCell(withCityStory: story)
             cell.alpha = 1.0
             break
         case 2:
             let story = state.watchedFollowingStories[indexPath.item]
             cell.setupCell(withUserStory: story, showDot: false)
-            cell.alpha = 0.60
+            cell.alpha = 0.67
+            break
+        case 3:
+            let story = state.seenCityStories[indexPath.item]
+            cell.setupCell(withCityStory: story)
+            cell.alpha = 0.67
             break
         default:
             break
@@ -251,10 +262,10 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
             }
             break
         case 1:
-            let story = state.nearbyCityStories[indexPath.item]
+            let story = state.unseenCityStories[indexPath.item]
             story.determineState()
             if story.state == .contentLoaded {
-                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.nearbyCityStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.unseenCityStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
             } else {
                 story.downloadFirstItem()
             }
@@ -268,6 +279,15 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
                 story.downloadFirstItem()
             }
             break
+        case 3:
+            let story = state.seenCityStories[indexPath.item]
+            story.determineState()
+            if story.state == .contentLoaded {
+                globalMainInterfaceProtocol?.presentBannerStory(presentationType: .places, stories: state.seenCityStories, destinationIndexPath: IndexPath(item: indexPath.item, section: 0), initialIndexPath: indexPath)
+            } else {
+                story.downloadFirstItem()
+            }
+            break
         default:
             break
         }
@@ -276,7 +296,7 @@ class HomeHeaderView: UICollectionReusableView, UICollectionViewDelegate, UIColl
 
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 3
+        return 4
     }
     
     func getStoryItemSize() -> CGSize {

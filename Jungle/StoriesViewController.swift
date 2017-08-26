@@ -522,6 +522,10 @@ extension StoriesViewController: View2ViewTransitionPresented {
             }
         }
     }
+    
+    func didPanUp(_ gesture:UIPanGestureRecognizer, _ progress: CGFloat) {
+        
+    }
 }
 
 

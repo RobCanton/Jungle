@@ -19,24 +19,31 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     var collectionContainerView:UIView!
     var collectionView:UICollectionView!
+    var metaView:PostMetaView!
     
     var isSingleItem = false
     var showCommentsOnAppear = false
+    var isMetaViewUp = false
     
     var statusBarShouldHide = false
     var shouldScrollToBottom = false
     var clearItemObservers = true
+    
+    var metaPanGesture:UIPanGestureRecognizer!
+    var metaInitialPanPoint:CGPoint!
+    var metaTopGap:CGFloat = 60.0
     var currentIndexPath:IndexPath?
     {
         willSet {
             getCurrentCell()?.isCurrentItem = false
             getCurrentCell()?.shouldAutoPause = true
-            print("Prev value: \(currentIndexPath)")
         }
         didSet {
-            getCurrentCell()?.shouldAutoPause = false
-            getCurrentCell()?.isCurrentItem = true
-            print("Next value: \(currentIndexPath)")
+            guard let cell = getCurrentCell() else { return }
+            cell.shouldAutoPause = false
+            cell.isCurrentItem = true
+            metaView?.setup(withItem: cell.storyItem, state: cell.itemStateController)
+            print("ITEM: \(cell.storyItem.key)")
         }
     }
     
@@ -80,8 +87,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         self.navigationController?.delegate = transitionController
         
-        getCurrentCell()?.isCurrentItem = true
-        getCurrentCell()?.resume()
+        if let cell = getCurrentCell() {
+            cell.isCurrentItem = true
+            cell.resume()
+            metaView?.setup(withItem: cell.storyItem, state: cell.itemStateController)
+            print("ITEM: \(cell.storyItem.key)")
+        }
         
         clearItemObservers = true
         
@@ -153,8 +164,22 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         collectionContainerView.addSubview(collectionView)
         collectionContainerView.applyShadow(radius: 5.0, opacity: 0.25, height: 0.0, shouldRasterize: false)
+        collectionContainerView.clipsToBounds = true
+        view.addSubview(collectionContainerView)
         
-        self.view.addSubview(collectionContainerView)
+        metaView = UINib(nibName: "PostMetaView", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PostMetaView
+        metaView.frame = CGRect(x: 0, y: view.bounds.height, width: view.bounds.width, height: view.bounds.height)
+        metaView.backgroundColor = UIColor.clear
+        metaView.layer.cornerRadius = 16.0
+        metaView.clipsToBounds = true
+        metaView.delegate = self
+        view.addSubview(metaView)
+        
+        metaPanGesture = UIPanGestureRecognizer(target: self, action: #selector(metaPanned))
+        metaPanGesture.delegate = self
+        
+        view.addGestureRecognizer(metaPanGesture)
+        
   
     }
     
@@ -166,6 +191,10 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
         guard let cell = getCurrentCell() else { return false }
+        
+        if gestureRecognizer === metaPanGesture {
+            return isMetaViewUp && metaPanGesture.translation(in: self.view).y > 0
+        }
         let keyboardUp = cell.keyboardUp
         
         let point = gestureRecognizer.location(ofTouch: 0, in: self.view)
@@ -185,8 +214,12 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
         self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
         
+        
+        
         let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
         let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
+        
+        if isMetaViewUp { return false }
         
         if keyboardUp {
             if translate.y > 0 {
@@ -195,16 +228,20 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
             return false
         } else {
             if let item = cell.storyItem {
-                if translate.y < -1 && !item.shouldBlock {
-                    cell.commentBar.textField.becomeFirstResponder()
+//                if translate.y < -1 && !item.shouldBlock {
+//                    cell.commentBar.textField.becomeFirstResponder()
+//                }
+                if translate.y <= 0 {
+                    return true
                 }
             }
 
         }
         
+        
         return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
     }
-    
+
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
         return UIScreen.main.bounds.size
@@ -226,21 +263,6 @@ class GalleryViewController: UIViewController, UICollectionViewDelegate, UIColle
         cell.clipsToBounds = true
         
         return cell
-    }
-    
-    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-        
-        let indexPath: IndexPath = self.collectionView.indexPathsForVisibleItems.first! as IndexPath
-        let initialPath = self.transitionController.userInfo!["initialIndexPath"] as! NSIndexPath
-        if !isSingleItem {
-            self.transitionController.userInfo!["initialIndexPath"] = IndexPath(item: indexPath.item, section: initialPath.section) as AnyObject?
-        }
-        self.transitionController.userInfo!["destinationIndexPath"] = indexPath as AnyObject?
-        
-        let panGestureRecognizer: UIPanGestureRecognizer = gestureRecognizer as! UIPanGestureRecognizer
-        let translate: CGPoint = panGestureRecognizer.translation(in: self.view)
-        
-        return Double(abs(translate.y)/abs(translate.x)) > Double.pi / 4 && translate.y > 0
     }
     
     
@@ -472,6 +494,7 @@ extension GalleryViewController: PopupProtocol {
         
     }
     
+    
 }
 
 
@@ -490,6 +513,8 @@ extension GalleryViewController: UIScrollViewDelegate {
         scrollViewDidEndDecelerating(scrollView)
     }
     
+    
+
 }
 
 
@@ -518,5 +543,159 @@ extension GalleryViewController: View2ViewTransitionPresented {
             self.collectionView.layoutIfNeeded()
         }
     }
+    
+    func didPanUp(_ gesture:UIPanGestureRecognizer, _ progress: CGFloat) {
+        let translation = gesture.translation(in: gesture.view)
+
+        
+        if translation.y < 0 {
+            var metaFrame = metaView.frame
+            let amount:CGFloat = progress * (2.0 - progress)
+            
+            metaFrame.origin.y = view.bounds.height - view.bounds.height * amount * 0.5 + metaTopGap
+            metaView.frame = metaFrame
+            let scale: CGFloat = 1.0 - (0.05 * progress)
+
+            var transform = CGAffineTransform.identity
+            transform = transform.scaledBy(x: scale, y: scale)
+            self.collectionContainerView.transform = transform
+            self.collectionContainerView.layer.cornerRadius = 16.0 * progress
+        }
+
+        if gesture.state == .ended {
+            if metaView.frame.origin.y < view.bounds.height * 0.999 {
+                isMetaViewUp = true
+                UIView.animate(withDuration: 0.35, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: [.curveEaseOut], animations: {
+                    var metaFrame = self.metaView.frame
+                    metaFrame.origin.y = 0 + self.metaTopGap
+                    self.metaView.frame = metaFrame
+                    
+                    var transform = CGAffineTransform.identity
+                    transform = transform.scaledBy(x: 0.95, y: 0.95)
+
+                    self.collectionContainerView.transform = transform
+                }, completion: { _ in
+                    self.collectionContainerView.layer.cornerRadius = 16.0
+                })
+                
+                let anim1 = CABasicAnimation(keyPath: #keyPath(CALayer.cornerRadius))
+                anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+                anim1.fromValue = self.collectionContainerView.layer.cornerRadius
+                anim1.toValue = 16
+                anim1.duration = 0.35
+                anim1.isRemovedOnCompletion = false
+                collectionContainerView.layer.add(anim1, forKey: #keyPath(CALayer.cornerRadius))
+                
+            } else {
+                isMetaViewUp = false
+                UIView.animate(withDuration: 0.35, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: [.curveEaseOut], animations: {
+                    var metaFrame = self.metaView.frame
+                    metaFrame.origin.y = self.view.bounds.height
+                    self.metaView.frame = metaFrame
+                    
+                    self.collectionContainerView.transform = CGAffineTransform.identity
+
+                }, completion: { _ in
+                    self.collectionContainerView.layer.cornerRadius = 0.0
+                })
+                
+                let anim1 = CABasicAnimation(keyPath: #keyPath(CALayer.cornerRadius))
+                anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+                anim1.fromValue = self.collectionContainerView.layer.cornerRadius
+                anim1.toValue = 0
+                anim1.duration = 0.35
+                anim1.isRemovedOnCompletion = false
+                collectionContainerView.layer.add(anim1, forKey: #keyPath(CALayer.cornerRadius))
+            }
+        }
+    }
+    
+    func metaPanned(_ gesture:UIPanGestureRecognizer) {
+
+        let translation = gesture.translation(in: gesture.view)
+
+        if gesture.state == .began {
+            self.metaInitialPanPoint = gesture.location(in: gesture.view)
+            return
+        }
+        let range: Float = Float(UIScreen.main.bounds.size.width)
+        let location: CGPoint = gesture.location(in: gesture.view)
+        let distance: Float = sqrt(powf(Float(self.metaInitialPanPoint.x - location.x), 2.0) + powf(Float(self.metaInitialPanPoint.y - location.y), 2.0))
+        let progress: CGFloat = CGFloat(fminf(fmaxf((distance / range), 0.0), 1.0))
+        switch gesture.state {
+            
+        case .changed:
+            if translation.y > 0 {
+                let amount = progress * progress * progress
+                var metaFrame = metaView.frame
+                metaFrame.origin.y = view.bounds.height * amount * 0.5 + metaTopGap
+                metaView.frame = metaFrame
+                let scale: CGFloat = 0.95 + 0.05 * amount
+                var transform = CGAffineTransform.identity
+                transform = transform.scaledBy(x: scale, y: scale)
+                self.collectionContainerView.transform = transform
+                self.collectionContainerView.layer.cornerRadius = 16.0 * (1 - amount)
+                
+            }
+            break
+        case .ended:
+            if metaView.frame.origin.y > view.bounds.height * 0.05 + metaTopGap {
+                dismissMetaView()
+            } else {
+                isMetaViewUp = true
+                UIView.animate(withDuration: 0.35, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: [.curveEaseOut], animations: {
+                    var metaFrame = self.metaView.frame
+                    metaFrame.origin.y = self.metaTopGap
+                    self.metaView.frame = metaFrame
+                    
+                    var transform = CGAffineTransform.identity
+                    transform = transform.scaledBy(x: 0.95, y: 0.95)
+                    self.collectionContainerView.transform = transform
+                }, completion: { _ in
+                    self.collectionContainerView.layer.cornerRadius = 16.0
+                })
+                
+                let anim1 = CABasicAnimation(keyPath: #keyPath(CALayer.cornerRadius))
+                anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+                anim1.fromValue = self.collectionContainerView.layer.cornerRadius
+                anim1.toValue = 16
+                anim1.duration = 0.35
+                anim1.isRemovedOnCompletion = false
+                collectionContainerView.layer.add(anim1, forKey: #keyPath(CALayer.cornerRadius))
+            }
+            break
+        default:
+            break
+        }
+        
+    }
+    
+    
 }
 
+extension GalleryViewController: PostMetaProtocol {
+    func dismissMetaView() {
+        isMetaViewUp = false
+        UIView.animate(withDuration: 0.35, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0.0, options: [.curveEaseOut], animations: {
+            
+            var metaFrame = self.metaView.frame
+            metaFrame.origin.y = self.view.bounds.height
+            self.metaView.frame = metaFrame
+            
+            self.collectionContainerView.transform = CGAffineTransform.identity
+            
+        }, completion: { _ in
+            self.collectionContainerView.layer.cornerRadius = 0.0
+        })
+        
+        let anim1 = CABasicAnimation(keyPath: #keyPath(CALayer.cornerRadius))
+        anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        anim1.fromValue = self.collectionContainerView.layer.cornerRadius
+        anim1.toValue = 0
+        anim1.duration = 0.35
+        anim1.isRemovedOnCompletion = false
+        collectionContainerView.layer.add(anim1, forKey: #keyPath(CALayer.cornerRadius))
+    }
+    
+    
+}

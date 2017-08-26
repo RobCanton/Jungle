@@ -35,6 +35,8 @@
 		B05091B61EB915C1001B84B1 /* AlertBuilders.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05091B51EB915C1001B84B1 /* AlertBuilders.swift */; };
 		B05091B81EB936CB001B84B1 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05091B71EB936CB001B84B1 /* Reachability.swift */; };
 		B05482911F4E7B2400A79BF0 /* VolumeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05482901F4E7B2400A79BF0 /* VolumeBar.swift */; };
+		B05482931F50CAE100A79BF0 /* PostMetaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05482921F50CAE100A79BF0 /* PostMetaView.swift */; };
+		B05482951F50CB1800A79BF0 /* PostMetaView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B05482941F50CB1800A79BF0 /* PostMetaView.xib */; };
 		B0550D761E85E438007DAAAC /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D751E85E437007DAAAC /* MapViewController.swift */; };
 		B0550D7C1E8A1499007DAAAC /* LocationHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0550D7B1E8A1498007DAAAC /* LocationHeaderView.xib */; };
 		B0550D7E1E8A1888007DAAAC /* NearbyLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0550D7D1E8A1888007DAAAC /* NearbyLocationButton.swift */; };
@@ -243,6 +245,8 @@
 		B05091B51EB915C1001B84B1 /* AlertBuilders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertBuilders.swift; sourceTree = "<group>"; };
 		B05091B71EB936CB001B84B1 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		B05482901F4E7B2400A79BF0 /* VolumeBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VolumeBar.swift; sourceTree = "<group>"; };
+		B05482921F50CAE100A79BF0 /* PostMetaView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostMetaView.swift; sourceTree = "<group>"; };
+		B05482941F50CB1800A79BF0 /* PostMetaView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostMetaView.xib; sourceTree = "<group>"; };
 		B0550D751E85E437007DAAAC /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B0550D7B1E8A1498007DAAAC /* LocationHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LocationHeaderView.xib; sourceTree = "<group>"; };
 		B0550D7D1E8A1888007DAAAC /* NearbyLocationButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearbyLocationButton.swift; sourceTree = "<group>"; };
@@ -668,6 +672,8 @@
 				B0AE229B1E7A509E00141709 /* PostHeaderView.xib */,
 				B07169A71E83681B00AF6A41 /* GalleryViewController.swift */,
 				B07169A81E83681B00AF6A41 /* PostViewController.swift */,
+				B05482921F50CAE100A79BF0 /* PostMetaView.swift */,
+				B05482941F50CB1800A79BF0 /* PostMetaView.xib */,
 				B0C867821EF26D0C00BE7F14 /* GuardView.xib */,
 				B0168B551EEE4649001069C4 /* ItemStateController.swift */,
 				B0DF82401EDFB36700461DD8 /* CommentItemBar.swift */,
@@ -872,6 +878,7 @@
 				B03F39271F3413CB00E2FBD7 /* KingCollectionViewCell.xib in Resources */,
 				B0CBE0581EAE8D4100D6FF06 /* FollowingPhotoCell.xib in Resources */,
 				B05E67A51F48AC6A002D2DAC /* LoadMoreCommentsOverlayView.xib in Resources */,
+				B05482951F50CB1800A79BF0 /* PostMetaView.xib in Resources */,
 				B0F2A1801EE758A7004857CA /* BannerView.xib in Resources */,
 				B05F13F71EF46D8F008C5B34 /* CollectionDividerView.xib in Resources */,
 				B0C86D471E80B7F90067E004 /* FollowingHeader.xib in Resources */,
@@ -1047,6 +1054,7 @@
 				B0F894A41E7F24DA00E490C4 /* MainNavigationController.swift in Sources */,
 				B0DF822F1EDCBD2000461DD8 /* SignUpPhoneCodeViewController.swift in Sources */,
 				B0550DA01E8E21C4007DAAAC /* YokoTextField.swift in Sources */,
+				B05482931F50CAE100A79BF0 /* PostMetaView.swift in Sources */,
 				B03F392F1F34F03300E2FBD7 /* TRMosaicRow.swift in Sources */,
 				B0F2A18D1EE8A39E004857CA /* PlaceViewController.swift in Sources */,
 				B019E8E31ECE388100402D06 /* PasswordRecoveryViewController.swift in Sources */,

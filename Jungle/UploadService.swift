@@ -718,7 +718,7 @@ class UploadService {
         
         
         if uid == post.authorId { return }
-        if post.viewers[uid] != nil { return }
+        //if post.viewers[uid] != nil { return }
         
         post.addView(uid)
         

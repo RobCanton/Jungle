@@ -160,7 +160,7 @@ class RoundedViewController:UIViewController {
         backDrop = UIView(frame: self.view.bounds)
         backDrop.backgroundColor = UIColor.white
         
-        backDrop.layer.cornerRadius = 16.0
+        backDrop.layer.cornerRadius = 24.0
         backDrop.clipsToBounds = true
         
         self.view.addSubview(backDrop)

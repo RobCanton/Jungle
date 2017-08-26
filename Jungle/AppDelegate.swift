@@ -103,9 +103,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        }
         
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord,with:
-                [AVAudioSessionCategoryOptions.mixWithOthers,
-                 AVAudioSessionCategoryOptions.defaultToSpeaker])
+//            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord,with:
+//                [AVAudioSessionCategoryOptions.mixWithOthers,
+//                 AVAudioSessionCategoryOptions.defaultToSpeaker])
+            try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
             try AVAudioSession.sharedInstance().setActive(true)
             
         } catch {

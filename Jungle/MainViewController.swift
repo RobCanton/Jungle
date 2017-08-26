@@ -1478,26 +1478,26 @@ extension MainViewController: View2ViewTransitionPresenting {
     }
     
     func topView() -> UIView {
-//        if presentationType == .homeCollection || presentationType == .popular || presentationType == .following || presentationType == .places {
-//            if let view = places.header.snapshotImageTransparent() {
-//                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
-//                topView.backgroundColor = UIColor.black
-//                
-//                let bottomEdge = UIView(frame: CGRect(x: 0, y: topView.frame.height - 32.0, width: topView.frame.width, height: 32.0))
-//                bottomEdge.backgroundColor = UIColor.white
-//                
-//                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
-//                white.backgroundColor = UIColor.white
-//                white.layer.cornerRadius = 16.0
-//                white.clipsToBounds = true
-//                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
-//                t.image = view
-//                topView.addSubview(bottomEdge)
-//                topView.addSubview(white)
-//                topView.addSubview(t)
-//                return topView
-//            }
-//        }
+        if presentationType == .homeCollection || presentationType == .popular || presentationType == .following || presentationType == .places {
+            if let view = homie.header.snapshotImageTransparent() {
+                let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44.0 + 20.0))
+                topView.backgroundColor = UIColor.white
+                
+                let bottomEdge = UIView(frame: CGRect(x: 0, y: topView.frame.height - 32.0, width: topView.frame.width, height: 32.0))
+                bottomEdge.backgroundColor = UIColor.white
+                
+                let white = UIView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
+                white.backgroundColor = UIColor.white
+                white.layer.cornerRadius = 16.0
+                white.clipsToBounds = true
+                let t = UIImageView(frame: CGRect(x: 0, y: 20.0, width: topView.frame.width, height: 44.0))
+                t.image = view
+                topView.addSubview(bottomEdge)
+                topView.addSubview(white)
+                topView.addSubview(t)
+                return topView
+            }
+        }
 
         return UIView()
     }

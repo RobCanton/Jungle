@@ -57,10 +57,15 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
     var pageScrollView:UIScrollView!
     var homePage:UIView!
     var popularPage:UIView!
-    var itemSideLength:CGFloat = (UIScreen.main.bounds.width - 1.0) / 3.0
+    
+    fileprivate let sectionInsets = UIEdgeInsets(top: 0.5, left: 0.5, bottom: 0.5, right: 0.5)
     var itemSize:CGSize {
         get {
-            return CGSize(width: floor(itemSideLength), height: itemSideLength * 1.3)
+            let paddingSpace = sectionInsets.left * 6
+            let availableWidth = UIScreen.main.bounds.width - paddingSpace
+            let widthPerItem  = availableWidth/3
+            
+            return CGSize(width: widthPerItem,height: widthPerItem * 1.3)
         }
     }
     
@@ -97,9 +102,9 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         view.addSubview(pageScrollView)
         
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.sectionInset = sectionInsets
         layout.itemSize = itemSize
-        layout.minimumInteritemSpacing = 0.5
+        layout.minimumInteritemSpacing = 0.0
         layout.minimumLineSpacing = 1.0
         
         collectionView = UICollectionView(frame: homePage.bounds, collectionViewLayout: layout)
@@ -339,7 +344,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
     }
     
     func handleRadiusChange(_ radius:Int) {
-        LocationService.sharedInstance.setSearchRadius(radius)
+        LocationService.sharedInstance.radius = radius
         state.getNearby()
     }
     
@@ -368,7 +373,7 @@ class HomieViewController:RoundedViewController, StoreSubscriber, UICollectionVi
         var verticalHeight:CGFloat = 0
         let gpsAuthorized = gps_service.isAuthorized()
 
-        verticalHeight += state.hasHeaderPosts ? collectionViewHeight + bannerHeight + 16.0: 0
+        verticalHeight += state.hasHeaderPosts ? collectionViewHeight + bannerHeight + 8.0 : 0
         verticalHeight += !gpsAuthorized ? 140 : 0
         verticalHeight += state.nearbyPosts.count == 0 && gpsAuthorized ? 130 : 0
         
